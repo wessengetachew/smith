@@ -1012,6 +1012,8 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 #welcome-enter:hover::before{transform:scaleX(1);}
 #welcome-enter:hover{color:#04040d;border-color:#c8a84a;box-shadow:0 0 16px -4px rgba(200,168,74,.5);transform:translateY(-1px);}
 @media(max-width:600px){#welcome-card{padding:22px 20px 20px;}#welcome-title{font-size:20px;}}
+@keyframes wviewPulse{0%,100%{box-shadow:0 0 0 0 rgba(61,200,184,0);}50%{box-shadow:0 0 10px 2px rgba(61,200,184,.55);}}
+.wview-pulse{animation:wviewPulse 1.4s ease-in-out 3;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1769,15 +1771,15 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       if(canvasFs&&bar){ bar.insertBefore(row,btnRow||bar.firstChild); }
       else if(anchor.parentNode){ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
     });
-    // n / G sliders go BELOW the button row
-    var botRows=[['welcome-n-row','wfs-anchor-n']];
-    botRows.forEach(function(pair){
-      var row=document.getElementById(pair[0]);
-      var anchor=document.getElementById(pair[1]);
+    // n row goes DIRECTLY below the canvas, above the G slider row
+    (function(){
+      var row=document.getElementById('welcome-n-row');
+      var anchor=document.getElementById('wfs-anchor-n');
+      var gRow=document.getElementById('ws-g-row');
       if(!row||!anchor)return;
-      if(canvasFs&&bar){ bar.appendChild(row); }
+      if(canvasFs&&gRow&&gRow.parentNode){ gRow.parentNode.insertBefore(row,gRow); }
       else if(anchor.parentNode){ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
-    });
+    })();
     if(cv){cv._W=0;cv._H=0;} // force size recalc on next redraw
     // Reset hide/show state each time canvas fullscreen is entered/exited
     var showBtn=document.getElementById('wfs-show-btn');
@@ -1914,13 +1916,18 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       gaps:_wActiveGaps&&_wActiveGaps.size?[..._wActiveGaps].join(' '):'none',
       Cn:(_wMode==='finite')?_wCnFin(_wN,_wPrimeK):_wCn(_wN),
       img:cv?cv.toDataURL('image/png'):null,
-      imgs:(function(){
+      imgs:window._wRenderAllViews(_wG,_wN)};
+  };
+  // Render the opener's five views offscreen at ARBITRARY (G,n) — the state
+  // report calls this with the hero's parameters so both thumbnail grids are
+  // directly comparable.
+  window._wRenderAllViews=function(gg,nn){
         var out={},SZ=400;
-        var views={smith:function(c){drawWSmith(c,SZ,SZ,_wN,_wG,_wSmithZoomOut);},
-                   ring:function(c){drawWRing(c,SZ,SZ,_wN,_wG);},
-                   grid:function(c){drawWGrid(c,SZ,SZ,_wN,_wG);},
-                   farey:function(c){drawWFarey(c,SZ,SZ,_wN,_wG);},
-                   gauss:function(c){drawWGauss(c,SZ,SZ,_wN,_wG);}};
+        var views={smith:function(c){drawWSmith(c,SZ,SZ,nn,gg,_wSmithZoomOut);},
+                   ring:function(c){drawWRing(c,SZ,SZ,nn,gg);},
+                   grid:function(c){drawWGrid(c,SZ,SZ,nn,gg);},
+                   farey:function(c){drawWFarey(c,SZ,SZ,nn,gg);},
+                   gauss:function(c){drawWGauss(c,SZ,SZ,nn,gg);}};
         for(var v in views){
           try{
             var oc=document.createElement('canvas');oc.width=SZ;oc.height=SZ;
@@ -1931,7 +1938,6 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
           }catch(e){}
         }
         return out;
-      })()};
   };
   window.wNStep=function(d){
     var sl=document.getElementById('welcome-n-slider');
@@ -1957,7 +1963,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       var dv=document.getElementById('w-dn-val');
       if(!dv)return;
       var Z=Math.PI*Math.PI/6;
-      dv.textContent=(val/Z).toFixed(12);
+      dv.textContent=(val/Z).toFixed(Math.max(2,Math.min(15,_wDP||12))); // follow the dp slider
       document.getElementById('w-blk-val').textContent=String(_wN+1);
       var sat=0,nx=null;
       for(var i=0;i<_wPrimes.length;i++){
@@ -2306,7 +2312,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   window._wUpdateFormulaRatios=function(){
     var el=document.getElementById('wf-ratios');
     if(!el||typeof _cnExportCounts!=='function')return;
-    var c=_cnExportCounts(_wG,_wN);
+    var c=_cnExportCounts(_wG,_wN,(typeof _viewPop==='function')?_viewPop(_wView):undefined);
     var pc=function(a,b){return b?(a/b*100).toFixed(1)+'%':'—';};
     el.textContent='g '+c.gcd1+'/'+c.total+' '+pc(c.gcd1,c.total)+' · L '+c.lift+'/'+c.total+' '+pc(c.lift,c.total)+' · C '+c.lift+'/'+c.gcd1+' '+pc(c.lift,c.gcd1);
   };
@@ -2617,12 +2623,13 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     });
     for(var M=1;M<=G;M++){
       if(!_wRingActive(M))continue;
-      var rStart=(M===1)?0:1, rEnd=(M===1)?0:M-1;
-      for(var r=rStart;r<=rEnd;r++){
-        var pureCop=(M===1)||gcd(r,M)===1;
+      // Full G×G square (r=1..G for every M) — matches the hero grid, which
+      // plots all (r,M) pairs, not just the r<M lower triangle.
+      for(var r=1;r<=G;r++){
+        var pureCop=gcd(r,M)===1;
         if(!_wCharPass(pureCop))continue;
         var ok=isCoprime(r,M,n);
-        var rDisp=(M===1)?0:_wPerRingShiftedR(r,M,G,_wPerRing);
+        var rDisp=(r<M)?_wPerRingShiftedR(r,M,G,_wPerRing):r;
         var x=ox+rDisp*cell,y=oy+side-(M-1)*cell;
         var rad=(ok?Math.max(1.2,Math.min(2.5,cell*0.3)):0.7)*_wCharSizeMul(pureCop);
         if(_wHitRec)_wHitPts.push(x,y,r,M);
@@ -3234,6 +3241,18 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   }
 
   if(typeof _wgGetWelcomeHide!=='function'||!_wgGetWelcomeHide()){
+    // EARLY FIRST PAINT — don't wait for DOMContentLoaded: the heavy tail of
+    // the page (1.5e6 sieve, forward-gap map, hero init) parses AFTER this
+    // script, which left the teaser canvas blank for seconds on mobile.
+    try{wRenderCn();wRedrawCanvas();}catch(e){}
+    // Draw the eye to the view buttons: pulse 3x after load, stop on first tap
+    setTimeout(function(){
+      var row=document.getElementById('ws-view-row');
+      if(!row)return;
+      var btns=row.querySelectorAll('button');
+      btns.forEach(function(b,i){setTimeout(function(){b.classList.add('wview-pulse');},i*180);});
+      row.addEventListener('click',function(){btns.forEach(function(b){b.classList.remove('wview-pulse');});},{once:true});
+    },1200);
     if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
     else{setTimeout(init,50);}
   }
@@ -3506,14 +3525,10 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     <div id="finite-panel" style="flex-wrap:wrap;row-gap:6px;">
       <span class="fp-lbl">nth prime:</span>
       <button class="spin-btn" onclick="setFinitePrimes(_finitePrimes-1)" style="width:18px;height:18px;font-size:9px;">▼</button>
-      <input type="range" id="finite-sl" min="0" max="1000" value="1"
-        title="Dragging is capped at 1000 primes — large drags recompute on every step and can hang the page. Use the number box or ▲/▼ to go further."
-        oninput="setFinitePrimes(+this.value)">
       <button class="spin-btn" onclick="setFinitePrimes(_finitePrimes+1)" style="width:18px;height:18px;font-size:9px;">▲</button>
       <input type="number" id="finite-inp" min="0" max="114155" value="1" title="Enter the nth prime index (e.g. 5 → 5th prime = 11). No drag cap here — but very large values will be slow to compute."
         oninput="setFinitePrimes(+this.value)" style="width:50px;background:var(--bg2);border:1px solid var(--edge2);color:var(--lime);font-family:var(--mono);font-size:9px;text-align:center;padding:2px 3px;outline:none;">
       <span style="font-family:var(--mono);font-size:8px;color:var(--lime);min-width:88px;" id="finite-lbl">p≤2  (1)</span>
-      <span id="finite-cap-warn" style="display:none;font-family:var(--mono);font-size:7.5px;color:rgba(224,80,96,.85);white-space:nowrap;">⚠ &gt;1000 primes — slider capped, use ▲/number box (may be slow)</span>
       <div class="nb-sep" style="height:18px;"></div>
       <span class="fp-lbl">loop to:</span>
       <input type="number" id="finite-loop-target" min="1" max="114155" value="10" title="Loop the nth-prime slider from 0 up to this value"
@@ -3618,7 +3633,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     <div class="hrr-row">
       <div class="hrr-box">
         <div style="font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(126,200,122,.6);">gcd(r,M)=1</div>
-        <div id="hlr-gcd1" style="font-size:12.5px;font-weight:700;color:rgba(126,200,122,.95);white-space:nowrap;">—</div>
+        <div id="hlr-pop" style="font-size:6.5px;color:rgba(126,200,122,.5);letter-spacing:.08em;text-transform:uppercase;"></div><div id="hlr-gcd1" style="font-size:12.5px;font-weight:700;color:rgba(126,200,122,.95);white-space:nowrap;">—</div>
         <div style="font-size:7px;color:rgba(126,200,122,.45);">&rarr; 1/&#950;(2) &asymp; 0.60793 as G&rarr;&infin;</div>
         <button onclick="exportHeroRatioCSV('gcd')" style="background:none;border:1px solid rgba(126,200,122,.3);color:rgba(126,200,122,.7);font-family:var(--mono);font-size:6.5px;letter-spacing:.06em;padding:2px 7px;cursor:pointer;margin-top:4px;">&darr; CSV</button>
       </div>
@@ -10541,14 +10556,21 @@ function exportHeroSideBySide8K(rightPanel){
 // "lift" now means block-coprime depth ≥ n: gcd(r, M+j)=1 for every j=1..n,
 // not just a single hardcoded j=1 step — that was the bug where this panel
 // stayed frozen at the n=1 numbers no matter where the N slider was.
-function _cnExportCounts(G, n){
+// pop: 'triangle' (r<M — ring/smith/lift), 'square' (all r,M ≤ G — grid/gauss),
+//      'coprime' (reduced fractions only — farey)
+function _viewPop(v){return(v==='grid'||v==='gauss')?'square':(v==='farey')?'coprime':'triangle';}
+function _cnExportCounts(G, n, pop){
   if(typeof n!=='number') n = (typeof N!=='undefined') ? N : 1;
+  pop=pop||'triangle';
   let total=0, gcd1=0, lift=0;
   for(let M=1;M<=G;M++){
-    if(M===1){ total++; gcd1++; if(n===0) lift++; continue; } // trivial point r=0, always coprime
-    for(let r=1;r<M;r++){
+    if(pop!=='square'&&M===1){ total++; gcd1++; if(n===0) lift++; continue; } // trivial point r=0, always coprime
+    const rEnd=(pop==='square')?G:M-1;
+    for(let r=1;r<=rEnd;r++){
+      const cop=gcd(r,M)===1;
+      if(pop==='coprime'&&!cop)continue; // farey plots reduced fractions only
       total++;
-      if(gcd(r,M)!==1) continue;
+      if(!cop) continue;
       gcd1++;
       let survives = true;
       for(let j=1;j<=n;j++){
@@ -10701,7 +10723,7 @@ function exportHero4K(){
     // they are (independent of view — computed straight off the lattice) ──
     const ratioBandY=HEADER_H+BAND_H;
     {
-      const cnts=_cnExportCounts(G, curN);
+      const cnts=_cnExportCounts(G, curN, _viewPop(_heroViewMode));
       ctx.fillStyle='rgba(126,200,122,.05)'; ctx.fillRect(0,ratioBandY,PW,RATIO_BAND_H);
       ctx.fillStyle='rgba(126,200,122,.18)'; ctx.fillRect(0,ratioBandY,PW,2);
       ctx.font=`${Math.round(RATIO_BAND_H*0.20)}px 'JetBrains Mono',monospace`;
@@ -10860,7 +10882,7 @@ function exportHero4K(){
   // off the lattice (independent of view/n) and reads as a headline stat ──
   const ratioBandY2 = TITLE_H + BAND_H;
   {
-    const cnts=_cnExportCounts(G, curN);
+    const cnts=_cnExportCounts(G, curN, _viewPop(_heroViewMode));
     ctx.fillStyle='rgba(126,200,122,.05)'; ctx.fillRect(0,ratioBandY2,PW,RATIO_H);
     ctx.fillStyle='rgba(126,200,122,.18)'; ctx.fillRect(0,ratioBandY2,PW,2);
     ctx.font=`${Math.round(RATIO_H*0.30)}px 'JetBrains Mono',monospace`;
@@ -12171,7 +12193,10 @@ function _updateHeroRatioLive(G){
   const condEl=document.getElementById('hlr-cond');
   if(!gcdEl&&!liftEl&&!condEl) return;
   const n = typeof N!=='undefined' ? N : 1;
-  const cnts=_cnExportCounts(G, n);
+  const pop=_viewPop(typeof _heroViewMode!=='undefined'?_heroViewMode:'grid');
+  const cnts=_cnExportCounts(G, n, pop);
+  const popEl=document.getElementById('hlr-pop');
+  if(popEl)popEl.textContent='population: '+pop+' — '+(typeof _heroViewMode!=='undefined'?_heroViewMode:'')+' view';
   const pct=(a,b)=>(a/Math.max(1,b)*100).toFixed(2);
   if(gcdEl) gcdEl.textContent=`${cnts.gcd1}/${cnts.total}  (${pct(cnts.gcd1,cnts.total)}%)`;
   if(liftEl) liftEl.textContent=`${cnts.lift}/${cnts.total}  (${pct(cnts.lift,cnts.total)}%)`;
@@ -12208,7 +12233,7 @@ function exportStateReport(){
   const Z=Math.PI*Math.PI/6, esc=x=>String(x);
   const row=(k,v)=>'<tr><td>'+k+'</td><td>'+esc(v)+'</td></tr>';
   const cmp=(label,meas,cnt,theo,note)=>'<tr><td>'+label+'</td><td>'+meas+' <span class=n>('+cnt+')</span></td><td>'+theo+'</td><td>'+(meas!=='—'?Math.abs(meas-theo).toExponential(2):'—')+'</td><td class=n>'+note+'</td></tr>';
-  function counts(G,n){const c=_cnExportCounts(G,n);return c;}
+  function counts(G,n,pop){return _cnExportCounts(G,n,pop);}
   function section(title,st,c,Cn,n,extra){
     const gcdR=c.total?c.gcd1/c.total:0, liftR=c.total?c.lift/c.total:0, condR=c.gcd1?c.lift/c.gcd1:0;
     return '<h2>'+title+'</h2><div class=grid><table><caption>Parameters</caption>'+extra+'</table>'+
@@ -12229,7 +12254,7 @@ function exportStateReport(){
   html+='<h1>C(n) — Block-Coprime Density · State Report</h1><div class=n>'+new Date().toISOString()+' · C(n)=ζ(2)·∏_p(1−min(n+1,p)/p²) — probability that r is coprime to a block of n+1 consecutive integers starting at M, given the lattice below. gcd=1 counts coprime pairs; lift counts pairs surviving the full block; lift/gcd is the conditional survival that converges to C(n).</div>';
   // Opener
   if(typeof _wStateSnapshot==='function'){
-    const st=_wStateSnapshot(), c=counts(st.G,st.n);
+    const st=_wStateSnapshot(), c=counts(st.G,st.n,_viewPop(st.view));
     const ex=row('view',st.view)+row('G / n',st.G+' / '+st.n)+row('mode',st.mode)+
       row('zoom / pan',st.zoom.toFixed(3)+'× / ('+st.panX.toFixed(0)+','+st.panY.toFixed(0)+')')+
       row('per-ring twist',st.perRing)+
@@ -12241,7 +12266,7 @@ function exportStateReport(){
   }
   // Hero
   {
-    const G=_heroG, n=typeof N!=='undefined'?N:0, c=counts(G,n);
+    const G=_heroG, n=typeof N!=='undefined'?N:0, c=counts(G,n,_viewPop(_heroViewMode));
     const Cn=(typeof getCn==='function')?getCn(n):0;
     const cv=document.getElementById('hero-3d');
     const zoomEl=document.getElementById('hero-zoom-num');
@@ -12270,8 +12295,24 @@ function exportStateReport(){
         if(steps){x.translate(SZ/2,SZ/2);x.rotate(steps*Math.PI/2);x.translate(-SZ/2,-SZ/2);}
         V[v](x);x.restore();out[v]=oc.toDataURL('image/png');}catch(e){}
     }
-    // Grid: use the live canvas when it IS the current view; otherwise skip
-    if(_heroViewMode==='grid'){const cv=document.getElementById('hero-3d');if(cv)out.grid=cv.toDataURL('image/png');}
+    // Grid: render from the depth buffer (dots only), independent of current view
+    try{
+      if(_heroDepth&&_heroDepthG===_heroG){
+        const G=_heroG,oc=document.createElement('canvas');oc.width=SZ;oc.height=SZ;
+        const x=oc.getContext('2d');x.fillStyle='#04040d';x.fillRect(0,0,SZ,SZ);
+        const cW=SZ/G,dotR=Math.max(0.6,cW*0.38);
+        const heroCM=_heroColorModeLocal||'modular_distance';
+        for(let ri=0;ri<G;ri++)for(let mi=0;mi<G;mi++){
+          const d=_heroDepth[ri*G+mi];
+          const col=_getHeroColor(ri+1,mi+1,nA,d,heroCM,0,null,false,false,false,true);
+          x.fillStyle=col;x.beginPath();x.arc((ri+0.5)*cW,(mi+0.5)*cW,dotR,0,6.2832);x.fill();
+        }
+        const steps=_heroRotSteps&3;
+        if(steps){const rc=document.createElement('canvas');rc.width=SZ;rc.height=SZ;
+          const rx=rc.getContext('2d');rx.translate(SZ/2,SZ/2);rx.rotate(steps*Math.PI/2);rx.drawImage(oc,-SZ/2,-SZ/2);out.grid=rc.toDataURL('image/png');}
+        else out.grid=oc.toDataURL('image/png');
+      }
+    }catch(e){}
     return out;
   }
   function imgGrid(title,imgs){
@@ -12279,18 +12320,33 @@ function exportStateReport(){
     for(const v in imgs)if(imgs[v])h+='<figure style="margin:0;"><img src="'+imgs[v]+'" style="max-width:190px;"><figcaption class=n style="text-align:center;">'+v+'</figcaption></figure>';
     return h+'</div>';
   }
-  if(typeof _wStateSnapshot==='function'){
-    const st2=_wStateSnapshot();
-    if(st2.imgs)html+=imgGrid('Opener — all views (current G, n, filters)',st2.imgs);
-  }
-  html+=imgGrid('Hero — all views (current n, gaps, filters; unzoomed)',heroAllViews());
+  // Both thumbnail grids at the SAME parameters (hero's G and n) for direct comparison
+  const _cmpG=_heroG,_cmpN=typeof N!=='undefined'?N:0;
+  if(typeof _wRenderAllViews==='function')
+    html+=imgGrid('Opener — all views (rendered at shared G='+_cmpG+', n='+_cmpN+')',_wRenderAllViews(_cmpG,_cmpN));
+  html+=imgGrid('Hero — all views (G='+_cmpG+', n='+_cmpN+'; unzoomed)',heroAllViews());
   html+='<div class=n>Limits cited: 1/ζ(2) (Euler), D(n) and C(n) from the C(n) Euler product; measured columns are finite-G lattice counts, so |Δ| is the finite-size error (empirically O(1/G)).</div></body></html>';
-  const w=window.open('','_blank');
-  if(!w){alert('Popup blocked — allow popups to print the report.');return;}
-  w.document.write(html);w.document.close();
-  setTimeout(()=>{try{w.print();}catch(e){}},400);
+  // Mobile-safe: popups + document.write are unreliable on Android Chrome.
+  // Print via a hidden same-page iframe; also download the HTML as a fallback
+  // the user can open/print any time.
+  try{
+    const blob=new Blob([html],{type:'text/html'});
+    const a=document.createElement('a');
+    a.download='cn_state_report_'+Date.now()+'.html';
+    a.href=URL.createObjectURL(blob);a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  }catch(e){}
+  try{
+    const fr=document.createElement('iframe');
+    fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+    document.body.appendChild(fr);
+    fr.srcdoc=html;
+    fr.onload=()=>{setTimeout(()=>{try{fr.contentWindow.focus();fr.contentWindow.print();}catch(e){}
+      setTimeout(()=>fr.remove(),60000);},300);};
+  }catch(e){}
 }
 function exportHeroRatioCSV(filter){
+  const pop=_viewPop(typeof _heroViewMode!=='undefined'?_heroViewMode:'grid');
   const G = _heroG || 40;
   const n = typeof N!=='undefined' ? N : 1;
   const alpha = (typeof _heroSmithAlpha!=='undefined') ? _heroSmithAlpha : 0;
@@ -12298,7 +12354,7 @@ function exportHeroRatioCSV(filter){
   const rotSteps = (typeof _heroRotSteps!=='undefined') ? (_heroRotSteps&3) : 0;
   const rotRad = rotSteps*Math.PI/2;
   const flip = (typeof _heroSmithFlipScale!=='undefined') ? _heroSmithFlipScale : 1;
-  const cnts = _cnExportCounts(G, n);
+  const cnts = _cnExportCounts(G, n, pop);
   const Cn = (typeof getCn==='function') ? getCn(n) : null;
 
   const lines=[];
@@ -12311,10 +12367,12 @@ function exportHeroRatioCSV(filter){
   lines.push('r,M,gcd_rM,coprime,depth,survives_n,lift_chain,first_fail_j,theta0_deg,theta_alpha_deg,ring_R,gamma_u,gamma_v,disp_x,disp_y');
 
   const norm=d=>{ d%=360; if(d<0)d+=360; return d; };
+  lines[0]+=' — population: '+pop;
   for(let M=1;M<=G;M++){
-    const rEnd=(M===1)?0:M-1, rStart=(M===1)?0:1;
+    const rEnd=(pop==='square')?G:((M===1)?0:M-1), rStart=(pop==='square'||M>1)?1:0;
     for(let r=rStart;r<=rEnd;r++){
-      const g=(M===1)?1:gcd(r,M);
+      const g=(M===1&&r===0)?1:gcd(r,M);
+      if(pop==='coprime'&&g!==1)continue;
       const cop=(g===1)?1:0;
       // Block-coprime depth (30000+ = coprime with everything checked, reported as inf)
       let depth='';
