@@ -7,6 +7,7 @@
 
 <script>
 window.closeWelcome = function(){
+  if(typeof window._wMoveWorking==='function')window._wMoveWorking(false);
   var m=document.getElementById('welcome-modal'); if(m)m.style.display='none';
 };
 window.MathJax = {
@@ -187,6 +188,19 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
 }
 #hero-canvas-fs-wrap:fullscreen #hero-fs-ctrl-bar,#hero-canvas-fs-wrap:-webkit-full-screen #hero-fs-ctrl-bar{
   display:flex!important;position:relative!important;z-index:6!important;
+}
+/* ── Canvas lock (opt-in): pins the canvas itself below the sticky top bar,
+   so the control panels can be scrolled through underneath while the canvas
+   stays put — the "scroll the page while looking at the canvas" mode.
+   --hero-fs-topbar-h is kept in sync with the top bar's real height via JS,
+   since it grows/shrinks as the View switcher + n-controller rows move in. */
+#hero-canvas-fs-wrap.hero-fs-canvas-locked:fullscreen #hero-canvas-wrap,
+#hero-canvas-fs-wrap.hero-fs-canvas-locked:-webkit-full-screen #hero-canvas-wrap{
+  position:sticky!important;top:var(--hero-fs-topbar-h,0px)!important;
+  z-index:10;background:#04040d;
+}
+#hero-fs-lock-btn.active{
+  background:rgba(200,168,74,.18)!important;border-color:rgba(200,168,74,.8)!important;color:var(--gold)!important;
 }
 #hero-canvas-fs-wrap.hero-fs-hidden:fullscreen #hero-canvas-wrap,
 #hero-canvas-fs-wrap.hero-fs-hidden:-webkit-full-screen #hero-canvas-wrap{
@@ -1016,6 +1030,36 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 .wview-pulse{animation:wviewPulse 1.4s ease-in-out 3;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ── Mobile ergonomics: sticky view switchers + finger-sized controls ── */
+@media (max-width:768px){
+  #hero-view-bar{position:sticky;top:0;z-index:60;backdrop-filter:blur(4px);}
+  #hero-canvas-fs-wrap:fullscreen #hero-view-bar,
+  #hero-canvas-fs-wrap:-webkit-full-screen #hero-view-bar{position:static;backdrop-filter:none;}
+  #ws-view-row{position:sticky;top:0;z-index:50;background:rgba(7,7,26,.94);backdrop-filter:blur(4px);padding:4px 0;}
+  #ws-view-row button,#hero-view-bar button{min-height:30px;min-width:38px;}
+  button[onclick^="wGapStep"],button[onclick^="heroGapStep"],#w-gap-play,#hero-gap-play{
+    width:28px!important;height:28px!important;font-size:12px!important;}
+  #w-gap-sl,#hero-gap-sl{min-width:140px;height:28px;}
+  input[type=range]{min-height:24px;}
+}
+</style>
+<style>
+/* Collapsed top bars: view bar shrinks to a slim strip with only the toggle;
+   the C(n)/N controller row hides entirely — canvas stays unobstructed. */
+#hero-view-bar.hv-collapsed>*:not(#hero-bars-collapse){display:none!important;}
+#hero-view-bar.hv-collapsed{padding:3px 14px;}
+#nbar.hv-collapsed{display:none!important;}
+</style>
+<script>
+function heroToggleTopBars(){
+  var vb=document.getElementById('hero-view-bar'), nb=document.getElementById('nbar');
+  var on=vb&&vb.classList.toggle('hv-collapsed');
+  if(nb)nb.classList.toggle('hv-collapsed',!!on);
+  var b=document.getElementById('hero-bars-collapse');
+  if(b)b.textContent=on?'\u2304':'\u2303';
+}
+</script>
 </head>
 <body>
 
@@ -1034,21 +1078,59 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     <div style="animation:wgFadeUp .6s .3s both;margin:8px 0 10px;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#6a6560;margin-bottom:6px;">Preview canvas view:</div>
       <span id="wfs-anchor-view" style="display:none;"></span>
+      <div id="w-tour-panel"></div>
       <div id="ws-view-row" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="wv-btn" id="wvb-smith" onclick="wSetView('smith')"
           style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Smith</button>
         <button class="wv-btn" id="wvb-ring" onclick="wSetView('ring')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Ring</button>
+        <button id="wvb-ring-lift" onclick="wSetView('ring');wSetRingLift(!window._wRingLiftState);window._wRingLiftState=!window._wRingLiftState;" title="Ring sub-mode: lift dynamics arcs r → r mod(M+1) — same foundation as the hero's Lift view"
+          style="background:none;border:1px dashed rgba(61,200,184,.4);color:rgba(61,200,184,.55);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.06em;">+Lift</button>
         <button class="wv-btn" id="wvb-grid" onclick="wSetView('grid')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Grid</button>
         <button class="wv-btn" id="wvb-farey" onclick="wSetView('farey')"
           style="background:none;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Farey</button>
         <button class="wv-btn" id="wvb-gauss" onclick="wSetView('gauss')" title="Gaussian integers a+bi, octant 0≤b≤a (8-fold symmetry)"
           style="background:none;border:1px solid rgba(155,127,232,.35);color:rgba(155,127,232,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Gauss</button>
+        <button onclick="cnShareLink(this)" title="Copy a shareable link that restores this exact state (view, G, n, gaps, half plot)"
+          style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;">🔗 Link</button>
         <button onclick="wExport4K()" title="Export current view as a 4K PNG with title, formula, and stats panel"
           style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.5);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;">↓ 4K</button>
         <button id="w-send-hero-btn" onclick="wSendToHero()" title="Send this view/G/n/color to the hero section, hiding its text overlay — then use the hero's own 4K export for a clean shot"
           style="background:rgba(61,200,184,.1);border:1px solid rgba(61,200,184,.5);color:rgba(61,200,184,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;">↥ Send to Hero</button>
+      </div>
+
+      <!-- Grid-only: plot the full G×G square or just the r<M triangle
+           (bottom-left → top-right diagonal), mirroring the hero grid's toggle -->
+      <div id="w-ringlift-ctrl" style="display:none;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;padding:7px 10px;background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.25);font-family:'JetBrains Mono',monospace;font-size:8px;">
+        <span style="color:rgba(61,200,184,.85);letter-spacing:.08em;text-transform:uppercase;font-size:7.5px;">Lift dynamics:</span>
+        <label style="display:inline-flex;align-items:center;gap:4px;color:rgba(61,200,184,.9);cursor:pointer;"><input type="checkbox" class="lift-surv-chk" checked style="accent-color:rgba(61,200,184,.8);" onchange="liftSetSurv(this.checked)">Surviving</label>
+        <label style="display:inline-flex;align-items:center;gap:4px;color:rgba(224,80,96,.9);cursor:pointer;"><input type="checkbox" class="lift-broken-chk" checked style="accent-color:rgba(224,80,96,.8);" onchange="liftSetBroken(this.checked)">Broken</label>
+        <span style="color:#a8a294;">Thick:</span>
+        <input type="range" min="0.2" max="6" step="0.1" value="0.7" style="width:70px;accent-color:rgba(155,127,232,.7);" oninput="liftSetThick(this.value)">
+        <span class="lift-thick-lbl" style="color:#a8a294;min-width:30px;">0.7px</span>
+        <button class="lift-mode-btn" data-m="npath" onclick="liftSetMode('npath')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#3dc8b8;border-bottom:2px solid #3dc8b8;padding:2px 1px;">±n</button>
+        <button class="lift-mode-btn" data-m="spiral" onclick="liftSetMode('spiral')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Spiral</button>
+        <button class="lift-mode-btn" data-m="both" onclick="liftSetMode('both')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Both</button>
+        <button class="lift-mode-btn" data-m="connect" onclick="liftSetMode('connect')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Connect</button>
+        <span style="color:#a8a294;">n</span>
+        <button onclick="liftSetPathN(-1)" style="background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">-</button>
+        <span class="lift-pathn-lbl" style="color:#e8e2d4;min-width:14px;text-align:center;">1</span>
+        <button onclick="liftSetPathN(1)" style="background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
+        <button onclick="liftCycleSpiralP(-1)" style="background:none;border:1px solid rgba(200,168,74,.35);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 5px;cursor:pointer;">◀</button>
+        <span class="lift-spiralp-lbl" style="color:#c8a84a;min-width:30px;text-align:center;">p=auto</span>
+        <button onclick="liftCycleSpiralP(1)" style="background:none;border:1px solid rgba(200,168,74,.35);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 5px;cursor:pointer;">▶</button>
+        <span style="color:rgba(230,56,72,.85);">● spiral</span>
+        <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding" style="background:none;border:1px solid rgba(230,56,72,.4);color:rgba(230,56,72,.85);font-family:inherit;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
+        <span style="color:rgba(61,200,184,.85);">● ±1</span>
+        <button class="lift-npath-dir-btn" onclick="liftCycleNPathDir()" title="±1 branch" style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:inherit;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
+      </div>
+      <div id="w-grid-plot-ctrl" style="display:none;align-items:center;gap:6px;margin-top:6px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(155,127,232,.8);white-space:nowrap;">Plot:</span>
+        <button id="w-grid-plot-all" onclick="wSetGridHalf(false)" title="Plot all (r,M) pairs, r=1..G for every M"
+          style="background:rgba(155,127,232,.16);border:1px solid rgba(155,127,232,.65);color:rgba(155,127,232,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;">All points</button>
+        <button id="w-grid-plot-half" onclick="wSetGridHalf(true)" title="Plot only the r&lt;M triangle (bottom-left → top-right diagonal), same domain as Ring/Farey/Smith"
+          style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;">Half (diagonal)</button>
       </div>
 
       <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
@@ -1202,11 +1284,75 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
         style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(6,6,20,.8);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 12px;cursor:pointer;border-radius:3px;z-index:3;">Show controls</button>
     </div>
 
+    <details id="w-intro-dd" style="position:relative;z-index:1;">
+    <summary style="cursor:pointer;list-style:none;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,74,.7);padding:2px 0 6px;user-select:none;">
+      <span style="display:inline-block;transition:transform .15s;">▸</span> Intro — what is C(n)?
+    </summary>
+    <style>#w-intro-dd[open]>summary>span{transform:rotate(90deg);}</style>
     <p style="animation:wgFadeUp .6s .75s both;">
       Pick a random whole number. Now ask: how likely is it — and the next n numbers right
-      after it — to all share no common factor with some fixed reference? That probability
+      after it — to all share no common factor with a fixed modulus M? That probability
       has a name, C(n), and it drops in clean, predictable steps — one jump at every prime.
     </p>
+
+    <p style="animation:wgFadeUp .6s .9s both;">
+      It starts at certainty: C(0) = 1, exactly. The first step lands on
+      C(1) ≈ 0.530711…, and nothing about it is mysterious — it's ζ(2) times the
+      Feller–Tornier product ∏<sub>p</sub>(1−2/p²), and the result has its own
+      classical entry. Two known constants multiplied, one known answer — everything
+      <em>after</em> that first step is where this site begins.
+    </p>
+
+    <p class="welcome-note" style="animation:wgFadeUp .6s 1s both;">
+      OEIS:&nbsp;
+      <a href="https://oeis.org/A013661" target="_blank" rel="noopener" style="color:#3dc8b8;">A013661</a> (ζ(2)) ×
+      <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:#3dc8b8;">A065474</a> (∏(1−2/p²)) =
+      <a href="https://oeis.org/A065469" target="_blank" rel="noopener" style="color:#3dc8b8;">A065469</a> (C(1)).
+    </p>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.9;color:#b8b2a6;background:#0c0c22;border:1px solid rgba(255,255,255,.08);border-left:2px solid rgba(61,200,184,.5);padding:12px 14px;margin:0 0 12px;">
+      <div style="color:#3dc8b8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">How the ζ(2) cancels — baseline C(0) &amp; D(0)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">
+        <div style="border-right:1px solid rgba(255,255,255,.06);padding-right:10px;">
+          <span style="color:#6a6560;font-size:8px;">C(n) — normalized (× ζ(2))</span><br>
+          C(0) = ζ(2)·∏<sub>p</sub>(1−1/p²)<br>
+          &nbsp;&nbsp;= ∏<sub>p</sub>(1−1/p²)<sup>−1</sup>·∏<sub>p</sub>(1−1/p²)&nbsp;&nbsp;<span style="color:#6a6560;">[Euler]</span><br>
+          &nbsp;&nbsp;= <b style="color:#c8a84a;">1 exactly</b> — every factor cancels its own inverse.
+        </div>
+        <div>
+          <span style="color:#6a6560;font-size:8px;">D(n) = C(n)/ζ(2) — raw density</span><br>
+          D(0) = C(0)/ζ(2) = 1/ζ(2) = ∏<sub>p</sub>(1−1/p²)<br>
+          &nbsp;&nbsp;= (3/4)·(8/9)·(24/25)·(48/49)·…<br>
+          &nbsp;&nbsp;= <b style="color:#3dc8b8;">0.607927101854</b> — no cancellation left, it's just 1/ζ(2).
+        </div>
+      </div>
+      <div style="color:#3dc8b8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin:12px 0 6px;">First step — C(1) &amp; D(1)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">
+        <div style="border-right:1px solid rgba(255,255,255,.06);padding-right:10px;">
+          C(1) = ζ(2)·∏<sub>p</sub>(1−2/p²)<br>
+          &nbsp;&nbsp;= ∏<sub>p</sub> (1−2/p²)/(1−1/p²) = ∏<sub>p</sub> (p²−2)/(p²−1)<br>
+          &nbsp;&nbsp;= (2/3)·(7/8)·(23/24)·(47/48)·…<br>
+          &nbsp;&nbsp;≈ <b style="color:#c8a84a;">0.530711820472</b>
+        </div>
+        <div>
+          D(1) = C(1)/ζ(2) = ∏<sub>p</sub>(1−2/p²)<br>
+          &nbsp;&nbsp;<span style="color:#6a6560;">same product, no ζ(2) factor — this is the Feller–Tornier constant D<sub>FT</sub></span><br>
+          &nbsp;&nbsp;= (1/2)·(7/9)·(23/25)·(47/49)·…<br>
+          &nbsp;&nbsp;≈ <b style="color:#3dc8b8;">0.322634098939</b>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:9px;color:#6a6560;">check: C(1)/D(1) = ζ(2) = 1.644934… ✓ &nbsp;·&nbsp; C(0)/D(0) = ζ(2) ✓</div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;background:#0c0c22;border:1px solid rgba(155,127,232,.25);padding:12px 14px;margin:0 0 12px;">
+      <div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Try any n — step-by-step (C(n) &amp; D(n))</div>
+      <span style="color:#a8a294;">n =</span>
+      <input type="number" id="w-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;">
+      <button onclick="wCnSteps(+document.getElementById('w-steps-n').value)" style="background:rgba(155,127,232,.12);border:1px solid rgba(155,127,232,.5);color:#9b7fe8;font-family:inherit;font-size:9px;padding:4px 12px;cursor:pointer;">Show steps</button>
+      <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
+        <input type="checkbox" id="w-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('w-steps-n')?.value||0))"> set ground state (lock to page n)
+      </label>
+      <div id="w-steps-out" style="margin-top:8px;line-height:1.9;color:#b8b2a6;"></div>
+    </div>
+    </details>
 
     <!-- Mode toggle + C(n) display -->
     <div class="welcome-eq" id="welcome-eq-row" style="animation:wgFadeUp .6s 1.05s both;display:flex;flex-direction:column;gap:10px;align-items:stretch;">
@@ -1327,23 +1473,23 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#a8a294;">a</span>
           <div style="display:flex;flex-direction:column;gap:1px;">
-            <button onclick="document.getElementById('wsec-a').value=Math.max(1,(+document.getElementById('wsec-a').value||1)+1);" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▲</button>
-            <button onclick="document.getElementById('wsec-a').value=Math.max(1,(+document.getElementById('wsec-a').value||1)-1);" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▼</button>
+            <button onclick="document.getElementById('wsec-a').value=Math.max(1,(+document.getElementById('wsec-a').value||1)+1);wTraceSector();" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▲</button>
+            <button onclick="document.getElementById('wsec-a').value=Math.max(1,(+document.getElementById('wsec-a').value||1)-1);wTraceSector();" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▼</button>
           </div>
-          <input type="number" id="wsec-a" value="1" min="1" max="9999"
+          <input type="number" id="wsec-a" value="1" min="1" max="9999" oninput="wTraceSector()"
             style="width:42px;background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;padding:3px 4px;outline:none;">
           <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#a8a294;">/ b</span>
           <div style="display:flex;flex-direction:column;gap:1px;">
-            <button onclick="document.getElementById('wsec-b').value=Math.max(1,(+document.getElementById('wsec-b').value||1)+1);" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▲</button>
-            <button onclick="document.getElementById('wsec-b').value=Math.max(1,(+document.getElementById('wsec-b').value||1)-1);" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▼</button>
+            <button onclick="document.getElementById('wsec-b').value=Math.max(1,(+document.getElementById('wsec-b').value||1)+1);wTraceSector();" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▲</button>
+            <button onclick="document.getElementById('wsec-b').value=Math.max(1,(+document.getElementById('wsec-b').value||1)-1);wTraceSector();" style="background:none;border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:7px;padding:0 4px;cursor:pointer;line-height:1.3;">▼</button>
           </div>
-          <input type="number" id="wsec-b" value="2" min="1" max="9999"
+          <input type="number" id="wsec-b" value="2" min="1" max="9999" oninput="wTraceSector()"
             style="width:42px;background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;padding:3px 4px;outline:none;">
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#3dc8b8;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-pos" style="accent-color:#3dc8b8;">s = +1</label>
-          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-ray" checked style="accent-color:#c8a84a;">s = 0 (ray)</label>
-          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#e05060;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-neg" style="accent-color:#e05060;">s = −1</label>
+          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#3dc8b8;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-pos" onchange="wTraceSector()" style="accent-color:#3dc8b8;">s = +1</label>
+          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-ray" checked onchange="wTraceSector()" style="accent-color:#c8a84a;">s = 0 (ray)</label>
+          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#e05060;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-neg" onchange="wTraceSector()" style="accent-color:#e05060;">s = −1</label>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <button onclick="wTraceSector()" title="Highlight lattice points on this path"
@@ -1364,6 +1510,8 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 
       <!-- Active Gaps — twin/cousin/sexy-prime highlighting, works on all five views -->
       <span id="wfs-anchor-gaps" style="display:none;"></span>
+      <span id="wfs-anchor-working" style="display:none;"></span>
+      <span id="w-working-slot" style="display:block;"></span>
       <details id="ws-gaps-dd" style="margin-top:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);">
         <summary style="cursor:pointer;padding:7px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
           <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#a8a294;">▸</span>
@@ -1382,6 +1530,19 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
         <button id="wgap-btn-8" onclick="wToggleGap(8)" title="Gap-8 prime pairs (M, M+8)"
           style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">8</button>
         <div id="w-gap-dynamic" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <span style="flex-basis:100%;height:0;"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Custom g:</span>
+        <button onclick="wGapStep(-1)" title="Previous gap"
+          style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(200,168,74,.8);font-family:'JetBrains Mono',monospace;font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▼</button>
+        <input type="range" id="w-gap-sl" min="0" max="30" step="1" value="0"
+          style="width:100px;accent-color:rgba(200,168,74,.7);" oninput="wGapSliderChange(+this.value)"
+          title="Highlight gap class g — slides over the full grid size G; forward mode: consecutive-prime pairs (p, p+g); diagonal mode: |M−r|=g strip">
+        <button onclick="wGapStep(1)" title="Next gap"
+          style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(200,168,74,.8);font-family:'JetBrains Mono',monospace;font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
+        <button id="w-gap-play" onclick="wGapPlayToggle()" title="Loop the gap slider through every class up to G"
+          style="background:none;border:1px solid rgba(126,200,122,.45);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;width:20px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
+        <span id="w-gap-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.8);min-width:38px;">off</span>
+        <span id="w-gap-pairs" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(61,200,184,.75);min-width:80px;"></span>
         <span style="flex-basis:100%;height:0;"></span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#7a756a;letter-spacing:.06em;">SEMANTICS:</span>
         <button class="gap-sem-btn" data-mode="forward" onclick="setGapSemantics('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime belongs to exactly one class (a partition)"
@@ -1458,6 +1619,12 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
           <label style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#a8a294;cursor:pointer;">
             <input type="checkbox" id="ws-lift-straight" onchange="wToggleLiftStraight(this.checked)" style="accent-color:rgba(126,200,122,.85);"> Straight
           </label>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(230,56,72,.85);">● spiral</span>
+          <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding: ▲ r≡p (mod M) · ▼ mirrored"
+            style="background:none;border:1px solid rgba(230,56,72,.4);color:rgba(230,56,72,.85);font-family:'JetBrains Mono',monospace;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(61,200,184,.85);">● ±1</span>
+          <button class="lift-npath-dir-btn" onclick="liftCycleNPathDir()" title="±1 branch: ↕ both · ▲ +1 · ▼ −1"
+            style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:'JetBrains Mono',monospace;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
         </div>
         </div>
       </details>
@@ -1561,7 +1728,31 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   // Smith chart rotation/animation state (opener-only — independent of hero's _heroSmithAlpha)
   var _wsTheta=0;            // degrees, 0..360
   var _wShowLift=true;       // Lift Dynamics overlay on the opener Smith chart — on by default
+  var _wGridHalf=false;      // Grid view: false = full G×G square; true = only the r<M triangle (BL→TR diagonal)
+  window.wSetGridHalf=function(v){
+    _wGridHalf=!!v;
+    var allBtn=document.getElementById('w-grid-plot-all');
+    var halfBtn=document.getElementById('w-grid-plot-half');
+    [[allBtn,!_wGridHalf],[halfBtn,_wGridHalf]].forEach(function(pair){
+      var b=pair[0],on=pair[1];
+      if(!b)return;
+      b.style.background=on?'rgba(155,127,232,.16)':'none';
+      b.style.borderColor=on?'rgba(155,127,232,.65)':'rgba(255,255,255,.2)';
+      b.style.color=on?'rgba(155,127,232,.95)':'rgba(168,162,148,.75)';
+    });
+    if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+  };
   var _wLiftStraight=false;  // curved through Γ by default; true = straight chords
+  var _wRingLift=false;      // Ring view sub-mode: overlay lift dynamics arcs
+  window.wSetRingLift=function(v){
+    _wRingLift=!!v;
+    var b=document.getElementById('wvb-ring-lift');
+    if(b){b.style.background=_wRingLift?'rgba(61,200,184,.18)':'none';
+      b.style.color=_wRingLift?'rgba(61,200,184,.95)':'rgba(61,200,184,.55)';}
+    var c=document.getElementById('w-ringlift-ctrl');
+    if(c)c.style.display=(_wRingLift&&_wView==='ring')?'flex':'none';
+    wRedrawCanvas();
+  };
   window.wToggleLift=function(v){ _wShowLift=!!v; wRedrawCanvas(); };
   window.wToggleLiftStraight=function(v){ _wLiftStraight=!!v; wRedrawCanvas(); };
 
@@ -1763,7 +1954,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     // otherwise be unreachable). Moved, not cloned — single source of truth.
     var btnRow=document.getElementById('wfs-btn-row');
     // Formula + view-select rows go ABOVE the spin/flip/zoom button row
-    var topRows=[['welcome-cn-block','wfs-anchor-formula'],['ws-mode-row','wfs-anchor-mode'],['wm-finite-panel','wfs-anchor-finite'],['ws-view-row','wfs-anchor-view'],['w-adv-section','wfs-anchor-adv'],['ws-sector-ctrl','wfs-anchor-sector'],['ws-gaps-dd','wfs-anchor-gaps'],['ws-smith-ctrl','wfs-anchor-smithctrl'],['ws-perring-dd','wfs-anchor-perring']];
+    var topRows=[['welcome-cn-block','wfs-anchor-formula'],['ws-mode-row','wfs-anchor-mode'],['wm-finite-panel','wfs-anchor-finite'],['ws-view-row','wfs-anchor-view'],['w-adv-section','wfs-anchor-adv'],['ws-sector-ctrl','wfs-anchor-sector'],['ws-gaps-dd','wfs-anchor-gaps'],['hero-working-dd','wfs-anchor-working'],['ws-smith-ctrl','wfs-anchor-smithctrl'],['ws-perring-dd','wfs-anchor-perring']];
     topRows.forEach(function(pair){
       var row=document.getElementById(pair[0]);
       var anchor=document.getElementById(pair[1]);
@@ -1958,10 +2149,15 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     if(nDisp)nDisp.textContent=_wN;
     _wUpdateFormulaRatios();
     var val=(_wMode==='finite')?_wCnFin(_wN,_wPrimeK):_wCn(_wN);
+    // True once the page's real getCn/getCnFinite (full 1.5M-prime sieve +
+    // analytic tail correction) have been defined — see note below. Before
+    // that, _wCn/_wCnFin silently fall back to a coarse ~300-prime
+    // approximation, so every display derived from `val` is gated on this.
+    var _wMathReady=(typeof getCn==='function'&&typeof getCnFinite==='function');
     // D(n) / block / saturation cards (collapsed dropdown)
     (function(){
       var dv=document.getElementById('w-dn-val');
-      if(!dv)return;
+      if(!dv||!_wMathReady)return;
       var Z=Math.PI*Math.PI/6;
       dv.textContent=(val/Z).toFixed(Math.max(2,Math.min(15,_wDP||12))); // follow the dp slider
       document.getElementById('w-blk-val').textContent=String(_wN+1);
@@ -1977,7 +2173,17 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     })();
 
     // ── Value display: color-coded digits ──────────────────────────────
-    if(valEl){
+    // Guard against the EARLY FIRST PAINT call (below, before DOMContentLoaded):
+    // at that point the page's real getCn/getCnFinite (full 1.5M-prime sieve +
+    // analytic tail correction) haven't executed yet, so _wCn/_wCnFin silently
+    // fall back to a coarse ~300-prime approximation (no tail correction) —
+    // close but visibly different from the true value (e.g. C(1) 0.5308 vs
+    // 0.5307). That produced a one-time flip/flicker on load as init() later
+    // re-rendered with the real math. Skip overwriting the headline number
+    // until the real getCn/getCnFinite are actually defined; the static HTML
+    // already shows the correct default, and init()'s render (after the full
+    // script has parsed) fills in every other n.
+    if(valEl&&_wMathReady){
       if(_wMode==='finite'){
         // In finite mode, use convergence color like the hero does
         var inf=_wCn(_wN);
@@ -2020,11 +2226,27 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
           ann=(qn===1n?'= '+numStr2:'= '+numStr2+'/'+qn);
         }
       }catch(e){}
-    } else {
+    } else if(_wMathReady){
       if(_wN===0){ ann=null; } // C(0)=1 exactly, no π² form
       else if(typeof _piAnnotation==='function') ann=_piAnnotation(val);
     }
-    if(piEl) piEl.textContent=ann||'';
+    if(piEl&&_wMathReady) piEl.textContent=ann||'';
+
+    // ── Headline number follows ground state ──────────────────────────
+    // "Why does this number keep landing near 0.53?" is written for the
+    // default n=1 case. When "set ground state (lock to page n)" is on,
+    // swap 0.53 for the live C(n) value so the headline always matches
+    // whatever n the page is actually locked to.
+    (function(){
+      var titleEl=document.getElementById('welcome-title');
+      if(!titleEl)return;
+      var locked=document.getElementById('w-steps-link')?.checked;
+      if(locked&&_wMathReady){
+        titleEl.textContent='Why does this number keep landing near '+val.toFixed(2)+'?';
+      } else if(!locked){
+        titleEl.textContent='Why does this number keep landing near 0.53?';
+      }
+    })();
 
     _wUpdateFormula();
     wRedrawCanvas();
@@ -2057,6 +2279,10 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     }
     var prc=document.getElementById('ws-perring-dd');
     if(prc) prc.style.display='flex'; // now applies to every view, including Smith
+    var gpc=document.getElementById('w-grid-plot-ctrl');
+    if(gpc) gpc.style.display=(v==='grid')?'flex':'none';
+    var rlc=document.getElementById('w-ringlift-ctrl');
+    if(rlc) rlc.style.display=(v==='ring'&&_wRingLift)?'flex':'none';
     wRedrawCanvas();
   };
 
@@ -2192,6 +2418,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     if(_wActiveGaps.has(g)) _wActiveGaps.delete(g); else _wActiveGaps.add(g);
     var btn=document.getElementById('wgap-btn-'+g);
     if(btn) btn.setAttribute('style',_wGapBtnStyle(g,_wActiveGaps.has(g)));
+    if(typeof _wSyncGapButtons==='function')_wSyncGapButtons();
     wRedrawCanvas();
   };
   // "Generate Even Gaps" and "Add Consecutive Range" CREATE new toggle
@@ -2227,11 +2454,61 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   };
   window.wClearAllGaps=function(){
     _wActiveGaps.clear();
-    document.querySelectorAll('#ws-gaps-ctrl button[id^="wgap-btn-"]').forEach(function(btn){
-      var g=parseInt(btn.id.replace('wgap-btn-',''));
-      btn.setAttribute('style',_wGapBtnStyle(g,false));
-    });
+    _wSyncGapButtons();
+    var pairs=document.getElementById('w-gap-pairs');if(pairs)pairs.textContent='';
     wRedrawCanvas();
+  };
+  function _wSyncGapButtons(){
+    document.querySelectorAll('button[id^="wgap-btn-"]').forEach(function(btn){
+      var g=parseInt(btn.id.replace('wgap-btn-',''));
+      btn.setAttribute('style',_wGapBtnStyle(g,_wActiveGaps.has(g)));
+    });
+    var lbl=document.getElementById('w-gap-lbl');
+    if(lbl){
+      if(_wActiveGaps.size){var a=[];_wActiveGaps.forEach(function(g){a.push(g);});a.sort(function(x,y){return x-y;});
+        lbl.textContent='g='+a.join(',');lbl.style.color=_wGapColorFor(a[0]);}
+      else{lbl.textContent='off';lbl.style.color='rgba(200,168,74,.65)';}
+    }
+    var sl=document.getElementById('w-gap-sl');
+    if(sl)sl.value=(_wActiveGaps.size===1)?_wActiveGaps.values().next().value:0;
+  }
+  // Gap slider — mirrors the hero's: sets exactly one active gap (0 = off).
+  // Max always tracks the opener grid size G (updated in wSetG + lazily here).
+  window.wGapSliderChange=function(v){
+    var sl=document.getElementById('w-gap-sl');
+    var max=Math.max(1,_wG-1);
+    if(sl&&+sl.max!==max){sl.max=max;}
+    v=Math.max(0,Math.min(max,Math.round(+v||0)));
+    if(_gapSemantics==='forward'&&v>1&&v%2){v=Math.min(max,v+1);} // gaps >1 are even
+    if(sl)sl.value=v;
+    _wActiveGaps.clear();
+    var pairs=document.getElementById('w-gap-pairs');
+    if(v>0){
+      _wActiveGaps.add(v);
+      if(pairs)pairs.textContent=(_gapSemantics==='forward')
+        ?('pairs='+fwdGapPairCount(v,_wG)+' (p,p+'+v+') \u2264 G')
+        :('|M\u2212r|='+v+' diagonal');
+    } else if(pairs)pairs.textContent='';
+    _wSyncGapButtons();
+    wRedrawCanvas();
+  };
+  window.wGapStep=function(dir){
+    var sl=document.getElementById('w-gap-sl');
+    var v=sl?+sl.value:0, max=Math.max(1,_wG-1);
+    window.wGapSliderChange(Math.max(0,Math.min(max,_gapStepVal(v,dir))));
+  };
+  var _wGapPlayId=null;
+  window.wGapPlayToggle=function(){
+    var btn=document.getElementById('w-gap-play');
+    if(_wGapPlayId){clearInterval(_wGapPlayId);_wGapPlayId=null;if(btn)btn.textContent='\u25b6';return;}
+    if(btn)btn.textContent='\u23f8';
+    _wGapPlayId=setInterval(function(){
+      var sl=document.getElementById('w-gap-sl');
+      var v=sl?+sl.value:0, max=Math.max(1,_wG-1);
+      var nx=_gapStepVal(v,1);
+      if(nx>max)nx=1; // loop
+      window.wGapSliderChange(nx);
+    },800);
   };
   // Returns the set of M values (2..G) that are part of at least one active gap pair,
   // tagged with the gap color to use.
@@ -2407,6 +2684,28 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     wRenderCn();
   };
 
+  // ── Opening sequence: land on a clean dp=6 preset, then shape into the
+  // saved/default state after a few seconds; collapse the intro at 10s. ──
+  window._wOpeningSequence=function(){
+    var target=_wDP||12;            // whatever is configured (URL hash may set it later)
+    if((location.hash||'').indexOf('wv=')<0&&typeof wSetView==='function')wSetView('grid');
+    window.wSetDP(6);               // preset view: 6 decimal places
+    setTimeout(function(){          // …then ease to the configured dp
+      var cur=6, dir=target>cur?1:-1;
+      var iv=setInterval(function(){
+        cur+=dir;
+        window.wSetDP(cur);
+        if(cur===target)clearInterval(iv);
+      },90);
+    },3000);
+    var dd=document.getElementById('w-intro-dd');
+    if(dd){
+      var cancel=false;
+      dd.addEventListener('pointerdown',function(){cancel=true;},{once:true});
+      setTimeout(function(){if(!cancel)dd.removeAttribute('open');},10000);
+    }
+  };
+
   window.wSetDP=function(v){
     _wDP=Math.max(2,Math.min(50,Math.round(+v||12)));
     var sl=document.getElementById('welcome-dp-sl');
@@ -2426,6 +2725,9 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   };
   window.wSetG=function(v){
     _wG=Math.max(1,Math.min(400,Math.round(+v||31)));
+    var gsl=document.getElementById('w-gap-sl');
+    if(gsl){var gm=Math.max(1,_wG-1);gsl.max=gm;if(+gsl.value>gm)window.wGapSliderChange(0);}
+    if(_wSectorPts&&_wSectorPts.length&&typeof window.wTraceSector==='function')window.wTraceSector();
     _wUpdateFormulaRatios();
     var sl=document.getElementById('ws-g-sl');
     var num=document.getElementById('ws-g-num');
@@ -2623,15 +2925,18 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     });
     for(var M=1;M<=G;M++){
       if(!_wRingActive(M))continue;
-      // Full G×G square (r=1..G for every M) — matches the hero grid, which
-      // plots all (r,M) pairs, not just the r<M lower triangle.
+      // Full G×G square (r=1..G for every M) by default — matches the hero
+      // grid. With the "Half (diagonal)" toggle on, keep only the r<M
+      // triangle above the bottom-left → top-right r=M diagonal.
       for(var r=1;r<=G;r++){
+        if(_wGridHalf&&r>=M)continue;
         var pureCop=gcd(r,M)===1;
         if(!_wCharPass(pureCop))continue;
         var ok=isCoprime(r,M,n);
         var rDisp=(r<M)?_wPerRingShiftedR(r,M,G,_wPerRing):r;
         var x=ox+rDisp*cell,y=oy+side-(M-1)*cell;
-        var rad=(ok?Math.max(1.2,Math.min(2.5,cell*0.3)):0.7)*_wCharSizeMul(pureCop);
+        var radBase=Math.min(cell*0.45,Math.max(cell*0.28,0.9/_wZoom)); // never-overlap cap, ≥~1px on screen
+        var rad=(ok?radBase:radBase*0.55)*_wCharSizeMul(pureCop);
         if(_wHitRec)_wHitPts.push(x,y,r,M);
         ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);
         ctx.fillStyle=_wModColor(r,M,ok,pureCop);
@@ -2644,7 +2949,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       var sp=_wSectorPts[si];
       var spDisp=_wPerRingShiftedR(sp.r,sp.M,G,_wPerRing);
       var spx=ox+spDisp*cell,spy=oy+side-(sp.M-1)*cell;
-      var spRad=Math.max(1,Math.min(2.2,cell*0.24))*_wSecDotScale;
+      var spRad=Math.min(cell*0.42,Math.max(cell*0.22,0.9/_wZoom))*_wSecDotScale;
       ctx.beginPath();ctx.arc(spx,spy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,spRad*1.7,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
@@ -2655,6 +2960,50 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     var cx=W/2,cy=H/2,rings=G;
     var maxR=Math.min(W,H)*0.46;
     var extraTurn=_wPerRing*2*Math.PI;
+    function ringXY(r,M){
+      var R=maxR*(M-1)/Math.max(1,rings-1);
+      var th=2*Math.PI*r/M+extraTurn*(M-1)-Math.PI/2;
+      return[cx+R*Math.cos(th),cy+R*Math.sin(th)];
+    }
+    if(_wRingLift){
+      // Lift arcs — foundationally the same picture as the hero Lift view,
+      // drawn between consecutive rings of THIS ring layout.
+      var pLift=new Path2D(),pDie=new Path2D();
+      for(var lM=2;lM<rings;lM++){
+        if(!_wRingActive(lM)||!_wRingActive(lM+1))continue;
+        for(var lr=1;lr<lM;lr++){
+          if(gcd(lr,lM)!==1)continue;
+          if(n>0&&!_wBlockCoprime2D(lr,lM,n))continue;
+          var lr2=lr%(lM+1);
+          var A=ringXY(lr,lM),B=ringXY(lr2,lM+1);
+          var tgt=gcd(lr2,lM+1)===1?pLift:pDie;
+          tgt.moveTo(A[0],A[1]);tgt.lineTo(B[0],B[1]);
+        }
+      }
+      ctx.save();ctx.lineWidth=(typeof _liftThick==='undefined')?0.6:_liftThick;
+      if(typeof _liftSurvOn==='undefined'||_liftSurvOn){ctx.strokeStyle='rgba(61,200,184,.4)';ctx.stroke(pLift);}
+      if(typeof _liftBrokenOn==='undefined'||_liftBrokenOn){ctx.strokeStyle='rgba(224,80,96,.35)';ctx.stroke(pDie);}
+      ctx.restore();
+      // red prime spiral + ±1 path markers (shared direction toggles)
+      var spOn=(typeof _liftShowSpiral==='undefined')||_liftShowSpiral;
+      var npOn=(typeof _liftShowNPath==='undefined')||_liftShowNPath;
+      var spDir=(typeof _liftSpiralDir==='undefined')?'up':_liftSpiralDir;
+      var npDir=(typeof _liftNPathDir==='undefined')?'both':_liftNPathDir;
+      var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(rings):2;
+      for(var pM=3;pM<=rings;pM++){
+        if(!_wRingActive(pM))continue;
+        if(spOn&&spP<pM){
+          var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
+          var S=ringXY(sr,pM);
+          ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
+        }
+        var _nn2=(typeof _liftPathN==='undefined')?1:_liftPathN;
+        if(npOn&&((pM%2)===(_nn2%2))){
+          if(npDir!=='down'&&(pM+_nn2)/2<pM){var U=ringXY((pM+_nn2)/2,pM);ctx.fillStyle='rgba(61,200,184,.9)';ctx.beginPath();ctx.arc(U[0],U[1],2.2,0,6.2832);ctx.fill();}
+          if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=ringXY((pM-_nn2)/2,pM);ctx.fillStyle='rgba(61,200,184,.9)';ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}
+        }
+      }
+    }
     // Active Gaps: outline the full ring for every M in a twin/cousin/sexy-prime pair
     var gapSet=_wGapHighlightSet(G);
     gapSet.forEach(function(color,M){
@@ -2882,14 +3231,47 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
         }
       }
       ctx.save();
-      ctx.lineWidth=0.6;
+      ctx.lineWidth=(typeof _liftThick==='undefined')?0.6:_liftThick;
       ctx.shadowBlur=4;
-      ctx.shadowColor='rgba(61,200,184,.65)';
-      ctx.strokeStyle='rgba(61,200,184,.5)';
-      ctx.stroke(pathLift);
+      if(typeof _liftSurvOn==='undefined'||_liftSurvOn){
+        ctx.shadowColor='rgba(61,200,184,.65)';
+        ctx.strokeStyle='rgba(61,200,184,.5)';
+        ctx.stroke(pathLift);
+      }
+      if(typeof _liftBrokenOn==='undefined'||_liftBrokenOn){
       ctx.shadowColor='rgba(224,80,96,.55)';
       ctx.strokeStyle='rgba(224,80,96,.4)';
       ctx.stroke(pathDie);
+      }
+      // ── Prime spiral (red) + ±1 path markers — same objects as the hero
+      // Lift view, drawn through the Cayley map; direction toggles shared. ──
+      ctx.shadowBlur=0;
+      var _spOn=(typeof _liftShowSpiral==='undefined')||_liftShowSpiral;
+      var _npOn=(typeof _liftShowNPath==='undefined')||_liftShowNPath;
+      var _spDir=(typeof _liftSpiralDir==='undefined')?'up':_liftSpiralDir;
+      var _npDir=(typeof _liftNPathDir==='undefined')?'both':_liftNPathDir;
+      if(_spOn||_npOn){
+        var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(rings):2;
+        var mark=function(pr,pM,color,rad){
+          var pRingR=0.5+((pM-1)/Math.max(1,rings-1))*1.5;
+          var prD=_wPerRingShiftedR(pr,pM,pM,_wPerRing);
+          var th=2*Math.PI*prD/pM+alpha;
+          var w=_conformalSmithXY(pRingR*Math.cos(th),pRingR*Math.sin(th),R0);
+          ctx.fillStyle=color;ctx.beginPath();ctx.arc(cx+w.x,cy+w.y,rad,0,6.2832);ctx.fill();
+        };
+        for(var pM=3;pM<=rings;pM++){
+          if(!_wRingActive(pM))continue;
+          if(_spOn&&spP<pM){
+            var sr=_spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
+            mark(sr,pM,'rgba(230,56,72,.95)',2.6); // red spiral
+          }
+          var _nn=(typeof _liftPathN==='undefined')?1:_liftPathN;
+          if(_npOn&&((pM%2)===(_nn%2))){
+            if(_npDir!=='down'&&(pM+_nn)/2<pM)mark((pM+_nn)/2,pM,'rgba(61,200,184,.9)',2.2);
+            if(_npDir!=='up'&&(pM-_nn)/2>=1)mark((pM-_nn)/2,pM,'rgba(61,200,184,.9)',2.2);
+          }
+        }
+      }
       ctx.restore();
     }
     for(var M=1;M<=rings;M++){
@@ -2970,10 +3352,19 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   // ── Reopen the welcome/opener modal from outside (e.g. the page nav bar) ──
   // The close-detection observer in init() disconnects itself after firing
   // once, so each reopen re-attaches a fresh one to catch the next close.
+  window._wMoveWorking=function(into){
+    var dd=document.getElementById('hero-working-dd');
+    var slot=document.getElementById('w-working-slot');
+    var home=document.getElementById('w-working-home');
+    if(!dd)return;
+    if(into&&slot){slot.appendChild(dd);}
+    else if(!into&&home){home.appendChild(dd);}
+  };
   window.openWelcome=function(){
     var m=document.getElementById('welcome-modal');
     if(!m)return;
     m.style.display='flex';
+    window._wMoveWorking(true);
     wRedrawCanvas();
     if(_wsSpinning) _wsEnsureLoop();
     var obs=new MutationObserver(function(){
@@ -3151,6 +3542,10 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       {label:'C(n)', val:Cn, col:'rgba(200,168,74,.85)'},
       {label:'Color', val:colorLabel.slice(0,16), col:'rgba(184,178,166,.75)'},
       {label:'Rings', val:ringLabel.slice(0,18), col:'rgba(155,127,232,.8)'},
+      {label:'Gaps ('+((typeof _gapSemantics!=='undefined'&&_gapSemantics==='diagonal')?'|M−r|':'Δp')+')',
+       val:_wActiveGaps.size?Array.from(_wActiveGaps).sort(function(a,b){return a-b;}).join(',').slice(0,14):'none',
+       col:'rgba(126,200,122,.8)'},
+      ...(( _wView==='grid'&&_wGridHalf)?[{label:'Plot',val:'half r<M',col:'rgba(155,127,232,.8)'}]:[]),
     ]);
 
     // ── gcd=1 / lift survival ratios for the current G and n — independent of view ──
@@ -3225,6 +3620,8 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 
     // Initial render
     wRenderCn();
+    if(typeof window._wOpeningSequence==='function')window._wOpeningSequence();
+    if(typeof window._wMoveWorking==='function')window._wMoveWorking(true);
     // Default sector path traced on load: 1/2, s=0 ray, 0.3× points
     if(typeof window.wTraceSector==='function')window.wTraceSector();
     // No auto-animations on load: the one-shot Flip demo and the 10s G
@@ -3297,6 +3694,11 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
      ['Carl Friedrich Gauss','Gaussian integers ℤ[i], used in the lattice visualization on Page 2.'],
      ['Phillip H. Smith','The Smith chart, repurposed here as a visualization mode rather than for its original transmission-line context.']
    ]],
+   ['OEIS — constants in the credits ledger',[
+     ['C(1) \u2248 0.530711820472','\u03b6(2)\u00b7\u220f\u209a(1\u22122/p\u00b2) \u2014 relative density of squarefree numbers followed by a squarefree successor. <a href="https://oeis.org/A065469" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A065469 \u2197</a>'],
+     ['D(1) \u2248 0.322634098940','the raw density \u220f\u209a(1\u22122/p\u00b2), the Feller\u2013Tornier Euler product D_FT. <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A065474 \u2197</a>'],
+     ['1/\u03b6(2) \u2248 0.607927101854','6/\u03c0\u00b2 \u2014 density of squarefree integers; the total raw ratio C(1)=D(1)/(1/\u03b6(2)). <a href="https://oeis.org/A059956" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A059956 \u2197</a>']
+   ]],
    ['Other classical references noted in the honesty audit',[
      ['Ernesto Cesàro','Cesàro summation/averaging, referenced where relevant and explicitly distinguished from this site\'s own constructions.'],
      ['J. Franel & E. Landau','Franel–Landau results connecting error terms to the Riemann Hypothesis, cited for context around the decay theorem (Page 16).']
@@ -3364,10 +3766,6 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
           <button class="exp-opt" onclick="exportHeroSideBySide8K('farey');closeExpDD()">
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">8K</span>
             <span><b>Grid + Farey 8K</b><span class="exp-opt-sub">Side-by-side · Farey lattice · 7680 × 4320</span></span>
-          </button>
-          <button class="exp-opt" onclick="exportConformal4K();closeExpDD()">
-            <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">4K</span>
-            <span><b>Conformal Disk 4K</b><span class="exp-opt-sub">Möbius disk · coprime lattice · critical line</span></span>
           </button>
           <button class="exp-opt" onclick="exportHeroRatioCSV();closeExpDD()">
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">CSV</span>
@@ -3457,6 +3855,8 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 
 <span id="hero-fs-top-restore-anchor" style="display:none;"></span>
 <div id="hero-view-bar" style="background:rgba(7,7,26,.97);border:1px solid var(--edge2);border-bottom:2px solid var(--edge);padding:8px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+  <button id="hero-bars-collapse" onclick="heroToggleTopBars()" title="Collapse the View + C(n) control bars so they don't obstruct the canvas"
+    style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:10px;width:22px;height:22px;padding:0;cursor:pointer;flex-shrink:0;">⌃</button>
   <!-- ── VIEW MODE ── -->
   <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);">View:</span>
   <button id="hero-view-grid" onclick="heroSetView('grid')" title="Grid (lattice) view"
@@ -3475,6 +3875,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 
 
 
+<div id="hero-tour-panel"></div>
 <!-- ══════════ N CONTROLLER — above canvas, below the View/Inspect rows ══════════ -->
 <div id="nbar">
 <div id="nbar-inner">
@@ -3557,7 +3958,11 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
        stays sticky at top and the hero's own controls scroll below it,
        exactly mirroring the opener's canvas-fullscreen UX -->
   <div id="hero-canvas-fs-wrap">
-    <div id="hero-fs-top-bar"></div>
+    <div id="hero-fs-top-bar">
+      <button id="hero-fs-lock-btn" onclick="heroToggleCanvasLock()"
+        title="Pin the canvas to the top of the screen so you can scroll through the controls below while still seeing it"
+        style="align-self:center;margin:6px 0 2px;background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;cursor:pointer;flex-shrink:0;">📌 Lock canvas</button>
+    </div>
     <div id="hero-canvas-wrap">
       <div id="hero-canvas-sq">
         <canvas id="hero-3d"></canvas>
@@ -3626,6 +4031,9 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       <span>&#950;(2) &middot; &prod;<sub>p</sub>(1 &minus; min(<span class="hn1" id="hl-n1">n+1</span>, p) / p&sup2;)</span>
       <span class="heq">=</span>
       <span class="hresult" id="hl-val">—</span><span id="hl-pi" style="display:none;font-family:var(--mono);font-size:.72em;color:var(--violet);opacity:.88;margin-left:.55em;letter-spacing:-.01em;white-space:nowrap;"></span>
+    </div>
+    <div id="hero-live-precnote" style="font-size:7px;color:rgba(200,168,74,.45);margin-top:4px;" title="Asymptotic mode sums the Euler product over 114,155 primes ≤ 1,500,000 plus an analytic tail term. Float summation over that many terms is reliable to ~11 dp for n≠1. n=1 shown here is exact — sourced from OEIS A065474/A065469.">
+      &infin; asymptotic: 114,155 primes (&le;1.5M) + tail correction, ~11 dp reliable &middot; n=1 shown exact (OEIS A065474/A065469)
     </div>
   </div>
 
@@ -3789,27 +4197,6 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 
   <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
 
-  <!-- ── GAP HIGHLIGHT ── -->
-  <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);">Gap g:</span>
-  <button onclick="heroGapStep(-1)" title="Decrease gap by 1"
-    style="background:none;border:1px solid var(--edge2);color:rgba(200,168,74,.8);font-family:var(--mono);font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▼</button>
-  <input type="range" id="hero-gap-sl" min="0" max="50" step="1" value="0"
-    style="width:80px;accent-color:rgba(200,168,74,.7);"
-    oninput="heroGapSliderChange(+this.value)"
-    title="Highlight gap class g — forward mode: consecutive-prime pairs (p, p+g); diagonal mode: |M−r|=g strip">
-  <button onclick="heroGapStep(1)" title="Increase gap by 1"
-    style="background:none;border:1px solid var(--edge2);color:rgba(200,168,74,.8);font-family:var(--mono);font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
-  <span id="hero-gap-lbl" style="font-family:var(--mono);font-size:8px;color:rgba(200,168,74,.8);min-width:24px;">off</span>
-  <span id="hero-gap-phi" style="font-family:var(--mono);font-size:7.5px;color:rgba(61,200,184,.75);min-width:80px;"></span>
-  <button class="gap-sem-btn" data-mode="forward" onclick="setGapSemantics('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime in exactly one class"
-    style="background:rgba(126,200,122,.16);border:1px solid rgba(126,200,122,.65);color:rgba(126,200,122,.95);font-family:var(--mono);font-size:7px;padding:2px 7px;cursor:pointer;">Δp</button>
-  <button class="gap-sem-btn" data-mode="diagonal" onclick="setGapSemantics('diagonal')" title="Legacy diagonal: every point with |M−r|=g, no primality"
-    style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:var(--mono);font-size:7px;padding:2px 7px;cursor:pointer;">|M−r|</button>
-  <button onclick="heroGapClear()" title="Clear gap highlight"
-    style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:2px 7px;cursor:pointer;">✕</button>
-
-  <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
-
   <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
 
   <!-- ── ROW SHIFT ── -->
@@ -3842,6 +4229,12 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   <button onclick="_heroSyncRowShiftText('0')"
     style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:2px 7px;cursor:pointer;"
     title="Reset row shift to 0">✕</button>
+  <button id="hero-rowshift-spin-btn" onclick="_heroRowShiftToggleSpin()" title="Continuously increase the row shift twist"
+    style="background:rgba(126,200,122,.1);border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:7.5px;padding:2px 8px;cursor:pointer;white-space:nowrap;">▶ Animate</button>
+  <span style="font-family:var(--mono);font-size:7.5px;color:rgba(126,200,122,.55);">speed</span>
+  <input type="range" id="hero-rowshift-speed-sl" min="5" max="360" step="5" value="60"
+    style="width:50px;accent-color:rgba(126,200,122,.7);"
+    oninput="_heroRowShiftSetSpeed(+this.value)" title="Twist speed (deg/sec of a full lap)">
 
   <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
 
@@ -3971,6 +4364,79 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     </div>
   </div>
 </details>
+
+<!-- ══ ACTIVE GAPS — twin/cousin/sexy-prime highlighting, works on every hero view
+     (Ring, Grid, Farey, Lift, Gauss, Smith) — same idea as the opener's own
+     Active Gaps tab, given its own collapsible section here instead of being
+     buried inline in Lattice Controls. ══ -->
+<details id="hero-gaps-dd" style="background:rgba(7,7,26,.97);border:1px solid rgba(200,168,74,.28);border-top:none;font-family:var(--mono);">
+  <summary style="cursor:pointer;padding:8px 14px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:rgba(200,168,74,.9);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
+    <span style="display:inline-block;transition:transform .15s;">▸</span>
+    Active Gaps
+    <span style="font-size:7.5px;color:var(--cream3);font-weight:400;letter-spacing:.04em;text-transform:none;margin-left:6px;">twin / cousin / sexy-prime highlighting — applies to every view</span>
+  </summary>
+  <style>#hero-gaps-dd[open]>summary>span:first-child{transform:rotate(90deg);}</style>
+  <div style="padding:10px 14px;border-top:1px solid rgba(200,168,74,.14);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+    <button id="hero-gap-btn-1" class="hero-gap-preset" onclick="heroGapPresetToggle(1)" title="The only odd prime gap — the single pair (2, 3)"
+      style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">1 (2→3)</button>
+    <button id="hero-gap-btn-2" class="hero-gap-preset" onclick="heroGapPresetToggle(2)" title="Twin primes (M, M+2)"
+      style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">2 (twin)</button>
+    <button id="hero-gap-btn-4" class="hero-gap-preset" onclick="heroGapPresetToggle(4)" title="Cousin primes (M, M+4)"
+      style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">4 (cousin)</button>
+    <button id="hero-gap-btn-6" class="hero-gap-preset" onclick="heroGapPresetToggle(6)" title="Sexy primes (M, M+6)"
+      style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">6 (sexy)</button>
+    <button id="hero-gap-btn-8" class="hero-gap-preset" onclick="heroGapPresetToggle(8)" title="Gap-8 prime pairs (M, M+8)"
+      style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">8</button>
+    <div id="hero-gap-dynamic" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+
+    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
+
+    <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);">Custom g:</span>
+    <button onclick="heroGapStep(-1)" title="Decrease gap by 1"
+      style="background:none;border:1px solid var(--edge2);color:rgba(200,168,74,.8);font-family:var(--mono);font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▼</button>
+    <input type="range" id="hero-gap-sl" min="0" max="50" step="1" value="0"
+      style="width:100px;accent-color:rgba(200,168,74,.7);"
+      oninput="heroGapSliderChange(+this.value)"
+      title="Highlight gap class g — forward mode: consecutive-prime pairs (p, p+g); diagonal mode: |M−r|=g strip">
+    <button onclick="heroGapStep(1)" title="Increase gap by 1"
+      style="background:none;border:1px solid var(--edge2);color:rgba(200,168,74,.8);font-family:var(--mono);font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
+    <button id="hero-gap-play" onclick="heroGapPlayToggle()" title="Loop the gap slider through every class up to G"
+      style="background:none;border:1px solid rgba(126,200,122,.45);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:8px;width:20px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
+    <span id="hero-gap-lbl" style="font-family:var(--mono);font-size:8px;color:rgba(200,168,74,.8);min-width:60px;">off</span>
+    <span id="hero-gap-phi" style="font-family:var(--mono);font-size:7.5px;color:rgba(61,200,184,.75);min-width:80px;"></span>
+
+    <span style="flex-basis:100%;height:0;"></span>
+    <span style="font-family:var(--mono);font-size:7px;color:#7a756a;letter-spacing:.06em;">SEMANTICS:</span>
+    <button class="gap-sem-btn" data-mode="forward" onclick="setGapSemantics('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime in exactly one class"
+      style="background:rgba(126,200,122,.16);border:1px solid rgba(126,200,122,.65);color:rgba(126,200,122,.95);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">Δp forward</button>
+    <button class="gap-sem-btn" data-mode="diagonal" onclick="setGapSemantics('diagonal')" title="Legacy diagonal: every point with |M−r|=g, no primality"
+      style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">|M−r| diagonal</button>
+    <button onclick="heroGapClear()" title="Clear all active gaps"
+      style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:3px 9px;cursor:pointer;">✕ Clear all</button>
+  </div>
+  <!-- Dynamic Gap Generation — same control-builders as the opener: these
+       CREATE new toggle buttons (off by default); they don't switch gaps on. -->
+  <div style="margin:0 14px 10px;padding:9px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:2px;">
+    <div style="font-family:var(--mono);font-size:8px;color:#a8a294;font-weight:600;margin-bottom:8px;">Dynamic Gap Generation</div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+      <span style="font-family:var(--mono);font-size:7.5px;color:#6a6560;">Max Gap:</span>
+      <input type="number" id="hero-gap-max" min="2" step="2" value="12" placeholder="12"
+        style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:var(--mono);font-size:8px;text-align:center;padding:3px 4px;outline:none;">
+      <button onclick="heroGenerateEvenGaps()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);color:#cfc9bc;font-family:var(--mono);font-size:7.5px;padding:4px 9px;cursor:pointer;">Generate Even Gaps</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-family:var(--mono);font-size:7.5px;color:#6a6560;">Add Consecutive Range — From:</span>
+      <input type="number" id="hero-gap-from" min="1" step="2" value="14" title="Even values (prime gaps >1 are always even); enter 1 for the lone odd gap 2→3"
+        style="width:46px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:var(--mono);font-size:8px;text-align:center;padding:3px 4px;outline:none;">
+      <span style="font-family:var(--mono);font-size:7.5px;color:#6a6560;">To:</span>
+      <input type="number" id="hero-gap-to" min="2" step="2" value="20" title="Even values — the range steps by 2"
+        style="width:46px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:var(--mono);font-size:8px;text-align:center;padding:3px 4px;outline:none;">
+      <button onclick="heroAddGapRange()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);color:#cfc9bc;font-family:var(--mono);font-size:7.5px;padding:4px 9px;cursor:pointer;">Add Range</button>
+      <button onclick="heroGapClear()" style="background:rgba(224,80,96,.18);border:1px solid rgba(224,80,96,.6);color:#e89098;font-family:var(--mono);font-size:7.5px;padding:4px 10px;cursor:pointer;">Clear All Gaps</button>
+    </div>
+  </div>
+</details>
+
 <div id="hero-inspect-popup" style="display:none!important;">
   <div class="hpi-head">
     <span class="hpi-title">Inspected Points <span id="hpi-count">0</span></span>
@@ -3982,6 +4448,7 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 </div>
 
 <!-- ══ SHOW WORKING — prime-by-prime product table, collapsible ══ -->
+<span id="w-working-home" style="display:block;"></span>
 <details id="hero-working-dd" style="background:rgba(7,7,26,.97);border:1px solid rgba(200,168,74,.28);border-top:none;font-family:var(--mono);">
   <summary style="cursor:pointer;padding:8px 14px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:rgba(200,168,74,.85);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;" onclick="_buildWorkingTable()">
     <span style="display:inline-block;transition:transform .15s;">▸</span>
@@ -4019,69 +4486,40 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   </div>
 </details>
 
-<!-- CONFORMAL DISK CONTROLS -->
-<div id="hero-conformal-panel" style="display:none;background:rgba(6,6,18,.98);border:1px solid rgba(242,168,74,.35);border-top:none;font-family:var(--mono);font-size:9px;">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 14px;border-bottom:1px solid rgba(242,168,74,.14);background:rgba(242,168,74,.05);">
-    <span style="font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,168,74,.9);flex:1;">Conformal Disk — Möbius Map of Coprime Lattice</span>
-    <span style="font-size:8px;color:var(--cream3);">f(z)=(z−i)/(z+i) maps upper half-plane into unit disk · each (r,M) as z=r+iM</span>
+<!-- ══ GOLDBACH OVERLAY — highlight prime pairs (p,q) with p+q=N on the current lattice ══ -->
+<details id="hero-goldbach-dd" style="background:rgba(7,7,26,.97);border:1px solid rgba(126,200,122,.28);border-top:none;font-family:var(--mono);">
+  <summary style="cursor:pointer;padding:8px 14px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:rgba(126,200,122,.9);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
+    <span style="display:inline-block;transition:transform .15s;">▸</span>
+    Goldbach Overlay
+    <span style="font-size:7.5px;color:var(--cream3);font-weight:400;letter-spacing:.04em;text-transform:none;margin-left:6px;">every even N = p + q with p, q prime, highlighted as (r,M) pairs on the lattice</span>
+  </summary>
+  <style>#hero-goldbach-dd[open]>summary>span:first-child{transform:rotate(90deg);}</style>
+  <div style="padding:10px 14px;border-top:1px solid rgba(126,200,122,.14);">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span class="cv-lbl" style="color:rgba(126,200,122,.85);">N =</span>
+      <input type="range" id="hero-goldbach-n" min="4" max="200" step="2" value="4"
+        style="width:140px;accent-color:rgba(126,200,122,.85);"
+        oninput="heroGoldbachSetN(+this.value)">
+      <input type="number" id="hero-goldbach-n-num" value="4" min="4" max="9998" step="2"
+        style="width:60px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:#7ec87a;font-family:var(--mono);font-size:12px;padding:3px 5px;outline:none;text-align:center;"
+        onchange="heroGoldbachSetN(+this.value)">
+      <div class="cv-sep"></div>
+      <button id="hero-goldbach-play" class="cv-btn" onclick="heroGoldbachPlay()" style="color:rgba(126,200,122,.9);background:rgba(126,200,122,.1);border-color:rgba(126,200,122,.4);">▶ Pairs</button>
+      <button class="cv-btn" onclick="heroGoldbachClear()">Clear</button>
+      <span id="hero-goldbach-lbl" style="font-size:8px;color:rgba(126,200,122,.8);">N=—</span>
+    </div>
   </div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 14px;">
-    <span style="font-size:8px;color:rgba(242,168,74,.75);">Map:</span>
-    <select id="conf-map-type" onchange="_heroConfDraw()"
-      style="background:var(--bg2);border:1px solid rgba(242,168,74,.35);color:rgba(242,168,74,.9);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-      <option value="mobius" selected>Möbius (z−i)/(z+i)</option>
-      <option value="smith">Smith Chart (z−1)/(z+1)</option>
-      <option value="log">Logarithmic log(z)</option>
-      <option value="joukowski">Joukowski z+1/z</option>
-      <option value="exp">Exponential e^(iπz/G)</option>
-    </select>
-    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
-    <span style="font-size:8px;color:var(--cream3);">Dot:</span>
-    <input type="range" id="conf-dot-sl" min="0.5" max="8" step="0.5" value="2"
-      style="width:60px;accent-color:rgba(242,168,74,.8);"
-      oninput="document.getElementById('conf-dot-lbl').textContent=this.value;_heroConfDraw()">
-    <span id="conf-dot-lbl" style="font-size:8px;color:rgba(242,168,74,.7);min-width:18px;">2</span>
-    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
-    <span style="font-size:8px;color:rgba(155,127,232,.85);">SL₂ℤ shift a/b:</span>
-    <input type="range" id="conf-sl2-sl" min="-3" max="3" step="0.001" value="0"
-      style="width:90px;accent-color:rgba(155,127,232,.8);"
-      oninput="_confSl2SliderInput(+this.value)">
-    <span id="conf-sl2-frac" style="font-size:9px;color:rgba(155,127,232,.9);font-family:var(--mono);min-width:38px;text-align:center;">0</span>
-    <input type="number" id="conf-sl2-a" value="0" min="-20" max="20" step="1"
-      style="width:34px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:rgba(155,127,232,.75);font-family:var(--mono);font-size:8px;padding:2px 3px;outline:none;text-align:center;"
-      oninput="_confSl2NumInput()">
-    <span style="font-size:8px;color:var(--cream3);">/</span>
-    <input type="number" id="conf-sl2-b" value="1" min="1" max="20" step="1"
-      style="width:34px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:rgba(155,127,232,.75);font-family:var(--mono);font-size:8px;padding:2px 3px;outline:none;text-align:center;"
-      oninput="_confSl2NumInput()">
-    <button onclick="_confSl2Reset()" title="Reset shift to 0"
-      style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:1px 6px;cursor:pointer;">✕</button>
-    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
-    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" id="conf-normalize" checked style="accent-color:rgba(242,168,74,.8);" onchange="_heroConfDraw()">Normalize z/M
-    </label>
-    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" id="conf-grid-lines" checked style="accent-color:rgba(242,168,74,.5);" onchange="_heroConfDraw()">Grid arcs
-    </label>
-    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" id="conf-critical" checked style="accent-color:rgba(224,80,96,.7);" onchange="_heroConfDraw()">Re(s)=½ line
-    </label>
-    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
-    <span style="font-size:8px;color:rgba(61,200,184,.8);">Disk zoom:</span>
-    <input type="range" id="conf-zoom-sl" min="50" max="400" step="5" value="100"
-      style="width:70px;accent-color:rgba(61,200,184,.8);"
-      oninput="document.getElementById('conf-zoom-lbl').textContent=Math.round(+this.value)+'%';_heroConfDraw()">
-    <span id="conf-zoom-lbl" style="font-size:8px;color:rgba(61,200,184,.7);min-width:34px;">100%</span>
-    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
-    <button onclick="exportConformal4K()" style="background:rgba(242,168,74,.08);border:1px solid rgba(242,168,74,.4);color:rgba(242,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">↓ 4K Export</button>
-    <button onclick="_heroConfDraw()" style="background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;">↺ Redraw</button>
+  <!-- Live results — populated by heroGoldbachSetN(); toggled via the .open class, not display:none directly -->
+  <div id="hero-goldbach-panel">
+    <div class="hgp-head">
+      <span class="hgp-N">N = <span id="hgp-N-val">—</span></span>
+      <span class="hgp-meta"><b id="hgp-pair-count">0</b> prime pair(s) in the current grid</span>
+      <span class="hgp-meta" id="hgp-conj"></span>
+    </div>
+    <div class="hgp-badges" id="hgp-badges"></div>
   </div>
-  <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
-    <span style="color:rgba(242,168,74,.6);">Theory:</span>
-    The Möbius transform f(z)=(z−i)/(z+i) maps the upper half-plane onto the unit disk. Lattice points z=r+iM land in the disk; integer grid lines deform into orthogonal circular arcs — SL₂(ℤ) tessellations. The
-    <span style="color:rgba(224,80,96,.75);">red diameter</span> is the image of the critical line Re(s)=½. All existing color modes, labels, G, n, zoom, and gap overlays apply.
-  </div>
-</div>
+</details>
+
 <!-- SMITH CHART CONTROLS (distinct ring-polar construction, Γ=(z−1)/(z+1)) -->
 <div id="hero-smith-conn" style="display:none;"></div><div id="hero-smith-panel" style="display:none;background:rgba(6,6,18,.98);border:1px solid rgba(126,200,122,.35);border-top:none;font-family:var(--mono);font-size:9px;">
   <details id="hero-smith-ctrl-dd">
@@ -4191,7 +4629,14 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       style="width:70px;accent-color:rgba(61,200,184,.8);" onchange="_gridPanelUpdate()">
     <span id="grid-dot-lbl" style="font-size:8px;color:rgba(61,200,184,.7);min-width:28px;">1.0×</span>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
+    <span style="font-size:8px;color:rgba(155,127,232,.8);">Plot:</span>
+    <button id="hero-grid-plot-all" onclick="heroSetGridHalf(false)" title="Plot all (r,M) pairs, r=1..G for every M"
+      style="background:rgba(155,127,232,.16);border:1px solid rgba(155,127,232,.65);color:rgba(155,127,232,.95);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;">All points</button>
+    <button id="hero-grid-plot-half" onclick="heroSetGridHalf(true)" title="Plot only the r<M triangle (bottom-left → top-right diagonal), same domain as Ring/Farey/Smith"
+      style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;">Half (diagonal)</button>
+    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
     <button onclick="exportHero4K()" style="background:rgba(200,168,74,.08);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">↓ 4K Export</button>
+    <button onclick="cnShareLink(this)" title="Copy a shareable link that restores this exact state" style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">🔗 Link</button>
   </div>
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
     <span style="color:rgba(200,168,74,.6);">Theory:</span>
@@ -4279,6 +4724,23 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
      LIFT VIEW PANEL
 ═══════════════════════════════════════════════════════════════════════ -->
 <div id="hero-lift-panel" style="display:none;background:rgba(6,6,18,.98);border:1px solid rgba(155,127,232,.3);border-top:none;font-family:var(--mono);font-size:9px;">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;padding:6px 14px 4px;border-bottom:1px solid rgba(255,255,255,.06);">
+    <button class="lift-mode-btn" data-m="npath" onclick="liftSetMode('npath')" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#3dc8b8;padding:4px 2px;border-bottom:2px solid #3dc8b8;">±n Path</button>
+    <button class="lift-mode-btn" data-m="spiral" onclick="liftSetMode('spiral')" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#6a6560;padding:4px 2px;border-bottom:2px solid transparent;">Prime Spiral</button>
+    <button class="lift-mode-btn" data-m="both" onclick="liftSetMode('both')" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#6a6560;padding:4px 2px;border-bottom:2px solid transparent;">Both</button>
+    <button class="lift-mode-btn" data-m="connect" onclick="liftSetMode('connect')" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#6a6560;padding:4px 2px;border-bottom:2px solid transparent;">Lift Connect</button>
+    <span style="flex:1;"></span>
+    <span style="font-size:8px;color:var(--cream3);">n</span>
+    <button onclick="liftSetPathN(-10)" style="background:none;border:1px solid var(--edge2);color:#3dc8b8;font-family:var(--mono);font-size:8px;padding:2px 6px;cursor:pointer;">-10</button>
+    <button onclick="liftSetPathN(-1)" style="background:none;border:1px solid var(--edge2);color:#3dc8b8;font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;">-</button>
+    <span class="lift-pathn-lbl" style="font-size:10px;color:#e8e2d4;min-width:20px;text-align:center;">1</span>
+    <button onclick="liftSetPathN(1)" style="background:none;border:1px solid var(--edge2);color:#3dc8b8;font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;">+</button>
+    <button onclick="liftSetPathN(10)" style="background:none;border:1px solid var(--edge2);color:#3dc8b8;font-family:var(--mono);font-size:8px;padding:2px 6px;cursor:pointer;">+10</button>
+    <span style="width:8px;"></span>
+    <button onclick="liftCycleSpiralP(-1)" style="background:none;border:1px solid var(--edge2);color:#c8a84a;font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;">◀</button>
+    <span class="lift-spiralp-lbl" style="font-size:9px;color:#c8a84a;min-width:34px;text-align:center;">p=auto</span>
+    <button onclick="liftCycleSpiralP(1)" style="background:none;border:1px solid var(--edge2);color:#c8a84a;font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;">▶</button>
+  </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 14px;border-bottom:1px solid rgba(155,127,232,.12);background:rgba(155,127,232,.04);">
     <span style="font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(155,127,232,.9);flex:1;">Lift Dynamics — r → r mod (M+1)</span>
     <span style="font-size:8px;color:var(--cream3);">Teal arcs = lift survives · Coral arcs = lift broken · Concentric rings by M</span>
@@ -4299,14 +4761,27 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
       style="width:70px;accent-color:rgba(200,168,74,.8);" oninput="_liftPanelUpdate()">
     <span id="lift-dot-lbl" style="font-size:8px;color:rgba(200,168,74,.7);min-width:28px;">1.0×</span>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(61,200,184,.9);cursor:pointer;white-space:nowrap;">
+      <input type="checkbox" class="lift-surv-chk" checked style="accent-color:rgba(61,200,184,.8);" onchange="liftSetSurv(this.checked)">Surviving
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(224,80,96,.9);cursor:pointer;white-space:nowrap;">
+      <input type="checkbox" class="lift-broken-chk" checked style="accent-color:rgba(224,80,96,.8);" onchange="liftSetBroken(this.checked)">Broken
+    </label>
+    <span style="font-size:8px;color:var(--cream3);">Thick:</span>
+    <input type="range" min="0.2" max="6" step="0.1" value="0.7" style="width:60px;accent-color:rgba(155,127,232,.7);" oninput="liftSetThick(this.value)">
+    <span class="lift-thick-lbl" style="font-size:8px;color:var(--cream3);min-width:30px;">0.7px</span>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
       <input type="checkbox" id="lift-show-npath" checked style="accent-color:rgba(61,200,184,.8);"
         onchange="_liftPanelUpdate()">±1 path
     </label>
+    <button class="lift-npath-dir-btn" onclick="liftCycleNPathDir()" title="±1 branch: ↕ both · ▲ +1 only · ▼ −1 only"
+      style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:var(--mono);font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
       <input type="checkbox" id="lift-show-spiral" checked style="accent-color:rgba(200,168,74,.8);"
         onchange="_liftPanelUpdate()">Prime spiral
     </label>
+    <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding: ▲ r≡p (mod M) · ▼ mirrored r≡−p (mod M)"
+      style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
     <button onclick="exportHeroSideBySide8K('lift')" style="background:rgba(155,127,232,.08);border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">↓ 8K Export</button>
   </div>
@@ -4325,16 +4800,17 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     <input class="cv-sl" type="range" id="calc-dp" min="2" max="50" step="1" value="12" style="width:170px;"
       oninput="setCalcDP(this.value)" title="Decimal places shown for C(n) and D(n)">
     <span id="calc-dp-v" style="color:var(--gold);font-family:var(--mono);font-size:12px;min-width:18px;">12</span>
-    <span style="font-size:7.5px;color:var(--cream3);">C(n) and D(n) are accurate to ~12 dp</span>
+    <span style="font-size:7.5px;color:var(--cream3);" title="114,155 primes ≤ 1,500,000 + analytic tail. Float summation over that many terms limits reliability to ~11 dp; n=1 uses OEIS-verified exact digits instead.">C(n)/D(n): ~11 dp reliable (114,155 primes ≤ 1.5M, asymptotic) · n=1 exact via OEIS A065474/A065469</span>
   </div>
   <div style="display:flex;align-items:center;gap:16px;margin:-4px 0 12px;flex-wrap:wrap;">
     <span style="font-size:8px;color:var(--cream3);letter-spacing:.08em;text-transform:uppercase;">digit precision key</span>
     <span style="font-family:var(--mono);font-size:9px;color:var(--gold);font-weight:600;">■ 1–14</span>
-    <span style="font-size:8px;color:var(--cream3);">fully reliable (IEEE-754 double)</span>
+    <span style="font-size:8px;color:var(--cream3);">fully reliable (IEEE-754 double)*</span>
     <span style="font-family:var(--mono);font-size:9px;color:var(--coral);font-weight:500;">■ 15–16</span>
     <span style="font-size:8px;color:var(--cream3);">last float digits — may carry rounding noise</span>
     <span style="font-family:var(--mono);font-size:9px;color:var(--cream3);opacity:.55;">■ 17+</span>
     <span style="font-size:8px;color:var(--cream3);">beyond float precision — toFixed padding</span>
+    <span style="font-size:7px;color:var(--cream3);opacity:.7;width:100%;" title="Summing ~1.14e5 log-terms in double precision accumulates rounding error around 1e-11, well before the 'fully reliable' float ceiling of ~14dp — so in practice only the first ~11 digits shown here are trustworthy for n≠1 in asymptotic mode. n=1 is exact (all-gold, no flags) because it uses OEIS-sourced digits, not the live sum.">*for n≠1, actual reliability is ~11 dp (float summation error), not the full 14 shown — n=1 is the exception: exact, OEIS-sourced.</span>
   </div>
 
   <!-- Inline mode + compact controls — sits right above the 3 result objects so
@@ -5012,6 +5488,38 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
     purely additive companions to the multiplicative structure here.
   </div>
 
+  <!-- Panel 1: Goldbach R(N) vs Hardy–Littlewood prediction -->
+  <div style="font-family:var(--disp);font-size:.6rem;letter-spacing:.1em;color:var(--gold);margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--edge);">
+    R(N) — Goldbach Partition Count vs Hardy–Littlewood Prediction
+  </div>
+  <div class="cv-bar" style="flex-wrap:wrap;row-gap:6px;margin-bottom:8px;">
+    <span class="cv-lbl">N max:</span>
+    <input class="cv-sl" type="range" id="add-nmax" min="100" max="20000" step="100" value="5000"
+      style="width:90px;" oninput="document.getElementById('add-nmax-v').textContent=this.value;drawAdditiveGoldbach();">
+    <span class="cv-lbl" id="add-nmax-v">5000</span>
+    <div class="cv-sep"></div>
+    <label style="font-size:8.5px;color:var(--gold);display:flex;align-items:center;gap:4px;">
+      <input type="checkbox" id="add-show-rn" checked onchange="drawAdditiveGoldbach()" style="accent-color:var(--gold);">R(N)
+    </label>
+    <label style="font-size:8.5px;color:var(--teal);display:flex;align-items:center;gap:4px;">
+      <input type="checkbox" id="add-show-hl" checked onchange="drawAdditiveGoldbach()" style="accent-color:var(--teal);">Ĝ(N) (HL prediction)
+    </label>
+    <label style="font-size:8.5px;color:var(--coral);display:flex;align-items:center;gap:4px;">
+      <input type="checkbox" id="add-show-en" onchange="drawAdditiveGoldbach()" style="accent-color:var(--coral);">E(N)=R(N)−Ĝ(N)
+    </label>
+    <div class="cv-sep"></div>
+    <button class="cv-btn" onclick="exportAdditivePNG('goldbach')">PNG</button>
+    <button class="cv-btn" onclick="exportAdditiveCSV('goldbach')">CSV</button>
+  </div>
+  <canvas id="add-goldbach-cv" style="display:block;width:100%;height:260px;background:#04040d;border:1px solid var(--edge);cursor:crosshair;"></canvas>
+  <div id="add-goldbach-hover" style="min-height:18px;font-size:8.5px;color:var(--cream3);font-family:var(--mono);margin-top:4px;padding:2px 4px;"></div>
+  <div style="margin-top:6px;font-size:8px;color:var(--cream3);">
+    <span style="color:var(--gold)">—</span> R(N), actual prime-pair count &nbsp;
+    <span style="color:var(--teal)">- -</span> Ĝ(N), Hardy–Littlewood prediction &nbsp;
+    <span style="color:var(--violet)">- -</span> C(1) baseline &nbsp;
+    <span style="color:var(--coral)">—</span> E(N) error, when shown
+  </div>
+
   <!-- Panel 2: Prime counting π(x) vs Li(x) -->
   <div style="font-family:var(--disp);font-size:.6rem;letter-spacing:.1em;color:var(--teal);margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--edge);">
     π(x) — Prime Counting Function vs Li(x)
@@ -5140,16 +5648,38 @@ const PRIMES=sieve(1500000);
 // prime pair) belongs to exactly one gap class. This replaces the old
 // |M−r| diagonal semantics where the same prime lit up for many gap sizes. ══
 const _FWD_GAP=new Map();
-for(let _fg=0;_fg<PRIMES.length-1;_fg++)_FWD_GAP.set(PRIMES[_fg],PRIMES[_fg+1]-PRIMES[_fg]);
+const _FWD_GAP_UP=new Map(); // prime → gap back to the PREVIOUS prime (upper member of that pair)
+for(let _fg=0;_fg<PRIMES.length-1;_fg++){
+  const _g=PRIMES[_fg+1]-PRIMES[_fg];
+  _FWD_GAP.set(PRIMES[_fg],_g);
+  _FWD_GAP_UP.set(PRIMES[_fg+1],_g);
+}
 let _gapSemantics='forward'; // 'forward' (consecutive-prime pairs) | 'diagonal' (legacy |M−r| bands)
 function fwdGap(p){return _FWD_GAP.get(p)||0;}
-// Gap class of lattice point (r,M): in forward mode, g iff {r,M} are
-// CONSECUTIVE primes exactly g apart; 0 otherwise (never highlighted).
-function pointGapClass(r,M){
+// Shared slider stepper (opener + hero, step buttons + play loops):
+// forward semantics walks the real gap sequence 0,1,2,4,6,…; diagonal is ±1.
+function _gapStepVal(v,dir){
+  if(_gapSemantics==='forward'){
+    if(dir>0)return (v===0)?1:(v===1)?2:v+2;
+    return (v<=1)?v-1:(v===2)?1:v-2;
+  }
+  return v+dir;
+}
+// Gap class of lattice point (r,M): in forward mode, the class of ROW M
+// (M in a consecutive-prime pair) — same domain the opener highlights.
+function pointGapClass(r,M,set){
   if(_gapSemantics==='diagonal')return Math.abs(M-r);
-  const lo=Math.min(r,M),hi=Math.max(r,M);
-  const g=_FWD_GAP.get(lo);
-  return (g&&lo+g===hi)?g:0;
+  // Forward semantics — ROW-based, matching the opener's Active Gaps: the
+  // whole row/ring M lights (any r) when M is a member of a consecutive-prime
+  // pair (p, p+g) — not just the dots on the |M−r|=g diagonal.
+  const lo=_FWD_GAP.get(M)||0;     // M as lower member (M, M+lo)
+  const up=_FWD_GAP_UP.get(M)||0;  // M as upper member (M−up, M)
+  if(set&&set.size){
+    if(lo&&set.has(lo))return lo;
+    if(up&&set.has(up))return up;
+    return 0;
+  }
+  return lo||up;
 }
 // Count of consecutive-prime pairs (p, p+g) with p+g ≤ limit
 function fwdGapPairCount(g,limit){
@@ -5270,6 +5800,8 @@ function setFiniteMode(on){
   const cmh = document.getElementById('calc-mode-hint');
   if(cmt){ cmt.textContent = on ? '⊞ FINITE' : '∞ ASYMPTOTIC'; cmt.classList.toggle('on', on); }
   if(cmh){ cmh.textContent = on ? '— partial product, converges as primes ↑' : '— exact analytic value'; }
+  const precNote = document.getElementById('hero-live-precnote');
+  if(precNote) precNote.style.display = on ? 'none' : '';
   _syncHeroGToFinitePrime();
   updateUI();
   drawChart();
@@ -6461,7 +6993,7 @@ function renderGrid(){
         lctx.fillRect(0,0,cW,cH);
         for(let r=1;r<=G;r++){
           for(let M=1;M<=G;M++){
-            const gap=pointGapClass(r,M);
+            const gap=pointGapClass(r,M,_gridActiveGaps);
             if(gap===0||!_gridActiveGaps.has(gap))continue;
             const _pm=getGridPerMod();
             const rDisp=_pm===0?r:_gridShiftedR(r,M,G,_pm);
@@ -6913,7 +7445,7 @@ function drawRingImpl(ctx,cW,cH,zoom,panX,panY){
       if(rcmOverride)fillColor=rcmOverride;
 
       // Gap highlight
-      const gap=pointGapClass(r,M);
+      const gap=pointGapClass(r,M,_ringActiveGaps);
       const onRingGap=_ringActiveGaps&&_ringActiveGaps.size>0&&gap>0&&_ringActiveGaps.has(gap);
       const dimmedByGap=_ringActiveGaps&&_ringActiveGaps.size>0&&!onRingGap;
 
@@ -8326,6 +8858,58 @@ function _finiteDecimalStr(kind, n, decimals){
   return val.toFixed(decimals);
 }
 
+// ── Asymptotic-mode precision note ───────────────────────────────────────
+// getCn(n) sums the Euler product over all 114,155 primes ≤ 1,500,000
+// (PRIMES.length), plus an analytic first-order tail term for p>1,500,000.
+// In double-precision float, summing ~1.14e5 log-terms accumulates rounding
+// error on the order of 1e-11 to 1e-12 — this (not the analytic tail, which
+// is negligible) is why C(n)/D(n) are reliable to only ~11 dp in asymptotic
+// mode, not the full ~15-16 dp double precision would otherwise allow.
+//
+// For n=1 specifically — C(1), D(1), C_FT — we instead use fixed 60-digit
+// values sourced from OEIS A065474 (D(1) = Product_p(1-2/p^2)) and derived
+// via C(1)=zeta(2)*D(1), C_FT=(1+D(1))/2 at 80-digit precision (mpmath).
+// Cross-checked against an independent primes+prime-zeta-tail computation
+// (primes to 3,000,000 plus multi-term analytic tail) — both agree to
+// beyond 50 decimal digits. This covers the full 50-digit slider ceiling.
+const _D1_HQ  = "0.322634098939244670579531692548237066570950579665832709961811";
+const _C1_HQ  = "0.530711820472044794972943772472977170947861022209860403475819";
+const _CFT_HQ = "0.661317049469622335289765846274118533285475289832916354980906";
+function _hqDecimalStr(hqStr, decimals){
+  // Correctly-rounded truncation of a pre-verified high-precision decimal
+  // string to `decimals` places (round-half-up on the first dropped digit).
+  const [ip, fp=''] = hqStr.split('.');
+  if(decimals >= fp.length) return ip + '.' + fp.padEnd(decimals,'0');
+  if(decimals === 0) return (fp.charCodeAt(0)-48 >= 5) ? String(BigInt(ip)+1n) : ip;
+  const kept = fp.slice(0, decimals);
+  const nextDigit = fp.charCodeAt(decimals) - 48;
+  if(nextDigit < 5) return ip + '.' + kept;
+  // propagate a carry through the kept digits
+  let arr = kept.split('');
+  let i = arr.length - 1, carry = 1;
+  while(i >= 0 && carry){
+    const d = arr[i].charCodeAt(0) - 48 + carry;
+    arr[i] = String(d % 10); carry = d >= 10 ? 1 : 0; i--;
+  }
+  let ipOut = ip;
+  if(carry) ipOut = String(BigInt(ip) + 1n);
+  return ipOut + '.' + arr.join('');
+}
+// Asymptotic-mode display string: exact OEIS-sourced value at n=1, else null
+// (caller falls back to plain toFixed, flagged via _colorCodedDigits).
+function _asymptoticDecimalStr(kind, n, decimals){
+  if(n !== 1) return null;
+  const hq = kind === 'C' ? _C1_HQ : _D1_HQ;
+  return _hqDecimalStr(hq, decimals);
+}
+// Renders an asymptotic-mode C(n)/D(n) string with the right digit coloring:
+// OEIS-exact gold-only styling when available (n=1), else the float
+// gold/coral/grey precision-flagged styling.
+function _asymptoticCodedDigits(kind, n, decimals, floatVal){
+  const exact = _asymptoticDecimalStr(kind, n, decimals);
+  return exact !== null ? _exactCodedDigits(exact) : _colorCodedDigits(floatVal.toFixed(decimals));
+}
+
 // Draw the π² annotation on a canvas context inline after a centered fillText call.
 // mainText: the string just drawn (used to measure width)
 // cx: centre x used for that fillText
@@ -8595,6 +9179,17 @@ function _colorCodedDigits(numStr){
          (coral ? `<span style="color:var(--coral);font-weight:500" title="last float digits — may carry rounding noise">${coral}</span>` : '') +
          (grey  ? `<span style="color:var(--cream3);opacity:.45"    title="beyond float precision — meaningless">${grey}</span>`  : '');
 }
+// Digit coloring for OEIS-sourced exact values (n=1 only) — every digit is
+// verified, so render entirely in gold with a distinct tooltip instead of
+// applying the float-noise/padding flags meant for the live Euler-product sum.
+function _exactCodedDigits(numStr){
+  const dot = numStr.indexOf('.');
+  if(dot < 0) return `<span style="color:var(--gold)" title="OEIS-verified exact digits">${numStr}</span>`;
+  const head = numStr.slice(0, dot+1);
+  const frac = numStr.slice(dot+1);
+  return `<span style="color:var(--cream2)">${head}</span>` +
+         `<span style="color:var(--gold);font-weight:600" title="Exact — sourced from OEIS A065474/A065469, cross-checked to 50+ dp">${frac}</span>`;
+}
 
 function _updateHeroFormula(n, Cn){
   const nEl=document.getElementById('hl-n');
@@ -8610,9 +9205,8 @@ function _updateHeroFormula(n, Cn){
       valEl.style.color = _finiteColor(gap);
       valEl.textContent = _finiteDecimalStr('C', n, _calcDP);
     } else {
-      const numStr = dispVal.toFixed(_calcDP);
       valEl.style.color = '';
-      valEl.innerHTML = _colorCodedDigits(numStr);
+      valEl.innerHTML = _asymptoticCodedDigits('C', n, _calcDP, dispVal);
     }
   }
   // π² annotation — show when asymptotic or finite mode active, if value matches
@@ -8657,7 +9251,7 @@ function updateUI(){
       cnEl.textContent = _finiteDecimalStr('C', n, _calcDP);
     } else {
       cnEl.style.color = '';
-      cnEl.innerHTML = _colorCodedDigits(CnDisp.toFixed(_calcDP));
+      cnEl.innerHTML = _asymptoticCodedDigits('C', n, _calcDP, CnDisp);
     }
   }
   if(dnEl){
@@ -8667,7 +9261,7 @@ function updateUI(){
       dnEl.textContent = _finiteDecimalStr('D', n, _calcDP);
     } else {
       dnEl.style.color = '';
-      dnEl.innerHTML = _colorCodedDigits(DnDisp.toFixed(_calcDP));
+      dnEl.innerHTML = _asymptoticCodedDigits('D', n, _calcDP, DnDisp);
     }
   }
   document.getElementById('r-block').textContent=n+1;
@@ -8723,11 +9317,11 @@ function updateHLPanel(){
       {key:'D0',  sym:'D(0)=6/π²',   val:(1/ZETA2).toFixed(7), formula:'∏_p(1−1/p²)',           desc:'Standard coprime pair density',                                 cls:''},
       {key:'Cn',  sym:`C(${n})`,      val:Cn.toFixed(7),   formula:'ζ(2)·D(n)',                 desc:`Block-coprime density, block ${n+1}; current n=${n}`,            cls:''},
       {key:'Dn',  sym:`D(${n})`,      val:Dn.toFixed(7),   formula:'∏_p(1−min(n+1,p)/p²)',      desc:'Raw density; D(n)/D(0) = C(n)',                                 cls:'hl-sym-teal'},
-      {key:'C1',  sym:'C(1)≈0.5307', val:Cn1.toFixed(7),  formula:'ζ(2)·∏_p(1−2/p²)',         desc:'Feller–Tornier normalized; lift survival constant',              cls:''},
-      {key:'D1',  sym:'D(1)≈0.3226', val:Dn1.toFixed(7),  formula:'∏_p(1−2/p²)',               desc:'Feller–Tornier Euler product D_FT',                              cls:'hl-sym-teal'},
+      {key:'C1',  sym:'C(1)≈0.5307', val:Cn1.toFixed(7),  formula:'ζ(2)·∏_p(1−2/p²)',         desc:'Feller–Tornier normalized; lift survival constant &nbsp;<a href="https://oeis.org/A065469" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065469 ↗</a>',              cls:''},
+      {key:'D1',  sym:'D(1)≈0.3226', val:Dn1.toFixed(7),  formula:'∏_p(1−2/p²)',               desc:'Feller–Tornier Euler product D_FT &nbsp;<a href="https://oeis.org/A065474" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065474 ↗</a>',                              cls:'hl-sym-teal'},
       {key:'C2',  sym:'C₂≈0.6602',   val:C2.toFixed(7),   formula:'∏_{p≥3} p(p−2)/(p−1)²',    desc:'Twin prime constant — HL local factor at n=1, p≥3',              cls:'hl-sym-lime'},
       {key:'twoC2',sym:'2C₂≈1.3203', val:(2*C2).toFixed(7),formula:'2·C₂',                    desc:'Goldbach background constant for generic even N',                cls:'hl-sym-violet'},
-      {key:'CFT', sym:'C_FT≈0.6613', val:((1+Dn1)/2).toFixed(7),formula:'½(1+D_FT)',           desc:'Classical Feller–Tornier constant (distinct from C(1))',         cls:'hl-sym-coral'},
+      {key:'CFT', sym:'C_FT≈0.6613', val:((1+Dn1)/2).toFixed(7),formula:'½(1+D_FT)',           desc:'Classical Feller–Tornier constant (distinct from C(1)) &nbsp;<a href="https://oeis.org/A065493" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065493 ↗</a>',         cls:'hl-sym-coral'},
     ];
     tbody.innerHTML=rows.map(r=>`<tr class="${r.cls}" onclick="openHLInfo('${r.key}')" tabindex="0" role="button"
       title="Click for full derivation at n=${n}" style="cursor:pointer;"
@@ -8762,107 +9356,12 @@ function updateHLPanel(){
     }).join('');
   }
 
-  // Goldbach panel
-  updateGoldbachPanel();
+  // Goldbach constants (S(N), HL prediction, factor breakdown) are covered by
+  // the Additive Number Theory card's R(N) chart and the hero Goldbach overlay;
+  // this section used to also refresh a standalone gb-* mini-panel that was
+  // never added to the page.
 }
 
-function updateGoldbachPanel(){
-  const inp=document.getElementById('gb-n-input');
-  if(!inp)return;
-  let GN=parseInt(inp.value)||100;
-  if(GN<4){GN=4;inp.value=4;}
-  if(GN%2!==0){GN++;inp.value=GN;}
-
-  const warn=document.getElementById('gb-warning');
-  if(warn)warn.style.display='none';
-
-  const S=goldbachSingularSeries(GN);
-  const pred=goldbachHLPrediction(GN);
-  const actual=GN<=200000?countGoldbachPairs(GN):'—';
-  const ratio=(typeof actual==='number'&&pred>0)?(actual/pred).toFixed(4):'—';
-
-  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('gb-singular',S.toFixed(6));
-  set('gb-pred',pred.toFixed(2));
-  set('gb-actual',actual);
-  set('gb-ratio',ratio);
-
-  // Factor breakdown
-  const facEl=document.getElementById('gb-factors');
-  if(facEl){
-    const parts=['N = '+GN+' = 2'];
-    let x=GN>>1;
-    const oddFacs=[];
-    for(const p of PRIMES){
-      if(p===2)continue;if(p*p>x)break;
-      if(x%p===0){oddFacs.push(p);while(x%p===0)x=Math.floor(x/p);}
-    }
-    if(x>2)oddFacs.push(x);
-    if(oddFacs.length===0){
-      facEl.innerHTML=`<span style="color:var(--teal)">N = ${GN} = 2 × ${GN/2} — no odd prime factors → no correction, S(N) = 2C₂</span>`;
-    } else {
-      const corrParts=oddFacs.map(p=>`(${p}−1)/(${p}−2)=${((p-1)/(p-2)).toFixed(4)}`);
-      facEl.innerHTML=`<span style="color:var(--cream3)">Odd prime factors: </span><span style="color:var(--coral)">${oddFacs.join(', ')}</span>
-        &nbsp;→ correction = ${corrParts.join(' × ')} = <span style="color:var(--gold)">${(S/(2*computeC2())).toFixed(5)}</span>
-        &nbsp;→ S(N) = 2C₂ × ${(S/(2*computeC2())).toFixed(5)} = <span style="color:var(--gold)">${S.toFixed(6)}</span>`;
-    }
-  }
-
-  drawGoldbachCanvas(GN);
-}
-
-function drawGoldbachCanvas(GN){
-  const cv=document.getElementById('gb-canvas');
-  if(!cv)return;
-  const W=cv.parentElement.clientWidth||600;
-  const H=60;
-  const dpr=Math.min(devicePixelRatio||1,2);
-  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
-  cv.style.height=H+'px';
-  const ctx=cv.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle='#04040d';ctx.fillRect(0,0,W,H);
-  if(GN<4||GN%2!==0)return;
-
-  // Draw p from 2 to N/2 as cells along x axis
-  const maxP=Math.floor(GN/2);
-  const cellW=W/maxP;
-  for(let p=2;p<=maxP;p++){
-    const q=GN-p;
-    const bothPrime=PS.has(p)&&PS.has(q);
-    const pOnly=PS.has(p)&&!PS.has(q);
-    const qOnly=!PS.has(p)&&PS.has(q);
-    let col='rgba(255,255,255,.06)';
-    if(bothPrime)col='rgba(200,168,74,.95)';
-    else if(pOnly)col='rgba(61,200,184,.75)';
-    else if(qOnly)col='rgba(224,80,96,.6)';
-    ctx.fillStyle=col;
-    ctx.fillRect((p-1)*cellW,0,Math.max(1,cellW-0.5),H);
-  }
-  // Label
-  ctx.font='8px "JetBrains Mono",monospace';
-  ctx.fillStyle='rgba(200,168,74,.6)';ctx.textAlign='right';
-  ctx.fillText(`N=${GN} · pairs=${countGoldbachPairs(GN)} · p∈[2,${maxP}]`,W-5,H-4);
-}
-
-function setGBtoCurrentN(){
-  const inp=document.getElementById('gb-n-input');
-  if(inp){inp.value=2*(N+1);updateGoldbachPanel();}
-}
-
-function goldbachFindNext(dir){
-  const inp=document.getElementById('gb-n-input');
-  if(!inp)return;
-  let v=(parseInt(inp.value)||100)+dir*2;
-  // Find next even N where there are multiple Goldbach pairs (skip trivials)
-  for(let i=0;i<2000;i++){
-    if(v<4)v=4;
-    if(v>200000)break;
-    if(v%2===0&&countGoldbachPairs(v)>=2){inp.value=v;updateGoldbachPanel();return;}
-    v+=dir*2;
-  }
-  inp.value=v;updateGoldbachPanel();
-}
 
 function applyRingFractionPreset(a,b){
   const frac=b===0?0:a/b;
@@ -9367,6 +9866,7 @@ function getHLInfoHTML(key){
         `<b>At p≥3:</b> factor = 1−2/p². For p=3: 1−2/9≈0.7778; p=5: 1−2/25=0.9200; …`,
         `<b>D(1) = </b><span class="teal">${Dn1.toFixed(7)}</span> &nbsp;·&nbsp; ζ(2) = <span class="gold">${Cn1.toFixed(7)}</span> = C(1).`,
         `<b>Distinct from C_FT:</b> C_FT = (1+D(1))/2 ≈ ${((1+Dn1)/2).toFixed(7)} is the classical Feller–Tornier constant (prob. gcd is squarefree), not to be confused with C(1).`,
+        `<b>OEIS:</b> <a href="https://oeis.org/A065469" target="_blank" rel="noopener" style="color:inherit;opacity:.6;text-decoration:underline;">A065469 ↗</a> — decimal expansion of this constant, listed as density(A007674)/density(A005117) = A065474/A059956.`,
       ],
       tableFactory:()=>_hlPartialTable(p=>1-2/(p*p),2,16,false),
       tableTitle:'D(1) = ∏_p(1−2/p²) — Feller–Tornier product, partial products',
@@ -9384,6 +9884,7 @@ function getHLInfoHTML(key){
         `<b>p=5:</b> 1 − 2/25 = <span class="teal">0.9200000</span>. Running ≈ 0.3578.`,
         `<b>Convergence:</b> product converges to D_FT ≈ <span class="gold">${Dn1.toFixed(7)}</span>.`,
         `<b>Relation to C₂:</b> D(1) uses factor (1−2/p²) while C₂ uses p(p−2)/(p−1)². Both "exclude 2 residues" but C₂ is 1D (prime counting) and D(1) is 2D (pair counting).`,
+        `<b>OEIS:</b> <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:inherit;opacity:.6;text-decoration:underline;">A065474 ↗</a> — decimal expansion of ∏_p(1−2/p²); also the density of squarefree n with n+1 squarefree (Tóth–Sándor 1989).`,
       ],
       tableFactory:()=>_hlPartialTable(p=>1-2/(p*p),2,16,false),
       tableTitle:'D(1) = ∏_p(1−2/p²) — partial products',
@@ -9434,6 +9935,7 @@ function getHLInfoHTML(key){
         `<b>C_FT = ½(1 + D(1)) = ½(1 + ${Dn1.toFixed(6)}) = </b><span class="gold">${((1+Dn1)/2).toFixed(7)}</span>.`,
         `<b>Compare:</b> C(1) = ζ(2)·D(1) = ${ZETA2.toFixed(5)}·${Dn1.toFixed(6)} ≈ <span class="gold">${Cn1.toFixed(7)}</span>. These are different constants using the same D(1).`,
         `<b>Numerical check:</b> C_FT ≈ 0.6613 ≠ C(1) ≈ 0.5307. The difference comes from 1/2·(1+D) vs ζ(2)·D.`,
+        `<b>OEIS:</b> <a href="https://oeis.org/A065493" target="_blank" rel="noopener" style="color:inherit;opacity:.6;text-decoration:underline;">A065493 ↗</a> — decimal expansion of the classical Feller–Tornier constant.`,
       ],
       tableFactory:null,
       tableTitle:null,
@@ -10612,13 +11114,13 @@ function exportHero4K(){
     if(_heroViewMode==='ring'){
       _drawHeroRingMain(offCtx,sz,sz,nAnim,0,1,0,0,_heroRowShift||0,_heroRingOpacity);
     } else if(_heroViewMode==='farey'){
-      _drawHeroFarey(offCtx,sz,sz,nAnim,0,1,0,0);
+      _drawHeroFarey(offCtx,sz,sz,nAnim,0,1,0,0,_heroRowShift||0);
     } else if(_heroViewMode==='lift'){
-      _drawHeroLift(offCtx,sz,sz,nAnim,0,1,0,0);
+      _drawHeroLift(offCtx,sz,sz,nAnim,0,1,0,0,_heroRowShift||0);
     } else if(_heroViewMode==='gauss'){
-      _drawHeroGauss(offCtx,sz,sz,nAnim,0,1,0,0);
+      _drawHeroGauss(offCtx,sz,sz,nAnim,0,1,0,0,_heroRowShift||0);
     } else if(_heroViewMode==='smith'){
-      _drawHeroSmith(offCtx,sz,sz,nAnim,0,1,0,0);
+      _drawHeroSmith(offCtx,sz,sz,nAnim,0,1,0,0,_heroRowShift||0);
     } else {
       // Grid — re-render at full 4K using depth data
       if(_heroDepth && _heroDepthG===G){
@@ -10632,18 +11134,28 @@ function exportHero4K(){
         for(let ri=0;ri<G;ri++){
           for(let mi=0;mi<G;mi++){
             const r=ri+1, M=mi+1;
+            if(!_heroRingActive(M))continue;
+            if(_heroGridHalf&&ri>=mi)continue; // half (r<M) plot toggle
+            const pureCop=gcd(r,M)===1;
+            if(!_heroCharPass(pureCop))continue;
+            const sRi=(_heroRowShift&&_heroRowShift!==0)?((ri+mi*_heroRowShift*G)%G+G)%G:ri;
             const d=depth[ri*G+mi];
-            const x=(ri+0.5)*cW, y=(mi+0.5)*cH;
-            const gap=pointGapClass(r,M);
+            const x=(sRi+0.5)*cW, y=(mi+0.5)*cH;
+            const gap=pointGapClass(r,M,_heroActiveGaps);
             const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
             const dimmed=hasGaps&&!onGap;
             const isInspected=_heroInspectSet&&_heroInspectSet.has(ri+','+mi);
+            let gbDimmed=false;
+            if(typeof _heroGoldbachActive!=='undefined'&&_heroGoldbachActive){
+              gbDimmed=!(PS.has(r)&&PS.has(M)&&r+M===_heroGoldbachN);
+            }
             const gapColor=onGap?_gapRgbFn(gap):null;
             const col=_getHeroColor(r,M,nAnim,d,heroCM,0,gapColor,dimmed,onGap,isInspected,true);
-            if(dimmed)offCtx.globalAlpha=0.5;
+            if(gbDimmed)offCtx.globalAlpha=d<0?Math.min(0.04,(_heroGbDimAlpha||0.1)*0.4):(_heroGbDimAlpha||0.1);
+            else if(dimmed)offCtx.globalAlpha=0.5;
             offCtx.fillStyle=col;
-            offCtx.beginPath(); offCtx.arc(x,y,dotR,0,6.2832); offCtx.fill();
-            if(dimmed)offCtx.globalAlpha=1;
+            offCtx.beginPath(); offCtx.arc(x,y,dotR*_heroCharSizeMul(pureCop),0,6.2832); offCtx.fill();
+            if(dimmed||gbDimmed)offCtx.globalAlpha=1;
             if(isInspected){
               const idx=_heroInspectPts?_heroInspectPts.findIndex(p=>p.ri===ri&&p.mi===mi):-1;
               if(idx>=0){
@@ -10659,9 +11171,13 @@ function exportHero4K(){
           for(let ri=0;ri<G;ri++){
             for(let mi=0;mi<G;mi++){
               const r=ri+1, M=mi+1;
+              if(!_heroRingActive(M))continue;
+              if(_heroGridHalf&&ri>=mi)continue;
+              if(!_heroCharPass(gcd(r,M)===1))continue;
+              const sRi=(_heroRowShift&&_heroRowShift!==0)?((ri+mi*_heroRowShift*G)%G+G)%G:ri;
               const d=depth[ri*G+mi];
-              const x=(ri+0.5)*cW, y=(mi+0.5)*cH;
-              const gap=pointGapClass(r,M);
+              const x=(sRi+0.5)*cW, y=(mi+0.5)*cH;
+              const gap=pointGapClass(r,M,_heroActiveGaps);
               const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
               const dimmed=hasGaps&&!onGap;
               // Only draw labels on gap-highlighted cells (when gap active) or all cells (when no gap)
@@ -10682,6 +11198,8 @@ function exportHero4K(){
             }
           }
         }
+        if(typeof _heroGoldbachActive!=='undefined'&&_heroGoldbachActive&&typeof _drawGoldbachOverlay==='function')
+          _drawGoldbachOverlay(offCtx,0,0,cW,cH,G,0);
       } else if(liveCv){
         offCtx.imageSmoothingEnabled=false;
         offCtx.drawImage(liveCv,0,0,sz,sz);
@@ -10750,7 +11268,8 @@ function exportHero4K(){
     ctx.fillStyle='rgba(200,168,74,.06)'; ctx.fillRect(0,footY,PW,FOOTER_H);
     ctx.fillStyle='rgba(200,168,74,.18)'; ctx.fillRect(0,footY,PW,2);
     const hasGapsExp = _heroActiveGaps && _heroActiveGaps.size>0;
-    const gapVal2 = hasGapsExp ? [..._heroActiveGaps][0] : null;
+    const gapVal2 = hasGapsExp ? [..._heroActiveGaps].sort((a,b)=>a-b).join(',') : null;
+    const gapSemB = (typeof _gapSemantics!=='undefined'&&_gapSemantics==='diagonal')?'|M−r|':'Δp';
     const stats2=[
       {label:'n',val:`${curN}`,col:'rgba(155,127,232,.9)'},
       {label:'G',val:`${G}`,col:'rgba(61,200,184,.9)'},
@@ -10758,7 +11277,8 @@ function exportHero4K(){
       {label:'view',val:_heroViewMode,col:'rgba(126,200,122,.85)'},
       {label:'color',val:(_heroColorModeLocal||'default').replace('_',' '),col:'rgba(232,226,214,.7)'},
       {label:'mode',val:_finiteMode?`Finite p≤${PRIMES[_finitePrimes-1]||'?'}`:'Asymptotic',col:_finiteMode?'rgba(126,200,122,.9)':'rgba(200,168,74,.9)'},
-      ...(hasGapsExp?[{label:'gap g',val:`|M−r|=${gapVal2}`,col:'rgba(200,168,74,.9)'}]:[]),
+      ...(hasGapsExp?[{label:'gap g',val:`${gapSemB}=${gapVal2}`,col:'rgba(200,168,74,.9)'}]:[]),
+      ...((typeof _heroGridHalf!=='undefined'&&_heroGridHalf&&_heroViewMode==='grid')?[{label:'plot',val:'half r<M',col:'rgba(155,127,232,.85)'}]:[]),
       {label:'date',val:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),col:'rgba(184,178,166,.6)'},
     ];
     const SW2=Math.floor(PW/stats2.length), SH2=FOOTER_H-40;
@@ -10900,13 +11420,14 @@ function exportHero4K(){
   const captY = TITLE_H + BAND_H + RATIO_H;
   const captCX = Math.round((PW-CANVAS_SZ)/2) + CANVAS_SZ/2; // centred over canvas
   const hasGapsExp2 = _heroActiveGaps && _heroActiveGaps.size>0;
-  const gapVal3 = hasGapsExp2 ? [..._heroActiveGaps][0] : null;
+  const gapVal3 = hasGapsExp2 ? [..._heroActiveGaps].sort((a,b)=>a-b).join(',') : null;
+  const gapSem4k = (typeof _gapSemantics!=='undefined'&&_gapSemantics==='diagonal')?'|M−r|':'Δp';
   const labelMode4k=document.getElementById('hero-label-mode')?.value||'none';
   const modeLabel4k=_finiteMode?`Finite p≤${(typeof PRIMES!=='undefined'?PRIMES:[])[_finitePrimes-1]||'?'}`:'Asymptotic';
   ctx.font=`bold ${SZ.capt}px 'JetBrains Mono',monospace`;
   ctx.fillStyle='#ffffff';
   ctx.textBaseline='top';
-  ctx.fillText(`Block-Coprime Lattice  ·  G = ${G}  ·  n = ${curN}  ·  ${modeLabel4k}${expZoom>1.05?`  ·  zoom ${expZoom.toFixed(1)}×`:''}${_heroRowShift>0.00001?`  ·  row shift ${_heroRowShift.toFixed(5)}`:''}${hasGapsExp2?`  ·  gap |M−r| = ${gapVal3}`:''}${labelMode4k!=='none'?`  ·  label: ${labelMode4k}`:''}`, captCX, captY+LINE);
+  ctx.fillText(`Block-Coprime Lattice  ·  G = ${G}  ·  n = ${curN}  ·  ${modeLabel4k}${expZoom>1.05?`  ·  zoom ${expZoom.toFixed(1)}×`:''}${_heroRowShift>0.00001?`  ·  row shift ${_heroRowShift.toFixed(5)}`:''}${hasGapsExp2?`  ·  gap ${gapSem4k} = ${gapVal3}`:''}${(typeof _heroGridHalf!=='undefined'&&_heroGridHalf&&_heroViewMode==='grid')?'  ·  half (r<M)':''}${labelMode4k!=='none'?`  ·  label: ${labelMode4k}`:''}`, captCX, captY+LINE);
 
   ctx.font=`${SZ.subcapt}px 'JetBrains Mono',monospace`;
   ctx.fillStyle='rgba(200,168,74,.7)';
@@ -10938,46 +11459,13 @@ function exportHero4K(){
 
       // ── Render full unzoomed grid to an offscreen canvas ──
       const OV_SZ = 700; // overview map size in export px
-      const ovCv = document.createElement('canvas');
-      ovCv.width = OV_SZ; ovCv.height = OV_SZ;
+      // Reuse the exact renderer used for the main export canvas — single
+      // source of truth, so the overview inherits every live filter (half
+      // plot, rings, char, gaps, Goldbach) instead of a drifted copy.
+      const ovCv = renderHeroViewAt(OV_SZ);
       const ovCtx = ovCv.getContext('2d');
-      ovCtx.fillStyle = '#04040d';
-      ovCtx.fillRect(0,0,OV_SZ,OV_SZ);
 
       if(_heroDepth && _heroDepthG===G){
-        const depth = _heroDepth;
-        const cW = OV_SZ/G, cH = OV_SZ/G;
-        const dotR = Math.max(0.8, Math.min(cW,cH)*0.38);
-        const curN2 = typeof N!=='undefined' ? N : 0;
-        const hasGaps = _heroActiveGaps && _heroActiveGaps.size>0;
-        const heroCM = document.getElementById('global-color')?.value||'5';
-        const useExtColor = isNaN(parseInt(heroCM));
-        for(let ri=0;ri<G;ri++){
-          for(let mi=0;mi<G;mi++){
-            const r=ri+1, M=mi+1;
-            const d=depth[ri*G+mi];
-            const x=(ri+0.5)*cW, y=(mi+0.5)*cH;
-            const gap=pointGapClass(r,M);
-            const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
-            const dimmed=hasGaps&&!onGap;
-            let col;
-            if(d<0){ col=dimmed?'rgba(255,255,255,.008)':'rgba(255,255,255,.04)'; }
-            else if(d>=curN2){
-              if(dimmed)col='rgba(200,168,74,.06)';
-              else if(onGap){const[gr,gg,gb]=_gapRgbFn(gap)||[200,168,74];col=`rgba(${gr},${gg},${gb},.92)`;}
-              else if(useExtColor)col=getCellColorForMode(r,M,curN2,heroCM);
-              else col='rgba(200,168,74,.92)';
-            } else {
-              if(dimmed)col='rgba(61,200,184,.02)';
-              else if(onGap){const[gr,gg,gb]=_gapRgbFn(gap)||[61,200,184];col=`rgba(${gr},${gg},${gb},.55)`;}
-              else if(useExtColor)col=getCellColorForMode(r,M,curN2,heroCM);
-              else col='rgba(61,200,184,.38)';
-            }
-            ovCtx.fillStyle=col;
-            ovCtx.beginPath();ovCtx.arc(x,y,dotR,0,6.2832);ovCtx.fill();
-          }
-        }
-
         // ── Compute the viewport rectangle in grid-fraction coords ──
         // Live canvas: zoom=expZoom, pan=expPanX/Y pixels in liveSize space
         // origin of zoomed grid in live canvas px:
@@ -11149,21 +11637,6 @@ function exportHero4K(){
 }
 
 // ── GRID 4K EXPORT ──
-// Export Goldbach CSV from HL panel
-function exportGoldbachCSV(){
-  const inp=document.getElementById('gb-n-input');
-  const GN=parseInt(inp?.value)||100;
-  let rows='N,S(N),G_HL,G_actual,ratio\n';
-  for(let N2=4;N2<=Math.min(GN,200000);N2+=2){
-    const S=goldbachSingularSeries(N2);
-    const pred=goldbachHLPrediction(N2);
-    const act=N2<=200000?countGoldbachPairs(N2):'';
-    const ratio=typeof act==='number'&&pred>0?(act/pred).toFixed(5):'';
-    rows+=`${N2},${S.toFixed(6)},${pred.toFixed(4)},${act},${ratio}\n`;
-  }
-  const a=document.createElement('a');a.download=`goldbach_hl_Nmax${GN}.csv`;
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows);a.click();
-}
 
 function initAdditive(){
   // Draw all three additive charts after a brief delay to let layout settle
@@ -11373,7 +11846,7 @@ function setCalcDP(v){
       cnEl.textContent=_finiteDecimalStr('C', N, _calcDP);
     } else {
       cnEl.style.color='';
-      cnEl.innerHTML=_colorCodedDigits(CnD.toFixed(_calcDP));
+      cnEl.innerHTML=_asymptoticCodedDigits('C', N, _calcDP, CnD);
     }
   }
   if(dnEl){
@@ -11383,7 +11856,7 @@ function setCalcDP(v){
       dnEl.textContent=_finiteDecimalStr('D', N, _calcDP);
     } else {
       dnEl.style.color='';
-      dnEl.innerHTML=_colorCodedDigits(DnD.toFixed(_calcDP));
+      dnEl.innerHTML=_asymptoticCodedDigits('D', N, _calcDP, DnD);
     }
   }
   _updateHeroFormula(N,Cn);
@@ -12180,6 +12653,9 @@ function heroLatticeSetG(v){
   const gbSl=document.getElementById('hero-goldbach-n');
   if(gbSl) gbSl.max=Math.max(48,Math.min(200,2*_heroG));
   _buildHeroDepth(_heroG);
+  // Sector path tracks the grid slider: retrace so points never outlive a
+  // smaller G and automatically extend when G grows.
+  if(typeof _heroSectorFrac!=='undefined'&&_heroSectorFrac&&typeof heroTraceSector==='function')heroTraceSector();
   _updateHeroRatioLive(_heroG);
 }
 
@@ -12283,10 +12759,10 @@ function exportStateReport(){
   function heroAllViews(){
     const out={},SZ=400,nA=typeof N!=='undefined'?N:0;
     const V={ring:c=>_drawHeroRingMain(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0,_heroRingOpacity),
-             farey:c=>_drawHeroFarey(c,SZ,SZ,nA,0,1,0,0),
-             lift:c=>_drawHeroLift(c,SZ,SZ,nA,0,1,0,0),
-             gauss:c=>_drawHeroGauss(c,SZ,SZ,nA,0,1,0,0),
-             smith:c=>_drawHeroSmith(c,SZ,SZ,nA,0,1,0,0)};
+             farey:c=>_drawHeroFarey(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0),
+             lift:c=>_drawHeroLift(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0),
+             gauss:c=>_drawHeroGauss(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0),
+             smith:c=>_drawHeroSmith(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0)};
     for(const v in V){
       try{const oc=document.createElement('canvas');oc.width=SZ;oc.height=SZ;
         const x=oc.getContext('2d');x.fillStyle='#04040d';x.fillRect(0,0,SZ,SZ);
@@ -12423,6 +12899,14 @@ function exportHeroRatioCSV(filter){
 
 // ── Hero per-row shift ──
 let _heroRowShift=0; // 0..1 fraction
+// Wrapped r-shift, mirroring the opener's _wPerRingShiftedR: each successive
+// M shifts its residues by an extra (M-1)×frac of a full lap, wrapped
+// cyclically within `mod` (mod=M for Farey's own-row wrap, mod=G for the
+// Grid/Gauss "shear the whole square" wrap).
+function _heroRowShiftedR(r,M,mod,frac){
+  if(!frac)return r;
+  return 1+(((r-1)+(M-1)*frac*mod)%mod+mod)%mod;
+}
 
 function _heroRowShiftApply(v){
   v=isNaN(v)?0:Math.max(0,Math.min(1,v));
@@ -12465,6 +12949,30 @@ function _heroSyncRowShiftFrac(){
   const a=Math.max(0,parseInt(document.getElementById('hero-rowshift-a')?.value)||0);
   const b=Math.max(1,parseInt(document.getElementById('hero-rowshift-b')?.value)||1);
   _heroRowShiftApply(a/b);
+}
+// ── Row-shift Animate — continuously advances the twist, mirroring the
+// opener's per-ring/per-mod "Animate" button. Ticked once per frame from the
+// main hero animate() loop (see _heroRowShiftAnimTick call there). Speed is
+// in deg/sec of a full lap, same convention as the opener's wpr speed slider. ──
+let _heroRowShiftSpinning=false, _heroRowShiftSpeed=60;
+let _heroRowShiftLastT=null;
+function _heroRowShiftToggleSpin(){
+  _heroRowShiftSpinning=!_heroRowShiftSpinning;
+  const b=document.getElementById('hero-rowshift-spin-btn');
+  if(b) b.textContent=_heroRowShiftSpinning?'❙❙ Animate':'▶ Animate';
+  _heroRowShiftLastT=null;
+}
+function _heroRowShiftSetSpeed(v){ _heroRowShiftSpeed=Math.max(1,+v||60); }
+// Called once per frame from the main animate() loop (no-op unless spinning)
+function _heroRowShiftAnimTick(now){
+  if(!_heroRowShiftSpinning)return;
+  if(_heroRowShiftLastT===null)_heroRowShiftLastT=now;
+  const dt=(now-_heroRowShiftLastT)/1000;
+  _heroRowShiftLastT=now;
+  const v=((_heroRowShift+(_heroRowShiftSpeed*dt)/360)%1+1)%1;
+  _heroRowShiftApply(v);
+  const dec=document.getElementById('hero-rowshift-dec');
+  if(dec)dec.value=v.toFixed(5);
 }
 
 const _HERO_ZMIN=0.01,_HERO_ZMAX=256; // effectively unbounded zoom range (was 1–32)
@@ -12614,6 +13122,58 @@ function _fareyPanelUpdate(){
 
 // Lift panel
 let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=true, _liftDotScale=1.0;
+let _liftSurvOn=true, _liftBrokenOn=true, _liftThick=0.7;
+let _liftPathN=1;      // ±n path: r = (M±n)/2 (n=1 is the classic half-barrier)
+let _liftSpiralP=0;    // spiral prime; 0 = auto (largest prime ≤ G)
+function _liftRedraw(){if(typeof wRedrawCanvas==='function')wRedrawCanvas();}
+function liftSetPathN(d){
+  _liftPathN=Math.max(1,Math.min(999,_liftPathN+d));
+  document.querySelectorAll('.lift-pathn-lbl').forEach(l=>l.textContent=_liftPathN);
+  _liftRedraw();
+}
+function liftSpiralPFor(G){
+  if(_liftSpiralP>=2&&_liftSpiralP<=G)return _liftSpiralP;
+  for(let i=PRIMES.length-1;i>=0;i--)if(PRIMES[i]<=G)return PRIMES[i];
+  return 2;
+}
+function liftCycleSpiralP(dir){
+  const G=(typeof _heroG!=='undefined')?_heroG:100;
+  let cur=liftSpiralPFor(G), idx=PRIMES.indexOf(cur);
+  if(idx<0)idx=0;
+  idx=Math.max(0,idx+dir);
+  while(idx>0&&PRIMES[idx]>G)idx--;
+  _liftSpiralP=PRIMES[Math.min(idx,PRIMES.length-1)];
+  document.querySelectorAll('.lift-spiralp-lbl').forEach(l=>l.textContent='p='+_liftSpiralP);
+  _liftRedraw();
+}
+// Mode tabs (from the Lift Dynamics page): quick presets over the toggles
+function liftSetMode(m){
+  const np=(m==='npath'||m==='both'), sp=(m==='spiral'||m==='both'), ln=(m==='connect');
+  _liftShowNPath=np;_liftShowSpiral=sp;_liftShowLines=ln||m==='both';
+  const a=document.getElementById('lift-show-npath');if(a)a.checked=np;
+  const b=document.getElementById('lift-show-spiral');if(b)b.checked=sp;
+  document.querySelectorAll('.lift-mode-btn').forEach(x=>{
+    const on=x.dataset.m===m;
+    x.style.color=on?'#3dc8b8':'#6a6560';
+    x.style.borderBottom=on?'2px solid #3dc8b8':'2px solid transparent';
+  });
+  _liftRedraw();
+} // Surviving/Broken toggles + arc thickness (px)
+function liftSetSurv(v){_liftSurvOn=!!v;document.querySelectorAll('.lift-surv-chk').forEach(c=>c.checked=_liftSurvOn);if(typeof wRedrawCanvas==='function')wRedrawCanvas();}
+function liftSetBroken(v){_liftBrokenOn=!!v;document.querySelectorAll('.lift-broken-chk').forEach(c=>c.checked=_liftBrokenOn);if(typeof wRedrawCanvas==='function')wRedrawCanvas();}
+function liftSetThick(v){_liftThick=Math.max(0.2,Math.min(6,+v||0.7));document.querySelectorAll('.lift-thick-lbl').forEach(l=>l.textContent=_liftThick.toFixed(1)+'px');if(typeof wRedrawCanvas==='function')wRedrawCanvas();}
+let _liftSpiralDir='up';   // 'up' = r ≡ p (mod M) · 'down' = mirrored winding r ≡ −p (mod M)
+let _liftNPathDir='both';  // 'both' | 'up' (+1 branch) | 'down' (−1 branch)
+function liftCycleSpiralDir(){
+  _liftSpiralDir=_liftSpiralDir==='up'?'down':'up';
+  document.querySelectorAll('.lift-spiral-dir-btn').forEach(b=>b.textContent=_liftSpiralDir==='up'?'\u25b2':'\u25bc');
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
+function liftCycleNPathDir(){
+  _liftNPathDir=_liftNPathDir==='both'?'up':_liftNPathDir==='up'?'down':'both';
+  document.querySelectorAll('.lift-npath-dir-btn').forEach(b=>b.textContent=_liftNPathDir==='both'?'\u2195':_liftNPathDir==='up'?'\u25b2':'\u25bc');
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
 function _liftPanelUpdate(){
   _liftShowLines  = document.getElementById('lift-show-lines')?.checked  ?? true;
   _liftLineOp     = +document.getElementById('lift-line-op')?.value      || 0.18;
@@ -12628,6 +13188,18 @@ function _liftPanelUpdate(){
 
 // Grid panel
 let _gridShowDots=true, _gridDotScale=1.0, _gridShowGridLines=true, _gridGridLineOp=0.07;
+let _heroGridHalf=false; // false = all (r,M) pairs; true = only the r<M triangle
+function heroSetGridHalf(v){
+  _heroGridHalf=!!v;
+  const allBtn=document.getElementById('hero-grid-plot-all');
+  const halfBtn=document.getElementById('hero-grid-plot-half');
+  [[allBtn,!_heroGridHalf],[halfBtn,_heroGridHalf]].forEach(([b,on])=>{
+    if(!b)return;
+    b.style.background=on?'rgba(155,127,232,.16)':'none';
+    b.style.borderColor=on?'rgba(155,127,232,.65)':'rgba(255,255,255,.2)';
+    b.style.color=on?'rgba(155,127,232,.95)':'rgba(168,162,148,.75)';
+  });
+}
 function _gridPanelUpdate(){
   _gridShowDots    = document.getElementById('grid-show-dots')?.checked    ?? true;
   _gridDotScale    = +document.getElementById('grid-dot-scale')?.value     || 1.0;
@@ -12739,13 +13311,14 @@ function _updateHeroViewCaps(){
 // same construction as the opener-preview's drawWGauss, but reusing the
 // hero's own precomputed depth data + color pipeline so it stays in sync
 // with G/n/color-mode/gap-highlight like every other hero view.
-function _drawHeroGauss(ctx,W,H,nAnim,t,zoom,panX,panY){
-  zoom=zoom||1; panX=panX||0; panY=panY||0;
+function _drawHeroGauss(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
+  zoom=zoom||1; panX=panX||0; panY=panY||0; rowShift=rowShift||0;
   const G=_heroG;
   if(_heroDepthG!==G||!_heroDepth)return;
   const depth=_heroDepth;
   const heroMode=_heroColorModeLocal||'default';
   const textHidden=!_heroTextVisible;
+  const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
 
   const side=Math.min(W,H)*zoom-20;
   const halfW=side/2;
@@ -12768,10 +13341,16 @@ function _drawHeroGauss(ctx,W,H,nAnim,t,zoom,panX,panY){
         const pureCop=gcd(r,M)===1;
         if(!_heroCharPass(pureCop))continue;
         const d=depth[ri*G+mi];
-        const x=(ri+0.5)*cw, y=(mi+0.5)*cw;
-        const col=_getHeroColor(r,M,nAnim,d,heroMode,t,null,false,false,false,textHidden);
+        const rDisp=rowShift?_heroRowShiftedR(r,M,G,rowShift):r;
+        const x=(rDisp-1+0.5)*cw, y=(mi+0.5)*cw;
+        const gap=pointGapClass(r,M,_heroActiveGaps);
+        const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
+        const dimmed=hasGaps&&!onGap;
+        const col=onGap?_gapColor(gap):_getHeroColor(r,M,nAnim,d,heroMode,t,null,dimmed,false,false,textHidden);
+        ctx.globalAlpha=dimmed?0.5:1;
         ctx.fillStyle=col;
         ctx.beginPath();ctx.arc(x,y,dotR*_heroCharSizeMul(pureCop),0,6.2832);ctx.fill();
+        ctx.globalAlpha=1;
         // Inspect highlight — same ring as the other views, drawn in every
         // quadrant occurrence of the selected (r,M)
         if(_heroInspectMode&&_heroInspectSet&&_heroInspectSet.has(ri+','+mi)){
@@ -12795,8 +13374,8 @@ function _drawHeroGauss(ctx,W,H,nAnim,t,zoom,panX,panY){
   ctx.textBaseline='bottom';ctx.fillText('-Im',cx,cy+halfW*0.82);
 }
 
-function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY){
-  zoom=zoom||1; panX=panX||0; panY=panY||0;
+function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
+  zoom=zoom||1; panX=panX||0; panY=panY||0; rowShift=rowShift||0;
   const mMax=_heroG;
   const cx=W/2+panX, cy=H/2+panY;
   const heroMode=_heroColorModeLocal||'modular_distance';
@@ -12832,11 +13411,12 @@ function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY){
     if(sy<-10||sy>H+10)continue;
     for(let r=1;r<M;r++){
       if(gcd(r,M)!==1)continue;
-      const fx=r/M*2-1;
+      const rDisp=rowShift?_heroRowShiftedR(r,M,M,rowShift):r; // wrap within this row's own modulus, same as opener's Farey
+      const fx=rDisp/M*2-1;
       const sx=cx+fx*W/2*zoom;
       if(sx<-10||sx>W+10)continue;
       const d=_heroTrueDepth?_heroTrueDepth(r,M):-2;
-      const gap=pointGapClass(r,M);
+      const gap=pointGapClass(r,M,_heroActiveGaps);
       const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
       const dimmed=hasGaps&&!onGap;
       const isInspected=_heroInspectMode&&_heroInspectSet&&_heroInspectSet.has((r-1)+','+(M-1));
@@ -12894,13 +13474,14 @@ function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY){
 // ── HERO LIFT VIEW ────────────────────────────────────────────────────────────
 // Concentric rings (r on ring M). Gold = block-coprime, teal = lift survives,
 // coral = lift broken. ±1 path highlighted. Rotation follows ring global rot.
-function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY){
-  zoom=zoom||1; panX=panX||0; panY=panY||0;
+function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
+  zoom=zoom||1; panX=panX||0; panY=panY||0; rowShift=rowShift||0;
   const mMax=_heroG;
   const cx=W/2+panX, cy=H/2+panY;
   const maxR=Math.min(W,H)*0.46*zoom;
   const globalRot=typeof getGlobalRotRing==='function'?getGlobalRotRing():0;
   const labelMode=document.getElementById('hero-label-mode')?.value||'none';
+  const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
 
   ctx.fillStyle='#04040d';
   ctx.fillRect(0,0,W,H);
@@ -12915,7 +13496,7 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY){
 
   function toXY(r,M){
     const rho=(M/mMax)*maxR;
-    const theta=2*Math.PI*r/M + globalRot;
+    const theta=2*Math.PI*r/M + globalRot + rowShift*2*Math.PI*(M-1);
     return[cx+rho*Math.cos(theta), cy-rho*Math.sin(theta)];
   }
 
@@ -12944,17 +13525,16 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY){
         const lifted=nextSet.has(r2);
         const[x1,y1]=toXY(r,M);
         const[x2,y2]=toXY(r2,M+1);
+        if(lifted?!_liftSurvOn:!_liftBrokenOn)return; // forEach callback
         ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-        ctx.lineWidth=0.7;
+        ctx.lineWidth=_liftThick;
         ctx.strokeStyle=lifted?`rgba(61,200,184,${_liftLineOp})`:`rgba(224,80,96,${_liftLineOp*0.83})`;
         ctx.stroke();
       });
     }
   }
 
-  // Find largest prime ≤ mMax for spiral highlight
-  let spiralP=2;
-  for(let i=PRIMES.length-1;i>=0;i--){if(PRIMES[i]<=mMax){spiralP=PRIMES[i];break;}}
+  const spiralP=liftSpiralPFor(mMax);
 
   // Dots
   const dotBase=Math.max(1, Math.min(3.5*Math.sqrt(zoom), maxR/mMax*0.35))*(_liftDotScale||1)*_heroCharSupportSize;
@@ -12969,17 +13549,25 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY){
       const lifted=nextSet?nextSet.has(r2):false;
       const d=_heroTrueDepth?_heroTrueDepth(r,M):-2;
       const ok=(d>=nAnim&&d>=0)||(d>=30000&&nAnim>=0);
-      const onNpath=_liftShowNPath&&(M%2===1)&&(r===(M+1)/2||r===(M-1)/2);
-      const onSpiral=_liftShowSpiral&&spiralP<M&&r===spiralP%M;
+      const _nn=_liftPathN, _par=((M%2)===(_nn%2)); // (M±n)/2 integral
+      const onNpath=_liftShowNPath&&_par&&(
+        (_liftNPathDir!=='down'&&r===(M+_nn)/2&&r<M)||
+        (_liftNPathDir!=='up'&&r===(M-_nn)/2&&r>=1));
+      const spSel=_liftSpiralDir==='down'?(((M-(spiralP%M))%M)||M):(spiralP%M);
+      const onSpiral=_liftShowSpiral&&spiralP<M&&r===spSel;
+      const gap=pointGapClass(r,M,_heroActiveGaps);
+      const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
+      const dimmed=hasGaps&&!onGap;
       let col,sz=dotR;
-      if(onNpath&&onSpiral){col='rgba(255,220,80,.95)';sz=dotR*2.4;}
+      if(onGap){col=_gapColor(gap);sz=dotR*1.6;}
+      else if(onNpath&&onSpiral){col='rgba(255,220,80,.95)';sz=dotR*2.4;}
       else if(onNpath){col='rgba(61,200,184,.92)';sz=dotR*2.2;}
       else if(onSpiral){col='rgba(200,168,74,.85)';sz=dotR*2;}
       else if(ok){col='rgba(200,168,74,.75)';sz=dotR*1.3;}
       else if(d>=0){col='rgba(61,200,184,.4)';}
       else{col='rgba(255,255,255,.06)';sz=dotR*0.8;}
       ctx.fillStyle=col;
-      ctx.globalAlpha=_heroRingOpacity;
+      ctx.globalAlpha=(dimmed?0.5:1)*_heroRingOpacity;
       ctx.beginPath();ctx.arc(sx,sy,sz,0,6.2832);ctx.fill();
       ctx.globalAlpha=1;
       if(onNpath||onSpiral){
@@ -13253,7 +13841,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
       const x=cx+rho*Math.cos(theta);
       const y=cy-rho*Math.sin(theta);
 
-      const gap=pointGapClass(r,M);
+      const gap=pointGapClass(r,M,_heroActiveGaps);
       const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
       const dimmed=hasGaps&&!onGap;
 
@@ -14244,13 +14832,55 @@ function _startRingInterval(){
 function heroGapStep(delta){
   const sl=document.getElementById('hero-gap-sl');
   if(!sl)return;
-  const min=+sl.min||0, max=+sl.max||50;
-  const cur=+sl.value||0;
-  const v=Math.max(min,Math.min(max,cur+delta));
+  const max=Math.max(1,_heroG-1);
+  if(+sl.max!==max)sl.max=max;
+  let v=Math.max(0,Math.min(max,_gapStepVal(+sl.value||0,delta)));
   sl.value=v;
   heroGapSliderChange(v);
 }
+let _heroGapPlayId2=null;
+function heroGapPlayToggle(){
+  const btn=document.getElementById('hero-gap-play');
+  if(_heroGapPlayId2){clearInterval(_heroGapPlayId2);_heroGapPlayId2=null;if(btn)btn.textContent='\u25b6';return;}
+  if(btn)btn.textContent='\u23f8';
+  _heroGapPlayId2=setInterval(()=>{
+    const sl=document.getElementById('hero-gap-sl');
+    const max=Math.max(1,_heroG-1);
+    if(sl&&+sl.max!==max)sl.max=max;
+    let nx=_gapStepVal(sl?+sl.value:0,1);
+    if(nx>max)nx=1; // loop back
+    heroGapSliderChange(nx);
+  },800);
+}
+// Dynamic Gap Generation — same control-builders as the opener: create new
+// multi-select toggle buttons (off by default) in #hero-gap-dynamic.
+function heroEnsureGapBtn(g){
+  if(document.getElementById('hero-gap-btn-'+g))return;
+  const c=document.getElementById('hero-gap-dynamic');
+  if(!c)return;
+  const b=document.createElement('button');
+  b.id='hero-gap-btn-'+g;b.className='hero-gap-preset';
+  b.title='Gap-'+g+' prime pairs (M, M+'+g+')';b.textContent=String(g);
+  b.setAttribute('style','background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;');
+  b.onclick=function(){heroGapPresetToggle(g);};
+  c.appendChild(b);
+}
+function heroGenerateEvenGaps(){
+  let max=parseInt(document.getElementById('hero-gap-max')?.value)||12;
+  if(max%2)max--;
+  for(let g=2;g<=max;g+=2)heroEnsureGapBtn(g);
+}
+function heroAddGapRange(){
+  let a=parseInt(document.getElementById('hero-gap-from')?.value);
+  let b=parseInt(document.getElementById('hero-gap-to')?.value);
+  if(!a||!b||a<1||b<a)return;
+  if(a===1){heroEnsureGapBtn(1);a=2;}
+  if(a%2)a++;
+  if(b%2)b--;
+  for(let g=a;g<=b;g+=2)heroEnsureGapBtn(g);
+}
 function heroGapSliderChange(v){
+  {const sl=document.getElementById('hero-gap-sl');const mx=Math.max(1,_heroG-1);if(sl&&+sl.max!==mx)sl.max=mx;}
   if(_gapSemantics==='forward'){
     // Prime gaps above 1 are always even — snap odd slider values up (1 stays,
     // it's the lone odd gap: the pair 2→3)
@@ -14284,6 +14914,36 @@ function heroGapSliderChange(v){
     if(lbl){lbl.textContent='off';lbl.style.color='rgba(200,168,74,.65)';}
     if(philbl)philbl.textContent='';
   }
+  if(typeof heroGapSyncButtons==='function') heroGapSyncButtons();
+}
+// Multi-select preset toggle (1,2,4,6,8 buttons) — adds/removes from the
+// same _heroActiveGaps Set the slider uses, so any combination can be lit at
+// once, mirroring the opener's Active Gaps tab. Does not touch the slider's
+// own single-value state; heroGapSyncButtons() below keeps both in sync.
+function heroGapPresetToggle(g){
+  if(_heroActiveGaps.has(g)) _heroActiveGaps.delete(g);
+  else _heroActiveGaps.add(g);
+  heroGapSyncButtons();
+}
+function heroGapSyncButtons(){
+  document.querySelectorAll('button[id^="hero-gap-btn-"]').forEach(b=>{
+    const g=parseInt(b.id.replace('hero-gap-btn-',''));
+    const on=_heroActiveGaps.has(g);
+    b.style.background=on?'rgba(126,200,122,.16)':'none';
+    b.style.borderColor=on?'rgba(126,200,122,.65)':'rgba(255,255,255,.18)';
+    b.style.color=on?'rgba(126,200,122,.95)':'#a8a294';
+  });
+  const lbl=document.getElementById('hero-gap-lbl');
+  if(lbl){
+    if(_heroActiveGaps.size){
+      lbl.textContent='g='+[..._heroActiveGaps].sort((a,b)=>a-b).join(',');
+      lbl.style.color=_gapColor([..._heroActiveGaps][0]);
+    } else {
+      lbl.textContent='off'; lbl.style.color='rgba(200,168,74,.65)';
+    }
+  }
+  const sl=document.getElementById('hero-gap-sl');
+  if(sl) sl.value = _heroActiveGaps.size===1 ? [..._heroActiveGaps][0] : 0;
 }
 function heroGapClear(){
   _heroActiveGaps.clear();
@@ -14293,6 +14953,7 @@ function heroGapClear(){
   if(sl) sl.value=0;
   if(lbl){lbl.textContent='off';lbl.style.color='rgba(200,168,74,.65)';}
   if(philbl)philbl.textContent='';
+  heroGapSyncButtons();
 }
 // Legacy toggle kept for compatibility (unused now but harmless)
 function heroToggleGap(g){
@@ -15000,6 +15661,7 @@ function initHeroThree(){
     const mMax=_heroG;
     const cx=W/2+_heroPanX, cy=H/2+_heroPanY;
     const zoom=_heroZoom;
+    const rowShift=_heroRowShift||0;
     let best=null, bestDist=Infinity;
     for(let M=2;M<=mMax;M++){
       if(!_heroRingActive(M))continue;
@@ -15009,7 +15671,8 @@ function initHeroThree(){
       if(sy<-10||sy>H+10)continue;
       for(let r=1;r<M;r++){
         if(!_heroCharPass(gcd(r,M)===1))continue;
-        const fx=r/M*2-1;
+        const rDisp=rowShift?_heroRowShiftedR(r,M,M,rowShift):r;
+        const fx=rDisp/M*2-1;
         const sx=cx+fx*W/2*zoom;
         if(sx<-10||sx>W+10)continue;
         const dist=(px-sx)**2+(py-sy)**2;
@@ -15028,13 +15691,14 @@ function initHeroThree(){
     const cx=W/2+_heroPanX, cy=H/2+_heroPanY;
     const maxR=Math.min(W,H)*0.46*_heroZoom;
     const globalRot=typeof getGlobalRotRing==='function'?getGlobalRotRing():0;
+    const rowShift=_heroRowShift||0;
     let best=null, bestDist=Infinity;
     for(let M=2;M<=mMax;M++){
       if(!_heroRingActive(M))continue;
       const rho=(M/mMax)*maxR;
       for(let r=1;r<M;r++){
         if(!_heroCharPass(gcd(r,M)===1))continue;
-        const theta=2*Math.PI*r/M+globalRot;
+        const theta=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
         const x=cx+rho*Math.cos(theta);
         const y=cy-rho*Math.sin(theta);
         const dist=(px-x)**2+(py-y)**2;
@@ -15054,15 +15718,31 @@ function initHeroThree(){
     const halfW=side/2, cw=halfW/G;
     const cx=W/2+_heroPanX, cy=H/2+_heroPanY;
     const dx=px-cx, dy=py-cy;
+    const rowShift=_heroRowShift||0;
     for(let q=0;q<4;q++){
       const ang=-q*Math.PI/2; // undo the quadrant rotation
       const ux=dx*Math.cos(ang)-dy*Math.sin(ang);
       const uy=dx*Math.sin(ang)+dy*Math.cos(ang);
       if(ux<0||ux>=halfW||uy<0||uy>=halfW)continue;
-      const ri=Math.floor(ux/cw), mi=Math.floor(uy/cw);
-      if(ri<0||ri>=G||mi<0||mi>=G)return null;
-      if(!_heroRingActive(mi+1))return null;
-      return{ri,mi,r:ri+1,M:mi+1};
+      const mi=Math.floor(uy/cw);
+      const M=mi+1;
+      if(mi<0||mi>=G)return null;
+      if(!_heroRingActive(M))return null;
+      if(!rowShift){
+        const ri=Math.floor(ux/cw);
+        if(ri<0||ri>=G)return null;
+        return{ri,mi,r:ri+1,M};
+      }
+      // Sheared case: the shift needn't land on integer cell boundaries, so
+      // find the r whose shifted screen x is nearest ux (matches drawing exactly).
+      let bestR=1,bestDist=Infinity;
+      for(let r=1;r<=G;r++){
+        const rDisp=_heroRowShiftedR(r,M,G,rowShift);
+        const x=(rDisp-1+0.5)*cw;
+        const d=Math.abs(x-ux);
+        if(d<bestDist){bestDist=d;bestR=r;}
+      }
+      return{ri:bestR-1,mi,r:bestR,M};
     }
     return null;
   }
@@ -15086,6 +15766,7 @@ function initHeroThree(){
     lpx=cx+flip*(lpx-cx); // mirror is its own inverse
     const R=Math.min(W,H)*0.44*_heroZoom/(_heroSmithZoomOut||1);
     const alpha=(typeof _heroSmithAlpha!=='undefined')?_heroSmithAlpha:0;
+    const rowShift=_heroRowShift||0;
     const dotScale=parseFloat(document.getElementById('smith-dot-sc')?.value||1);
     let best=null, bestDist=Infinity;
     for(let M=2;M<=mMax;M++){
@@ -15094,7 +15775,7 @@ function initHeroThree(){
       for(let r=1;r<M;r++){
         const pureCop=gcd(r,M)===1;
         if(!_heroCharPass(pureCop))continue;
-        const theta=2*Math.PI*r/M+alpha;
+        const theta=2*Math.PI*r/M+alpha+rowShift*2*Math.PI*(M-1);
         const w=_conformalMap(Rring*Math.cos(theta),Rring*Math.sin(theta),'smith');
         if(!w)continue;
         const x=cx+w.u*R, y=cy-w.v*R;
@@ -15306,10 +15987,12 @@ function initHeroThree(){
   }
   setupHeroPan();
 
+  let _heroIdleKey='';
   function animate(){
     rafRef.id=requestAnimationFrame(animate);
     t+=0.007;
     if(typeof _heroSmithAnimTick==='function') _heroSmithAnimTick(1/60);
+    if(typeof _heroRowShiftAnimTick==='function') _heroRowShiftAnimTick(performance.now());
 
     // ── Smooth zoom/pan lerp ──
     const lerpF=0.14;
@@ -15326,6 +16009,26 @@ function initHeroThree(){
     if(cv3d) cv3d.classList.toggle('pannable',isPannable);
     const panCtrl=document.getElementById('hero-pan-ctrl');
     if(panCtrl) panCtrl.style.display=isPannable?'block':'none';
+
+    // ── #perf: idle frame-skip (grid view) — when zoom/pan have settled and
+    // nothing on screen is time-animated, keep the last frame instead of
+    // re-running the O(G²) dot loop every rAF. Any state change alters the
+    // key and re-renders next frame; interactions keep the normal 60fps path.
+    if(_heroViewMode==='grid'){
+      const settled=Math.abs(_heroZoomTarget-_heroZoom)<0.0005&&Math.abs(_heroPanXTarget-_heroPanX)<0.25&&Math.abs(_heroPanYTarget-_heroPanY)<0.25;
+      if(settled){_heroZoom=_heroZoomTarget;_heroPanX=_heroPanXTarget;_heroPanY=_heroPanYTarget;}
+      const hm=_heroColorModeLocal||'default';
+      const tAnimated=_heroActiveGaps.size>0||!!_heroFocused||(_heroInspectMode&&_heroInspectSet&&_heroInspectSet.size>0)||_heroGoldbachActive||(typeof _heroNPlayId!=='undefined'&&_heroNPlayId)||hm==='depth'||hm==='r_prime'||hm==='global';
+      const key=[_heroG,(typeof N!=='undefined'?N:0),hm,
+        document.getElementById('hero-label-mode')?.value||'',
+        _heroRowShift,_heroRotSteps,_gapSemantics,_heroGridHalf?1:0,
+        _heroCharFilter,_heroCharSupportSize,_heroCharVanishSize,
+        _heroActiveRings?Array.from(_heroActiveRings).join('.'):'',
+        _heroTextVisible?1:0,W,H,
+        _heroZoom.toFixed(4),_heroPanX.toFixed(2),_heroPanY.toFixed(2)].join('|');
+      if(settled&&!tAnimated&&key===_heroIdleKey)return; // canvas already shows this exact state
+      _heroIdleKey=key;
+    } else _heroIdleKey='';
 
     ctx.clearRect(0,0,W,H);
 
@@ -15348,21 +16051,21 @@ function initHeroThree(){
     // ── FAREY VIEW ──
     if(_heroViewMode==='farey'){
       _updateHeroViewCaps();
-      _drawHeroFarey(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY);
+      _drawHeroFarey(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY,_heroRowShift||0);
       return;
     }
 
     // ── LIFT VIEW ──
     if(_heroViewMode==='lift'){
       _updateHeroViewCaps();
-      _drawHeroLift(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY);
+      _drawHeroLift(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY,_heroRowShift||0);
       return;
     }
 
     // ── GAUSSIAN INTEGERS VIEW ──
     if(_heroViewMode==='gauss'){
       _updateHeroViewCaps();
-      _drawHeroGauss(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY);
+      _drawHeroGauss(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY,_heroRowShift||0);
       return;
     }
 
@@ -15375,7 +16078,7 @@ function initHeroThree(){
         ctx.rotate((_heroRotSteps&3)*Math.PI/2);
         ctx.translate(-W/2,-H/2);
       }
-      _drawHeroSmith(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY);
+      _drawHeroSmith(ctx,W,H,nAnim,t,_heroZoom,_heroPanX,_heroPanY,_heroRowShift||0);
       if(_heroRotSteps&3) ctx.restore();
       return;
     }
@@ -15406,6 +16109,7 @@ function initHeroThree(){
       for(let mi=0;mi<G;mi++){
         const M=mi+1;
         if(!_heroRingActive(M))continue;
+        if(_heroGridHalf&&ri>=mi)continue; // only the r<M triangle, bottom-left→top-right diagonal
         const d=depth[ri*G+mi];
         const pureCop=gcd(r,M)===1;
         if(!_heroCharPass(pureCop))continue;
@@ -15415,7 +16119,7 @@ function initHeroThree(){
 
         if(x+dotR<0||x-dotR>W||y+dotR<0||y-dotR>H)continue;
 
-        const gap=pointGapClass(r,M);
+        const gap=pointGapClass(r,M,_heroActiveGaps);
         const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
         const dimmed=hasGaps&&!onGap;
         const isFocused=!_heroInspectMode&&_heroFocused&&_heroFocused.ri===ri&&_heroFocused.mi===mi;
@@ -15583,7 +16287,7 @@ const _heroFsControlIds=[
   'hero-adv-dd',         // Advanced — custom rings & χ(r) filter
   'hero-sector-dd',      // Sector Path
   'hero-working-dd',     // Show Working (Euler product, export)
-  'hero-conformal-panel',// Gauss view panel
+  'hero-goldbach-dd',    // Goldbach Overlay (N slider, play/clear, live pair panel)
   'hero-smith-panel',    // Smith Chart controls
   'hero-grid-panel',     // Grid view panel
   'hero-ring-panel',     // Ring view panel
@@ -15665,10 +16369,34 @@ function _heroCanvasFsChangeHandler(){
   }
   // Force canvas resize recalc
   if(cv){cv._w=0;cv._h=0;}
+  if(typeof _heroSyncFsTopbarHeight==='function')setTimeout(_heroSyncFsTopbarHeight,60);
   setTimeout(function(){if(typeof animate==='function')animate();},50);
 }
 document.addEventListener('fullscreenchange',_heroCanvasFsChangeHandler);
 document.addEventListener('webkitfullscreenchange',_heroCanvasFsChangeHandler);
+
+// ── Canvas lock: pin the canvas below the sticky top bar in hero fullscreen,
+// so the controls below can be scrolled through while the canvas stays put.
+let _heroFsCanvasLocked=false;
+function _heroSyncFsTopbarHeight(){
+  const topBar=document.getElementById('hero-fs-top-bar');
+  if(!topBar)return;
+  document.documentElement.style.setProperty('--hero-fs-topbar-h',topBar.offsetHeight+'px');
+}
+function heroToggleCanvasLock(){
+  _heroFsCanvasLocked=!_heroFsCanvasLocked;
+  const wrap=document.getElementById('hero-canvas-fs-wrap');
+  if(wrap)wrap.classList.toggle('hero-fs-canvas-locked',_heroFsCanvasLocked);
+  const btn=document.getElementById('hero-fs-lock-btn');
+  if(btn){
+    btn.classList.toggle('active',_heroFsCanvasLocked);
+    btn.textContent=_heroFsCanvasLocked?'📌 Canvas locked':'📌 Lock canvas';
+  }
+  _heroSyncFsTopbarHeight();
+}
+window.addEventListener('resize',function(){
+  if(_heroFsActive&&_heroFsCanvasLocked)_heroSyncFsTopbarHeight();
+});
 
 function toggleHeroText(){
   _heroTextVisible=!_heroTextVisible;
@@ -16103,22 +16831,19 @@ function drawRingConnections(ctx,cW,cH){
       }
     }
   } else if(mode==='lift'){
-    // Lift arcs: connect r/M ≈ r'/M' (same fractional value across rings)
-    ctx.strokeStyle='rgba(61,200,184,1)';
+    // True lift arcs: r at ring M lifts to r mod(M+1) at ring M+1. A coprime
+    // residue "survives" the lift iff that image is still coprime to M+1 —
+    // this is the exact r→r mod(M+1) rule from the Lift Dynamics reference,
+    // not a fractional-proximity guess. Teal = survives, coral = breaks.
     for(let M=2;M<mMax;M++){
       for(let r=1;r<M;r++){
-        // find r' in M+1 closest to same fraction
-        const frac=r/M;
-        const rp=Math.round(frac*(M+1));
-        if(rp>=1&&rp<M+1&&Math.abs(rp/(M+1)-frac)<0.08){
-          const{ok:ok1}=_ringCell(r,M,n);
-          const{ok:ok2}=_ringCell(rp,M+1,n);
-          if(ok1||ok2){
-            const p0=ringPt(r,M),p1=ringPt(rp,M+1);
-            ctx.globalAlpha=ok1&&ok2?0.35:0.12;
-            ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);ctx.stroke();
-          }
-        }
+        if(gcd(r,M)!==1)continue; // only coprime residues participate in a lift
+        const r2=r%(M+1);
+        const lifted=gcd(r2,M+1)===1;
+        const p0=ringPt(r,M),p1=ringPt(r2,M+1);
+        ctx.strokeStyle=lifted?'rgba(61,200,184,1)':'rgba(224,80,96,1)';
+        ctx.globalAlpha=lifted?0.30:0.18;
+        ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);ctx.stroke();
       }
     }
   } else if(mode==='squarefree'){
@@ -16265,31 +16990,40 @@ function drawRingPrimeSpiral(ctx,cW,cH){
 
   ctx.save();
 
-  // Use r=p directly — _ringPt applies globalRot and per-ring increment automatically
-  // so the spiral moves correctly with all rotation controls
-  let lastTop=null, lastBot=null;
-  for(let M=2;M<=mMax;M++){
-    if(M<=p)continue;          // p must be a valid residue r < M
-    if(gcd(p,M)!==1)continue;  // gap at multiples of p
-    const{x,y}=_ringPt(M,p,cx,cy,R,mMax,globalRot);
-    const isTop=p/M>0.5;
-    const lifts=gcd(p,M+1)===1;
+  // The "Spire" panel (drawRingSpire) draws this same p mod M trajectory with
+  // mirror/dropout/lift support — if it's also active, skip the basic dots
+  // and lines here so the two don't overlap into a conflicting double image.
+  // The 2p-gap ring and ±n barrier annotations below are unique to this
+  // function and still draw either way.
+  const _spireAlsoOn=document.getElementById('ring-spire-on')?.checked;
 
-    if(isTop&&lastTop){
-      ctx.beginPath();ctx.moveTo(lastTop.x,lastTop.y);ctx.lineTo(x,y);
-      ctx.strokeStyle='rgba(61,200,184,.4)';ctx.lineWidth=1.1;ctx.stroke();
-    }
-    if(!isTop&&lastBot){
-      ctx.beginPath();ctx.moveTo(lastBot.x,lastBot.y);ctx.lineTo(x,y);
-      ctx.strokeStyle='rgba(255,140,105,.4)';ctx.lineWidth=1.1;ctx.stroke();
-    }
-    if(isTop)lastTop={x,y}; else lastBot={x,y};
+  if(!_spireAlsoOn){
+    // Use r=p directly — _ringPt applies globalRot and per-ring increment automatically
+    // so the spiral moves correctly with all rotation controls
+    let lastTop=null, lastBot=null;
+    for(let M=2;M<=mMax;M++){
+      if(M<=p)continue;          // p must be a valid residue r < M
+      if(gcd(p,M)!==1)continue;  // gap at multiples of p
+      const{x,y}=_ringPt(M,p,cx,cy,R,mMax,globalRot);
+      const isTop=p/M>0.5;
+      const lifts=gcd(p,M+1)===1;
 
-    ctx.beginPath();ctx.arc(x,y,dotSz*1.2+1,0,Math.PI*2);
-    ctx.fillStyle=isTop?'#4ecdc4':'#ff8c69';ctx.fill();
-    if(!lifts){
-      ctx.beginPath();ctx.arc(x,y,dotSz*1.8,0,Math.PI*2);
-      ctx.strokeStyle='rgba(224,80,96,.7)';ctx.lineWidth=1;ctx.stroke();
+      if(isTop&&lastTop){
+        ctx.beginPath();ctx.moveTo(lastTop.x,lastTop.y);ctx.lineTo(x,y);
+        ctx.strokeStyle='rgba(61,200,184,.4)';ctx.lineWidth=1.1;ctx.stroke();
+      }
+      if(!isTop&&lastBot){
+        ctx.beginPath();ctx.moveTo(lastBot.x,lastBot.y);ctx.lineTo(x,y);
+        ctx.strokeStyle='rgba(255,140,105,.4)';ctx.lineWidth=1.1;ctx.stroke();
+      }
+      if(isTop)lastTop={x,y}; else lastBot={x,y};
+
+      ctx.beginPath();ctx.arc(x,y,dotSz*1.2+1,0,Math.PI*2);
+      ctx.fillStyle=isTop?'#4ecdc4':'#ff8c69';ctx.fill();
+      if(!lifts){
+        ctx.beginPath();ctx.arc(x,y,dotSz*1.8,0,Math.PI*2);
+        ctx.strokeStyle='rgba(224,80,96,.7)';ctx.lineWidth=1;ctx.stroke();
+      }
     }
   }
 
@@ -19180,53 +19914,12 @@ function drawStripAverage(overrideG,overrideW){
 
 <script>
 // ══════════════════════════════════════════════════════════
-//  CONFORMAL DISK VIEW (Möbius / SL₂(ℤ) mapping)
+// The standalone "Conformal Disk" hero view (its panel, SL₂ℤ shift
+// controls, and 4K export) was removed — Gauss superseded it as a
+// selectable hero view and the panel had become unreachable. This
+// map function survives because the Smith Chart's own Lift Dynamics
+// overlay (below) calls it directly with mapType='smith'.
 // ══════════════════════════════════════════════════════════
-// ── SL₂ℤ shift slider helpers ──────────────────────────────────────────────
-// Best rational approximation to v with denominator ≤ maxD (Stern–Brocot)
-function _bestRat(v, maxD){
-  if(Math.abs(v)<1e-9)return{a:0,b:1};
-  const sign=v<0?-1:1; v=Math.abs(v);
-  let pn=0,pd=1,qn=1,qd=1;
-  for(let i=0;i<40;i++){
-    const mn=pn+qn, md=pd+qd;
-    if(md>maxD)break;
-    if(Math.abs(mn/md-v)<1e-9){pn=mn;pd=md;break;}
-    if(mn/md<v){pn=mn;pd=md;}else{qn=mn;qd=md;}
-  }
-  // pick whichever of pn/pd, qn/qd is closer
-  const r=Math.abs(pn/pd-v)<Math.abs(qn/qd-v)?{a:pn,b:pd}:{a:qn,b:qd};
-  return{a:sign*r.a,b:r.b};
-}
-function _confSl2SliderInput(v){
-  const rat=_bestRat(v,12);
-  const aEl=document.getElementById('conf-sl2-a');
-  const bEl=document.getElementById('conf-sl2-b');
-  const fEl=document.getElementById('conf-sl2-frac');
-  if(aEl)aEl.value=rat.a;
-  if(bEl)bEl.value=rat.b;
-  if(fEl)fEl.textContent=rat.b===1?String(rat.a):rat.a+'/'+rat.b;
-  _heroConfDraw();
-}
-function _confSl2NumInput(){
-  const a=parseInt(document.getElementById('conf-sl2-a')?.value||0)||0;
-  const b=Math.max(1,parseInt(document.getElementById('conf-sl2-b')?.value||1)||1);
-  const sl=document.getElementById('conf-sl2-sl');
-  const fEl=document.getElementById('conf-sl2-frac');
-  const v=a/b;
-  if(sl)sl.value=Math.max(-3,Math.min(3,v));
-  if(fEl)fEl.textContent=b===1?String(a):a+'/'+b;
-  _heroConfDraw();
-}
-function _confSl2Reset(){
-  const aEl=document.getElementById('conf-sl2-a');
-  const bEl=document.getElementById('conf-sl2-b');
-  const sl=document.getElementById('conf-sl2-sl');
-  const fEl=document.getElementById('conf-sl2-frac');
-  if(aEl)aEl.value=0; if(bEl)bEl.value=1;
-  if(sl)sl.value=0; if(fEl)fEl.textContent='0';
-  _heroConfDraw();
-}
 function _conformalMap(rx,ry,mapType){
   // z = (rx, ry) in complex plane  →  w in unit disk or ℂ
   if(mapType==='mobius'){
@@ -19275,223 +19968,6 @@ function _conformalMap(rx,ry,mapType){
   }
 }
 
-function _heroConfDraw(ctx,W,H,nAnim,t,zoom,panX,panY){
-  // Can be called as a render function (with ctx) or as a UI-triggered redraw (no args)
-  const liveMode = !ctx;
-  if(liveMode){
-    const cv=document.getElementById('hero-3d'); if(!cv)return;
-    const dpr=Math.min(devicePixelRatio||1,2);
-    W=Math.max(1,cv.width)/dpr; H=Math.max(1,cv.height)/dpr;
-    ctx=cv.getContext('2d');
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    nAnim=typeof N!=='undefined'?N:0;
-    t=0; zoom=1; panX=0; panY=0;
-  }
-  zoom=zoom||1; panX=panX||0; panY=panY||0;
-
-  const mMax=_heroG||40;
-  const mapType=document.getElementById('conf-map-type')?.value||'mobius';
-  const normalize=document.getElementById('conf-normalize')?.checked!==false;
-  const showGridLines=document.getElementById('conf-grid-lines')?.checked!==false;
-  const showCritical=document.getElementById('conf-critical')?.checked!==false;
-  const dotRBase=parseFloat(document.getElementById('conf-dot-sl')?.value||2);
-  const diskZoom=(parseFloat(document.getElementById('conf-zoom-sl')?.value||100))/100;
-  const sl2a=parseInt(document.getElementById('conf-sl2-a')?.value||0)||0;
-  const sl2b=Math.max(1,parseInt(document.getElementById('conf-sl2-b')?.value||1)||1);
-  const heroMode=_heroColorModeLocal||'modular_distance';
-  const labelMode=document.getElementById('hero-label-mode')?.value||'none';
-  const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
-
-  ctx.fillStyle='#020212'; ctx.fillRect(0,0,W,H);
-
-  const cx=W/2+panX, cy=H/2+panY;
-  const R=Math.min(W,H)*0.44*zoom*diskZoom;
-
-  // ── Background disk ──
-  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
-  grad.addColorStop(0,'rgba(10,10,35,.95)');
-  grad.addColorStop(0.85,'rgba(4,4,20,.98)');
-  grad.addColorStop(1,'rgba(2,2,12,1)');
-  ctx.fillStyle=grad;
-  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();
-
-  // ── Unit circle boundary ──
-  ctx.strokeStyle='rgba(242,168,74,.55)';ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
-
-  // ── Grid arcs: images of vertical (r=const) lines and horizontal (M=const) lines ──
-  if(showGridLines){
-   if(mapType==='smith'){
-    // ── Smith chart grid: constant-resistance circles & constant-reactance arcs ──
-    // (closed-form geometry of the Cayley transform, exact — not traced line images)
-    [0.2,0.5,1.0,2.0,5.0].forEach(rv=>{
-      const ctr=rv/(1+rv), rad=1/(1+rv);
-      ctx.beginPath();ctx.arc(cx+ctr*R,cy,rad*R,0,Math.PI*2);
-      ctx.strokeStyle='rgba(61,200,184,.22)';ctx.lineWidth=.8;ctx.stroke();
-      ctx.font="7px 'JetBrains Mono',monospace";ctx.fillStyle='rgba(61,200,184,.5)';
-      ctx.textAlign='left';ctx.textBaseline='bottom';
-      ctx.fillText('R='+rv,cx+(ctr+rad)*R+2,cy-2);
-    });
-    [-2,-1,-.5,.5,1,2].forEach(xv=>{
-      ctx.beginPath();
-      ctx.arc(cx+R,cy+(1/xv)*R,(1/Math.abs(xv))*R,
-        xv>0?Math.PI:0,xv>0?0:Math.PI,xv>0);
-      ctx.strokeStyle='rgba(155,127,232,.25)';ctx.lineWidth=.8;ctx.stroke();
-      ctx.font="7px 'JetBrains Mono',monospace";ctx.fillStyle='rgba(155,127,232,.55)';
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      const lx=cx+R+(1/xv)*R*0.55, ly=cy+(1/xv)*R*0.55;
-      ctx.fillText('X='+xv,lx,ly);
-    });
-    ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=.8;
-    ctx.beginPath();ctx.moveTo(cx-R,cy);ctx.lineTo(cx+R,cy);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx,cy-R);ctx.lineTo(cx,cy+R);ctx.stroke();
-   } else {
-    ctx.lineWidth=0.35;
-    // Images of M = k (horizontal lines in ℍ) → circular arcs in disk
-    for(let M=2;M<=mMax;M+=Math.max(1,Math.floor(mMax/16))){
-      const pts=[];
-      const ry=normalize?M/mMax:M;
-      for(let rx=-2;rx<=3;rx+=0.02){
-        const shiftedRx=rx+sl2a/sl2b*ry;
-        const w=_conformalMap(shiftedRx,ry,mapType);
-        if(!w)continue;
-        const len=w.u*w.u+w.v*w.v;
-        if(len>1.01)continue;
-        pts.push([cx+w.u*R, cy-w.v*R]);
-      }
-      if(pts.length<2)continue;
-      ctx.strokeStyle=PS?.has(M)?'rgba(61,200,184,.15)':'rgba(255,255,255,.06)';
-      ctx.beginPath();
-      pts.forEach(([px,py],i)=>i===0?ctx.moveTo(px,py):ctx.lineTo(px,py));
-      ctx.stroke();
-    }
-    // Images of r = k (vertical lines in ℍ) → circular arcs in disk
-    for(let ri=1;ri<=mMax;ri+=Math.max(1,Math.floor(mMax/24))){
-      const pts=[];
-      const rx=normalize?ri/mMax:ri;
-      for(let M2=0.01;M2<=mMax*1.5;M2+=0.05){
-        const ry=normalize?M2/mMax:M2;
-        const shiftedRx=rx+sl2a/sl2b*ry;
-        const w=_conformalMap(shiftedRx,ry,mapType);
-        if(!w)continue;
-        const len=w.u*w.u+w.v*w.v;
-        if(len>1.01)continue;
-        pts.push([cx+w.u*R, cy-w.v*R]);
-      }
-      if(pts.length<2)continue;
-      ctx.strokeStyle='rgba(200,168,74,.09)';
-      ctx.beginPath();
-      pts.forEach(([px,py],i)=>i===0?ctx.moveTo(px,py):ctx.lineTo(px,py));
-      ctx.stroke();
-    }
-   }
-  }
-
-  // ── Critical line Re(s)=1/2: image of x=1/2 line in ℍ ──
-  if(showCritical){
-    const critPts=[];
-    const critX=normalize?0.5/mMax:0.5;
-    for(let M2=0.001;M2<=mMax*2;M2+=0.02){
-      const ry=normalize?M2/mMax:M2;
-      const shiftedRx=critX+sl2a/sl2b*ry;
-      const w=_conformalMap(shiftedRx,ry,mapType);
-      if(!w)continue;
-      const len=w.u*w.u+w.v*w.v;
-      if(len>1.01)continue;
-      critPts.push([cx+w.u*R, cy-w.v*R]);
-    }
-    if(critPts.length>1){
-      ctx.strokeStyle='rgba(224,80,96,.7)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
-      ctx.beginPath();
-      critPts.forEach(([px,py],i)=>i===0?ctx.moveTo(px,py):ctx.lineTo(px,py));
-      ctx.stroke(); ctx.setLineDash([]);
-      // Label
-      if(critPts.length>0){
-        const[lx,ly]=critPts[Math.floor(critPts.length*0.55)];
-        ctx.font="8px 'JetBrains Mono',monospace";
-        ctx.fillStyle='rgba(224,80,96,.75)'; ctx.textAlign='center'; ctx.textBaseline='bottom';
-        ctx.fillText('Re(s)=½',lx,ly-4);
-      }
-    }
-  }
-
-  // ── Coprime lattice points ──
-  const dotR=Math.max(1, dotRBase*(Math.min(W,H)/500));
-  for(let M=2;M<=mMax;M++){
-    if(!_heroRingActive(M))continue;
-    for(let r=1;r<M;r++){
-      const pureCop=gcd(r,M)===1;
-      if(!_heroCharPass(pureCop))continue;
-      const d=_heroTrueDepth?_heroTrueDepth(r,M):-2;
-      const gap=pointGapClass(r,M);
-      const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
-      const dimmed=hasGaps&&!onGap;
-      const isInspected=_heroInspectMode&&_heroInspectSet&&_heroInspectSet.has((r-1)+','+(M-1));
-
-      // Coordinate: z = r + iM
-      // normalize=true: scale r∈[1,M-1] to (0,1), M∈[2,mMax] to (0,1) — spreads points across disk
-      // normalize=false: use raw integers — points cluster near boundary for large M
-      const rawR=normalize?r/mMax:r;
-      const rawM=normalize?M/mMax:M;
-      const shiftedRx=rawR+sl2a/sl2b*rawM;
-      const w=_conformalMap(shiftedRx,rawM,mapType);
-      if(!w)continue;
-      const len2=w.u*w.u+w.v*w.v;
-      if(len2>1.005)continue; // outside disk
-
-      const px=cx+w.u*R, py=cy-w.v*R;
-      // Clip to canvas
-      if(px<-dotR||px>W+dotR||py<-dotR||py>H+dotR)continue;
-
-      let col;
-      if(onGap) col=_gapColor(gap);
-      else col=_getHeroColor(r,M,nAnim,d,heroMode,t||0,null,dimmed,false,false,true);
-
-      let gbDimmed=false;
-      if(_heroGoldbachActive){const gbPair=PS?.has(r)&&PS?.has(M)&&r+M===_heroGoldbachN;gbDimmed=!gbPair;}
-      const alpha=(gbDimmed?_heroGbDimAlpha:(dimmed?0.4:1))*_heroRingOpacity;
-      ctx.globalAlpha=alpha;
-      ctx.fillStyle=col;
-      // Size varies by depth
-      const dr=d>=nAnim?dotR:d>=0?dotR*0.75:dotR*0.5;
-      ctx.beginPath();ctx.arc(px,py,dr,0,Math.PI*2);ctx.fill();
-      ctx.globalAlpha=1;
-
-      if(isInspected){
-        const idx=_heroInspectPts?_heroInspectPts.findIndex(p=>p.ri===r-1&&p.mi===M-1):-1;
-        const icol=(_HPI_COLS||_HPD_COLS||['#fff'])[idx>=0?idx%(_HPI_COLS||_HPD_COLS||['#fff']).length:0];
-        ctx.strokeStyle=icol;ctx.lineWidth=1.2;
-        ctx.beginPath();ctx.arc(px,py,dr*1.9*_heroSecDotScale,0,Math.PI*2);ctx.stroke();
-      }
-
-      // Labels
-      if(labelMode!=='none'&&!dimmed&&dr>=2.5&&!liveMode){
-        const lbl=_getHeroLabel?_getHeroLabel(r,M,nAnim,d,labelMode):String(r);
-        if(lbl){
-          const fz=Math.max(5,Math.min(dr*0.85,9))|0;
-          ctx.font=fz+"px 'JetBrains Mono',monospace";
-          ctx.textAlign='center';ctx.textBaseline='bottom';
-          ctx.fillStyle='rgba(220,215,205,.7)';
-          ctx.fillText(lbl,px,py-dr-1);
-        }
-      }
-    }
-  }
-
-  // ── Boundary label ──
-  ctx.font="8px 'JetBrains Mono',monospace";
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillStyle='rgba(242,168,74,.5)';
-  ctx.fillText('Unit Disk  —  Möbius image of coprime lattice (r,M), 2≤M≤'+mMax, cx, cy+R+6);
-
-  // ── SL₂ shift badge ──
-  if(sl2a!==0){
-    ctx.font="8px 'JetBrains Mono',monospace";
-    ctx.textAlign='left'; ctx.textBaseline='top';
-    ctx.fillStyle='rgba(155,127,232,.7)';
-    ctx.fillText('SL₂ℤ shift: '+sl2a+'/'+sl2b, cx-R+8, cy-R+6);
-  }
-}
 
 // ── HERO SMITH CHART VIEW ────────────────────────────────────────────────────
 // Distinct from the Conformal map dropdown: here z = R·e^{iθ} is built the same
@@ -19601,8 +20077,8 @@ function _heroSmithRingR(M,mMax){
   return 0.5+(ringIdx/Math.max(1,totalRings-1))*1.5;
 }
 
-function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY){
-  zoom=zoom||1; panX=panX||0; panY=panY||0;
+function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
+  zoom=zoom||1; panX=panX||0; panY=panY||0; rowShift=rowShift||0;
   const mMax=_heroG;
   const cx=W/2+panX, cy=H/2+panY;
   const R=Math.min(W,H)*0.44*zoom/_heroSmithZoomOut;
@@ -19742,14 +20218,14 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY){
     for(let r=1;r<M;r++){
       const pureCop=gcd(r,M)===1;
       if(!_heroCharPass(pureCop))continue;
-      const theta=2*Math.PI*r/M+alpha;
+      const theta=2*Math.PI*r/M+alpha+rowShift*2*Math.PI*(M-1);
       const w=_conformalMap(Rring*Math.cos(theta),Rring*Math.sin(theta),'smith');
       if(!w)continue;
       const px=cx+w.u*R, py=cy-w.v*R;
       if(px<-dotR||px>W+dotR||py<-dotR||py>H+dotR)continue;
 
       const d=_heroTrueDepth?_heroTrueDepth(r,M):-2;
-      const gap=pointGapClass(r,M);
+      const gap=pointGapClass(r,M,_heroActiveGaps);
       const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
       const dimmed=hasGaps&&!onGap;
       const isInspected=_heroInspectMode&&_heroInspectSet&&_heroInspectSet.has((r-1)+','+(M-1));
@@ -19823,90 +20299,6 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY){
   ctx.fillText=_origSmithFillText; // un-patch
 }
 
-// ── Conformal 4K Export ──
-function exportConformal4K(){
-  const PW=4096;
-  const curN=typeof N!=='undefined'?N:0;
-  const G=_heroG||40;
-  const curCn=getCnDisplay(curN).toFixed(Math.max(6,_calcDP||6));
-
-  const LINE=PW*0.013, PAD=Math.round(PW*0.035);
-  const SZ={
-    tag:Math.round(PW*0.010),title:Math.round(PW*0.024),
-    form:Math.round(PW*0.013),nval:Math.round(PW*0.012),
-    cnval:Math.round(PW*0.020),sub:Math.round(PW*0.009),
-    capt:Math.round(PW*0.011),wmark:Math.round(PW*0.007),
-  };
-  let y=0; const Y={};
-  y+=Math.round(PW*0.025); Y.tag=y; y+=SZ.tag+LINE*2;
-  Y.title=y; y+=SZ.title+LINE*2;
-  Y.form=y; y+=SZ.form+LINE*2;
-  Y.nval=y; y+=SZ.nval+LINE;
-  Y.cnval=y; y+=SZ.cnval+LINE*2;
-  Y.sub1=y; y+=SZ.sub+LINE*3;
-  const TITLE_H=y;
-
-  const CAPT_H=SZ.capt+LINE*2;
-  const BAND_H=Math.round(PW*0.052);
-  const CANVAS_SZ=Math.min(PW-PAD*2, PW-PAD*2);
-  const WMARK_H=Math.round(PW*0.022);
-  const TOTAL_H=TITLE_H+BAND_H+CAPT_H+CANVAS_SZ+WMARK_H;
-
-  const out=document.createElement('canvas');
-  out.width=PW; out.height=TOTAL_H;
-  const ctx=out.getContext('2d');
-  ctx.fillStyle='#000000'; ctx.fillRect(0,0,PW,TOTAL_H);
-  const cxc=PW/2;
-
-  ctx.fillStyle='rgba(200,168,74,.45)'; ctx.font=SZ.tag+"px 'JetBrains Mono',monospace";
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText('ANALYTIC NUMBER THEORY · WESSEN GETACHEW', cxc, Y.tag);
-
-  ctx.fillStyle='#ffffff'; ctx.font='bold '+SZ.title+"px serif";
-  ctx.fillText('C(n) — Block-Coprime Density · Conformal Disk', cxc, Y.title);
-
-  ctx.fillStyle='rgba(242,168,74,.85)'; ctx.font=SZ.form+"px 'JetBrains Mono',monospace";
-  ctx.fillText('Möbius map  f(z) = (z−i)/(z+i)  ·  z = r + iM  ·  M∈[2,G]', cxc, Y.form);
-
-  ctx.fillStyle='rgba(242,168,74,.65)'; ctx.font=SZ.nval+"px 'JetBrains Mono',monospace";
-  ctx.fillText('n = '+curN+'  ·  G = '+G, cxc, Y.nval);
-
-  ctx.fillStyle='#ffffff'; ctx.font='bold '+SZ.cnval+"px 'JetBrains Mono',monospace";
-  ctx.fillText('C('+curN+')  =  '+curCn, cxc, Y.cnval);
-
-  ctx.fillStyle='rgba(184,178,166,.5)'; ctx.font=SZ.sub+"px 'JetBrains Mono',monospace";
-  ctx.fillText('Gold = block-coprime (depth ≥ n) · Teal = coprime only · Red dashed = Re(s)=½ critical line', cxc, Y.sub1);
-
-  // Gold divider
-  ctx.fillStyle='rgba(242,168,74,.3)'; ctx.fillRect(PAD,TITLE_H-LINE*1.5,PW-PAD*2,1.5);
-
-  // ── Live value band ──
-  _drawLiveValueBand(ctx, PW, TITLE_H, curN, curCn, {bandH:BAND_H});
-
-  ctx.fillStyle='#ffffff'; ctx.font='bold '+SZ.capt+"px 'JetBrains Mono',monospace";
-  ctx.textBaseline='top';
-  ctx.fillText('Conformal Disk · G = '+G+' · n = '+curN+' · C('+curN+') = '+curCn, cxc, TITLE_H+BAND_H+LINE);
-
-  // Render conformal at full canvas size
-  const canvasX=PAD, canvasY=TITLE_H+BAND_H+CAPT_H;
-  const offCv=document.createElement('canvas');
-  offCv.width=CANVAS_SZ; offCv.height=CANVAS_SZ;
-  const offCtx=offCv.getContext('2d');
-  _heroConfDraw(offCtx,CANVAS_SZ,CANVAS_SZ,curN,0,1,0,0);
-  ctx.drawImage(offCv,canvasX,canvasY,CANVAS_SZ,CANVAS_SZ);
-
-  ctx.fillStyle='rgba(106,101,96,.4)'; ctx.font=SZ.wmark+"px 'JetBrains Mono',monospace";
-  ctx.textAlign='right'; ctx.textBaseline='bottom';
-  ctx.fillText('wessengetachew.github.io', PW-PAD, TOTAL_H-LINE);
-
-  out.toBlob(blob=>{
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.download='cn_conformal_4K_n'+curN+'_G'+G+'.png'; a.href=url;
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},2000);
-  },'image/png');
-}
 </script>
 
 <script>
@@ -19926,5 +20318,211 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
 })();
 </script>
 
+
+<script>
+(function(){
+  function enc(){
+    var p=[];
+    try{
+      if(typeof _wView!=='undefined'){
+        p.push('wv='+_wView,'wg='+_wG);
+        var ns=document.getElementById('welcome-n-slider');if(ns)p.push('wn='+ns.value);
+        if(_wActiveGaps&&_wActiveGaps.size)p.push('wgap='+Array.from(_wActiveGaps).sort(function(a,b){return a-b;}).join('.'));
+        if(typeof _wGridHalf!=='undefined'&&_wGridHalf)p.push('wh=1');
+      }
+    }catch(e){}
+    try{
+      if(typeof _heroViewMode!=='undefined'){
+        p.push('hv='+_heroViewMode,'hg='+_heroG,'hn='+(typeof N!=='undefined'?N:0));
+        if(_heroActiveGaps&&_heroActiveGaps.size)p.push('hgap='+Array.from(_heroActiveGaps).sort(function(a,b){return a-b;}).join('.'));
+        if(typeof _heroGridHalf!=='undefined'&&_heroGridHalf)p.push('hh=1');
+      }
+    }catch(e){}
+    if(typeof _gapSemantics!=='undefined')p.push('sem='+_gapSemantics);
+    return p.join('&');
+  }
+  window.cnShareLink=function(btn){
+    var url=location.origin+location.pathname+'#'+enc();
+    try{history.replaceState(null,'','#'+enc());}catch(e){}
+    (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){
+      if(btn){var t=btn.textContent;btn.textContent='\u2713 copied';setTimeout(function(){btn.textContent=t;},1200);}
+    }).catch(function(){prompt('Shareable link:',url);});
+  };
+  function apply(){
+    if(!location.hash||location.hash.length<2)return;
+    var q={};location.hash.slice(1).split('&').forEach(function(kv){var i=kv.indexOf('=');if(i>0)q[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});
+    try{
+      if(q.sem&&typeof setGapSemantics==='function')setGapSemantics(q.sem==='diagonal'?'diagonal':'forward');
+      if(q.wg&&typeof wSetG==='function')wSetG(+q.wg);
+      if(q.wn){var ns=document.getElementById('welcome-n-slider');if(ns&&typeof wRenderCn==='function'){ns.value=+q.wn;wRenderCn();}}
+      if(q.wv&&typeof wSetView==='function')wSetView(q.wv);
+      if(q.wh==='1'&&typeof wSetGridHalf==='function')wSetGridHalf(true);
+      if(q.wgap&&typeof wToggleGap==='function')q.wgap.split('.').forEach(function(g){if(+g&&!_wActiveGaps.has(+g))wToggleGap(+g);});
+      if(q.hg&&typeof heroLatticeSetG==='function')heroLatticeSetG(+q.hg);
+      if(q.hn&&typeof setN==='function')setN(+q.hn);
+      if(q.hv&&typeof heroSetView==='function')heroSetView(q.hv);
+      if(q.hh==='1'&&typeof heroSetGridHalf==='function')heroSetGridHalf(true);
+      if(q.hgap&&typeof heroGapPresetToggle==='function')q.hgap.split('.').forEach(function(g){
+        g=+g;if(!g)return;
+        if(typeof heroEnsureGapBtn==='function')heroEnsureGapBtn(g);
+        if(!_heroActiveGaps.has(g))heroGapPresetToggle(g);
+      });
+    }catch(e){console.warn('hash state restore:',e);}
+  }
+  if(document.readyState==='complete')setTimeout(apply,0);
+  else window.addEventListener('load',function(){setTimeout(apply,50);});
+})();
+</script>
+
+<script>
+// ── VIEW TOUR — auto-cycle through canvases with a reorderable list + timer ──
+(function(){
+  var C={mono:"'JetBrains Mono',monospace"};
+  function makeTour(o){
+    var order=o.views.slice(), iv=null, idx=0, secs=o.secs||2, calling=false;
+    var host=document.getElementById(o.panel); if(!host)return null;
+    host.innerHTML='<details id="'+o.panel+'-dd" style="margin:4px 0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);font-family:'+C.mono+';">'
+      +'<summary style="cursor:pointer;list-style:none;padding:5px 10px;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(155,127,232,.85);user-select:none;">\u25b8 Play Dynamic \u2014 view tour</summary>'
+      +'<div style="padding:6px 10px 8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:8px;color:#a8a294;">'
+      +'<button id="'+o.panel+'-play" style="background:rgba(126,200,122,.12);border:1px solid rgba(126,200,122,.5);color:rgba(126,200,122,.9);font-family:'+C.mono+';font-size:9px;width:26px;height:22px;cursor:pointer;">\u25b6</button>'
+      +'<span>every</span><input id="'+o.panel+'-secs" type="number" min="0.5" step="0.5" value="'+secs+'" style="width:44px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:'+C.mono+';font-size:9px;text-align:center;padding:2px;">'
+      +'<span>s</span><div id="'+o.panel+'-list" style="display:flex;flex-wrap:wrap;gap:5px;"></div></div></details>';
+    var listEl=document.getElementById(o.panel+'-list');
+    var playBtn=document.getElementById(o.panel+'-play');
+    var secsEl=document.getElementById(o.panel+'-secs');
+    function render(){
+      listEl.innerHTML='';
+      order.forEach(function(v,i){
+        var chip=document.createElement('span');
+        chip.style.cssText='display:inline-flex;align-items:center;gap:3px;border:1px solid '+(i===idx&&iv?'rgba(126,200,122,.7)':'rgba(255,255,255,.15)')+';padding:2px 4px 2px 7px;font-size:8px;color:'+(i===idx&&iv?'rgba(126,200,122,.95)':'#a8a294')+';';
+        chip.innerHTML=v+' <button data-d="-1" style="all:unset;cursor:pointer;font-size:8px;color:#6a6560;padding:0 2px;">\u25c0</button><button data-d="1" style="all:unset;cursor:pointer;font-size:8px;color:#6a6560;padding:0 2px;">\u25b6</button>';
+        chip.querySelectorAll('button').forEach(function(b){
+          b.onclick=function(){var d=+b.dataset.d,j=i+d;if(j<0||j>=order.length)return;
+            order.splice(i,1);order.splice(j,0,v);if(idx===i)idx=j;render();};
+        });
+        listEl.appendChild(chip);
+      });
+      playBtn.textContent=iv?'\u23f8':'\u25b6';
+    }
+    function stop(){if(iv){clearInterval(iv);iv=null;render();}}
+    function start(){
+      stop();
+      secs=Math.max(0.5,parseFloat(secsEl.value)||2);
+      iv=setInterval(function(){
+        idx=(idx+1)%order.length;
+        calling=true; try{o.set(order[idx]);}catch(e){} calling=false;
+        render();
+      },secs*1000);
+      render();
+    }
+    playBtn.onclick=function(){iv?stop():start();};
+    secsEl.onchange=function(){if(iv)start();};
+    // Manual view-button click stops the tour (don't fight the user)
+    (o.stopButtons||[]).forEach(function(id){
+      var b=document.getElementById(id);
+      if(b)b.addEventListener('click',function(){if(!calling)stop();});
+    });
+    render();
+    return {start:start,stop:stop,goFirst:function(){idx=0;calling=true;try{o.set(order[0]);}catch(e){}calling=false;render();}};
+  }
+  function _tourBoot(tries){
+    if(typeof wSetView!=='function'||typeof heroSetView!=='function'){
+      if(tries>0)setTimeout(function(){_tourBoot(tries-1);},500);
+      return;
+    }
+    _tourInit();
+  }
+  function _tourInit(){
+    var wTour=makeTour({panel:'w-tour-panel',secs:30,
+      views:['grid','ring','ring+lift','farey','gauss','smith'],
+      set:function(v){
+        if(typeof wSetView!=='function')return;
+        if(v==='ring+lift'){wSetView('ring');if(typeof wSetRingLift==='function')wSetRingLift(true);window._wRingLiftState=true;}
+        else{if(typeof wSetRingLift==='function')wSetRingLift(false);window._wRingLiftState=false;wSetView(v);}
+      },
+      stopButtons:['wvb-smith','wvb-ring','wvb-grid','wvb-farey','wvb-gauss']});
+    var hTour=makeTour({panel:'hero-tour-panel',secs:30,
+      views:['grid','ring','farey','lift','gauss','smith'],
+      set:function(v){if(typeof heroSetView==='function')heroSetView(v);},
+      stopButtons:['hero-view-grid','hero-view-ring','hero-view-farey','hero-view-lift','hero-view-gauss','hero-view-smith']});
+    // Default on open: start on Grid, shift every 2s — unless a share-link
+    // hash pinned a specific view.
+    var h=location.hash||'';
+    if(wTour&&h.indexOf('wv=')<0){wTour.goFirst();wTour.start();}
+    if(hTour&&h.indexOf('hv=')<0){hTour.goFirst();hTour.start();}
+  }
+  if(document.readyState!=='loading')_tourBoot(20);
+  else document.addEventListener('DOMContentLoaded',function(){_tourBoot(20);});
+})();
+</script>
+
+<script>
+(function(){
+  var P=null;
+  function sieve(){if(P)return P;var L=60000,f=new Uint8Array(L+1);P=[];
+    for(var i=2;i<=L;i++){if(!f[i]){P.push(i);for(var j=i*i;j<=L;j+=i)f[j]=1;}}return P;}
+  window.wCnSteps=function(n){
+    n=Math.max(0,Math.min(500,Math.round(n||0)));
+    var pr=sieve(),ZETA2=Math.PI*Math.PI/6;
+
+    // ── C(n) column ──
+    var hC='';
+    hC+='C('+n+') = ζ(2)·∏<sub>p</sub>(1 − min('+(n+1)+', p)/p²)<br>';
+    hC+='<span style="color:#6a6560;">split at p ≤ '+(n+1)+' (factor 1−1/p) vs p &gt; '+(n+1)+' (factor 1−'+(n+1)+'/p²):</span><br>';
+    hC+='&nbsp;= ζ(2) · ∏<sub>p≤'+(n+1)+'</sub>(1−1/p) · ∏<sub>p&gt;'+(n+1)+'</sub>(1−'+(n+1)+'/p²)<br>';
+    hC+='<span style="color:#6a6560;">absorb ζ(2)=∏(1−1/p²)⁻¹ prime-by-prime:</span><br>';
+    hC+='&nbsp;= ∏<sub>p≤'+(n+1)+'</sub> p/(p+1) · ∏<sub>p&gt;'+(n+1)+'</sub> (p²−'+(n+1)+')/(p²−1)<br>';
+    var smallC=[],prodC=1,i;
+    for(i=0;i<pr.length&&pr[i]<=n+1;i++){smallC.push(pr[i]+'/'+(pr[i]+1));prodC*=pr[i]/(pr[i]+1);}
+    if(smallC.length)hC+='&nbsp;= ['+smallC.join(' · ')+'] · tail<br>';
+    var shownC=[],k=0;
+    for(;i<pr.length;i++){
+      var p=pr[i],f=(p*p-(n+1))/(p*p-1);
+      prodC*=f;
+      if(k<5){shownC.push('('+(p*p-(n+1))+'/'+(p*p-1)+')');k++;}
+    }
+    hC+='<span style="color:#6a6560;">first tail factors:</span> '+shownC.join('·')+' · …<br>';
+    hC+='C('+n+') ≈ <b style="color:#c8a84a;">'+prodC.toFixed(9)+'</b> <span style="color:#6a6560;">(primes ≤ 60k; ~7–8 dp)</span>';
+    if(n===0)hC+='<br><span style="color:#3dc8b8;">n=0: every factor is (p²−1)/(p²−1)=1 → C(0)=1 exactly.</span>';
+
+    // ── D(n) column — same product, no ζ(2) prefactor: the raw density ──
+    var hD='';
+    hD+='D('+n+') = C('+n+')/ζ(2) = ∏<sub>p</sub>(1 − min('+(n+1)+', p)/p²)<br>';
+    hD+='<span style="color:#6a6560;">split at p ≤ '+(n+1)+' (factor 1−1/p = (p−1)/p) vs p &gt; '+(n+1)+' (factor (p²−'+(n+1)+')/p²):</span><br>';
+    hD+='&nbsp;= ∏<sub>p≤'+(n+1)+'</sub> (p−1)/p · ∏<sub>p&gt;'+(n+1)+'</sub> (p²−'+(n+1)+')/p²<br>';
+    var smallD=[],prodD=1,j;
+    for(j=0;j<pr.length&&pr[j]<=n+1;j++){smallD.push((pr[j]-1)+'/'+pr[j]);prodD*=(pr[j]-1)/pr[j];}
+    if(smallD.length)hD+='&nbsp;= ['+smallD.join(' · ')+'] · tail<br>';
+    var shownD=[],k2=0;
+    for(;j<pr.length;j++){
+      var q=pr[j],g=(q*q-(n+1))/(q*q);
+      prodD*=g;
+      if(k2<5){shownD.push('('+(q*q-(n+1))+'/'+(q*q)+')');k2++;}
+    }
+    hD+='<span style="color:#6a6560;">first tail factors:</span> '+shownD.join('·')+' · …<br>';
+    hD+='D('+n+') ≈ <b style="color:#3dc8b8;">'+prodD.toFixed(9)+'</b> <span style="color:#6a6560;">(primes ≤ 60k; ~7–8 dp)</span>';
+    if(n===0)hD+='<br><span style="color:#3dc8b8;">n=0: every factor is (p²−1)/p² → D(0)=1/ζ(2)=6/π² exactly.</span>';
+    hD+='<br><span style="color:#6a6560;">check: C('+n+')/D('+n+') = '+(prodC/prodD).toFixed(6)+' ≈ ζ(2)=1.644934 ✓</span>';
+
+    var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">'+
+      '<div style="border-right:1px solid rgba(255,255,255,.06);padding-right:10px;">'+hC+'</div>'+
+      '<div>'+hD+'</div></div>';
+    var o=document.getElementById('w-steps-out');if(o)o.innerHTML=h;
+    // Ground-state lock: push this n into the page's C(n) so every view,
+    // live value, and readout follows the widget.
+    if(document.getElementById('w-steps-link')?.checked){
+      var ns=document.getElementById('welcome-n-slider');
+      if(ns&&typeof wRenderCn==='function'){
+        ns.value=Math.min(+ns.max||31,n);
+        wRenderCn();
+        if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+      }
+      if(typeof setN==='function')setN(n); // hero n follows too
+    } else if(typeof wRenderCn==='function'){
+      wRenderCn(); // not locked — let wRenderCn restore the default headline
+    }
+  };
+})();
+</script>
 </body>
 </html>
