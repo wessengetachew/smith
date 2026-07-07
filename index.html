@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="An interactive explorer for C(n), the Euler product governing how often a random integer is coprime to an entire block of n+1 consecutive integers. Six live lattice views (Grid, Ring, Farey, Lift, Gauss, Smith), step-by-step derivations, and exportable data.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="C(n) — Block-Coprime Density">
+<meta property="og:description" content="One Euler product, six interactive views: watch the density of block-coprime integers step down from ζ(2)⁻¹ as the block grows.">
+<meta name="twitter:card" content="summary">
 <title>C(n) — Block-Coprime Density · Wessen Getachew</title>
 
 <script>
@@ -1073,6 +1078,28 @@ function heroToggleTopBars(){
       <button id="welcome-x" onclick="window.closeWelcome()" aria-label="Close">×</button>
     </div>
     <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53?</div>
+
+    <!-- Plain-language lede — one breath of context before any controls,
+         so a first-time reader knows what the page is about. -->
+    <div style="animation:wgFadeUp .6s .18s both;margin:6px 0 2px;font-family:'Spectral',serif;font-size:12.5px;line-height:1.55;color:#a8a294;">
+      Two integers are <em style="color:#cfc9bc;">coprime</em> when they share no common factor.
+      This page asks a stronger question: how often is a random integer coprime to
+      <em style="color:#cfc9bc;">every one</em> of <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">n+1</span> consecutive integers at once?
+      One Euler product — <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#3dc8b8;">C(n)</span> — governs that density for every n, and every view below is that product made visible.
+    </div>
+
+    <!-- Ground-state control — surfaced right below the title so the
+         headline question has an immediate, hands-on answer. Shares state
+         with the fuller "Try any n" panel inside the Intro dropdown below
+         (and the matching copy above the hero's calculator) via wCnSteps. -->
+    <div id="w-groundstate-top" style="animation:wgFadeUp .6s .22s both;margin:8px 0 4px;padding:8px 10px;background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.18);font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+      <span>C(1) ≈ 0.530711&hellip; is the first step down from certainty — set n below to lock a ground state and watch each later step live.</span>
+      <span style="color:#a8a294;">n&nbsp;=</span>
+      <input type="number" id="top-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;">
+      <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
+        <input type="checkbox" id="top-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('top-steps-n')?.value||0))"> set ground state (lock to page n)
+      </label>
+    </div>
 
     <!-- View options row — moved here so the view picker sits right below the title -->
     <div style="animation:wgFadeUp .6s .3s both;margin:8px 0 10px;">
@@ -2248,7 +2275,9 @@ function heroToggleTopBars(){
     (function(){
       var titleEl=document.getElementById('welcome-title');
       if(!titleEl)return;
-      var locked=document.getElementById('w-steps-link')?.checked;
+      var locked=document.getElementById('top-steps-link')?.checked
+        ||document.getElementById('w-steps-link')?.checked
+        ||document.getElementById('hero-steps-link')?.checked;
       if(locked&&_wMathReady){
         titleEl.textContent='Why does this number keep landing near '+val.toFixed(2)+'?';
       } else if(!locked){
@@ -2877,6 +2906,11 @@ function heroToggleTopBars(){
     }
     ctx.restore();
   }
+  // Expose globally — lift-toggle handlers (Mirror/Dropout/All p/All n/etc.)
+  // live in a separate <script> block and call this via a typeof-guarded
+  // reference; without this it silently no-ops and only the G/n sliders
+  // (which call the local closure copy directly) ever trigger a redraw.
+  window.wRedrawCanvas=wRedrawCanvas;
 
   // ── Canvas fullscreen: hide/show the control bar (+ zoom row) ──
   window.wToggleHideControls=function(){
@@ -3050,6 +3084,10 @@ function heroToggleTopBars(){
       ctx.strokeStyle=color+'70';ctx.lineWidth=1.5;
       ctx.beginPath();ctx.arc(cx,cy,gR,0,Math.PI*2);ctx.stroke();
     });
+    // Dim the base ring points while the Lift overlay is on — they're drawn
+    // on top of the lift arcs/spirals and at full opacity were flattening
+    // them out. Hit-testing (_wHitPts) still records at full fidelity.
+    if(_wRingLift){ctx.save();ctx.globalAlpha=0.4;}
     for(var M=1;M<=rings;M++){
       if(!_wRingActive(M))continue;
       var R=maxR*(M-1)/Math.max(1,rings-1);
@@ -3069,6 +3107,7 @@ function heroToggleTopBars(){
         ctx.fill();
       }
     }
+    if(_wRingLift){ctx.restore();}
     // Sector path — highlight traced points at their true ring position
     // (same extraRot/per-ring twist as the main lattice, for visual consistency).
     for(var si=0;si<_wSectorPts.length;si++){
@@ -3839,9 +3878,30 @@ function heroToggleTopBars(){
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">8K</span>
             <span><b>Grid + Farey 8K</b><span class="exp-opt-sub">Side-by-side · Farey lattice · 7680 × 4320</span></span>
           </button>
+          <button class="exp-opt" onclick="exportHeroSideBySide8K('lift');closeExpDD()">
+            <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">8K</span>
+            <span><b>Grid + Lift 8K</b><span class="exp-opt-sub">Side-by-side · Lift dynamics · 7680 × 4320</span></span>
+          </button>
           <button class="exp-opt" onclick="exportHeroRatioCSV();closeExpDD()">
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">CSV</span>
             <span><b>Per-Point Survival CSV</b><span class="exp-opt-sub">Every (r,M) · gcd, lift chain, depth, angles &amp; rotation</span></span>
+          </button>
+          <div class="exp-sec">Hero Lattice — point-level</div>
+          <button class="exp-opt" onclick="heroExportDetailCSV();closeExpDD()">
+            <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">CSV</span>
+            <span><b>Point Detail CSV</b><span class="exp-opt-sub">Traced-path points from the Point Detail table</span></span>
+          </button>
+          <button class="exp-opt" onclick="heroExportInspectCSV();closeExpDD()">
+            <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">CSV</span>
+            <span><b>Inspected Points CSV</b><span class="exp-opt-sub">Points added via click-to-inspect</span></span>
+          </button>
+          <button class="exp-opt" onclick="_exportWorkingCSV();closeExpDD()">
+            <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">CSV</span>
+            <span><b>Show Working CSV</b><span class="exp-opt-sub">Prime-by-prime Euler product table · current n</span></span>
+          </button>
+          <button class="exp-opt" onclick="_exportWorkingPNG();closeExpDD()">
+            <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">PNG</span>
+            <span><b>Show Working PNG</b><span class="exp-opt-sub">Prime-by-prime Euler product table · current n</span></span>
           </button>
           <div class="exp-sec">C(n) Chart &amp; Tables</div>
           <button class="exp-opt" onclick="openChartPNGPreview()">
@@ -4885,6 +4945,79 @@ function heroToggleTopBars(){
   </div>
 </div>
 
+
+<!-- Intro dropdown — duplicated from the opener, above the calculator -->
+<div class="card sec-anchor" id="hero-intro-card">
+    <details id="hero-intro-dd" style="position:relative;z-index:1;">
+    <summary style="cursor:pointer;list-style:none;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,74,.7);padding:2px 0 6px;user-select:none;">
+      <span style="display:inline-block;transition:transform .15s;">▸</span> Intro — what is C(n)?
+    </summary>
+    <style>#hero-intro-dd[open]>summary>span{transform:rotate(90deg);}</style>
+    <p style="animation:wgFadeUp .6s .75s both;">
+      Pick a random whole number. Now ask: how likely is it — and the next n numbers right
+      after it — to all share no common factor with a fixed modulus M? That probability
+      has a name, C(n), and it drops in clean, predictable steps — one jump at every prime.
+    </p>
+
+    <p style="animation:wgFadeUp .6s .9s both;">
+      It starts at certainty: C(0) = 1, exactly. The first step lands on
+      C(1) ≈ 0.530711…, and nothing about it is mysterious — it's ζ(2) times the
+      Feller–Tornier product ∏<sub>p</sub>(1−2/p²), and the result has its own
+      classical entry. Two known constants multiplied, one known answer — everything
+      <em>after</em> that first step is where this site begins.
+    </p>
+
+    <p class="welcome-note" style="animation:wgFadeUp .6s 1s both;">
+      OEIS:&nbsp;
+      <a href="https://oeis.org/A013661" target="_blank" rel="noopener" style="color:#3dc8b8;">A013661</a> (ζ(2)) ×
+      <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:#3dc8b8;">A065474</a> (∏(1−2/p²)) =
+      <a href="https://oeis.org/A065469" target="_blank" rel="noopener" style="color:#3dc8b8;">A065469</a> (C(1)).
+    </p>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.9;color:#b8b2a6;background:#0c0c22;border:1px solid rgba(255,255,255,.08);border-left:2px solid rgba(61,200,184,.5);padding:12px 14px;margin:0 0 12px;">
+      <div style="color:#3dc8b8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">How the ζ(2) cancels — baseline C(0) &amp; D(0)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">
+        <div style="border-right:1px solid rgba(255,255,255,.06);padding-right:10px;">
+          <span style="color:#6a6560;font-size:8px;">C(n) — normalized (× ζ(2))</span><br>
+          C(0) = ζ(2)·∏<sub>p</sub>(1−1/p²)<br>
+          &nbsp;&nbsp;= ∏<sub>p</sub>(1−1/p²)<sup>−1</sup>·∏<sub>p</sub>(1−1/p²)&nbsp;&nbsp;<span style="color:#6a6560;">[Euler]</span><br>
+          &nbsp;&nbsp;= <b style="color:#c8a84a;">1 exactly</b> — every factor cancels its own inverse.
+        </div>
+        <div>
+          <span style="color:#6a6560;font-size:8px;">D(n) = C(n)/ζ(2) — raw density</span><br>
+          D(0) = C(0)/ζ(2) = 1/ζ(2) = ∏<sub>p</sub>(1−1/p²)<br>
+          &nbsp;&nbsp;= (3/4)·(8/9)·(24/25)·(48/49)·…<br>
+          &nbsp;&nbsp;= <b style="color:#3dc8b8;">0.607927101854</b> — no cancellation left, it's just 1/ζ(2).
+        </div>
+      </div>
+      <div style="color:#3dc8b8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin:12px 0 6px;">First step — C(1) &amp; D(1)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">
+        <div style="border-right:1px solid rgba(255,255,255,.06);padding-right:10px;">
+          C(1) = ζ(2)·∏<sub>p</sub>(1−2/p²)<br>
+          &nbsp;&nbsp;= ∏<sub>p</sub> (1−2/p²)/(1−1/p²) = ∏<sub>p</sub> (p²−2)/(p²−1)<br>
+          &nbsp;&nbsp;= (2/3)·(7/8)·(23/24)·(47/48)·…<br>
+          &nbsp;&nbsp;≈ <b style="color:#c8a84a;">0.530711820472</b>
+        </div>
+        <div>
+          D(1) = C(1)/ζ(2) = ∏<sub>p</sub>(1−2/p²)<br>
+          &nbsp;&nbsp;<span style="color:#6a6560;">same product, no ζ(2) factor — this is the Feller–Tornier constant D<sub>FT</sub></span><br>
+          &nbsp;&nbsp;= (1/2)·(7/9)·(23/25)·(47/49)·…<br>
+          &nbsp;&nbsp;≈ <b style="color:#3dc8b8;">0.322634098939</b>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:9px;color:#6a6560;">check: C(1)/D(1) = ζ(2) = 1.644934… ✓ &nbsp;·&nbsp; C(0)/D(0) = ζ(2) ✓</div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;background:#0c0c22;border:1px solid rgba(155,127,232,.25);padding:12px 14px;margin:0 0 12px;">
+      <div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Try any n — step-by-step (C(n) &amp; D(n))</div>
+      <span style="color:#a8a294;">n =</span>
+      <input type="number" id="hero-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;">
+      <button onclick="wCnSteps(+document.getElementById('hero-steps-n').value)" style="background:rgba(155,127,232,.12);border:1px solid rgba(155,127,232,.5);color:#9b7fe8;font-family:inherit;font-size:9px;padding:4px 12px;cursor:pointer;">Show steps</button>
+      <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
+        <input type="checkbox" id="hero-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('hero-steps-n')?.value||0))"> set ground state (lock to page n)
+      </label>
+      <div id="hero-steps-out" style="margin-top:8px;line-height:1.9;color:#b8b2a6;"></div>
+    </div>
+    </details>
+</div>
 
 <!-- SECTION 1: CALCULATOR -->
 <div class="card sec-anchor" id="s-calc">
@@ -10022,9 +10155,9 @@ function getHLInfoHTML(key){
       color:'224,80,96',
       title:'Classical Feller–Tornier Constant',
       formula:'C_FT = ½(1 + D_FT) = ½(1 + D(1))',
-      desc:`The Feller–Tornier constant (1932) is the probability that gcd(a,b) is squarefree. It is NOT the same as C(1) (block-coprime density at n=1). The distinction: C_FT uses ½(1+∏_p(1−2/p²)) while C(1) = ζ(2)·∏_p(1−2/p²). The two constants share D(1) but combine it differently.`,
+      desc:`The Feller–Tornier constant (1932) is the density of integers with an even number of distinct prime factors of multiplicity ≥ 2 (non-unitary prime divisors). It is NOT the same as C(1) (block-coprime density at n=1). The distinction: C_FT uses ½(1+∏_p(1−2/p²)) while C(1) = ζ(2)·∏_p(1−2/p²). The two constants share D(1) but combine it differently.`,
       steps:[
-        `<b>Feller–Tornier (1933):</b> Prob(gcd(a,b) is squarefree) = ½(1 + D_FT) where D_FT = ∏<sub>p</sub>(1−2/p²). (Note: this is a half-sum of two products, not itself reducible to a single Euler product over a modified local factor.)`,
+        `<b>Feller–Tornier (1932):</b> density of integers with an even number of non-unitary prime divisors = ½(1 + D_FT) where D_FT = ∏<sub>p</sub>(1−2/p²). (Note: this is a half-sum of two products, not itself reducible to a single Euler product over a modified local factor.)`,
         `<b>D_FT = D(1) ≈ </b><span class="teal">${Dn1.toFixed(7)}</span>.`,
         `<b>C_FT = ½(1 + D(1)) = ½(1 + ${Dn1.toFixed(6)}) = </b><span class="gold">${((1+Dn1)/2).toFixed(7)}</span>.`,
         `<b>Compare:</b> C(1) = ζ(2)·D(1) = ${ZETA2.toFixed(5)}·${Dn1.toFixed(6)} ≈ <span class="gold">${Cn1.toFixed(7)}</span>. These are different constants using the same D(1).`,
@@ -20643,11 +20776,12 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
       views:['grid','ring','farey','lift','gauss','smith'],
       set:function(v){if(typeof heroSetView==='function')heroSetView(v);},
       stopButtons:['hero-view-grid','hero-view-ring','hero-view-farey','hero-view-lift','hero-view-gauss','hero-view-smith']});
-    // Default on open: start on Grid, shift every 2s — unless a share-link
-    // hash pinned a specific view.
+    // Default on open: land on Grid but do NOT auto-play — the tour is
+    // opt-in now (hit the play button), unless a share-link hash pinned a
+    // specific view, in which case leave it alone entirely.
     var h=location.hash||'';
-    if(wTour&&h.indexOf('wv=')<0){wTour.goFirst();wTour.start();}
-    if(hTour&&h.indexOf('hv=')<0){hTour.goFirst();hTour.start();}
+    if(wTour&&h.indexOf('wv=')<0){wTour.goFirst();}
+    if(hTour&&h.indexOf('hv=')<0){hTour.goFirst();}
   }
   if(document.readyState!=='loading')_tourBoot(20);
   else document.addEventListener('DOMContentLoaded',function(){_tourBoot(20);});
@@ -20705,10 +20839,19 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
     var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">'+
       '<div style="border-right:1px solid rgba(255,255,255,.06);padding-right:10px;">'+hC+'</div>'+
       '<div>'+hD+'</div></div>';
+    // Mirror into both the opener's copy and the hero's copy (above the calculator).
     var o=document.getElementById('w-steps-out');if(o)o.innerHTML=h;
+    var oh=document.getElementById('hero-steps-out');if(oh)oh.innerHTML=h;
+    // Keep all three "n =" inputs in sync no matter which one triggered this.
+    var nsTop=document.getElementById('top-steps-n'); if(nsTop&&+nsTop.value!==n)nsTop.value=n;
+    var nsIn=document.getElementById('w-steps-n'); if(nsIn&&+nsIn.value!==n)nsIn.value=n;
+    var nsInH=document.getElementById('hero-steps-n'); if(nsInH&&+nsInH.value!==n)nsInH.value=n;
     // Ground-state lock: push this n into the page's C(n) so every view,
-    // live value, and readout follows the widget.
-    if(document.getElementById('w-steps-link')?.checked){
+    // live value, and readout follows the widget. Any of the three copies'
+    // checkboxes (top-of-opener, Intro dropdown, hero) can lock it.
+    if(document.getElementById('top-steps-link')?.checked
+      ||document.getElementById('w-steps-link')?.checked
+      ||document.getElementById('hero-steps-link')?.checked){
       var ns=document.getElementById('welcome-n-slider');
       if(ns&&typeof wRenderCn==='function'){
         ns.value=Math.min(+ns.max||31,n);
