@@ -1124,6 +1124,14 @@ function heroToggleTopBars(){
         <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding" style="background:none;border:1px solid rgba(230,56,72,.4);color:rgba(230,56,72,.85);font-family:inherit;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
         <span style="color:rgba(61,200,184,.85);">● ±1</span>
         <button class="lift-npath-dir-btn" onclick="liftCycleNPathDir()" title="±1 branch" style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:inherit;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
+        <span style="width:1px;height:14px;background:rgba(255,255,255,.12);display:inline-block;"></span>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Mirror conjugate spiral σ(r)=M−r"><input type="checkbox" class="lift-mirror-chk" onchange="liftToggleMirror(this.checked)">Mirror</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.9);cursor:pointer;" title="Highlight the dropout ring M=p"><input type="checkbox" class="lift-dropout-chk" onchange="liftToggleDropout(this.checked)">Dropout</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.7);cursor:pointer;" title="Overlay every prime's spiral"><input type="checkbox" class="lift-allp-chk" onchange="liftToggleAllPrimes(this.checked)">All p</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(61,200,184,.9);cursor:pointer;" title="Overlay n=1,3,5,7,9 simultaneously"><input type="checkbox" class="lift-alln-chk" onchange="liftToggleAllN(this.checked)">All n</label>
+        <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:none;border:1px solid rgba(61,200,184,.4);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ n</button>
+        <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ p</button>
+        <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:none;border:1px solid rgba(126,200,122,.4);color:#7ec87a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ M</button>
       </div>
       <div id="w-grid-plot-ctrl" style="display:none;align-items:center;gap:6px;margin-top:6px;">
         <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(155,127,232,.8);white-space:nowrap;">Plot:</span>
@@ -2989,18 +2997,49 @@ function heroToggleTopBars(){
       var npOn=(typeof _liftShowNPath==='undefined')||_liftShowNPath;
       var spDir=(typeof _liftSpiralDir==='undefined')?'up':_liftSpiralDir;
       var npDir=(typeof _liftNPathDir==='undefined')?'both':_liftNPathDir;
+      var mirrorOn=(typeof _liftMirrorOn!=='undefined')&&_liftMirrorOn;
+      var dropoutOn=(typeof _liftDropoutOn!=='undefined')&&_liftDropoutOn;
+      var allPOn=(typeof _liftAllPrimesOn!=='undefined')&&_liftAllPrimesOn;
+      var allNOn=(typeof _liftAllNOn!=='undefined')&&_liftAllNOn;
       var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(rings):2;
+      // Dropout ring — the spiral prime's own modulus, where it exits (ℤ/Mℤ)*.
+      if(dropoutOn&&spP>=2&&spP<=rings&&_wRingActive(spP)){
+        var dR=maxR*(spP-1)/Math.max(1,rings-1);
+        ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.75)';ctx.lineWidth=1.3;
+        ctx.beginPath();ctx.arc(cx,cy,dR,0,Math.PI*2);ctx.stroke();ctx.restore();
+      }
+      // All-primes overlay — every other prime's spiral, dimmed relative to the selected one.
+      if(allPOn&&typeof PRIMES!=='undefined'){
+        for(var api=0;api<PRIMES.length;api++){
+          var ap=PRIMES[api]; if(ap>=rings)break;
+          if(ap===spP)continue;
+          for(var apM=ap+1;apM<=rings;apM++){
+            if(!_wRingActive(apM))continue;
+            var apr=spDir==='down'?(((apM-(ap%apM))%apM)||apM):(ap%apM);
+            var apXY=ringXY(apr,apM);
+            ctx.fillStyle='rgba(230,56,72,.28)';ctx.beginPath();ctx.arc(apXY[0],apXY[1],1.5,0,6.2832);ctx.fill();
+          }
+        }
+      }
+      var nList=allNOn?LIFT_ALL_N:[(typeof _liftPathN==='undefined')?1:_liftPathN];
       for(var pM=3;pM<=rings;pM++){
         if(!_wRingActive(pM))continue;
         if(spOn&&spP<pM){
           var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
           var S=ringXY(sr,pM);
           ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
+          if(mirrorOn){
+            var SM=ringXY(pM-sr,pM);
+            ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();
+          }
         }
-        var _nn2=(typeof _liftPathN==='undefined')?1:_liftPathN;
-        if(npOn&&((pM%2)===(_nn2%2))){
-          if(npDir!=='down'&&(pM+_nn2)/2<pM){var U=ringXY((pM+_nn2)/2,pM);ctx.fillStyle='rgba(61,200,184,.9)';ctx.beginPath();ctx.arc(U[0],U[1],2.2,0,6.2832);ctx.fill();}
-          if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=ringXY((pM-_nn2)/2,pM);ctx.fillStyle='rgba(61,200,184,.9)';ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}
+        for(var nI=0;nI<nList.length;nI++){
+          var _nn2=nList[nI];
+          if(!(npOn&&((pM%2)===(_nn2%2))))continue;
+          var nAlpha=allNOn?(0.35+0.5*(nI/(nList.length-1||1))):0.9;
+          var nCol='rgba(61,200,184,'+nAlpha.toFixed(2)+')';
+          if(npDir!=='down'&&(pM+_nn2)/2<pM){var U=ringXY((pM+_nn2)/2,pM);ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(U[0],U[1],2.2,0,6.2832);ctx.fill();}
+          if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=ringXY((pM-_nn2)/2,pM);ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}
         }
       }
     }
@@ -3250,6 +3289,10 @@ function heroToggleTopBars(){
       var _npOn=(typeof _liftShowNPath==='undefined')||_liftShowNPath;
       var _spDir=(typeof _liftSpiralDir==='undefined')?'up':_liftSpiralDir;
       var _npDir=(typeof _liftNPathDir==='undefined')?'both':_liftNPathDir;
+      var _mirrorOn=(typeof _liftMirrorOn!=='undefined')&&_liftMirrorOn;
+      var _dropoutOn=(typeof _liftDropoutOn!=='undefined')&&_liftDropoutOn;
+      var _allPOn=(typeof _liftAllPrimesOn!=='undefined')&&_liftAllPrimesOn;
+      var _allNOn=(typeof _liftAllNOn!=='undefined')&&_liftAllNOn;
       if(_spOn||_npOn){
         var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(rings):2;
         var mark=function(pr,pM,color,rad){
@@ -3259,16 +3302,45 @@ function heroToggleTopBars(){
           var w=_conformalSmithXY(pRingR*Math.cos(th),pRingR*Math.sin(th),R0);
           ctx.fillStyle=color;ctx.beginPath();ctx.arc(cx+w.x,cy+w.y,rad,0,6.2832);ctx.fill();
         };
+        // Dropout ring — the ring M=p itself, where the spiral prime exits (ℤ/Mℤ)*.
+        if(_dropoutOn&&spP>=2&&spP<=rings&&_wRingActive(spP)){
+          var dRingR=0.5+((spP-1)/Math.max(1,rings-1))*1.5;
+          ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.1;
+          ctx.beginPath();
+          for(var dk=0;dk<=64;dk++){
+            var dt=2*Math.PI*dk/64+alpha;
+            var dp=_conformalSmithPt(dRingR,dt,R0);
+            if(dk===0)ctx.moveTo(cx+dp.x,cy+dp.y);else ctx.lineTo(cx+dp.x,cy+dp.y);
+          }
+          ctx.closePath();ctx.stroke();ctx.restore();
+        }
+        // All-primes overlay — every other prime's spiral, dimmed vs. the selected one.
+        if(_allPOn&&typeof PRIMES!=='undefined'){
+          for(var api=0;api<PRIMES.length;api++){
+            var ap=PRIMES[api]; if(ap>=rings)break;
+            if(ap===spP)continue;
+            for(var apM=ap+1;apM<=rings;apM++){
+              if(!_wRingActive(apM))continue;
+              var apr=_spDir==='down'?(((apM-(ap%apM))%apM)||apM):(ap%apM);
+              mark(apr,apM,'rgba(230,56,72,.25)',1.4);
+            }
+          }
+        }
+        var _nList=_allNOn?LIFT_ALL_N:[(typeof _liftPathN==='undefined')?1:_liftPathN];
         for(var pM=3;pM<=rings;pM++){
           if(!_wRingActive(pM))continue;
           if(_spOn&&spP<pM){
             var sr=_spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
             mark(sr,pM,'rgba(230,56,72,.95)',2.6); // red spiral
+            if(_mirrorOn) mark(pM-sr,pM,'rgba(155,127,232,.85)',2.3); // conjugate σ(r)=M−r
           }
-          var _nn=(typeof _liftPathN==='undefined')?1:_liftPathN;
-          if(_npOn&&((pM%2)===(_nn%2))){
-            if(_npDir!=='down'&&(pM+_nn)/2<pM)mark((pM+_nn)/2,pM,'rgba(61,200,184,.9)',2.2);
-            if(_npDir!=='up'&&(pM-_nn)/2>=1)mark((pM-_nn)/2,pM,'rgba(61,200,184,.9)',2.2);
+          for(var nI=0;nI<_nList.length;nI++){
+            var _nn=_nList[nI];
+            if(!(_npOn&&((pM%2)===(_nn%2))))continue;
+            var nAlpha=_allNOn?(0.35+0.5*(nI/(_nList.length-1||1))):0.9;
+            var nCol='rgba(61,200,184,'+nAlpha.toFixed(2)+')';
+            if(_npDir!=='down'&&(pM+_nn)/2<pM)mark((pM+_nn)/2,pM,nCol,2.2);
+            if(_npDir!=='up'&&(pM-_nn)/2>=1)mark((pM-_nn)/2,pM,nCol,2.2);
           }
         }
       }
@@ -4784,6 +4856,28 @@ function heroToggleTopBars(){
       style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
     <button onclick="exportHeroSideBySide8K('lift')" style="background:rgba(155,127,232,.08);border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">↓ 8K Export</button>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:7px 14px;border-top:1px solid rgba(255,255,255,.04);background:rgba(155,127,232,.02);">
+    <span style="font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(155,127,232,.8);">Dynamics</span>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(155,127,232,.9);cursor:pointer;white-space:nowrap;">
+      <input type="checkbox" class="lift-mirror-chk" style="accent-color:rgba(155,127,232,.8);" onchange="liftToggleMirror(this.checked)">Mirror σ(r)=M−r
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(230,56,72,.9);cursor:pointer;white-space:nowrap;">
+      <input type="checkbox" class="lift-dropout-chk" style="accent-color:rgba(230,56,72,.8);" onchange="liftToggleDropout(this.checked)">Dropout ring
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(230,56,72,.7);cursor:pointer;white-space:nowrap;">
+      <input type="checkbox" class="lift-allp-chk" style="accent-color:rgba(230,56,72,.65);" onchange="liftToggleAllPrimes(this.checked)">All primes
+    </label>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(61,200,184,.9);cursor:pointer;white-space:nowrap;">
+      <input type="checkbox" class="lift-alln-chk" style="accent-color:rgba(61,200,184,.8);" onchange="liftToggleAllN(this.checked)">n = 1,3,5,7,9
+    </label>
+    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
+    <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ n</button>
+    <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:rgba(200,168,74,.08);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ p</button>
+    <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:rgba(126,200,122,.08);border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ M</button>
+    <span style="font-size:8px;color:var(--cream3);">Speed</span>
+    <input type="range" min="20" max="500" step="10" value="140" style="width:60px;accent-color:rgba(155,127,232,.7);" oninput="liftSetAnimSpeed(this.value)">
+    <span class="lift-anim-speed-lbl" style="font-size:8px;color:var(--cream3);min-width:34px;">140ms</span>
   </div>
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
     <span style="color:rgba(155,127,232,.6);">Theory:</span>
@@ -13186,6 +13280,82 @@ function _liftPanelUpdate(){
   if(dlbl)dlbl.textContent=_liftDotScale.toFixed(1)+'×';
 }
 
+// ── Lift Dynamics extensions — ported from the standalone Lift Dynamics
+//    (ℤ/Mℤ)* explorer: conjugate/mirror spiral, dropout-ring highlight,
+//    an all-primes overlay, an all-n overlay, and ▶n/▶p/▶M animations.
+//    Shared by the hero Lift/Ring/Smith views and the opener's Ring +Lift
+//    sub-mode through the same state + redraw pattern used above. ──
+let _liftMirrorOn=false;     // show conjugate spiral σ(r)=M−r alongside the primary one
+let _liftDropoutOn=false;    // mark the ring M=p where the spiral prime exits (ℤ/Mℤ)*
+let _liftAllPrimesOn=false;  // overlay every prime's spiral, dimmed, not just the selected p
+let _liftAllNOn=false;       // overlay n = 1,3,5,7,9 on the ±n path simultaneously
+const LIFT_ALL_N=[1,3,5,7,9];
+function liftToggleMirror(v){_liftMirrorOn=!!v;document.querySelectorAll('.lift-mirror-chk').forEach(c=>c.checked=_liftMirrorOn);_liftRedraw();}
+function liftToggleDropout(v){_liftDropoutOn=!!v;document.querySelectorAll('.lift-dropout-chk').forEach(c=>c.checked=_liftDropoutOn);_liftRedraw();}
+function liftToggleAllPrimes(v){_liftAllPrimesOn=!!v;document.querySelectorAll('.lift-allp-chk').forEach(c=>c.checked=_liftAllPrimesOn);_liftRedraw();}
+function liftToggleAllN(v){_liftAllNOn=!!v;document.querySelectorAll('.lift-alln-chk').forEach(c=>c.checked=_liftAllNOn);_liftRedraw();}
+
+// Shared tick speed (ms) for the ▶n and ▶p play loops below.
+let _liftAnimSpeed=140;
+function liftSetAnimSpeed(v){
+  _liftAnimSpeed=Math.max(20,Math.min(1000,+v||140));
+  document.querySelectorAll('.lift-anim-speed-lbl').forEach(l=>l.textContent=_liftAnimSpeed+'ms');
+  if(_liftNPlayId){clearInterval(_liftNPlayId);_liftNPlayId=null;liftNPlay();}
+  if(_liftPPlayId){clearInterval(_liftPPlayId);_liftPPlayId=null;liftPPlay();}
+}
+
+// ── ▶ n : ping-pong the ±n path offset from 1 up to (ring max − 1) ──
+let _liftNPlayId=null, _liftNPlayDir=1;
+function liftNPlay(){
+  const btns=document.querySelectorAll('.lift-n-play-btn');
+  if(_liftNPlayId){
+    clearInterval(_liftNPlayId);_liftNPlayId=null;
+    btns.forEach(b=>{b.textContent='▶ n';b.style.color='rgba(61,200,184,.9)';b.style.background='rgba(61,200,184,.08)';});
+    return;
+  }
+  const nMax=Math.max(3,Math.min(499,(typeof _heroG!=='undefined'?_heroG:100)-1));
+  _liftNPlayDir=1;
+  btns.forEach(b=>{b.textContent='■ n';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
+  _liftNPlayId=setInterval(()=>{
+    let next=_liftPathN+_liftNPlayDir;
+    if(next>=nMax){next=nMax;_liftNPlayDir=-1;}
+    else if(next<=1){next=1;_liftNPlayDir=1;}
+    _liftPathN=next;
+    document.querySelectorAll('.lift-pathn-lbl').forEach(l=>l.textContent=_liftPathN);
+    _liftRedraw();
+  },_liftAnimSpeed);
+}
+
+// ── ▶ p : ping-pong the spiral prime through PRIMES ≤ current ring max ──
+let _liftPPlayId=null, _liftPPlayDir=1;
+function liftPPlay(){
+  const btns=document.querySelectorAll('.lift-p-play-btn');
+  if(_liftPPlayId){
+    clearInterval(_liftPPlayId);_liftPPlayId=null;
+    btns.forEach(b=>{b.textContent='▶ p';b.style.color='rgba(200,168,74,.9)';b.style.background='rgba(200,168,74,.08)';});
+    return;
+  }
+  btns.forEach(b=>{b.textContent='■ p';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
+  _liftPPlayDir=1;
+  _liftPPlayId=setInterval(()=>{
+    const G=(typeof _heroG!=='undefined')?_heroG:100;
+    const before=liftSpiralPFor(G);
+    liftCycleSpiralP(_liftPPlayDir);
+    if(liftSpiralPFor(G)===before){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
+  },_liftAnimSpeed);
+}
+
+// ── ▶ M : reuses the existing hero ring-count play loop ──
+function liftMPlay(){
+  if(typeof heroGPlay==='function') heroGPlay();
+  const running=(typeof _heroGPlayId!=='undefined')&&!!_heroGPlayId;
+  document.querySelectorAll('.lift-m-play-btn').forEach(b=>{
+    b.textContent=running?'■ M':'▶ M';
+    b.style.color=running?'rgba(224,80,96,.9)':'rgba(126,200,122,.9)';
+    b.style.background=running?'rgba(224,80,96,.12)':'rgba(126,200,122,.08)';
+  });
+}
+
 // Grid panel
 let _gridShowDots=true, _gridDotScale=1.0, _gridShowGridLines=true, _gridGridLineOp=0.07;
 let _heroGridHalf=false; // false = all (r,M) pairs; true = only the r<M triangle
@@ -13536,6 +13706,13 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
 
   const spiralP=liftSpiralPFor(mMax);
 
+  // Dropout ring — the spiral prime's own modulus, where it exits (ℤ/Mℤ)*.
+  if(_liftDropoutOn&&spiralP>=2&&spiralP<=mMax&&_heroRingActive(spiralP)){
+    const dRho=(spiralP/mMax)*maxR;
+    ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(230,56,72,.75)';ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.arc(cx,cy,dRho,0,2*Math.PI);ctx.stroke();ctx.restore();
+  }
+
   // Dots
   const dotBase=Math.max(1, Math.min(3.5*Math.sqrt(zoom), maxR/mMax*0.35))*(_liftDotScale||1)*_heroCharSupportSize;
   for(let M=2;M<=mMax;M++){
@@ -13549,20 +13726,41 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
       const lifted=nextSet?nextSet.has(r2):false;
       const d=_heroTrueDepth?_heroTrueDepth(r,M):-2;
       const ok=(d>=nAnim&&d>=0)||(d>=30000&&nAnim>=0);
-      const _nn=_liftPathN, _par=((M%2)===(_nn%2)); // (M±n)/2 integral
-      const onNpath=_liftShowNPath&&_par&&(
-        (_liftNPathDir!=='down'&&r===(M+_nn)/2&&r<M)||
-        (_liftNPathDir!=='up'&&r===(M-_nn)/2&&r>=1));
+      const nList=_liftAllNOn?LIFT_ALL_N:[_liftPathN];
+      let onNpath=false, npIntensity=1;
+      if(_liftShowNPath){
+        for(let ni=0;ni<nList.length;ni++){
+          const nn=nList[ni];
+          if((M%2)!==(nn%2))continue;
+          if((_liftNPathDir!=='down'&&r===(M+nn)/2&&r<M)||(_liftNPathDir!=='up'&&r===(M-nn)/2&&r>=1)){
+            onNpath=true; npIntensity=_liftAllNOn?(0.5+0.5*(ni/(nList.length-1||1))):1;
+            break;
+          }
+        }
+      }
       const spSel=_liftSpiralDir==='down'?(((M-(spiralP%M))%M)||M):(spiralP%M);
       const onSpiral=_liftShowSpiral&&spiralP<M&&r===spSel;
+      const onSpiralMirror=_liftMirrorOn&&_liftShowSpiral&&spiralP<M&&r===(M-spSel)&&r!==spSel;
+      let onAnyPrimeSpiral=false;
+      if(_liftAllPrimesOn&&!onSpiral){
+        for(let api=0;api<PRIMES.length;api++){
+          const ap=PRIMES[api]; if(ap>=M)break;
+          if(ap===spiralP)continue;
+          const apSel=_liftSpiralDir==='down'?(((M-(ap%M))%M)||M):(ap%M);
+          if(r===apSel){onAnyPrimeSpiral=true;break;}
+        }
+      }
       const gap=pointGapClass(r,M,_heroActiveGaps);
       const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
       const dimmed=hasGaps&&!onGap;
       let col,sz=dotR;
       if(onGap){col=_gapColor(gap);sz=dotR*1.6;}
       else if(onNpath&&onSpiral){col='rgba(255,220,80,.95)';sz=dotR*2.4;}
-      else if(onNpath){col='rgba(61,200,184,.92)';sz=dotR*2.2;}
+      else if(onNpath&&onSpiralMirror){col='rgba(210,225,255,.9)';sz=dotR*2.3;}
+      else if(onNpath){col='rgba(61,200,184,'+(0.7+0.25*npIntensity).toFixed(2)+')';sz=dotR*(1.8+0.6*npIntensity);}
       else if(onSpiral){col='rgba(200,168,74,.85)';sz=dotR*2;}
+      else if(onSpiralMirror){col='rgba(155,127,232,.85)';sz=dotR*1.9;}
+      else if(onAnyPrimeSpiral){col='rgba(230,56,72,.35)';sz=dotR*1.3;}
       else if(ok){col='rgba(200,168,74,.75)';sz=dotR*1.3;}
       else if(d>=0){col='rgba(61,200,184,.4)';}
       else{col='rgba(255,255,255,.06)';sz=dotR*0.8;}
