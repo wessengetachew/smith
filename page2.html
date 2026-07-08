@@ -629,12 +629,10 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="card">
       <div class="card-title">The Gap Diagonal Identity</div>
       <p style="color:var(--cream2);font-size:0.88rem">
-        <strong>Classical result</strong> (direct consequence of Euler's totient function):
-        for the lattice $\{(r,M) : 1 \le r \le M \le G\}$, the fraction of pairs on the diagonal
-        $|M-r|=g$ that are coprime equals $\varphi(g)/g$.<br><br>
-        <strong>What's new here:</strong> the <em>geometric framing</em> — reading the lattice as a
-        family of diagonal strips, each carrying its own density, as a way to decompose and visualize
-        C(n). The identity itself is classical; the decomposition perspective is this project's contribution.
+        For the lattice $\{(r,M) : 1 \le r \le M \le G\}$, the fraction of pairs on the diagonal
+        $|M-r|=g$ that are coprime equals $\varphi(g)/g$ — a direct consequence of Euler's totient
+        function. The identity is classical; reading the lattice as a family of diagonal strips,
+        each carrying its own density, gives a geometric way to decompose and visualize C(n).
       </p>
       <div class="formula-block">$$\text{coprime density on } \{|M - r| = g\} = \frac{\varphi(g)}{g}$$</div>
       <div class="kv-row">
@@ -683,26 +681,25 @@ canvas { display: block; width: 100%; height: 100%; }
         <div class="kv-item"><span class="kv-k">n→∞</span><span class="kv-v" style="color:var(--violet)">C(∞)=0</span></div>
       </div>
       <p style="color:var(--cream3);font-size:0.82rem;margin-top:8px;">
-        <em>Note:</em> this per-strip formula is a heuristic for how each diagonal behaves individually.
-        The global C(n) is not exactly a weighted average of these per-strip densities — that would require
-        the strips to be independent, which they are not (they share prime factors). The diagonal
-        decomposition is a visualization tool and a useful approximation, not an exact identity at n&gt;0.
+        This per-strip formula describes how each diagonal behaves individually. The global C(n) is
+        not exactly a weighted average of these per-strip densities, since that would require the
+        strips to be independent — they aren't, as they share prime factors. The diagonal decomposition
+        is a visualization and a close approximation rather than an exact identity once n&gt;0.
       </p>
     </div>
 
     <div class="card">
       <div class="card-title">Why This Matters</div>
       <ul class="obs-list">
-        <li><strong>Geometric decomposition (this project):</strong> reading the lattice as diagonal strips,
-        each with its own density φ(g)/g, gives a visual explanation for why C(n)'s Euler product looks the way
+        <li><strong>Geometric decomposition:</strong> reading the lattice as diagonal strips, each with
+        its own density φ(g)/g, gives a visual explanation for why C(n)'s Euler product looks the way
         it does — each prime p contributes most strongly through the diagonals it divides.</li>
-        <li class="teal"><strong>Classical:</strong> the density φ(g)/g on diagonal g is a direct consequence
-        of Euler's totient formula and periodicity — no new mathematics, but a useful geometric restatement.</li>
-        <li class="violet"><strong>Connection to Hardy–Littlewood (speculative, not established here):</strong>
-        the per-strip block-coprime density is structurally similar to the local factors in Hardy–Littlewood's
-        singular series for prime constellations. This is a suggestive parallel worth noting, but this page
-        does not establish any formal connection — the Hardy–Littlewood conjecture remains unproven and the
-        relationship would require careful additional work to make precise.</li>
+        <li class="teal"><strong>Classical foundation:</strong> the density φ(g)/g on diagonal g is a
+        direct consequence of Euler's totient formula and periodicity.</li>
+        <li class="violet"><strong>Hardy–Littlewood parallel:</strong> the per-strip block-coprime density
+        is structurally similar to the local factors in Hardy–Littlewood's singular series for prime
+        constellations. The Hardy–Littlewood conjecture itself remains unproven, and the parallel here is
+        suggestive rather than a formal connection.</li>
       </ul>
     </div>
   </div>
@@ -717,7 +714,7 @@ canvas { display: block; width: 100%; height: 100%; }
 
   <!-- Share quote -->
   <div class="share-quote">
-    Euler's $\varphi(g)/g$ is not just a formula — read geometrically, it is the exact density of a diagonal slice through the infinite lattice of integer pairs. The identity is classical; the diagonal lattice perspective is the lens this project uses to make C(n)'s structure visible.
+    Euler's $\varphi(g)/g$ is not just a formula — read geometrically, it is the exact density of a diagonal slice through the infinite lattice of integer pairs. The identity is classical; the diagonal lattice perspective is what makes C(n)'s structure visible.
     <cite>— Gap Diagonal Identity · wessengetachew.github.io · 2026</cite>
   </div>
   <div style="display:flex;gap:16px;margin-bottom:20px">
@@ -943,7 +940,7 @@ canvas { display: block; width: 100%; height: 100%; }
         <tr><td>Convergence rate</td><td>O(log G/G)</td><td>Mertens error</td></tr>
         <tr><td>Under RH</td><td>O(G^{−1+ε})</td><td>Bureaux–Enriquez 2016</td></tr>
       </table>
-      <p style="color:var(--cream3);font-size:0.8rem;margin-top:8px;font-family:var(--mono)">Note: The RH error exponent is O(G^{−1+ε}), not O(G^{−3/2+ε}) — the sharper bound is not supported by current literature.</p>
+      <p style="color:var(--cream3);font-size:0.8rem;margin-top:8px;font-family:var(--mono)">Under RH the error exponent is O(G^{−1+ε}); the tighter O(G^{−3/2+ε}) bound seen elsewhere is not supported by current literature.</p>
     </div>
 
     <div class="card">
@@ -1033,17 +1030,17 @@ function blockDiagDensity(g, n) {
   }
   return prod;
 }
-// C(n) = ζ(2)·∏_p(1 − min(n+1,p)/p²)  — matches index definition exactly
-// At n=0: C(0) = 6/π² ≈ 0.60793 (2D coprime density)
+// C(n) = ζ(2)·∏_p(1 − min(n+1,p)/p²)
 const _cnCache={};
 function getCn(n){
   if(_cnCache[n]!==undefined)return _cnCache[n];
-  // n=0: C(0)=ζ(2)·∏_p(1−1/p²)=1 exactly (Euler product identity)
+  // C(0) = ζ(2)·∏_p(1−1/p²) = 1 exactly (Euler product identity)
   if(n===0)return _cnCache[0]=1;
   const ZETA2=Math.PI*Math.PI/6;
   let prod=1;
-  // Large prime cap so truncated product is accurate to ≥5 decimal places
-  for(let p=2;p<=Math.max(1500,n+3);p++){
+  // Prime cap scales with n; truncated product stays accurate to ~4-5 decimal places
+  const cap=Math.max(20000,80*(n+1));
+  for(let p=2;p<=cap;p++){
     if(!isPrime(p))continue;
     prod*=(1-Math.min(n+1,p)/(p*p));
   }
@@ -2383,7 +2380,7 @@ function updateRingPointList(){
 function updateBar() {
   document.getElementById('db-G').textContent=G;
   document.getElementById('db-n').textContent=depthN;
-  // C(n) = field density at depth n — 6/π² at n=0, decreasing
+  // C(n) at the current depth — starts at 1 and decreases as n grows
   document.getElementById('db-cn-field').textContent=getCn(depthN).toFixed(6);
   document.getElementById('db-g').textContent=activeGap||'off';
   const p=activeGap>0?phi(activeGap):null;
@@ -2938,7 +2935,7 @@ function update3DStats() {
   const obs=(s.coprimePts/Math.pow(s.G,3)).toFixed(5);
   const cappedNote=s.capped?' (capped)':'';
   document.getElementById('lbl-3d-stats').textContent=
-    `G=${s.G} · gcd(x,y,z)=1 only · interior:${_3d.showInterior?'on':'off'} · coprime pts:${s.coprimePts}${cappedNote} · obs/G³:${obs} · 1/ζ(3)≈0.83187 · n=${s.n}`;
+    `G=${s.G} · gcd(x,y,z)=1 only · interior:${_3d.showInterior?'on':'off'} · coprime pts:${s.coprimePts}${cappedNote} · obs/G³:${obs} · 1/ζ(3)≈0.83191 · n=${s.n}`;
 }
 
 function animate3D() {
@@ -3193,7 +3190,7 @@ function export3D() {
 
     const s=_3d._stats||{G:_3d.G,n:_3d.depthN,totalPts:0,coprimePts:0,capped:false};
     const obs3D=(s.totalPts>0?(s.coprimePts/s.totalPts).toFixed(6):'—');
-    const zeta3='0.83187';
+    const zeta3='0.83191';
 
     let ty=Math.round(SIZE*0.020);
     ty=drawTag(ty);
@@ -3227,7 +3224,7 @@ function export3D() {
 
     drawFooter(SIZE-footerH+Math.round(SIZE*0.004),[
       ['rgba(200,168,74,0.80)',`G=${s.G}  \u00b7  gcd(x,y,z)=1  \u00b7  block n=${s.n}`],
-      ['rgba(61,200,184,0.80)',`1/\u03b6(3)\u22480.83187  \u00b7  coprime: ${s.coprimePts.toLocaleString()}${s.capped?' (cap)':''}`],
+      ['rgba(61,200,184,0.80)',`1/\u03b6(3)\u22480.83191  \u00b7  coprime: ${s.coprimePts.toLocaleString()}${s.capped?' (cap)':''}`],
       ['rgba(184,178,166,0.65)','3D Coprime Lattice  \u00b7  Analytic Number Theory'],
     ]);
 
