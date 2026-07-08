@@ -4,7 +4,7 @@
 
 An interactive explorer for the block-coprime density function
 
-$$C(n) \;=\; \zeta(2)\prod_{p}\left(1-\frac{\min(n+1,\,p)}{p^{2}}\right)$$
+$$C(n) \=\ \zeta(2)\prod_{p}\left(1-\frac{\min(n+1,\,p)}{p^{2}}\right)$$
 
 — the natural density of integer pairs $(r, M)$ with $\gcd(r, M+j)=1$ for every $j = 0,1,\dots,n$, rescaled by $\zeta(2)$ so that $C(0)=1$ exactly. One Euler product governs the density for every block length; every view on the page is that product made visible.
 
