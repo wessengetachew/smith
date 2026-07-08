@@ -72,17 +72,29 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
 #welcome-card:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;overflow:auto;display:block;}
 #welcome-card:-webkit-full-screen{width:100vw;height:100vh;max-width:none;max-height:none;overflow:auto;display:block;}
 #welcome-teaser-wrap:fullscreen{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#04040d;width:100vw;height:100vh;overflow-y:auto;padding:8px 0 24px;box-sizing:border-box;}
-#welcome-teaser-wrap:fullscreen #welcome-teaser{width:min(94vw,1300px)!important;height:min(78vh,900px)!important;margin:0 0 8px!important;flex-shrink:0;position:sticky;top:0;z-index:5;background:#04040d;}
+#welcome-teaser-wrap:fullscreen #welcome-teaser{width:min(94vw,78vh,900px)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto 8px!important;flex-shrink:0;position:sticky;top:0;z-index:5;background:#04040d;}
 #welcome-teaser-wrap:-webkit-full-screen{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#04040d;width:100vw;height:100vh;overflow-y:auto;padding:8px 0 24px;box-sizing:border-box;}
-#welcome-teaser-wrap:-webkit-full-screen #welcome-teaser{width:min(94vw,1300px)!important;height:min(78vh,900px)!important;margin:0 0 8px!important;flex-shrink:0;position:sticky;top:0;z-index:5;background:#04040d;}
+#welcome-teaser-wrap:-webkit-full-screen #welcome-teaser{width:min(94vw,78vh,900px)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto 8px!important;flex-shrink:0;position:sticky;top:0;z-index:5;background:#04040d;}
 /* Hiding controls now actually grows the canvas into the freed space —
    without that, the hide button would be pointless since the canvas
    already stays pinned at top and controls scroll independently below it. */
-#welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{height:min(92vh,1100px)!important;}
+#welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{width:min(94vw,92vh,1100px)!important;}
 /* #wfs-ctrl-bar only ever holds the moved-in formula/view/n/G rows + the
    Hide button — it's a fullscreen-overlay convenience, not needed inline. */
 #wfs-ctrl-bar{display:none;}
 #welcome-teaser-wrap:fullscreen #wfs-ctrl-bar,#welcome-teaser-wrap:-webkit-full-screen #wfs-ctrl-bar{display:flex;}
+
+/* ── In-page canvas lock (opt-in, no native fullscreen needed): pins the
+   preview canvas near the top of the viewport so it stays visible while the
+   controls below it scroll normally underneath — same idea as the hero's
+   fullscreen "Lock canvas" button, but usable without leaving the page. ── */
+#welcome-teaser-wrap.wcv-locked #welcome-teaser{
+  position:sticky!important;top:var(--wcv-lock-top,8px)!important;
+  z-index:15;background:#04040d;box-shadow:0 10px 26px rgba(0,0,0,.5);
+}
+#welcome-lock-btn.active{
+  background:rgba(200,168,74,.18)!important;border-color:rgba(200,168,74,.8)!important;color:var(--gold)!important;
+}
 
 /* ── MOBILE: two rows ── */
 @media(max-width:700px){
@@ -91,8 +103,8 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
   #nb-stat-compact{display:flex !important;}
   #nb-row1,#nb-row2{flex-wrap:wrap;height:auto;row-gap:6px;padding:4px 0;}
   #finite-panel{flex-wrap:wrap;row-gap:4px;}
-  #welcome-teaser-wrap:fullscreen #welcome-teaser,#welcome-teaser-wrap:-webkit-full-screen #welcome-teaser{width:100vw!important;height:55vh!important;position:sticky;top:0;z-index:5;}
-  #welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{height:75vh!important;}
+  #welcome-teaser-wrap:fullscreen #welcome-teaser,#welcome-teaser-wrap:-webkit-full-screen #welcome-teaser{width:min(94vw,55vh)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto!important;position:sticky;top:0;z-index:5;}
+  #welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{width:min(94vw,75vh)!important;}
   #ws-zoom-ctrl{flex-wrap:wrap;row-gap:6px;}
 }
 #nb-row1,#nb-row2{
@@ -1344,7 +1356,9 @@ function heroToggleTopBars(){
     </div>
 
     <div id="welcome-teaser-wrap" style="position:relative;">
-      <canvas id="welcome-teaser" width="536" height="200" style="display:block;width:100%;height:200px;margin:2px 0 12px;border-radius:2px;animation:wgFadeUp .7s .4s both;"></canvas>
+      <canvas id="welcome-teaser" width="900" height="900" style="display:block;width:100%;aspect-ratio:1/1;max-width:min(64vh,536px);height:auto;margin:2px auto 12px;border-radius:2px;animation:wgFadeUp .7s .4s both;"></canvas>
+      <button id="welcome-lock-btn" onclick="wToggleCanvasLock()" title="Pin the canvas to the top of the screen so you can scroll through the controls below while still seeing it"
+        style="position:absolute;top:6px;right:34px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(6,6,20,.7);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-size:11px;cursor:pointer;border-radius:2px;z-index:2;">📌</button>
       <button id="welcome-fs-btn" onclick="wToggleFullscreen()" title="Toggle fullscreen"
         style="position:absolute;top:6px;right:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(6,6,20,.7);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-size:12px;cursor:pointer;border-radius:2px;z-index:2;">⛶</button>
       <!-- Lattice size G — moved here (above zoom) so it stays reachable in
@@ -1355,11 +1369,11 @@ function heroToggleTopBars(){
           style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ G</button>
         <button onclick="wGStepPrime(-1)" title="Jump G to the previous prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">◂ prime</button>
-        <input type="range" id="ws-g-sl" min="1" max="200" step="1" value="31"
+        <input type="range" id="ws-g-sl" min="1" max="512" step="1" value="31"
           style="flex:1;accent-color:rgba(200,168,74,.8);" oninput="wGMarkUserTouched();wSetG(+this.value)">
         <button onclick="wGStepPrime(1)" title="Jump G to the next prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">prime ▸</button>
-        <input type="number" id="ws-g-num" min="1" max="400" value="31"
+        <input type="number" id="ws-g-num" min="1" max="2048" value="31"
           style="width:46px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;text-align:center;padding:2px 3px;outline:none;"
           oninput="wGMarkUserTouched();wSetG(+this.value)">
         <span id="ws-g-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);white-space:nowrap;">G=31  (grid p²=961)</span>
@@ -1975,6 +1989,23 @@ function heroToggleTopBars(){
       if(exit){var p2=exit.call(document);if(p2&&p2.catch)p2.catch(function(){});}
     }
   };
+  // Pin the canvas near the top of the viewport in normal page flow (no
+  // native fullscreen required) so it stays visible while the control
+  // panels below it scroll past underneath — mirrors the hero's fullscreen
+  // "Lock canvas" toggle, adapted for the regular scrolling page.
+  window.wToggleCanvasLock=function(){
+    var wrap=document.getElementById('welcome-teaser-wrap');
+    var btn=document.getElementById('welcome-lock-btn');
+    if(!wrap)return;
+    var locked=wrap.classList.toggle('wcv-locked');
+    if(btn){
+      btn.classList.toggle('active',locked);
+      btn.title=locked?'Unpin the canvas':'Pin the canvas to the top of the screen so you can scroll through the controls below while still seeing it';
+    }
+    if(locked){
+      wrap.style.setProperty('--wcv-lock-top','8px');
+    }
+  };
   function _wFsChangeHandler(){
     var cv=document.getElementById('welcome-teaser');
     var btn=document.getElementById('welcome-fs-btn');
@@ -2023,7 +2054,7 @@ function heroToggleTopBars(){
   // prime — mirrors the hero's _syncHeroGToFinitePrime exactly, since without
   // this, switching finite/asymptotic or stepping primes had no visible
   // effect on the lattice at all (it just kept showing G=31, untouched).
-  var _wG_SYNC_CAP=400; // matches wSetG's own hard clamp
+  var _wG_SYNC_CAP=2048; // matches wSetG's own hard clamp
   function _wSyncGToFinitePrime(){
     if(_wMode!=='finite')return;
     if(_wPrimeK<=0)return;
@@ -2053,6 +2084,18 @@ function heroToggleTopBars(){
     wRenderCn();
     _wSyncGToFinitePrime();
     wRedrawCanvas();
+    // Mirror onto the shared global mode state so anything reading it
+    // elsewhere on the page — most notably the "Show Working" table, which
+    // is a single shared element moved in and out of this modal — reflects
+    // whatever the opener's own toggle says, instead of silently staying on
+    // whatever the hero navbar last set (or the default) and disagreeing
+    // with what's visibly selected up here.
+    if(!window._modeSyncGuard){
+      window._modeSyncGuard=true;
+      if(typeof setFinitePrimes==='function') setFinitePrimes(_wPrimeK);
+      if(typeof setFiniteMode==='function') setFiniteMode(m==='finite');
+      window._modeSyncGuard=false;
+    }
   };
 
   var W_SLIDER_CAP=1000; // same rationale as hero's FINITE_SLIDER_CAP — dragging fires
@@ -2084,6 +2127,13 @@ function heroToggleTopBars(){
     }
     var ml=document.getElementById('welcome-cn-mode-lbl');
     if(ml&&_wMode==='finite')ml.textContent='('+_wPrimeK+' primes)';
+    // Keep the shared global prime count (used by the hero and the "Show
+    // Working" table) matching whatever the opener's own stepper says.
+    if(_wMode==='finite'&&!window._modeSyncGuard&&typeof setFinitePrimes==='function'){
+      window._modeSyncGuard=true;
+      setFinitePrimes(_wPrimeK);
+      window._modeSyncGuard=false;
+    }
     _wSyncGToFinitePrime();
     wRenderCn();wRedrawCanvas();
   };
@@ -2747,13 +2797,13 @@ function heroToggleTopBars(){
   window.wGStepPrime=function(dir){
     window.wGMarkUserTouched();
     var v=_wG;
-    var lo=1, hi=400; // matches wSetG's clamp range
+    var lo=1, hi=2048; // matches wSetG's clamp range
     do{ v+=dir; }while(v>lo&&v<hi&&!isPrimeW(v));
     if(!isPrimeW(v))return; // ran off the end without finding one
     window.wSetG(v);
   };
   window.wSetG=function(v){
-    _wG=Math.max(1,Math.min(400,Math.round(+v||31)));
+    _wG=Math.max(1,Math.min(2048,Math.round(+v||31)));
     var gsl=document.getElementById('w-gap-sl');
     if(gsl){var gm=Math.max(1,_wG-1);gsl.max=gm;if(+gsl.value>gm)window.wGapSliderChange(0);}
     if(_wSectorPts&&_wSectorPts.length&&typeof window.wTraceSector==='function')window.wTraceSector();
@@ -2773,6 +2823,7 @@ function heroToggleTopBars(){
     }
     wRedrawCanvas();
   };
+  window._wGetG=function(){return _wG;}; // read-only accessor — lets the shared Lift Dynamics animation (▶ n / ▶ p) know the opener's own G, since _wG itself lives in this closure
 
   var _wZoom=1; // canvas zoom — center-anchored, applies uniformly to all four views
   var _wZoomMin=0.005, _wZoomMax=256; // effectively unbounded — reachable past the slider's ±2 (0.25×–4×) span via ▲▼, the number box, or pinch
@@ -2849,7 +2900,7 @@ function heroToggleTopBars(){
     var cv=document.getElementById('welcome-teaser');
     if(!cv)return;
     var dpr=window.devicePixelRatio||1;
-    var W=cv.clientWidth||536,H=cv.clientHeight||200;
+    var W=cv.clientWidth||536,H=cv.clientHeight||536;
     if(cv._W!==W||cv._H!==H){cv.width=W*dpr;cv.height=H*dpr;cv._W=W;cv._H=H;}
     var ctx=cv.getContext('2d');
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -2953,7 +3004,7 @@ function heroToggleTopBars(){
     // Active Gaps: highlight the full row for every M in a twin/cousin/sexy-prime pair
     var gapSet=_wGapHighlightSet(G);
     gapSet.forEach(function(color,M){
-      var gy=oy+side-(M-1)*cell;
+      var gy=oy+(M-1)*cell;
       ctx.strokeStyle=color+'55';ctx.lineWidth=Math.max(1.5,cell*0.5);
       ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox+side,gy);ctx.stroke();
     });
@@ -2968,7 +3019,10 @@ function heroToggleTopBars(){
         if(!_wCharPass(pureCop))continue;
         var ok=isCoprime(r,M,n);
         var rDisp=(r<M)?_wPerRingShiftedR(r,M,G,_wPerRing):r;
-        var x=ox+rDisp*cell,y=oy+side-(M-1)*cell;
+        // M increasing downward — matches the hero grid's y=originY+(mi+0.5)*cH
+        // convention exactly (was previously inverted here, which is why the
+        // opener grid read as vertically flipped / "rotated" next to the hero).
+        var x=ox+rDisp*cell,y=oy+(M-1)*cell;
         var radBase=Math.min(cell*0.45,Math.max(cell*0.28,0.9/_wZoom)); // never-overlap cap, ≥~1px on screen
         var rad=(ok?radBase:radBase*0.55)*_wCharSizeMul(pureCop);
         if(_wHitRec)_wHitPts.push(x,y,r,M);
@@ -2982,7 +3036,7 @@ function heroToggleTopBars(){
     for(var si=0;si<_wSectorPts.length;si++){
       var sp=_wSectorPts[si];
       var spDisp=_wPerRingShiftedR(sp.r,sp.M,G,_wPerRing);
-      var spx=ox+spDisp*cell,spy=oy+side-(sp.M-1)*cell;
+      var spx=ox+spDisp*cell,spy=oy+(sp.M-1)*cell;
       var spRad=Math.min(cell*0.42,Math.max(cell*0.22,0.9/_wZoom))*_wSecDotScale;
       ctx.beginPath();ctx.arc(spx,spy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,spRad*1.7,0,Math.PI*2);
@@ -2996,8 +3050,13 @@ function heroToggleTopBars(){
     var extraTurn=_wPerRing*2*Math.PI;
     function ringXY(r,M){
       var R=maxR*(M-1)/Math.max(1,rings-1);
-      var th=2*Math.PI*r/M+extraTurn*(M-1)-Math.PI/2;
-      return[cx+R*Math.cos(th),cy+R*Math.sin(th)];
+      // Matches the hero ring's angle convention exactly: theta=2πr/M+twist,
+      // x=cx+R·cos(theta), y=cy−R·sin(theta) — no extra phase offset. (Used
+      // to start at 12 o'clock and wind clockwise here vs. hero's 3-o'clock/
+      // counter-clockwise start, which is why the two rings looked mirrored
+      // and rotated relative to each other.)
+      var th=2*Math.PI*r/M+extraTurn*(M-1);
+      return[cx+R*Math.cos(th),cy-R*Math.sin(th)];
     }
     if(_wRingLift){
       // Lift arcs — foundationally the same picture as the hero Lift view,
@@ -3090,8 +3149,8 @@ function heroToggleTopBars(){
         if(!_wCharPass(pureCop))continue;
         var ok=isCoprime(r,M,n);
         var theta=2*Math.PI*r/M+extraRot; // M=1,r=0 → theta=0°; M=2,r=1 → theta=180°
-        var x=cx+R*Math.cos(theta-Math.PI/2);
-        var y=cy+R*Math.sin(theta-Math.PI/2);
+        var x=cx+R*Math.cos(theta);
+        var y=cy-R*Math.sin(theta);
         var rad=(ok?2:0.8)*_wCharSizeMul(pureCop);
         if(_wHitRec)_wHitPts.push(x,y,r,M);
         ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);
@@ -3107,7 +3166,7 @@ function heroToggleTopBars(){
       var spR=maxR*(sp.M-1)/Math.max(1,rings-1);
       var spExtraRot=extraTurn*(sp.M-1);
       var spTheta=2*Math.PI*sp.r/sp.M+spExtraRot;
-      var spx=cx+spR*Math.cos(spTheta-Math.PI/2),spy=cy+spR*Math.sin(spTheta-Math.PI/2);
+      var spx=cx+spR*Math.cos(spTheta),spy=cy-spR*Math.sin(spTheta);
       ctx.beginPath();ctx.arc(spx,spy,1.7*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,2.9*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
@@ -3669,10 +3728,16 @@ function heroToggleTopBars(){
     a.href=cv.toDataURL('image/png'); a.click();
   };
 
-  // ── Send to Hero — copies the opener's current state (view, G, n, color
-  // mode) onto the hero section, and hides the hero's text overlay so the
-  // user can immediately use the hero's own (more elaborate) 4K export on
-  // a clean canvas-only shot of what the opener was just showing. ──
+  // ── Send to Hero — copies the opener's FULL current state onto the hero
+  // section: view, G, n, color mode, per-ring twist, zoom, grid-half,
+  // χ(r) filter + point sizes, active/custom rings, active gaps, and the
+  // Smith zoom-out level — so the hero picks up exactly what the opener
+  // canvas was showing, not just the basics. (Lift Dynamics state —
+  // spiral prime, ±n path, mirror/dropout/all-p/all-n — needs no transfer
+  // at all: those are shared globals the opener and hero already read from
+  // directly, so they're already identical on both sides.) Then hides the
+  // hero's text overlay so the user can immediately use the hero's own 4K
+  // export on a clean canvas-only shot of what the opener was just showing. ──
   window.wSendToHero=function(){
     // Close the welcome/opener modal and back out of canvas-fullscreen (if
     // active) first — otherwise the overlay sits on top of the page and the
@@ -3689,6 +3754,55 @@ function heroToggleTopBars(){
     if(typeof heroSetView==='function') heroSetView(heroView);
     var colorMap={'default':'modular_distance',residue_value:'residue_value',ring_hash:'ring_hash',phi_position:'phi_position',phi_spectrum:'phi_spectrum'};
     var heroColorVal=colorMap[_wColorMode]||'modular_distance';
+
+    // Per-ring twist ("spin" the rings apply per M) — opener's _wPerRing and
+    // the hero's _heroRowShift are the same 0..1 fraction, same formula
+    // (_heroRowShiftedR mirrors _wPerRingShiftedR exactly), so this is a
+    // direct 1:1 copy.
+    if(typeof _heroRowShiftApply==='function') _heroRowShiftApply(_wPerRing||0);
+
+    // Global 90°-step rotation — the opener has no equivalent control, so
+    // it's implicitly always "unrotated"; reset the hero to match rather
+    // than leaving a stale rotation from earlier hero-only tinkering.
+    if(typeof _heroRotSteps!=='undefined') _heroRotSteps=0;
+
+    // Zoom — scale-independent, carries over directly. Pan is deliberately
+    // NOT copied 1:1 (opener and hero canvases are different pixel sizes,
+    // so a raw pixel offset wouldn't land on the same content) — reset to
+    // centered instead, which is the more correct "same view" transfer.
+    if(typeof _heroZoomTarget!=='undefined') _heroZoomTarget=Math.max(0.1,Math.min(20,_wZoom||1));
+    if(typeof _heroPanXTarget!=='undefined') _heroPanXTarget=0;
+    if(typeof _heroPanYTarget!=='undefined') _heroPanYTarget=0;
+    var hzSl=document.getElementById('hero-zoom-sl'); if(hzSl) hzSl.value=Math.round((_wZoom||1)*100);
+    var hzNum=document.getElementById('hero-zoom-num'); if(hzNum) hzNum.value=(_wZoom||1).toFixed(1);
+
+    // Grid half-triangle toggle
+    if(typeof heroSetGridHalf==='function') heroSetGridHalf(!!_wGridHalf);
+
+    // χ(r) character filter + independent point-size multipliers
+    if(typeof _heroCharFilter!=='undefined') _heroCharFilter=_wCharFilter;
+    var hSup=document.getElementById('hero-char-support'), hVan=document.getElementById('hero-char-vanishing');
+    if(hSup) hSup.checked=(_wCharFilter==='both'||_wCharFilter==='support');
+    if(hVan) hVan.checked=(_wCharFilter==='both'||_wCharFilter==='vanishing');
+    if(typeof _heroCharSupportSize!=='undefined') _heroCharSupportSize=_wCharSupportSize;
+    if(typeof _heroCharVanishSize!=='undefined') _heroCharVanishSize=_wCharVanishSize;
+    var hSupSz=document.getElementById('hero-char-support-size'); if(hSupSz) hSupSz.value=_wCharSupportSize;
+    var hVanSz=document.getElementById('hero-char-vanish-size'); if(hVanSz) hVanSz.value=_wCharVanishSize;
+    var hSupSzV=document.getElementById('hero-char-support-size-val'); if(hSupSzV) hSupSzV.textContent=(_wCharSupportSize||1).toFixed(2)+'×';
+    var hVanSzV=document.getElementById('hero-char-vanish-size-val'); if(hVanSzV) hVanSzV.textContent=(_wCharVanishSize||1).toFixed(2)+'×';
+
+    // Active/custom rings — same Set-of-M-or-null shape on both sides
+    if(typeof _heroActiveRings!=='undefined'){
+      _heroActiveRings=_wActiveRings?new Set(_wActiveRings):null;
+      if(typeof _heroRefreshActiveRingList==='function') _heroRefreshActiveRingList();
+    }
+
+    // Active gap highlights (twin/cousin/sexy-prime pairs)
+    if(typeof _heroActiveGaps!=='undefined') _heroActiveGaps=new Set(_wActiveGaps);
+
+    // Smith zoom-out level — only meaningful in Smith, harmless otherwise
+    if(heroView==='smith'&&typeof _heroSmithSetZoomOut==='function') _heroSmithSetZoomOut(_wSmithZoomOut||8);
+
     if(typeof _heroColorModeLocal!=='undefined') _heroColorModeLocal=heroColorVal;
     var heroSel=document.getElementById('hero-color-mode');
     if(heroSel) heroSel.value=heroColorVal;
@@ -6027,7 +6141,19 @@ function setFiniteMode(on){
   _syncHeroGToFinitePrime();
   updateUI();
   drawChart();
+  // Auto-open "Show Working" and rebuild it right away, so switching mode
+  // makes the table appear/update on the page instead of sitting stale and
+  // collapsed until someone happens to click it open.
+  const wkdd = document.getElementById('hero-working-dd');
+  if(wkdd && !wkdd.open) wkdd.open = true;
   if(typeof _buildWorkingTable === 'function') _buildWorkingTable();
+  // reopened later it agrees with whatever was just set here instead of
+  // showing whichever mode it last happened to be left in.
+  if(!window._modeSyncGuard && typeof window.wSetMode === 'function'){
+    window._modeSyncGuard = true;
+    window.wSetMode(on ? 'finite' : 'asymptotic');
+    window._modeSyncGuard = false;
+  }
 }
 
 // ── Compress/expand the 3-object result row (C(n), D(n), block/saturation) ──
@@ -6090,6 +6216,12 @@ function setFinitePrimes(v){
   updateUI();
   drawChart();
   if(typeof _buildWorkingTable === 'function') _buildWorkingTable();
+  // Mirror back onto the opener's own nth-prime stepper.
+  if(!window._modeSyncGuard && typeof window.wSetPrimes === 'function'){
+    window._modeSyncGuard = true;
+    window.wSetPrimes(_finitePrimes || 1);
+    window._modeSyncGuard = false;
+  }
 }
 
 // ── Looping animation over the nth-prime (finite/asymptotic) slider ──
@@ -13363,8 +13495,20 @@ function liftSpiralPFor(G){
   for(let i=PRIMES.length-1;i>=0;i--)if(PRIMES[i]<=G)return PRIMES[i];
   return 2;
 }
+// The Lift Dynamics controls (spiral-prime step/play, ±n play) are shared
+// between the opener's own preview (_wG, lives in a separate closure) and
+// the hero panel (_heroG). Both call the same onclick handlers, so the
+// interactive functions below can't assume which one the person is looking
+// at — they take the larger of the two, so the animation always reaches as
+// high as whichever grid the person actually moved. (The per-frame drawing
+// code elsewhere already passes its own G explicitly and doesn't need this.)
+function _liftCurrentG(){
+  const wg=(typeof window._wGetG==='function')?(window._wGetG()||0):0;
+  const hg=(typeof _heroG!=='undefined')?(_heroG||0):0;
+  return Math.max(wg,hg)||100;
+}
 function liftCycleSpiralP(dir){
-  const G=(typeof _heroG!=='undefined')?_heroG:100;
+  const G=_liftCurrentG();
   let cur=liftSpiralPFor(G), idx=PRIMES.indexOf(cur);
   if(idx<0)idx=0;
   idx=Math.max(0,idx+dir);
@@ -13446,7 +13590,7 @@ function liftNPlay(){
     btns.forEach(b=>{b.textContent='▶ n';b.style.color='rgba(61,200,184,.9)';b.style.background='rgba(61,200,184,.08)';});
     return;
   }
-  const nMax=Math.max(3,Math.min(499,(typeof _heroG!=='undefined'?_heroG:100)-1));
+  const nMax=Math.max(3,Math.min(2047,_liftCurrentG()-1));
   _liftNPlayDir=1;
   btns.forEach(b=>{b.textContent='■ n';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
   _liftNPlayId=setInterval(()=>{
@@ -13471,7 +13615,7 @@ function liftPPlay(){
   btns.forEach(b=>{b.textContent='■ p';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
   _liftPPlayDir=1;
   _liftPPlayId=setInterval(()=>{
-    const G=(typeof _heroG!=='undefined')?_heroG:100;
+    const G=_liftCurrentG();
     const before=liftSpiralPFor(G);
     liftCycleSpiralP(_liftPPlayDir);
     if(liftSpiralPFor(G)===before){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
