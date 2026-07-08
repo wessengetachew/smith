@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="An interactive explorer for C(n), the Euler product governing how often a random integer is coprime to an entire block of n+1 consecutive integers. Six live lattice views (Grid, Ring, Farey, Lift, Gauss, Smith), step-by-step derivations, and exportable data.">
+<meta name="description" content="Interactive explorer for C(n) = ζ(2)·∏(1−min(n+1,p)/p²): the density of integers coprime to a block of n+1 consecutive integers. Six lattice views, step-by-step derivations, data tables, 4K export.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="C(n) — Block-Coprime Density">
-<meta property="og:description" content="One Euler product, six interactive views: watch the density of block-coprime integers step down from ζ(2)⁻¹ as the block grows.">
+<meta property="og:description" content="The density of integers coprime to n+1 consecutive integers, plotted six ways. C(1) ≈ 0.5307.">
 <meta name="twitter:card" content="summary">
 <title>C(n) — Block-Coprime Density · Wessen Getachew</title>
 
@@ -974,7 +974,6 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 .dd-btn.sec{background:transparent;border-color:var(--edge2);color:var(--cream3);}
 .dd-btn.sec:hover{color:var(--cream);}
 
-
 /* FINITE / ASYMPTOTIC MODE */
 #finite-panel{display:none;align-items:center;gap:6px;flex-shrink:0;}
 #finite-sl{width:160px;}
@@ -1077,15 +1076,20 @@ function heroToggleTopBars(){
         style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.75);font-size:12px;width:22px;height:22px;cursor:pointer;border-radius:2px;margin-right:6px;">⛶</button>
       <button id="welcome-x" onclick="window.closeWelcome()" aria-label="Close">×</button>
     </div>
-    <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53?</div>
+    <details id="w-intro-wrap" open style="position:relative;z-index:1;">
+    <summary style="list-style:none;cursor:pointer;user-select:none;display:flex;align-items:flex-start;gap:10px;">
+      <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53?</div>
+      <span class="wi-chev" style="margin-left:auto;flex-shrink:0;font-size:13px;color:rgba(200,168,74,.7);transition:transform .18s;padding-top:6px;">▾</span>
+    </summary>
+    <style>#w-intro-wrap>summary::-webkit-details-marker{display:none}#w-intro-wrap:not([open]) .wi-chev{transform:rotate(-90deg)}#w-intro-wrap:not([open])>summary #welcome-title{margin-bottom:6px;}</style>
 
     <!-- Plain-language lede — one breath of context before any controls,
          so a first-time reader knows what the page is about. -->
     <div style="animation:wgFadeUp .6s .18s both;margin:6px 0 2px;font-family:'Spectral',serif;font-size:12.5px;line-height:1.55;color:#a8a294;">
-      Two integers are <em style="color:#cfc9bc;">coprime</em> when they share no common factor.
-      This page asks a stronger question: how often is a random integer coprime to
-      <em style="color:#cfc9bc;">every one</em> of <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">n+1</span> consecutive integers at once?
-      One Euler product — <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#3dc8b8;">C(n)</span> — governs that density for every n, and every view below is that product made visible.
+      Coprime means sharing no common factor. Pick a random integer: what's the chance it stays coprime
+      to <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">n+1</span> consecutive integers in a row?
+      A single Euler product, <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#3dc8b8;">C(n)</span>,
+      tracks that density for every n. Everything on this page is built from it.
     </div>
 
     <!-- Ground-state control — surfaced right below the title so the
@@ -1095,11 +1099,109 @@ function heroToggleTopBars(){
     <div id="w-groundstate-top" style="animation:wgFadeUp .6s .22s both;margin:8px 0 4px;padding:8px 10px;background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.18);font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
       <span>C(1) ≈ 0.530711&hellip; is the first step down from certainty — set n below to lock a ground state and watch each later step live.</span>
       <span style="color:#a8a294;">n&nbsp;=</span>
-      <input type="number" id="top-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;">
+      <button onclick="wCnStep('top-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="top-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('top-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
         <input type="checkbox" id="top-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('top-steps-n')?.value||0))"> set ground state (lock to page n)
       </label>
     </div>
+
+    <!-- Mode toggle + C(n) display -->
+    <div class="welcome-eq" id="welcome-eq-row" style="animation:wgFadeUp .6s .3s both;display:flex;flex-direction:column;gap:10px;align-items:stretch;">
+      <!-- Mode toggle row -->
+      <span id="wfs-anchor-mode" style="display:none;"></span>
+      <div id="ws-mode-row" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:2px;">
+        <button id="wm-btn-asymp" onclick="wSetMode('asymptotic')"
+          style="background:rgba(200,168,74,.18);border:1px solid rgba(200,168,74,.7);color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .15s;">∞ Asymptotic</button>
+        <button id="wm-btn-finite" onclick="wSetMode('finite')"
+          style="background:none;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.6);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .15s;">Finite ∏</button>
+      </div>
+      <!-- C(n) display — hero-style multi-line formula -->
+      <span id="wfs-anchor-formula" style="display:none;"></span>
+      <details id="welcome-cn-block" open style="border:1px solid rgba(200,168,74,.18);">
+        <summary style="cursor:pointer;padding:6px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.06);">
+          <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#c8a84a;">▸</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#c8a84a;letter-spacing:.06em;">F</span>
+          <span id="wf-ratios" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(126,200,122,.85);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+        </summary>
+        <style>#welcome-cn-block[open]>summary>span:first-child{transform:rotate(90deg);}</style>
+      <div style="background:rgba(200,168,74,.05);padding:10px 14px 12px;margin:2px 0;">
+        <div style="display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:0 5px;font-family:'JetBrains Mono',monospace;font-size:clamp(.78rem,3.5vw,.95rem);color:var(--cream,#e8e3db);line-height:1.6;text-align:center;">
+          <span>C(<span id="welcome-n-val" style="color:#c8a84a;font-weight:700;font-size:1.1em;">0</span>)</span>
+          <span id="welcome-cn-mode-lbl" style="font-size:8px;color:#6a6560;align-self:center;"></span>
+          <span style="color:var(--cream,#e8e3db);padding:0 3px;">=</span>
+          <span style="white-space:nowrap;">ζ(2) · ∏<sub style="font-size:.7em;">p</sub>(1 − min(<span id="welcome-hl-n1" style="color:#3dc8b8;font-weight:700;font-size:1.1em;">1</span>, p) / p²)</span>
+          <span style="color:var(--cream,#e8e3db);padding:0 3px;">=</span>
+        </div>
+        <div style="text-align:center;margin-top:4px;">
+          <span id="welcome-countup" style="font-family:'JetBrains Mono',monospace;font-size:clamp(1.1rem,5vw,1.5rem);font-weight:700;color:#c8a84a;letter-spacing:-.01em;word-break:break-all;">0.530712</span>
+          <span id="welcome-pi-ann" style="font-family:'JetBrains Mono',monospace;font-size:.72em;color:rgba(155,127,232,.9);margin-left:.5em;letter-spacing:.01em;white-space:nowrap;"></span>
+        </div>
+      </div>
+      <!-- Formula line — mirrors the hero's ζ(2)·∏ formula, mode-aware -->
+      <div id="welcome-formula-line" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(200,168,74,.65);letter-spacing:.01em;padding-bottom:6px;"></div>
+      </details>
+      <!-- n slider — max now tracks the lattice size G (was hardcoded to 20) -->
+      <span id="wfs-anchor-n" style="display:none;"></span>
+      <div id="welcome-n-row" style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6560;">n</span>
+        <button id="wn-play-btn" onclick="wNPlay()" title="Ping-pong n from 0 to max"
+          style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ N</button>
+        <button onclick="wNextSat()" title="Jump n to the next saturation point (n = p−1)"
+          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">→sat</button>
+        <button onclick="wNStep(-1)" title="n − 1"
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">−</button>
+        <input type="range" id="welcome-n-slider" min="0" max="31" step="1" value="1"
+          style="flex:1;max-width:220px;accent-color:#c8a84a;" oninput="wRenderCn()">
+        <button onclick="wNStep(1)" title="n + 1"
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">+</button>
+        <span id="welcome-n-disp" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#3dc8b8;min-width:16px;text-align:right;">0</span>
+      </div>
+      
+      <details id="w-dn-block" style="border:1px solid rgba(61,200,184,.18);margin-top:4px;">
+        <summary style="cursor:pointer;padding:5px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(61,200,184,.05);">
+          <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#3dc8b8;">▸</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3dc8b8;letter-spacing:.06em;">D(n) · BLOCK · SATURATION</span>
+          <span id="w-dn-mini" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(200,168,74,.8);"></span>
+        </summary>
+        <style>#w-dn-block[open]>summary>span:first-child{transform:rotate(90deg);}</style>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;font-family:'JetBrains Mono',monospace;">
+          <div style="flex:1;min-width:110px;border:1px solid rgba(255,255,255,.08);padding:6px 8px;text-align:center;">
+            <div style="font-size:6.5px;letter-spacing:.12em;color:#6a6560;">D(N) = RAW DENSITY</div>
+            <div id="w-dn-val" style="font-size:13px;color:#c8a84a;margin:3px 0;">—</div>
+            <div style="font-size:6.5px;color:#6a6560;">D(n) = C(n)/ζ(2) · ζ(2)=1.644934…</div>
+          </div>
+          <div style="flex:1;min-width:90px;border:1px solid rgba(255,255,255,.08);padding:6px 8px;text-align:center;">
+            <div style="display:flex;justify-content:center;gap:4px;align-items:center;"><span style="font-size:6.5px;letter-spacing:.12em;color:#6a6560;">BLOCK LENGTH</span><button onclick="wNStep(1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▲</button><button onclick="wNStep(-1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▼</button></div>
+            <div id="w-blk-val" style="font-size:13px;color:#e8e3db;margin:3px 0;">—</div>
+            <div style="font-size:6.5px;color:#6a6560;">n+1 consecutive integers</div>
+          </div>
+          <div style="flex:1;min-width:100px;border:1px solid rgba(255,255,255,.08);padding:6px 8px;text-align:center;">
+            <div style="display:flex;justify-content:center;gap:4px;align-items:center;"><span style="font-size:6.5px;letter-spacing:.12em;color:#6a6560;">SATURATED PRIMES</span><button onclick="wSatStep(1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▲</button><button onclick="wSatStep(-1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▼</button></div>
+            <div id="w-sat-val" style="font-size:13px;color:#e05060;margin:3px 0;">—</div>
+            <div id="w-sat-next" style="font-size:6.5px;color:#6a6560;">p ≤ n+1 → factor = 1−1/p</div>
+          </div>
+        </div>
+      </details>
+      <!-- Finite primes panel (hidden in asymptotic mode) -->
+      <span id="wfs-anchor-finite" style="display:none;"></span>
+      <div id="wm-finite-panel" style="display:none;flex-direction:column;gap:6px;background:rgba(61,200,184,.04);border:1px solid rgba(61,200,184,.2);padding:8px 10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#6a6560;text-transform:uppercase;letter-spacing:.1em;">nth prime:</span>
+          <button onclick="wAdjPrimes(-1)" style="width:20px;height:20px;background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-size:11px;cursor:pointer;line-height:1;">▼</button>
+          <button onclick="wAdjPrimes(1)" style="width:20px;height:20px;background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-size:11px;cursor:pointer;line-height:1;">▲</button>
+          <input type="number" id="wm-prime-inp" min="1" max="114155" value="1"
+            title="No drag cap here — but very large values will be slow to compute."
+            style="width:40px;background:rgba(255,255,255,.04);border:1px solid rgba(61,200,184,.3);color:#3dc8b8;font-family:'JetBrains Mono',monospace;font-size:9px;text-align:center;padding:2px 3px;outline:none;"
+            oninput="wSetPrimesInp(+this.value)">
+        </div>
+        <div id="wm-prime-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(61,200,184,.7);text-align:center;">using primes up to p₁ = 2</div>
+        <details id="wm-prime-list-dd" style="border:1px solid rgba(61,200,184,.18);">
+          <summary style="cursor:pointer;padding:4px 8px;list-style:none;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3dc8b8;letter-spacing:.06em;">▸ PRIMES IN PRODUCT <span id="wm-prime-list-mini" style="color:#6a6560;"></span></summary>
+          <div id="wm-prime-list" style="padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(61,200,184,.8);line-height:1.7;word-break:break-all;max-height:120px;overflow-y:auto;"></div>
+        </details>
+      </div>
+    </div>
+    </details>
 
     <!-- View options row — moved here so the view picker sits right below the title -->
     <div style="animation:wgFadeUp .6s .3s both;margin:8px 0 10px;">
@@ -1370,7 +1472,7 @@ function heroToggleTopBars(){
         </div>
         <div>
           D(1) = C(1)/ζ(2) = ∏<sub>p</sub>(1−2/p²)<br>
-          &nbsp;&nbsp;<span style="color:#6a6560;">same product, no ζ(2) factor — this is the Feller–Tornier constant D<sub>FT</sub></span><br>
+          &nbsp;&nbsp;<span style="color:#6a6560;">same product, no ζ(2) factor — the Feller–Tornier product D<sub>FT</sub> (the classical F–T constant is ½(1+D<sub>FT</sub>))</span><br>
           &nbsp;&nbsp;= (1/2)·(7/9)·(23/25)·(47/49)·…<br>
           &nbsp;&nbsp;≈ <b style="color:#3dc8b8;">0.322634098939</b>
         </div>
@@ -1380,7 +1482,7 @@ function heroToggleTopBars(){
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;background:#0c0c22;border:1px solid rgba(155,127,232,.25);padding:12px 14px;margin:0 0 12px;">
       <div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Try any n — step-by-step (C(n) &amp; D(n))</div>
       <span style="color:#a8a294;">n =</span>
-      <input type="number" id="w-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;">
+      <button onclick="wCnStep('w-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="w-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('w-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <button onclick="wCnSteps(+document.getElementById('w-steps-n').value)" style="background:rgba(155,127,232,.12);border:1px solid rgba(155,127,232,.5);color:#9b7fe8;font-family:inherit;font-size:9px;padding:4px 12px;cursor:pointer;">Show steps</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
         <input type="checkbox" id="w-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('w-steps-n')?.value||0))"> set ground state (lock to page n)
@@ -1389,109 +1491,7 @@ function heroToggleTopBars(){
     </div>
     </details>
 
-    <!-- Mode toggle + C(n) display -->
-    <div class="welcome-eq" id="welcome-eq-row" style="animation:wgFadeUp .6s 1.05s both;display:flex;flex-direction:column;gap:10px;align-items:stretch;">
-      <!-- Mode toggle row -->
-      <span id="wfs-anchor-mode" style="display:none;"></span>
-      <div id="ws-mode-row" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:2px;">
-        <button id="wm-btn-asymp" onclick="wSetMode('asymptotic')"
-          style="background:rgba(200,168,74,.18);border:1px solid rgba(200,168,74,.7);color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .15s;">∞ Asymptotic</button>
-        <button id="wm-btn-finite" onclick="wSetMode('finite')"
-          style="background:none;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.6);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .15s;">Finite ∏</button>
-      </div>
-      <!-- C(n) display — hero-style multi-line formula -->
-      <span id="wfs-anchor-formula" style="display:none;"></span>
-      <details id="welcome-cn-block" open style="border:1px solid rgba(200,168,74,.18);">
-        <summary style="cursor:pointer;padding:6px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.06);">
-          <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#c8a84a;">▸</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#c8a84a;letter-spacing:.06em;">F</span>
-          <span id="wf-ratios" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(126,200,122,.85);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-        </summary>
-        <style>#welcome-cn-block[open]>summary>span:first-child{transform:rotate(90deg);}</style>
-      <div style="background:rgba(200,168,74,.05);padding:10px 14px 12px;margin:2px 0;">
-        <div style="display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:0 5px;font-family:'JetBrains Mono',monospace;font-size:clamp(.78rem,3.5vw,.95rem);color:var(--cream,#e8e3db);line-height:1.6;text-align:center;">
-          <span>C(<span id="welcome-n-val" style="color:#c8a84a;font-weight:700;font-size:1.1em;">0</span>)</span>
-          <span id="welcome-cn-mode-lbl" style="font-size:8px;color:#6a6560;align-self:center;"></span>
-          <span style="color:var(--cream,#e8e3db);padding:0 3px;">=</span>
-          <span style="white-space:nowrap;">ζ(2) · ∏<sub style="font-size:.7em;">p</sub>(1 − min(<span id="welcome-hl-n1" style="color:#3dc8b8;font-weight:700;font-size:1.1em;">1</span>, p) / p²)</span>
-          <span style="color:var(--cream,#e8e3db);padding:0 3px;">=</span>
-        </div>
-        <div style="text-align:center;margin-top:4px;">
-          <span id="welcome-countup" style="font-family:'JetBrains Mono',monospace;font-size:clamp(1.1rem,5vw,1.5rem);font-weight:700;color:#c8a84a;letter-spacing:-.01em;word-break:break-all;">0.530712</span>
-          <span id="welcome-pi-ann" style="font-family:'JetBrains Mono',monospace;font-size:.72em;color:rgba(155,127,232,.9);margin-left:.5em;letter-spacing:.01em;white-space:nowrap;"></span>
-        </div>
-      </div>
-      <!-- Formula line — mirrors the hero's ζ(2)·∏ formula, mode-aware -->
-      <div id="welcome-formula-line" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(200,168,74,.65);letter-spacing:.01em;padding-bottom:6px;"></div>
-      </details>
-      <!-- n slider — max now tracks the lattice size G (was hardcoded to 20) -->
-      <span id="wfs-anchor-n" style="display:none;"></span>
-      <div id="welcome-n-row" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6560;">n</span>
-        <button id="wn-play-btn" onclick="wNPlay()" title="Ping-pong n from 0 to max"
-          style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ N</button>
-        <button onclick="wNextSat()" title="Jump n to the next saturation point (n = p−1)"
-          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">→sat</button>
-        <button onclick="wNStep(-1)" title="n − 1"
-          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">−</button>
-        <input type="range" id="welcome-n-slider" min="0" max="31" step="1" value="1"
-          style="flex:1;max-width:220px;accent-color:#c8a84a;" oninput="wRenderCn()">
-        <button onclick="wNStep(1)" title="n + 1"
-          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">+</button>
-        <span id="welcome-n-disp" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#3dc8b8;min-width:16px;text-align:right;">0</span>
-      </div>
-      <!-- Decimal precision — exact (BigInt/π-to-100dp) in finite mode, full double precision in asymptotic -->
-      <span id="wfs-anchor-dp" style="display:none;"></span>
-      <div id="welcome-dp-row" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6560;">dp</span>
-        <input type="range" id="welcome-dp-sl" min="2" max="15" step="1" value="12"
-          style="flex:1;max-width:220px;accent-color:#c8a84a;" oninput="wSetDP(+this.value)">
-        <span id="welcome-dp-disp" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#3dc8b8;min-width:16px;text-align:right;">12</span>
-      </div>
-      <details id="w-dn-block" style="border:1px solid rgba(61,200,184,.18);margin-top:4px;">
-        <summary style="cursor:pointer;padding:5px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(61,200,184,.05);">
-          <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#3dc8b8;">▸</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3dc8b8;letter-spacing:.06em;">D(n) · BLOCK · SATURATION</span>
-          <span id="w-dn-mini" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(200,168,74,.8);"></span>
-        </summary>
-        <style>#w-dn-block[open]>summary>span:first-child{transform:rotate(90deg);}</style>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;font-family:'JetBrains Mono',monospace;">
-          <div style="flex:1;min-width:110px;border:1px solid rgba(255,255,255,.08);padding:6px 8px;text-align:center;">
-            <div style="font-size:6.5px;letter-spacing:.12em;color:#6a6560;">D(N) = RAW DENSITY</div>
-            <div id="w-dn-val" style="font-size:13px;color:#c8a84a;margin:3px 0;">—</div>
-            <div style="font-size:6.5px;color:#6a6560;">D(n) = C(n)/ζ(2) · ζ(2)=1.644934…</div>
-          </div>
-          <div style="flex:1;min-width:90px;border:1px solid rgba(255,255,255,.08);padding:6px 8px;text-align:center;">
-            <div style="display:flex;justify-content:center;gap:4px;align-items:center;"><span style="font-size:6.5px;letter-spacing:.12em;color:#6a6560;">BLOCK LENGTH</span><button onclick="wNStep(1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▲</button><button onclick="wNStep(-1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▼</button></div>
-            <div id="w-blk-val" style="font-size:13px;color:#e8e3db;margin:3px 0;">—</div>
-            <div style="font-size:6.5px;color:#6a6560;">n+1 consecutive integers</div>
-          </div>
-          <div style="flex:1;min-width:100px;border:1px solid rgba(255,255,255,.08);padding:6px 8px;text-align:center;">
-            <div style="display:flex;justify-content:center;gap:4px;align-items:center;"><span style="font-size:6.5px;letter-spacing:.12em;color:#6a6560;">SATURATED PRIMES</span><button onclick="wSatStep(1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▲</button><button onclick="wSatStep(-1)" style="background:none;border:1px solid rgba(255,255,255,.15);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 7px;cursor:pointer;">▼</button></div>
-            <div id="w-sat-val" style="font-size:13px;color:#e05060;margin:3px 0;">—</div>
-            <div id="w-sat-next" style="font-size:6.5px;color:#6a6560;">p ≤ n+1 → factor = 1−1/p</div>
-          </div>
-        </div>
-      </details>
-      <!-- Finite primes panel (hidden in asymptotic mode) -->
-      <span id="wfs-anchor-finite" style="display:none;"></span>
-      <div id="wm-finite-panel" style="display:none;flex-direction:column;gap:6px;background:rgba(61,200,184,.04);border:1px solid rgba(61,200,184,.2);padding:8px 10px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#6a6560;text-transform:uppercase;letter-spacing:.1em;">nth prime:</span>
-          <button onclick="wAdjPrimes(-1)" style="width:20px;height:20px;background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-size:11px;cursor:pointer;line-height:1;">▼</button>
-          <button onclick="wAdjPrimes(1)" style="width:20px;height:20px;background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-size:11px;cursor:pointer;line-height:1;">▲</button>
-          <input type="number" id="wm-prime-inp" min="1" max="114155" value="1"
-            title="No drag cap here — but very large values will be slow to compute."
-            style="width:40px;background:rgba(255,255,255,.04);border:1px solid rgba(61,200,184,.3);color:#3dc8b8;font-family:'JetBrains Mono',monospace;font-size:9px;text-align:center;padding:2px 3px;outline:none;"
-            oninput="wSetPrimesInp(+this.value)">
-        </div>
-        <div id="wm-prime-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(61,200,184,.7);text-align:center;">using primes up to p₁ = 2</div>
-        <details id="wm-prime-list-dd" style="border:1px solid rgba(61,200,184,.18);">
-          <summary style="cursor:pointer;padding:4px 8px;list-style:none;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3dc8b8;letter-spacing:.06em;">▸ PRIMES IN PRODUCT <span id="wm-prime-list-mini" style="color:#6a6560;"></span></summary>
-          <div id="wm-prime-list" style="padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(61,200,184,.8);line-height:1.7;word-break:break-all;max-height:120px;overflow-y:auto;"></div>
-        </details>
-      </div>
-    </div>
+    
 
       <!-- Sector path r/M=a/b — works on all four views; angle/position is
            derived from the live rotation state, so it tracks spin/flip/
@@ -2726,15 +2726,7 @@ function heroToggleTopBars(){
   window._wOpeningSequence=function(){
     var target=_wDP||12;            // whatever is configured (URL hash may set it later)
     if((location.hash||'').indexOf('wv=')<0&&typeof wSetView==='function')wSetView('grid');
-    window.wSetDP(6);               // preset view: 6 decimal places
-    setTimeout(function(){          // …then ease to the configured dp
-      var cur=6, dir=target>cur?1:-1;
-      var iv=setInterval(function(){
-        cur+=dir;
-        window.wSetDP(cur);
-        if(cur===target)clearInterval(iv);
-      },90);
-    },3000);
+    window.wSetDP(target);          // dp slider removed — fixed at the configured value (default 12)
     var dd=document.getElementById('w-intro-dd');
     if(dd){
       var cancel=false;
@@ -2936,7 +2928,7 @@ function heroToggleTopBars(){
 
 
   function isCoprime(r,M,n){
-    for(var k=0;k<=n&&k<M;k++){if(gcd(r+k,M)!==1)return false;}
+    for(var k=0;k<=n;k++){if(gcd(r,M+k)!==1)return false;}
     return true;
   }
 
@@ -4733,7 +4725,7 @@ function heroToggleTopBars(){
 
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
     <span style="color:rgba(126,200,122,.6);">Theory:</span>
-    Each residue (r,M) is first placed in polar form — radius R(M) growing with the ring index, angle θ=2πr/M+α matching the Ring view's own convention — then passed through the same Cayley map Γ(z)=(z−1)/(z+1) used by the Conformal view's "Smith Chart" map option. The teal circles are the actual images of each ring's |z|=R(M) locus; the violet rays are images of fixed angles, rotating live with α. This is a genuinely different construction from the Conformal dropdown, where (r,M) are read directly as Cartesian coordinates in the upper half-plane.
+    Each residue (r,M) is first placed in polar form — radius R(M) growing with the ring index, angle θ=2πr/M+α matching the Ring view's own convention — then passed through the same Cayley map Γ(z)=(z−1)/(z+1) used by the Conformal view's "Smith Chart" map option. The teal circles are the actual images of each ring's |z|=R(M) locus; the violet rays are images of fixed angles, rotating live with α. This is a different construction from the Conformal dropdown, where (r,M) are read directly as Cartesian coordinates in the upper half-plane.
   </div>
   </details>
 </div>
@@ -4772,7 +4764,7 @@ function heroToggleTopBars(){
   </div>
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
     <span style="color:rgba(200,168,74,.6);">Theory:</span>
-    Each cell (r, M) is gold if gcd(r, M+j) = 1 for all j = 0…n, teal if only gcd(r,M) = 1, dark otherwise. The density of gold cells converges to C(n) as G→∞.
+    Each cell (r, M) is gold if gcd(r, M+j) = 1 for all j = 0…n, teal if only gcd(r,M) = 1, dark otherwise. The density of gold cells converges to D(n) = C(n)/ζ(2) as G→∞.
   </div>
 </div>
 
@@ -4999,7 +4991,7 @@ function heroToggleTopBars(){
         </div>
         <div>
           D(1) = C(1)/ζ(2) = ∏<sub>p</sub>(1−2/p²)<br>
-          &nbsp;&nbsp;<span style="color:#6a6560;">same product, no ζ(2) factor — this is the Feller–Tornier constant D<sub>FT</sub></span><br>
+          &nbsp;&nbsp;<span style="color:#6a6560;">same product, no ζ(2) factor — the Feller–Tornier product D<sub>FT</sub> (the classical F–T constant is ½(1+D<sub>FT</sub>))</span><br>
           &nbsp;&nbsp;= (1/2)·(7/9)·(23/25)·(47/49)·…<br>
           &nbsp;&nbsp;≈ <b style="color:#3dc8b8;">0.322634098939</b>
         </div>
@@ -5009,7 +5001,7 @@ function heroToggleTopBars(){
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;background:#0c0c22;border:1px solid rgba(155,127,232,.25);padding:12px 14px;margin:0 0 12px;">
       <div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Try any n — step-by-step (C(n) &amp; D(n))</div>
       <span style="color:#a8a294;">n =</span>
-      <input type="number" id="hero-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;">
+      <button onclick="wCnStep('hero-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="hero-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('hero-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <button onclick="wCnSteps(+document.getElementById('hero-steps-n').value)" style="background:rgba(155,127,232,.12);border:1px solid rgba(155,127,232,.5);color:#9b7fe8;font-family:inherit;font-size:9px;padding:4px 12px;cursor:pointer;">Show steps</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
         <input type="checkbox" id="hero-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('hero-steps-n')?.value||0))"> set ground state (lock to page n)
@@ -5638,7 +5630,7 @@ function heroToggleTopBars(){
     <table class="dt">
       <thead><tr>
         <th>n</th><th>Block</th><th>C(n)</th><th>D(n)</th>
-        <th>C(n)/C(n−1)</th><th title="Signed difference C(n)−C(n−1); spikes mark saturation events">ΔC</th><th>Sat. primes</th><th title="C(n)/C₂ — block-coprime density relative to twin prime constant; genuinely new column">C(n)/C₂</th><th>Event</th>
+        <th>C(n)/C(n−1)</th><th title="Signed difference C(n)−C(n−1); spikes mark saturation events">ΔC</th><th>Sat. primes</th><th title="C(n)/C₂ — block-coprime density relative to twin prime constant">C(n)/C₂</th><th>Event</th>
       </tr></thead>
       <tbody id="dt-body"></tbody>
     </table>
@@ -5682,7 +5674,7 @@ function heroToggleTopBars(){
     $$\frac{1-\nu_p/p}{(1-1/p)^k} \quad (\text{1D: counts residues in }\mathbb{Z}/p\mathbb{Z})$$
     Both share the exclusion count $\nu_p = \min(n+1,p)$, but operate in different ambient dimensions. The
     <span style="color:var(--teal)">Block corr.</span> column shows the ratio $f_p(n)/(1-1/p)^{n+1}$ — always &gt; 1, diverging — 
-    while the <span style="color:var(--lime)">C₂ local (1D)</span> column shows the genuine twin prime factor $p(p-2)/(p-1)^2$, which is distinct.
+    while the <span style="color:var(--lime)">C₂ local (1D)</span> column shows the actual twin prime factor $p(p-2)/(p-1)^2$, which is distinct.
   </div>
 
   <!-- Per-prime HL factor table (first 12 primes, live) -->
@@ -5810,8 +5802,8 @@ function heroToggleTopBars(){
   <div class="card-title">Strip Average — Diagonal Decomposition of C(0)</div>
   <div class="ibox" style="margin-bottom:14px;">
     The coprime density 6/π² = D(0) is a weighted average of φ(g)/g over all diagonal strips of the G×G lattice:
-    $$A(G) = \frac{1}{G^2}\sum_{g=1}^{G-1}(G-g)\cdot\frac{\varphi(g)}{g} \;\to\; \frac{6}{\pi^2}$$
-    Each strip |M−r|=g contributes φ(g)/g coprime pairs, weighted by strip length (G−g).
+    $$A(G) = \frac{2}{G^2}\sum_{g=1}^{G-1}(G-g)\cdot\frac{\varphi(g)}{g} \;\to\; \frac{6}{\pi^2}$$
+    Each offset g corresponds to two mirrored strips M−r=±g (hence the factor 2), each of length (G−g) and coprime density φ(g)/g.
     The block-coprime extension replaces φ(g)/g with B(g,n) to recover D(n) = C(n)/ζ(2) for any n.
     This is the explicit bridge to the Gap Diagonal Identity (page2.html).
   </div>
@@ -5965,7 +5957,10 @@ function getCn(n){
   ld+=_cnTailLog(n);                       // supply the p>200000 tail analytically
   return(_cn[n]=ZETA2*Math.exp(ld));
 }
-for(let i=0;i<=600;i++)getCn(i);
+// Warm the cache in two stages: n ≤ 60 synchronously (covers the default UI
+// range instantly), the rest deferred so first paint isn't blocked ~1–4s.
+for(let i=0;i<=60;i++)getCn(i);
+setTimeout(()=>{for(let i=61;i<=600;i++)getCn(i);},50);
 
 // ── FINITE / ASYMPTOTIC MODE ──────────────────────────────────────────
 // getCnFinite(n, numPrimes) computes the partial Euler product
@@ -6537,7 +6532,7 @@ function renderCanvas2DGrid(){
       if(cm===0){
         col=ok?COLOR_MAP.gold:copM?COLOR_MAP.teal:COLOR_MAP.dark;
       }else if(cm===1){
-        const t=ok?1:(ff/(N+1));
+        const t=ok?1:(ff/(n+1));
         const ri=Math.round(210*(1-t)+200*t),gi=Math.round(50*(1-t)+168*t),bi=Math.round(50*(1-t)+74*t);
         col=`rgb(${ri},${gi},${bi})`;
       }else if(cm===2){
@@ -8720,7 +8715,7 @@ function _renderDD(rowN){
           <div class="kv"><span class="kv-k">Block length (n+1)</span><span class="kv-v teal">${n+1}</span></div>
           <div class="kv"><span class="kv-k">Offsets j checked</span><span class="kv-v">0, 1, …, ${n}</span></div>
           ${n===0?'<div class="pd-note">n=0 is the trivial case: only gcd(r,M)=1 is required. This recovers the standard coprime density D(0) = 1/ζ(2) = 6/π², so C(0) = 1 exactly.</div>':''}
-          ${n===1?'<div class="pd-note">n=1: the local factor at each prime p is 1−2/p², so D(1) = ∏<sub>p</sub>(1−2/p²) ≈ 0.3226. This Euler product is the <strong>Feller–Tornier product D<sub>FT</sub></strong>. Note: the classical Feller–Tornier constant is C<sub>FT</sub> = ½(1+D<sub>FT</sub>) ≈ 0.6613 — a different quantity measuring integers with even squarefull part. Our C(1) = ζ(2)·D<sub>FT</sub> ≈ 0.5307 is distinct from both.</div>':''}
+          ${n===1?'<div class="pd-note">n=1: the local factor at each prime p is 1−2/p², so D(1) = ∏<sub>p</sub>(1−2/p²) ≈ 0.3226. This Euler product is the <strong>Feller–Tornier product D<sub>FT</sub></strong>. Note: the classical Feller–Tornier constant is C<sub>FT</sub> = ½(1+D<sub>FT</sub>) ≈ 0.6613 — a different quantity: the density of integers with an even number of prime factors of multiplicity ≥ 2. Our C(1) = ζ(2)·D<sub>FT</sub> ≈ 0.5307 is distinct from both.</div>':''}
         </div>
       </div>
 
@@ -8732,7 +8727,7 @@ function _renderDD(rowN){
           <p>By the Chinese Remainder Theorem, coprimality conditions at distinct primes are independent.
           The natural density D(n) factors as an Euler product:</p>
           <div class="dd-formula gold">D(n) = ∏<sub>p prime</sub> (1 − min(n+1, p) / p²)</div>
-          <p>For each prime p, we count how many of the ${n+1} offsets {0,…,${n}} fall in the same residue class mod p as 0 — that count is min(n+1, p) = min(${n+1}, p).</p>
+          <p>For each prime p, we count how many <em>distinct</em> residue classes mod p the offsets {0,…,${n}} occupy — that count is min(n+1, p) = min(${n+1}, p). A pair (r, M) is forbidden mod p exactly when r ≡ 0 and M ≡ −j for one of those offsets — min(n+1, p) choices of M out of p, hence the local factor below.</p>
         </div>
       </div>
 
@@ -19497,7 +19492,7 @@ async function doExportWithPreview(){
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
 
 // ══════════════════════════════════════════════════════════
-//  SECTION 9 — STRIP AVERAGE: A(G) = (1/G²)∑(G−g)·φ(g)/g → 6/π²
+//  SECTION 9 — STRIP AVERAGE: A(G) = (2/G²)∑(G−g)·φ(g)/g → 6/π²
 // ══════════════════════════════════════════════════════════
 const _phiS={};
 function _phis(n){
@@ -19534,7 +19529,7 @@ function _stripAvgAt(G){
   if(_stripACache[G]!==undefined)return _stripACache[G];
   let s=0;
   for(let g=1;g<G;g++)s+=(G-g)*_phis(g)/g;
-  return(_stripACache[G]=s/(G*G));
+  return(_stripACache[G]=2*s/(G*G));
 }
 
 // Block-extended version: replace φ(g)/g with B(g,n)
@@ -19556,7 +19551,7 @@ function _blockDiagDensity(g,n){
 function _stripAvgDnAt(G,n){
   let s=0;
   for(let g=1;g<G;g++)s+=(G-g)*_blockDiagDensity(g,n);
-  return s/(G*G);
+  return 2*s/(G*G);
 }
 
 // ── Critical Strip PNG export — the strip canvas previously had no export path ──
@@ -20636,8 +20631,9 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
 document.addEventListener('keydown',function(e){if(e.key==='Escape')window.closeWelcome();});
 // If another page sent us here via "Opener" button, auto-open the welcome modal
 (function(){
-  if(sessionStorage.getItem('wg_open_opener')==='1'){
-    sessionStorage.removeItem('wg_open_opener');
+  var flag=null;
+  try{ flag=sessionStorage.getItem('wg_open_opener'); if(flag==='1')sessionStorage.removeItem('wg_open_opener'); }catch(e){}
+  if(flag==='1'){
     // Wait for init() to run first (it fires on DOMContentLoaded)
     var m=document.getElementById('welcome-modal');
     if(m) m.style.display='flex';
@@ -20793,6 +20789,12 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
   var P=null;
   function sieve(){if(P)return P;var L=60000,f=new Uint8Array(L+1);P=[];
     for(var i=2;i<=L;i++){if(!f[i]){P.push(i);for(var j=i*i;j<=L;j+=i)f[j]=1;}}return P;}
+  // ▲▼ stepper for the n inputs (opener + hero): clamp 0..500, sync, recompute
+  window.wCnStep=function(id,d){
+    var e=document.getElementById(id); if(!e)return;
+    var v=Math.max(0,Math.min(500,(parseInt(e.value)||0)+d));
+    e.value=v; wCnSteps(v);
+  };
   window.wCnSteps=function(n){
     n=Math.max(0,Math.min(500,Math.round(n||0)));
     var pr=sieve(),ZETA2=Math.PI*Math.PI/6;
