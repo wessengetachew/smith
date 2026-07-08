@@ -1286,10 +1286,10 @@ function heroToggleTopBars(){
         <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.7);white-space:nowrap;">Color:</span>
         <select id="w-color-mode" onchange="wSetColorMode()"
           style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;flex:1;max-width:220px;">
-          <option value="default" selected>Distance-from-center hue (default)</option>
+          <option value="default">Distance-from-center hue (default)</option>
           <option value="residue_value">By Residue Value (r hue, ignores ring)</option>
           <option value="ring_hash">By Ring/Modulus (M hue, ignores r)</option>
-          <option value="phi_position">φ(M) Mathematical Progression</option>
+          <option value="phi_position" selected>φ(M) Mathematical Progression</option>
           <option value="phi_spectrum">φ(M)/M Spectral Distribution</option>
         </select>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#6a6560;">all 5 views</span>
@@ -1536,9 +1536,28 @@ function heroToggleTopBars(){
             style="width:42px;background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;padding:3px 4px;outline:none;">
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#3dc8b8;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-pos" onchange="wTraceSector()" style="accent-color:#3dc8b8;">s = +1</label>
+          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#3dc8b8;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-pos" checked onchange="wTraceSector()" style="accent-color:#3dc8b8;">s = +1</label>
           <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-ray" checked onchange="wTraceSector()" style="accent-color:#c8a84a;">s = 0 (ray)</label>
-          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#e05060;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-neg" onchange="wTraceSector()" style="accent-color:#e05060;">s = −1</label>
+          <label style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#e05060;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="wsec-neg" checked onchange="wTraceSector()" style="accent-color:#e05060;">s = −1</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Label:</span>
+          <select id="wsec-label-mode" onchange="wTraceSector()"
+            style="background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+            <option value="none">None</option>
+            <option value="coords">r, M</option>
+            <option value="fraction">r/M (reduced)</option>
+            <option value="angle">2πr/M °</option>
+            <option value="gcd">gcd(r,M)</option>
+            <option value="depth">depth d</option>
+            <option value="status">ok/cop/no</option>
+            <option value="fail_j">fail j</option>
+            <option value="phi_M">φ(M)</option>
+            <option value="mobius_M">μ(M)</option>
+            <option value="gap">gap |M-r|</option>
+            <option value="r_val" selected>r only</option>
+            <option value="M_val">M only</option>
+          </select>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <button onclick="wTraceSector()" title="Highlight lattice points on this path"
@@ -1928,6 +1947,27 @@ function heroToggleTopBars(){
   // mapping, so it's automatically adaptive to spin/flip/per-ring rotation.
   var _wSectorPts=[]; // [{r,M,s}]
   function _wSectorColor(s){ return s>0?'rgba(61,200,184,.95)':s<0?'rgba(224,80,96,.95)':'rgba(200,168,74,.95)'; }
+  // Draws the same label vocabulary as the hero's "Label:" dropdown
+  // (_getHeroLabel, global fn) next to a traced sector point. curN comes
+  // from the page's ground-state n so depth/status-based labels agree with
+  // whatever n is currently locked, same as the hero.
+  function _wDrawSecLabel(ctx,x,y,r,M,off){
+    var mode=document.getElementById('wsec-label-mode')?.value||'none';
+    if(mode==='none'||typeof _getHeroLabel!=='function')return;
+    var n=typeof N!=='undefined'?N:0;
+    var d=typeof _heroTrueDepth==='function'?_heroTrueDepth(r,M):-1;
+    var lbl=_getHeroLabel(r,M,n,d,mode);
+    if(!lbl)return;
+    off=off||6;
+    ctx.save();
+    ctx.font='9px \'JetBrains Mono\',monospace';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(4,4,13,.85)';
+    ctx.strokeText(lbl,x+off,y);
+    ctx.fillStyle='#e8e3db';
+    ctx.fillText(lbl,x+off,y);
+    ctx.restore();
+  }
   window.wTraceSector=function(){
     var a=Math.max(1,Math.min(9999,parseInt(document.getElementById('wsec-a')?.value)||1));
     var b=Math.max(1,Math.min(9999,parseInt(document.getElementById('wsec-b')?.value)||1));
@@ -2624,7 +2664,7 @@ function heroToggleTopBars(){
   // dist=min(r,M-r), ratio=dist/floor(M/2), hue runs 240(near)→0(far).
   // ── Color mode (opener) — mirrors the hero's dropdown; ported the schemes
   // missing from the old project's "Residue Coloring Scheme" selector. ──
-  var _wColorMode='default';
+  var _wColorMode='phi_position';
   var _wPhiPosCache={};
   function _wCoprimeList(M){
     if(_wPhiPosCache[M])return _wPhiPosCache[M];
@@ -3041,6 +3081,7 @@ function heroToggleTopBars(){
       ctx.beginPath();ctx.arc(spx,spy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,spRad*1.7,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
+      _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,spRad*1.7+3);
     }
   }
 
@@ -3170,6 +3211,7 @@ function heroToggleTopBars(){
       ctx.beginPath();ctx.arc(spx,spy,1.7*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,2.9*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
+      _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,2.9*_wSecDotScale+3);
     }
   }
 
@@ -3211,6 +3253,7 @@ function heroToggleTopBars(){
       ctx.beginPath();ctx.arc(spx,spy,1.5*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,2.5*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.2;ctx.stroke();
+      _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,2.5*_wSecDotScale+3);
     }
   }
 
@@ -3278,6 +3321,7 @@ function heroToggleTopBars(){
           ctx.beginPath();ctx.arc(sx,sy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
           ctx.beginPath();ctx.arc(sx,sy,spRad*1.7,0,Math.PI*2);
           ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
+          _wDrawSecLabel(ctx,sx,sy,sp.r,sp.M,spRad*1.7+3);
         }
         ctx.rotate(Math.PI/2);
       }
@@ -3473,6 +3517,7 @@ function heroToggleTopBars(){
       ctx.beginPath();ctx.arc(spx,spy,1.8*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,3.0*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
+      _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,3.0*_wSecDotScale+3);
     }
   }
   // Cayley map Γ(z)=(z−1)/(z+1) for z=ringR·e^{iθ} (ringR dimensionless, O(1)), scaled to canvas radius R0
@@ -4342,12 +4387,12 @@ function heroToggleTopBars(){
       <option value="zeroDivisors">Zero Divisors</option>
       <option value="idempotents">Idempotents</option>
       <option value="primality">Primality (spf)</option>
-      <option value="modular_distance" selected>Modular Distance</option>
+      <option value="modular_distance">Modular Distance</option>
     </optgroup>
     <optgroup label="── Ported from old project ──">
       <option value="residue_value">By Residue Value (r hue, ignores ring)</option>
       <option value="ring_hash">By Ring/Modulus (M hue, ignores r)</option>
-      <option value="phi_position">φ(M) Mathematical Progression</option>
+      <option value="phi_position" selected>φ(M) Mathematical Progression</option>
       <option value="phi_spectrum">φ(M)/M Spectral Distribution</option>
     </optgroup>
     <optgroup label="── Global ──">
@@ -4359,7 +4404,7 @@ function heroToggleTopBars(){
 
   <!-- ── LABEL ── -->
   <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);">Label:</span>
-  <select id="hero-label-mode" onchange=""
+  <select id="hero-label-mode" onchange="heroLabelModeChange()"
     style="background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
     <option value="none">None</option>
     <option value="coords">r, M</option>
@@ -4578,6 +4623,24 @@ function heroToggleTopBars(){
       <label style="font-size:8.5px;color:var(--teal);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sec-pos" checked style="accent-color:var(--teal);">s = +1</label>
       <label style="font-size:8.5px;color:var(--cream3);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sec-ray" style="accent-color:var(--gold);">s = 0 (ray)</label>
       <label style="font-size:8.5px;color:var(--coral);display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sec-neg" checked style="accent-color:var(--coral);">s = −1</label>
+      <div class="cv-sep"></div>
+      <span class="cv-lbl">Label:</span>
+      <select id="hero-sec-label-mode" onchange="heroSyncSecLabel(this.value)"
+        style="background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+        <option value="none">None</option>
+        <option value="coords">r, M</option>
+        <option value="fraction">r/M (reduced)</option>
+        <option value="angle">2πr/M °</option>
+        <option value="gcd">gcd(r,M)</option>
+        <option value="depth">depth d</option>
+        <option value="status">ok/cop/no</option>
+        <option value="fail_j">fail j</option>
+        <option value="phi_M">φ(M)</option>
+        <option value="mobius_M">μ(M)</option>
+        <option value="gap">gap |M-r|</option>
+        <option value="r_val" selected>r only</option>
+        <option value="M_val">M only</option>
+      </select>
       <div class="cv-sep"></div>
       <button class="cv-btn" onclick="heroTraceSector()" title="Highlight points on this path and list them below">Trace path</button>
       <button class="cv-btn" onclick="heroClearInspect()">Clear</button>
@@ -6115,6 +6178,23 @@ function _finiteColor(gap){
   if(gap < 0.001)   return 'var(--teal)';
   if(gap < 0.01)    return 'var(--lime)';
   return 'var(--coral)';
+}
+
+// ── Label mode: main selector (top control bar) mirrors with the convenience
+// copy inside the Sector Path panel — changing either updates both and
+// forces an immediate redraw (labelMode is otherwise only read passively on
+// the next draw call, so a plain value change with no listener would sit
+// invisible until something else happened to trigger a redraw). ──
+function heroLabelModeChange(){
+  const v = document.getElementById('hero-label-mode')?.value || 'none';
+  const mirror = document.getElementById('hero-sec-label-mode');
+  if(mirror) mirror.value = v;
+  if(typeof drawChart === 'function') drawChart();
+}
+function heroSyncSecLabel(v){
+  const master = document.getElementById('hero-label-mode');
+  if(master) master.value = v;
+  if(typeof drawChart === 'function') drawChart();
 }
 
 function setFiniteMode(on){
@@ -14443,7 +14523,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
 }
 
 // ── HERO COLOR MODE ──
-let _heroColorModeLocal='modular_distance'; // local override, 'global' delegates to global-color
+let _heroColorModeLocal='phi_position'; // local override, 'global' delegates to global-color
 function heroColorModeChange(){
   _heroColorModeLocal=document.getElementById('hero-color-mode')?.value||'default';
 }
