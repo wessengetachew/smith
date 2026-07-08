@@ -1,6 +1,9 @@
 # C(n) — Block-Coprime Density
 
-**Live page:** https://wessengetachew.github.io/smith/
+**Live page 1 The Index.html:** https://wessengetachew.github.io/smith/
+
+## Page 2
+https://wessengetachew.github.io/smith/page2.html
 
 An interactive explorer for the block-coprime density function
 
@@ -58,3 +61,92 @@ Single deliverable: `index.html`. No build step, no server — open the file or 
 
 © Wessen Getachew ([@7dview](https://twitter.com/7dview)) · wessengetachew.github.io
 Code and text may be viewed and shared with attribution; please link back to the live page.
+
+
+## Page 2 
+
+# Gap Diagonal Identity — Page 2
+
+Part of Wessen Getachew's C(n) block-coprime density research suite
+([Page 2](https://wessengetachew.github.io/smith/page2.html)). This page explores the
+lattice `{(r, M) : 1 ≤ r ≤ M ≤ G}` through the diagonals `|M − r| = g`, using the classical
+identity
+
+```
+coprime density on {|M − r| = g}  =  φ(g) / g
+```
+
+as a geometric lens on C(n)'s structure.
+
+## Core idea
+
+For a fixed gap `g`, the pairs `(r, M)` on the diagonal `|M − r| = g` are coprime with
+density exactly `φ(g)/g` — a direct consequence of Euler's totient function and the identity
+`gcd(r, r+g) = gcd(r, g)`. The page treats the full lattice as a stack of these diagonal
+strips and lets you explore how each one behaves individually, then extends the same idea to
+block-coprimality (`gcd(r, r+g+j) = 1` for `j = 0, …, n`) via C(n).
+
+The Theory panel (collapsible, under the 2D Lattice tab) walks through the four-step proof of
+the base identity, the block-coprime extension, and an honest accounting of what's classical
+versus what's a visualization choice — the per-strip decomposition is a close approximation
+to C(n) at n > 0, not an exact identity, since the strips share prime factors and aren't
+independent.
+
+## Views
+
+**2D Lattice tab**
+- **Grid** — the raw `(r, M)` lattice, colored by coprimality/block-coprimality, with a movable
+  diagonal-gap highlight.
+- **Ring · Barrier · Spire** — a combined polar view: residues placed on concentric rings by
+  modulus M, with barrier and lift-survival overlays.
+- **ℤ[i]** — the same coprimality condition read as visible/invisible points from the origin in
+  the Gaussian integers, alongside the classical visible-lattice-point density `6/π² + O(log G/G)`.
+- **Ford** — Ford circles (radius `1/(2q²)` at each reduced fraction `p/q`) paired with a
+  Stern–Brocot mediant tree over the same sectors.
+
+Each sub-view shares the same `G` (grid size), `g` (active diagonal), `n` (block depth), and
+color-mode controls, plus 2ⁿ presets and a Play-G animation that ping-pongs G between 2 and 128.
+
+**3D Cube tab** — the analogous coprime lattice `gcd(x, y, z) = 1` in three dimensions, with
+density `1/ζ(3) ≈ 0.83191` (Apéry's constant), rendered as an interactive point cloud with
+rotation, zoom, slicing, and gradient-arrow overlays.
+
+**Field tab (⬡)** — a continuous view of local coprime density:
+- **Vault Split** — splits the field along the diagonal to compare regions directly.
+- **Density Heatmap / Gradient Flow** — computes `D_R(r, M)`, the coprime density in an
+  `R`-neighborhood of each cell (via a summed-area table for speed), and draws its gradient,
+  which points away from the coprime-sparse diagonal `r = M` toward denser strips.
+
+The Field theory panel includes attribution for the classical visible-lattice-point result
+(Cesàro 1881, Sylvester 1883, Dirichlet 1849, Mertens 1874) and its refinement under the
+Riemann Hypothesis (Bureaux–Enriquez 2016, arXiv:1612.03700), along with the Herzog–Stewart
+(1971) result on non-coprime "invisible forest" blocks.
+
+## Controls
+
+- **Grid G** (2–1024) — lattice size, shared across all 2D sub-views.
+- **g** — active diagonal gap; can be locked to `G/2` so it tracks G automatically.
+- **depth n** — block-coprimality depth; C(n) is recomputed live and shown in the sticky nav bar.
+- **Color mode** — over a dozen palettes (sector angle, gap band, residue, φ(M)/M density, lift
+  survival, Möbius μ, GCD spectrum, Farey rainbow, and more).
+- **Zoom / pan** — mouse drag and scroll, or the zoom slider, with view-specific max zoom.
+
+## Exports
+
+Every tab has a 4K PNG export (3840×3840) that renders the current view with a header, active
+formula, and live statistics baked in — suitable for sharing or printing.
+
+## Navigation
+
+The sticky top bar links to **P1** (the main C(n) Block-Coprime Density page), the current
+page (**P2**), and the **Opener** welcome/teaser view.
+
+## Implementation notes
+
+Single-file HTML/CSS/JavaScript, no build step or external dependencies beyond MathJax (for
+formula rendering) and JetBrains Mono/Cinzel/Spectral webfonts. All math (gcd, totient, Möbius,
+primality, the C(n) Euler product) is computed client-side with plain trial-division and
+memoized where it's called repeatedly. Canvas rendering is DPR-aware and capped at 3× pixel
+ratio to keep memory use reasonable on high-density displays.
+
+
