@@ -12879,6 +12879,11 @@ function heroLatticeSetG(v){
   // smaller G and automatically extend when G grows.
   if(typeof _heroSectorFrac!=='undefined'&&_heroSectorFrac&&typeof heroTraceSector==='function')heroTraceSector();
   _updateHeroRatioLive(_heroG);
+  // Spiral prime re-tracks the grid's own max prime ≤ G on every resize.
+  if(typeof _liftSpiralP!=='undefined'){
+    _liftSpiralP=0;
+    document.querySelectorAll('.lift-spiralp-lbl').forEach(l=>l.textContent='p=auto');
+  }
 }
 
 // ── Live survival-ratio table — mirrors _cnExportCounts, used by the 4K/8K
