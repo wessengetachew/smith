@@ -85,6 +85,24 @@ table.lbl td{font-family:var(--serif);font-weight:300;font-size:12px;line-height
 table.lbl td:first-child{font-family:var(--mono);font-size:9.5px;color:var(--cream);white-space:nowrap;}
 table.lbl td:nth-child(2){font-family:var(--mono);font-size:9px;color:var(--gold);white-space:nowrap;}
 
+/* ── SWATCH CONTROLS (view switch + G slider) ── */
+.sw-ctl{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;max-width:224px;}
+.sw-ctl select{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:7.5px;padding:2px 4px;cursor:pointer;outline:none;}
+.sw-ctl input[type=range]{flex:1;min-width:60px;accent-color:var(--gold);height:10px;}
+.sw-ctl .gv{font-family:var(--mono);font-size:7.5px;color:var(--gold);min-width:26px;text-align:right;}
+@media(max-width:760px){.sw-ctl{max-width:min(320px,100%);margin-left:auto;margin-right:auto;}}
+
+/* ── APPLY-ON-PAGE-1 strip ── */
+.m-apply{grid-column:1/-1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;padding-top:8px;border-top:1px solid var(--edge);}
+.m-apply .ap-lbl{font-family:var(--mono);font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream3);margin-right:2px;}
+.m-apply a{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border:1px solid;text-decoration:none;transition:all .15s;white-space:nowrap;}
+.m-apply a.op{color:var(--gold);border-color:rgba(200,168,74,.4);}
+.m-apply a.op:hover{background:rgba(200,168,74,.12);border-color:var(--gold);text-decoration:none;}
+.m-apply a.he{color:var(--teal);border-color:rgba(61,200,184,.4);}
+.m-apply a.he:hover{background:rgba(61,200,184,.12);border-color:var(--teal);text-decoration:none;}
+.m-apply a.gl{color:var(--violet);border-color:rgba(155,127,232,.4);}
+.m-apply a.gl:hover{background:rgba(155,127,232,.12);border-color:var(--violet);text-decoration:none;}
+
 footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--cream3);}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
 </style>
@@ -126,9 +144,11 @@ function openOpener(){
     Every lattice on Pages 1–2 colors the point \((r,M)\) by evaluating an arithmetic
     quantity — a gcd, a totient, a depth, an angle — and mapping it onto the hue wheel.
     This page documents <em>the exact formula behind each mode</em>, in each of the three
-    coloring scopes, with a live swatch rendered by that same formula: each swatch is the
-    full \(56\times56\) lattice — residues \(r=1\ldots56\) left→right, moduli
-    \(M=1\ldots56\) bottom→top, at block depth \(n=2\) — the same domain as the Grid view.
+    coloring scopes, with a live swatch rendered by that same formula: each swatch is a
+    live lattice at block depth \(n=2\), switchable between <em>Grid</em>
+    (\(r,M=1\ldots G\)), <em>Ring</em> (concentric moduli, dots at \(2\pi r/M\)),
+    and <em>Farey</em> (\(x=r/M\), one row per \(M\)) views, with a size slider
+    \(G=1\ldots109\) — capped at 109, a twin prime with 107.
   </p>
   <div id="scope-map">
     <div class="scope-card sc-op"><h3>Opener</h3>
@@ -233,7 +253,7 @@ function openOpener(){
 </section>
 
 <footer class="wrap" style="padding-left:0;padding-right:0;">
-  PAGE 3 · COLOR &amp; LABEL CODEX — SWATCHES RENDERED LIVE FROM THE DOCUMENTED FORMULAS · 56×56 LATTICE · r, M = 1…56 · n = 2
+  PAGE 3 · COLOR &amp; LABEL CODEX — SWATCHES RENDERED LIVE FROM THE DOCUMENTED FORMULAS · GRID / RING / FAREY · G = 1…109 (TWIN PRIME CAP) · n = 2
 </footer>
 </div>
 
@@ -401,7 +421,7 @@ const MODES=[
  tex:'\\mathrm{color}=\\mathrm{PALETTE}\\big[\\gcd(r,M)\\bmod 20\\big]',
  desc:'A flat 20-color categorical palette indexed by the gcd — the quantized cousin of the GCD spectrum, giving hard color boundaries between gcd classes instead of a hue ramp.',
  fn:(r,M,n)=>{const{g,ok}=ctx3(r,M,n);const D=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#34495e','#e67e22','#95a5a6','#d35400','#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad','#16a085','#2c3e50','#d35400','#7f8c8d','#c0392b'];return D[g%20]+(ok?'':'55');}},
-{sec:'global',id:'primality (spf)',name:'Primality (spf ramp)',sc:['gl'],
+{sec:'global',id:'primality (spf)',name:'Primality (spf ramp)',sc:['he','gl'],
  tex:'r\\ \\text{prime}\\Rightarrow\\text{green};\\quad r=1\\Rightarrow\\text{navy};\\quad\\text{else }h=360\\cdot\\frac{\\operatorname{spf}(r)}{19}',
  desc:'The Global variant of <i>r primality</i>: primes uniform green, composites on a continuous hue ramp proportional to \\(\\operatorname{spf}(r)/19\\) rather than the Hero\'s fixed four-hue code.',
  fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);if(r===1)return'rgba(22,33,62,.8)';if(PS.has(r))return ok?'rgba(72,187,120,.9)':'rgba(39,174,96,.32)';const h=((spf(r)/19)*360)|0;return ok?`hsl(${h},70%,50%)`:`hsla(${h},40%,28%,.5)`;}},
@@ -411,24 +431,127 @@ const MODES=[
  fn:(r,M,n)=>{const{cp,d}=ctx3(r,M,n);const ok=d>=n;if(!ok&&!cp)return'rgba(30,25,50,.35)';if(cp&&!ok){const t2=(d+1)/(n+1);return`hsla(200,60%,${(20+t2*20)|0}%,.5)`;}const ex=Math.min(12,Math.max(0,d-n)),h=(180+ex*12)|0,l=45+ex*4;return`hsla(${h},85%,${l}%,.92)`;}},
 ];
 
+/* ═══════════ Apply-on-Page-1 value map ═══════════
+   Registry id → real <option> value in each scope's dropdown on index.html.
+   op → #w-color-mode (wcm) · he → #hero-color-mode (hcm) · gl → #global-color (gcm) */
+const APPLY_VALS={
+ 'default (opener)':{op:'default'},
+ 'residue_value':{op:'residue_value',he:'residue_value',gl:'residue_value'},
+ 'ring_hash':{op:'ring_hash',he:'ring_hash',gl:'ring_hash'},
+ 'phi_position':{op:'phi_position',he:'phi_position',gl:'phi_position'},
+ 'phi_spectrum':{op:'phi_spectrum',he:'phi_spectrum',gl:'phi_spectrum'},
+ 'farey_angle':{he:'farey_angle',gl:'farey_angle'},
+ 'farey_prox':{he:'farey_prox',gl:'farey_prox'},
+ 'lift_angle':{he:'lift_angle',gl:'lift_angle'},
+ 'default (hero)':{he:'default',gl:'0'},
+ 'depth':{he:'depth'},
+ 'block_window':{he:'block_window',gl:'block_window'},
+ 'saturation':{he:'saturation',gl:'saturation'},
+ 'fail_prime':{he:'fail_prime',gl:'fail_prime'},
+ 'gcd_val':{he:'gcd_val',gl:'gcd_val'},
+ 'phi_ratio':{he:'phi_ratio',gl:'phi_ratio'},
+ 'mobius':{he:'mobius',gl:'mobius'},
+ 'quad_res':{he:'quad_res',gl:'quadratic_residue'},
+ 'r_prime':{he:'r_prime'},
+ 'mod_residue':{he:'mod_residue',gl:'mod_residue'},
+ 'rainbow':{he:'rainbow',gl:'rainbow'},
+ 'divisibility':{he:'divisibility',gl:'divisibility'},
+ 'zeroDivisors':{he:'zeroDivisors',gl:'zeroDivisors'},
+ 'idempotents':{he:'idempotents',gl:'idempotents'},
+ 'modular_distance':{he:'modular_distance',gl:'modular_distance'},
+ '1 — survival gradient':{gl:'1'},
+ '3 — gold / dark':{gl:'3'},
+ '4 — density heatmap':{gl:'4'},
+ '5 — sector':{gl:'5'},
+ 'nilpotent':{gl:'nilpotent'},
+ 'symmetry':{gl:'symmetry'},
+ 'heatmap_ext':{gl:'heatmap_ext'},
+ 'discrete':{gl:'discrete'},
+ 'primality (spf)':{he:'primality',gl:'primality'},
+ 'depth_grad':{gl:'depth_grad'}
+};
+const APPLY_PARAM={op:'wcm',he:'hcm',gl:'gcm'};
+const APPLY_NAME={op:'Opener',he:'Hero',gl:'Global'};
+
 /* ═══════════ Render mode rows + live swatches ═══════════ */
-const SG=56, NN=2, PX=4; // square G×G swatch — same domain as the Grid view
+const NN=2, CVSZ=448, GMAX=109; // 109: prime, twin of 107 — the slider's cap
+let _uid=0;
+
+function drawGrid(c,m,G){
+  const px=CVSZ/G;
+  for(let M=1;M<=G;M++){
+    const y=(G-M)*px; // M increases upward
+    for(let r=1;r<=G;r++){
+      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
+      c.fillRect((r-1)*px,y,Math.ceil(px),Math.ceil(px));
+    }
+  }
+}
+function drawRing(c,m,G){
+  const cx=CVSZ/2,cy=CVSZ/2,Rmax=CVSZ/2-6;
+  const dot=Math.max(1,Math.min(4,Rmax/(G*1.35)));
+  for(let M=1;M<=G;M++){
+    const R=Rmax*M/G;
+    for(let r=1;r<=M;r++){
+      const th=2*Math.PI*r/M-Math.PI/2;
+      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
+      c.beginPath();c.arc(cx+R*Math.cos(th),cy+R*Math.sin(th),dot,0,7);c.fill();
+    }
+  }
+}
+function drawFarey(c,m,G){
+  // Farey fan: x = r/M, y = M (increasing upward) — one row per modulus
+  const pad=8,W=CVSZ-2*pad,H=CVSZ-2*pad;
+  const rowH=H/G;
+  const dot=Math.max(1,Math.min(4,rowH*0.42));
+  for(let M=1;M<=G;M++){
+    const y=pad+H-(M-0.5)*rowH;
+    for(let r=1;r<=M;r++){
+      const x=pad+W*(r/M);
+      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
+      c.beginPath();c.arc(x,y,dot,0,7);c.fill();
+    }
+  }
+}
+const DRAW={grid:drawGrid,ring:drawRing,farey:drawFarey};
+
+function redraw(m,st){
+  const c=st.cv.getContext('2d');
+  c.fillStyle='#04040d';c.fillRect(0,0,CVSZ,CVSZ);
+  DRAW[st.view](c,m,st.G);
+  st.cap.textContent=(st.view==='grid'
+    ?`grid · r, M = 1…${st.G}`
+    :st.view==='ring'
+      ?`ring · M = 1…${st.G} · r = 1…M`
+      :`farey · x = r/M · M ↑ 1…${st.G}`)+` · n=${NN}`;
+}
+
 function makeRow(m){
+  const id='sw'+(_uid++);
   const row=document.createElement('div');row.className='mode';
   const scopes=m.sc.map(s=>`<span class="chip ${s}">${s==='op'?'Opener':s==='he'?'Hero':'Global'}</span>`).join('');
   row.innerHTML=`
     <div class="m-head"><span class="m-name">${m.name}</span><span class="m-id">· ${m.id}</span><span class="m-scopes">${scopes}</span></div>
-    <div class="m-sw"><canvas width="${SG*PX}" height="${SG*PX}"></canvas><div class="swcap">r → 1…${SG} · M ↑ 1…${SG} · n=${NN}</div></div>
-    <div class="m-body"><span class="frm">\\(${m.tex}\\)</span>${m.desc}</div>`;
-  const cv=row.querySelector('canvas'),c=cv.getContext('2d');
-  c.fillStyle='#04040d';c.fillRect(0,0,cv.width,cv.height);
-  for(let M=1;M<=SG;M++){
-    const y=(SG-M)*PX; // M increases upward, matching the lattice convention
-    for(let r=1;r<=SG;r++){
-      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
-      c.fillRect((r-1)*PX,y,PX,PX);
-    }
-  }
+    <div class="m-sw">
+      <canvas id="${id}-cv" width="${CVSZ}" height="${CVSZ}"></canvas>
+      <div class="sw-ctl">
+        <select id="${id}-view" title="Swatch view">
+          <option value="grid" selected>Grid</option>
+          <option value="ring">Ring</option>
+          <option value="farey">Farey</option>
+        </select>
+        <input id="${id}-g" type="range" min="1" max="${GMAX}" value="56" step="1" title="Lattice size G (max ${GMAX} — twin prime with 107)">
+        <span class="gv" id="${id}-gv">56</span>
+      </div>
+      <div class="swcap" id="${id}-cap"></div>
+    </div>
+    <div class="m-body"><span class="frm">\\(${m.tex}\\)</span>${m.desc}</div>
+    ${(v=>v?`<div class="m-apply"><span class="ap-lbl">Apply on Page 1 →</span>${Object.keys(v).map(k=>`<a class="${k}" href="index.html#${APPLY_PARAM[k]}=${encodeURIComponent(v[k])}" title="Open Page 1 with the ${APPLY_NAME[k]} color mode set to ${m.name}">${APPLY_NAME[k]}</a>`).join('')}</div>`:'')(APPLY_VALS[m.id])}`;
+  const st={cv:row.querySelector(`#${id}-cv`),cap:row.querySelector(`#${id}-cap`),view:'grid',G:56};
+  row.querySelector(`#${id}-view`).addEventListener('change',e=>{st.view=e.target.value;redraw(m,st);});
+  const sl=row.querySelector(`#${id}-g`),gv=row.querySelector(`#${id}-gv`);
+  sl.addEventListener('input',()=>{st.G=+sl.value;gv.textContent=sl.value;redraw(m,st);});
+  redraw(m,st);
   return row;
 }
 (function(){

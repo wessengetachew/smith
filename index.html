@@ -21094,6 +21094,16 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
         if(typeof heroEnsureGapBtn==='function')heroEnsureGapBtn(g);
         if(!_heroActiveGaps.has(g))heroGapPresetToggle(g);
       });
+      // ── Color-mode deep links (Page 3 codex "Apply" buttons): wcm / hcm / gcm ──
+      // Sets the dropdown only if the value is a real option, then fires its handler.
+      var _setSel=function(id,val,cb){var el=document.getElementById(id);if(!el)return;
+        for(var i=0;i<el.options.length;i++)if(el.options[i].value===val){el.value=val;if(typeof cb==='function')cb();break;}};
+      if(q.wcm){ // opener scheme — open the welcome teaser so the result is visible
+        if(typeof window.openWelcome==='function')window.openWelcome();
+        _setSel('w-color-mode',q.wcm,window.wSetColorMode);
+      }
+      if(q.hcm)_setSel('hero-color-mode',q.hcm,window.heroColorModeChange);
+      if(q.gcm)_setSel('global-color',q.gcm,window.onGlobalColorChange);
     }catch(e){console.warn('hash state restore:',e);}
   }
   if(document.readyState==='complete')setTimeout(apply,0);
