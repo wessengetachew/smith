@@ -2,8 +2,14 @@
 
 **Live page 1 The Index.html:** https://wessengetachew.github.io/smith/
 
-## Page 2
+# Page 2
 https://wessengetachew.github.io/smith/page2.html
+
+# Page 3 
+     # Color and Lables detailed 
+https://wessengetachew.github.io/smith/page3.html
+
+
 
 An interactive explorer for the block-coprime density function
 
