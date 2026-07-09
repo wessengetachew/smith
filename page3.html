@@ -196,25 +196,32 @@ function openOpener(){
     <span class="mb-sub">View:</span>
     <select id="mb-view">
       <option value="grid">Grid</option>
-      <option value="ring">Ring</option>
+      <option value="ring" selected>Ring</option>
       <option value="farey">Farey</option>
       <option value="smith">Smith</option>
     </select>
     <div class="mb-sep"></div>
     <span class="mb-sub">Block depth n:</span>
-    <input id="mb-n" type="range" min="0" max="108" value="2" step="1">
-    <span class="mb-sub" id="mb-nv" style="color:var(--gold);">2</span>
+    <input id="mb-n" type="range" min="0" max="108" value="0" step="1">
+    <span class="mb-sub" id="mb-nv" style="color:var(--gold);">0</span>
+    <button id="mb-nplay" class="lockbtn" title="Animate C(n) — play/pause the block depth n slider">▶ Play</button>
     <button id="mb-nlock" class="lockbtn" title="Lock block depth n to half of each swatch's own G — stays in sync as G changes, per card">🔒 n=G/2</button>
     <div class="mb-sep"></div>
     <span class="mb-cn">\(C(n)=\zeta(2)\prod_p\Big(1-\tfrac{\min(n+1,\,p)}{p^2}\Big)\) = <b id="mb-cn-val">…</b></span>
     <div class="mb-sep"></div>
-    <label style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:8px;color:var(--gold);cursor:pointer;"><input type="checkbox" id="mb-labels"> Labels (r)</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:8px;color:var(--gold);cursor:pointer;"><input type="checkbox" id="mb-labels" checked> Labels</label>
+    <select id="mb-label-content" title="What the label prints">
+      <option value="r" selected>r</option>
+      <option value="M">M</option>
+      <option value="gcd">gcd(r,M)</option>
+      <option value="d">depth d</option>
+    </select>
     <select id="mb-label-pos" title="Label position">
       <option value="point" selected>On point</option>
       <option value="box">In box</option>
     </select>
-    <input id="mb-label-size" type="range" min="5" max="18" step="1" value="7" title="Label size" style="width:70px;accent-color:var(--gold);">
-    <span class="mb-sub" id="mb-label-sizev" style="color:var(--gold);">7px</span>
+    <input id="mb-label-size" type="range" min="5" max="18" step="1" value="12" title="Label size" style="width:70px;accent-color:var(--gold);">
+    <span class="mb-sub" id="mb-label-sizev" style="color:var(--gold);">12px</span>
     <div class="mb-sep"></div>
     <span class="mb-sub" style="color:#7ec87a;">Smith zoom-out:</span>
     <button class="mbz-btn" data-z="1">1×</button>
@@ -229,7 +236,7 @@ function openOpener(){
     <div class="adv-title">Dirichlet Character Controls</div>
     <label><input type="checkbox" id="mb-chi-sup" checked> Show χ(r) ≠ 0 (Character Support)</label>
     <label class="van"><input type="checkbox" id="mb-chi-van" checked> Show χ(r) = 0 (Character Vanishing)</label>
-    <label style="color:var(--gold);" title="Ported from Page 2's 🔒 g=G/2 — locks each swatch's highlighted diagonal gap to half of its own G, staying in sync as G changes, on every view"><input type="checkbox" id="mb-gaplock"> Gap diagonal lock (g = G/2)</label>
+    <label style="color:var(--gold);" title="Ported from Page 2's 🔒 g=G/2 — locks each swatch's highlighted diagonal gap to half of its own G, staying in sync as G changes, on every view"><input type="checkbox" id="mb-gaplock" checked> Gap diagonal lock (g = G/2)</label>
     <div class="rings-row">
       <span class="mb-sub" style="color:var(--violet);">Custom rings M:</span>
       <input type="text" id="mb-rings" placeholder="e.g. 7, 11, 13, 30 — empty = all" spellcheck="false">
@@ -551,11 +558,11 @@ const APPLY_NAME={op:'Opener',he:'Hero',gl:'Global'};
 
 /* ═══════════ Render mode rows + live swatches ═══════════ */
 const CVSZ=448, GMAX=109; // 109: prime, twin of 107 — the slider's cap
-let NN=2;                       // global block depth — master slider drives all canvases
+let NN=0;                       // global block depth — master slider drives all canvases
 let CHI_SUP=true, CHI_VAN=true; // Dirichlet character filter: support χ(r)≠0, vanishing χ(r)=0
 let RINGS=null;                 // custom modulus set (null = all M render)
-let LABELS_ON=false, LABEL_POS='point', LABEL_SIZE=7; // point-label toggle + placement + font size (px), content is always r
-let GAP_LOCK=false;             // gap-diagonal lock at r/M=1/2, global overlay weighted by C(n)
+let LABELS_ON=true, LABEL_POS='point', LABEL_SIZE=12, LABEL_CONTENT='r'; // point-label toggle + placement + font size (px) + content field
+let GAP_LOCK=true;              // gap-diagonal lock at r/M=1/2, global overlay weighted by C(n)
 let SMITH_ZOOM=1;               // global Smith zoom-out factor — shrinks R0, mirrors index.html's wSmithSetZoomOut
 let N_LOCK=false;               // block-depth lock: n = round(G/2), computed per swatch off its own G
 function _lastPrimeAtMost(x){let last=2;for(const p of PRIMES){if(p>x)break;last=p;}return last;}
@@ -572,11 +579,20 @@ function _vis(r,M){             // shared visibility filter — same semantics a
   return true;
 }
 
-/* ── Point labels — content is always r (matches the r_val/r ★ default
-   documented in the Labels section). Toggled globally from the master bar;
+/* ── Point labels — content is switchable via the master bar's "Labels"
+   selector: r, M, gcd(r,M), or survival depth d (default r, matching the
+   r_val/r ★ default documented in the Labels section). Toggled globally;
    auto-suppressed per swatch once the cell/dot spacing gets too tight to
    avoid overlap, rather than ever stacking text. ── */
 function _labelOk(G){return LABELS_ON&&(CVSZ/G)>=LABEL_SIZE*1.7;}
+function _labelVal(r,M,n){
+  switch(LABEL_CONTENT){
+    case'M':return M;
+    case'gcd':return gcd(r,M);
+    case'd':return depthOf(r,M,14);
+    default:return r;
+  }
+}
 function _drawLabel(c,x,y,rVal){
   const txt=String(rVal);
   c.font=LABEL_SIZE+'px "JetBrains Mono",monospace';
@@ -616,7 +632,7 @@ function drawGrid(c,m,G,n){
       c.fillRect((r-1)*px,y,Math.ceil(px),Math.ceil(px));
       const cx=(r-1)*px+px/2,cy=y+px/2;
       _drawGapLock(c,r,M,cx,cy,px/2,G);
-      if(lbl)_drawLabel(c,cx,cy,r);
+      if(lbl)_drawLabel(c,cx,cy,_labelVal(r,M,n));
     }
   }
 }
@@ -633,7 +649,7 @@ function drawRing(c,m,G,n){
       try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
       c.beginPath();c.arc(px,py,dot,0,7);c.fill();
       _drawGapLock(c,r,M,px,py,dot,G);
-      if(lbl)_drawLabel(c,px,py,r);
+      if(lbl)_drawLabel(c,px,py,_labelVal(r,M,n));
     }
   }
 }
@@ -652,7 +668,7 @@ function drawFarey(c,m,G,n){
       try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
       c.beginPath();c.arc(x,y,dot,0,7);c.fill();
       _drawGapLock(c,r,M,x,y,dot,G);
-      if(lbl)_drawLabel(c,x,y,r);
+      if(lbl)_drawLabel(c,x,y,_labelVal(r,M,n));
     }
   }
 }
@@ -684,7 +700,7 @@ function drawSmith(c,m,G,n){
       try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
       c.beginPath();c.arc(px,py,dot,0,7);c.fill();
       _drawGapLock(c,r,M,px,py,dot,G);
-      if(lbl)_drawLabel(c,px,py,r);
+      if(lbl)_drawLabel(c,px,py,_labelVal(r,M,n));
     }
   }
 }
@@ -733,23 +749,35 @@ function makeRow(m){
       <canvas id="${id}-cv" width="${CVSZ}" height="${CVSZ}"></canvas>
       <div class="sw-ctl">
         <select id="${id}-view" title="Swatch view">
-          <option value="grid" selected>Grid</option>
-          <option value="ring">Ring</option>
+          <option value="grid">Grid</option>
+          <option value="ring" selected>Ring</option>
           <option value="farey">Farey</option>
           <option value="smith">Smith</option>
         </select>
-        <input id="${id}-g" type="range" min="1" max="${GMAX}" value="56" step="1" title="Lattice size G (max ${GMAX} — twin prime with 107)">
-        <span class="gv" id="${id}-gv">56</span>
+        <input id="${id}-g" type="range" min="1" max="${GMAX}" value="${GMAX}" step="1" title="Lattice size G (max ${GMAX} — twin prime with 107)">
+        <span class="gv" id="${id}-gv">${GMAX}</span>
+        <button id="${id}-play" class="lockbtn" title="Animate this swatch's G slider" style="padding:1px 6px;font-size:7px;">▶</button>
       </div>
       <div class="swcap" id="${id}-cap"></div>
     </div>
     <div class="m-body"><span class="frm">\\(${m.tex}\\)</span>${m.desc}</div>
     ${(v=>v?`<div class="m-apply"><span class="ap-lbl">Apply on Page 1 →</span>${Object.keys(v).map(k=>`<a class="${k}" href="index.html#${APPLY_PARAM[k]}=${encodeURIComponent(v[k])}" title="Open Page 1 with the ${APPLY_NAME[k]} color mode set to ${m.name}">${APPLY_NAME[k]}</a>`).join('')}</div>`:'')(APPLY_VALS[m.id])}`;
-  const st={cv:row.querySelector(`#${id}-cv`),cap:row.querySelector(`#${id}-cap`),view:'grid',G:56,
+  const st={cv:row.querySelector(`#${id}-cv`),cap:row.querySelector(`#${id}-cap`),view:'ring',G:GMAX,
             viewSel:row.querySelector(`#${id}-view`)};
   st.viewSel.addEventListener('change',e=>{st.view=e.target.value;redraw(m,st);});
   const sl=row.querySelector(`#${id}-g`),gv=row.querySelector(`#${id}-gv`);
   sl.addEventListener('input',()=>{st.G=+sl.value;gv.textContent=sl.value;redraw(m,st);});
+  // Per-swatch play button — animates this card's own G slider 1…GMAX, looping.
+  const playBtn=row.querySelector(`#${id}-play`);
+  let playTimer=null;
+  playBtn.addEventListener('click',()=>{
+    if(playTimer){clearInterval(playTimer);playTimer=null;playBtn.textContent='▶';playBtn.classList.remove('on');return;}
+    playBtn.textContent='⏸';playBtn.classList.add('on');
+    playTimer=setInterval(()=>{
+      let v=(+sl.value)+1; if(v>GMAX)v=1;
+      sl.value=v; st.G=v; gv.textContent=v; redraw(m,st);
+    },90);
+  });
   _ALL_STATES.push({m,st});
   redraw(m,st);
   return row;
@@ -777,6 +805,24 @@ function makeRow(m){
   const nSl=document.getElementById('mb-n'),nV=document.getElementById('mb-nv');
   nSl.max=NMAX;
   nSl.addEventListener('input',()=>{NN=+nSl.value;nV.textContent=nSl.value;updateCn();redrawAll();});
+  // Master "Play" — animates C(n) by stepping the block-depth n slider,
+  // looping 0…NMAX. Disabled together with the slider while n=G/2 lock is on.
+  const nPlayBtn=document.getElementById('mb-nplay');
+  let nPlayTimer=null;
+  nPlayBtn.addEventListener('click',()=>{
+    if(N_LOCK)return;
+    if(nPlayTimer){clearInterval(nPlayTimer);nPlayTimer=null;nPlayBtn.textContent='▶ Play';nPlayBtn.classList.remove('on');return;}
+    nPlayBtn.textContent='⏸ Pause';nPlayBtn.classList.add('on');
+    nPlayTimer=setInterval(()=>{
+      let v=NN+1; if(v>NMAX)v=0;
+      NN=v; nSl.value=v; nV.textContent=v; updateCn(); redrawAll();
+    },160);
+  });
+  // Default view is Ring on load — apply it to every already-built swatch
+  // (the per-swatch selects are already set to "ring" in markup/state, this
+  // just keeps the master-bar dropdown and all cards in sync from the start).
+  _ALL_STATES.forEach(o=>{o.st.view='ring';o.st.viewSel.value='ring';});
+  redrawAll();
   // Lock block depth n to half of each swatch's own G — ported from the same
   // "🔒 =G/2" pattern as the gap-diagonal lock, but for n instead of g. Since
   // page 3 has no single master G (every swatch owns its slider), the lock
@@ -788,6 +834,9 @@ function makeRow(m){
     nLockBtn.classList.toggle('on',N_LOCK);
     nSl.disabled=N_LOCK;
     nSl.style.opacity=N_LOCK?0.4:1;
+    nPlayBtn.disabled=N_LOCK;
+    nPlayBtn.style.opacity=N_LOCK?0.4:1;
+    if(N_LOCK&&nPlayTimer){clearInterval(nPlayTimer);nPlayTimer=null;nPlayBtn.textContent='▶ Play';nPlayBtn.classList.remove('on');}
     redrawAll();
   });
   document.getElementById('mb-adv-toggle').addEventListener('click',()=>{
@@ -799,6 +848,7 @@ function makeRow(m){
   document.getElementById('mb-chi-van').addEventListener('change',e=>{CHI_VAN=e.target.checked;redrawAll();});
   document.getElementById('mb-gaplock').addEventListener('change',e=>{GAP_LOCK=e.target.checked;redrawAll();});
   document.getElementById('mb-labels').addEventListener('change',e=>{LABELS_ON=e.target.checked;redrawAll();});
+  document.getElementById('mb-label-content').addEventListener('change',e=>{LABEL_CONTENT=e.target.value;redrawAll();});
   document.getElementById('mb-label-pos').addEventListener('change',e=>{LABEL_POS=e.target.value;redrawAll();});
   const lsSl=document.getElementById('mb-label-size'),lsV=document.getElementById('mb-label-sizev');
   lsSl.addEventListener('input',()=>{LABEL_SIZE=+lsSl.value;lsV.textContent=lsSl.value+'px';redrawAll();});
