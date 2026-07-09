@@ -85,6 +85,33 @@ table.lbl td{font-family:var(--serif);font-weight:300;font-size:12px;line-height
 table.lbl td:first-child{font-family:var(--mono);font-size:9.5px;color:var(--cream);white-space:nowrap;}
 table.lbl td:nth-child(2){font-family:var(--mono);font-size:9px;color:var(--gold);white-space:nowrap;}
 
+/* ── MASTER BAR — global view / n / C(n) / χ filter ── */
+#master-bar{position:sticky;top:44px;z-index:150;background:rgba(4,4,13,.97);border:1px solid rgba(200,168,74,.28);border-left:2px solid var(--gold);margin:18px 0 0;padding:9px 14px;backdrop-filter:blur(4px);}
+#master-bar .mb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#master-bar .mb-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+#master-bar .mb-sub{font-family:var(--mono);font-size:8px;color:var(--cream3);white-space:nowrap;}
+#master-bar select{background:var(--bg2);border:1px solid rgba(200,168,74,.35);color:var(--gold);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;}
+#master-bar input[type=range]{accent-color:var(--gold);width:110px;height:10px;}
+#master-bar .mb-cn{font-family:var(--mono);font-size:9px;color:var(--teal);white-space:nowrap;}
+#master-bar .mb-cn b{color:var(--cream);font-weight:500;}
+#master-bar .mb-sep{width:1px;height:16px;background:var(--edge2);flex-shrink:0;}
+#mb-adv-toggle{background:none;border:1px solid rgba(155,127,232,.45);color:var(--violet);font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;cursor:pointer;margin-left:auto;}
+#mb-adv-toggle:hover{background:rgba(155,127,232,.1);}
+.mbz-btn{background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:7.5px;padding:2px 7px;cursor:pointer;}
+.mbz-btn:hover{background:rgba(126,200,122,.12);}
+.mbz-btn.active{background:rgba(126,200,122,.2);border-color:#7ec87a;color:#7ec87a;}
+.lockbtn{background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:var(--mono);font-size:7.5px;padding:2px 8px;cursor:pointer;}
+.lockbtn:hover{background:rgba(155,127,232,.12);}
+.lockbtn.on{background:rgba(155,127,232,.22);border-color:#9b7fe8;color:#9b7fe8;}
+#mb-adv{display:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--edge);}
+#mb-adv .adv-title{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin-bottom:7px;}
+#mb-adv label{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:rgba(200,168,74,.9);cursor:pointer;margin-right:14px;}
+#mb-adv label.van{color:var(--cream2);}
+#mb-adv input[type=checkbox]{accent-color:var(--gold);}
+#mb-adv .rings-row{margin-top:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+#mb-adv input[type=text]{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:8px;padding:3px 7px;width:210px;outline:none;}
+#mb-adv input[type=text]:focus{border-color:rgba(155,127,232,.6);}
+
 /* ── SWATCH CONTROLS (view switch + G slider) ── */
 .sw-ctl{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;max-width:224px;}
 .sw-ctl select{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:7.5px;padding:2px 4px;cursor:pointer;outline:none;}
@@ -161,6 +188,55 @@ function openOpener(){
 </div></div>
 
 <div class="wrap">
+
+<!-- ── MASTER BAR — drives all 34 swatches at once ── -->
+<div id="master-bar">
+  <div class="mb-row">
+    <span class="mb-lbl">All canvases</span>
+    <span class="mb-sub">View:</span>
+    <select id="mb-view">
+      <option value="grid">Grid</option>
+      <option value="ring">Ring</option>
+      <option value="farey">Farey</option>
+      <option value="smith">Smith</option>
+    </select>
+    <div class="mb-sep"></div>
+    <span class="mb-sub">Block depth n:</span>
+    <input id="mb-n" type="range" min="0" max="108" value="2" step="1">
+    <span class="mb-sub" id="mb-nv" style="color:var(--gold);">2</span>
+    <button id="mb-nlock" class="lockbtn" title="Lock block depth n to half of each swatch's own G — stays in sync as G changes, per card">🔒 n=G/2</button>
+    <div class="mb-sep"></div>
+    <span class="mb-cn">\(C(n)=\zeta(2)\prod_p\Big(1-\tfrac{\min(n+1,\,p)}{p^2}\Big)\) = <b id="mb-cn-val">…</b></span>
+    <div class="mb-sep"></div>
+    <label style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:8px;color:var(--gold);cursor:pointer;"><input type="checkbox" id="mb-labels"> Labels (r)</label>
+    <select id="mb-label-pos" title="Label position">
+      <option value="point" selected>On point</option>
+      <option value="box">In box</option>
+    </select>
+    <input id="mb-label-size" type="range" min="5" max="18" step="1" value="7" title="Label size" style="width:70px;accent-color:var(--gold);">
+    <span class="mb-sub" id="mb-label-sizev" style="color:var(--gold);">7px</span>
+    <div class="mb-sep"></div>
+    <span class="mb-sub" style="color:#7ec87a;">Smith zoom-out:</span>
+    <button class="mbz-btn" data-z="1">1×</button>
+    <button class="mbz-btn" data-z="2">2×</button>
+    <button class="mbz-btn" data-z="3">3×</button>
+    <button class="mbz-btn" data-z="4">4×</button>
+    <input id="mb-smith-zoom" type="range" min="1" max="8" step="0.25" value="1" style="width:80px;accent-color:#7ec87a;">
+    <span class="mb-sub" id="mb-smith-zoomv" style="color:#7ec87a;">1×</span>
+    <button id="mb-adv-toggle">Advanced — custom rings &amp; χ(r) filter ▾</button>
+  </div>
+  <div id="mb-adv">
+    <div class="adv-title">Dirichlet Character Controls</div>
+    <label><input type="checkbox" id="mb-chi-sup" checked> Show χ(r) ≠ 0 (Character Support)</label>
+    <label class="van"><input type="checkbox" id="mb-chi-van" checked> Show χ(r) = 0 (Character Vanishing)</label>
+    <label style="color:var(--gold);" title="Ported from Page 2's 🔒 g=G/2 — locks each swatch's highlighted diagonal gap to half of its own G, staying in sync as G changes, on every view"><input type="checkbox" id="mb-gaplock"> Gap diagonal lock (g = G/2)</label>
+    <div class="rings-row">
+      <span class="mb-sub" style="color:var(--violet);">Custom rings M:</span>
+      <input type="text" id="mb-rings" placeholder="e.g. 7, 11, 13, 30 — empty = all" spellcheck="false">
+      <span class="mb-sub">only listed moduli render, on every canvas</span>
+    </div>
+  </div>
+</div>
 
 <!-- ── SHARED PREDICATES ── -->
 <section id="predicates">
@@ -474,56 +550,177 @@ const APPLY_PARAM={op:'wcm',he:'hcm',gl:'gcm'};
 const APPLY_NAME={op:'Opener',he:'Hero',gl:'Global'};
 
 /* ═══════════ Render mode rows + live swatches ═══════════ */
-const NN=2, CVSZ=448, GMAX=109; // 109: prime, twin of 107 — the slider's cap
+const CVSZ=448, GMAX=109; // 109: prime, twin of 107 — the slider's cap
+let NN=2;                       // global block depth — master slider drives all canvases
+let CHI_SUP=true, CHI_VAN=true; // Dirichlet character filter: support χ(r)≠0, vanishing χ(r)=0
+let RINGS=null;                 // custom modulus set (null = all M render)
+let LABELS_ON=false, LABEL_POS='point', LABEL_SIZE=7; // point-label toggle + placement + font size (px), content is always r
+let GAP_LOCK=false;             // gap-diagonal lock at r/M=1/2, global overlay weighted by C(n)
+let SMITH_ZOOM=1;               // global Smith zoom-out factor — shrinks R0, mirrors index.html's wSmithSetZoomOut
+let N_LOCK=false;               // block-depth lock: n = round(G/2), computed per swatch off its own G
+function _lastPrimeAtMost(x){let last=2;for(const p of PRIMES){if(p>x)break;last=p;}return last;}
+const NMAX=_lastPrimeAtMost(GMAX)-1; // n=p−1 saturation-point convention (see index.html's wNextSat)
+function _effN(G){return N_LOCK?Math.max(0,Math.min(NMAX,Math.round(G/2))):NN;}
 let _uid=0;
+const _ALL_STATES=[];           // every card's {m, st} — master controls redraw them all
 
-function drawGrid(c,m,G){
-  const px=CVSZ/G;
+function _vis(r,M){             // shared visibility filter — same semantics as the opener's Advanced panel
+  if(RINGS&&!RINGS.has(M))return false;
+  const cp=gcd(r,M)===1;
+  if(cp&&!CHI_SUP)return false;   // χ(r)≠0 hidden
+  if(!cp&&!CHI_VAN)return false;  // χ(r)=0 hidden
+  return true;
+}
+
+/* ── Point labels — content is always r (matches the r_val/r ★ default
+   documented in the Labels section). Toggled globally from the master bar;
+   auto-suppressed per swatch once the cell/dot spacing gets too tight to
+   avoid overlap, rather than ever stacking text. ── */
+function _labelOk(G){return LABELS_ON&&(CVSZ/G)>=LABEL_SIZE*1.7;}
+function _drawLabel(c,x,y,rVal){
+  const txt=String(rVal);
+  c.font=LABEL_SIZE+'px "JetBrains Mono",monospace';
+  c.textAlign='center';c.textBaseline='middle';
+  if(LABEL_POS==='box'){
+    const pad=Math.max(2,LABEL_SIZE*0.35),h=LABEL_SIZE+pad;
+    const w=c.measureText(txt).width+pad*2,bx=x+4,by=y-4-h;
+    c.fillStyle='rgba(4,4,13,.85)';c.fillRect(bx,by,w,h);
+    c.strokeStyle='rgba(255,255,255,.16)';c.lineWidth=0.5;c.strokeRect(bx,by,w,h);
+    c.fillStyle='#ddd8cc';c.fillText(txt,bx+w/2,by+h/2+0.5);
+  }else{
+    c.lineWidth=2;c.strokeStyle='rgba(4,4,13,.9)';c.strokeText(txt,x,y);
+    c.fillStyle='#f5f2ea';c.fillText(txt,x,y);
+  }
+}
+/* ── Gap diagonal lock — ported from Page 2 / index.html's "🔒 g=G/2":
+   locks the highlighted diagonal gap g to half of this swatch's own G,
+   staying in sync as G changes. Draws a violet ring around every point
+   with |M−r| = round(G/2), on top of whatever color mode is active. ── */
+function _drawGapLock(c,r,M,x,y,rad,G){
+  if(!GAP_LOCK)return;
+  const g=Math.max(1,Math.round(G/2));
+  if(Math.abs(M-r)!==g)return;
+  c.save();
+  c.strokeStyle='rgba(155,127,232,.85)';c.lineWidth=1.2;
+  c.beginPath();c.arc(x,y,Math.max(rad*1.8,3),0,7);c.stroke();
+  c.restore();
+}
+
+function drawGrid(c,m,G,n){
+  const px=CVSZ/G,lbl=_labelOk(G);
   for(let M=1;M<=G;M++){
     const y=(G-M)*px; // M increases upward
     for(let r=1;r<=G;r++){
-      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
+      if(!_vis(r,M))continue;
+      try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
       c.fillRect((r-1)*px,y,Math.ceil(px),Math.ceil(px));
+      const cx=(r-1)*px+px/2,cy=y+px/2;
+      _drawGapLock(c,r,M,cx,cy,px/2,G);
+      if(lbl)_drawLabel(c,cx,cy,r);
     }
   }
 }
-function drawRing(c,m,G){
+function drawRing(c,m,G,n){
   const cx=CVSZ/2,cy=CVSZ/2,Rmax=CVSZ/2-6;
   const dot=Math.max(1,Math.min(4,Rmax/(G*1.35)));
+  const lbl=_labelOk(G);
   for(let M=1;M<=G;M++){
     const R=Rmax*M/G;
     for(let r=1;r<=M;r++){
+      if(!_vis(r,M))continue;
       const th=2*Math.PI*r/M-Math.PI/2;
-      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
-      c.beginPath();c.arc(cx+R*Math.cos(th),cy+R*Math.sin(th),dot,0,7);c.fill();
+      const px=cx+R*Math.cos(th),py=cy+R*Math.sin(th);
+      try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
+      c.beginPath();c.arc(px,py,dot,0,7);c.fill();
+      _drawGapLock(c,r,M,px,py,dot,G);
+      if(lbl)_drawLabel(c,px,py,r);
     }
   }
 }
-function drawFarey(c,m,G){
+function drawFarey(c,m,G,n){
   // Farey fan: x = r/M, y = M (increasing upward) — one row per modulus
   const pad=8,W=CVSZ-2*pad,H=CVSZ-2*pad;
   const rowH=H/G;
   const dot=Math.max(1,Math.min(4,rowH*0.42));
+  const lbl=_labelOk(G);
   for(let M=1;M<=G;M++){
+    if(RINGS&&!RINGS.has(M))continue;
     const y=pad+H-(M-0.5)*rowH;
     for(let r=1;r<=M;r++){
+      if(!_vis(r,M))continue;
       const x=pad+W*(r/M);
-      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
+      try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
       c.beginPath();c.arc(x,y,dot,0,7);c.fill();
+      _drawGapLock(c,r,M,x,y,dot,G);
+      if(lbl)_drawLabel(c,x,y,r);
     }
   }
 }
-const DRAW={grid:drawGrid,ring:drawRing,farey:drawFarey};
+/* ── Smith view — the same Cayley map Γ(z)=(z−1)/(z+1) used by the Opener's
+   Smith chart in index.html (_conformalSmithXY/_conformalSmithPt): each
+   ring M sits at a dimensionless radius 0.5…2.0 by its position among the
+   G moduli, θ=2πr/M exactly as in Ring view, then the whole ring is passed
+   through the Möbius map. Re(z)>0 always here, so |Γ|<1 always — every
+   point lands strictly inside the unit circle, nothing clips. ── */
+function _cayley(zr,zi,R0){
+  let denom=(zr+1)*(zr+1)+zi*zi;
+  if(denom<1e-10)denom=1e-10;
+  return {x:((zr-1)*(zr+1)+zi*zi)/denom*R0,y:-(2*zi)/denom*R0};
+}
+function drawSmith(c,m,G,n){
+  const cx=CVSZ/2,cy=CVSZ/2,R0=CVSZ*0.44/Math.max(1,SMITH_ZOOM);
+  c.strokeStyle='rgba(126,200,122,.15)';c.lineWidth=1;
+  c.beginPath();c.arc(cx,cy,R0,0,7);c.stroke();
+  const dot=Math.max(1,Math.min(3.2,R0/(G*0.9)));
+  const lbl=_labelOk(G);
+  for(let M=1;M<=G;M++){
+    if(RINGS&&!RINGS.has(M))continue;
+    const ringR=0.5+((M-1)/Math.max(1,G-1))*1.5;
+    for(let r=1;r<=M;r++){
+      if(!_vis(r,M))continue;
+      const th=2*Math.PI*r/M;
+      const w=_cayley(ringR*Math.cos(th),ringR*Math.sin(th),R0);
+      const px=cx+w.x,py=cy+w.y;
+      try{c.fillStyle=m.fn(r,M,n);}catch(e){c.fillStyle='#111';}
+      c.beginPath();c.arc(px,py,dot,0,7);c.fill();
+      _drawGapLock(c,r,M,px,py,dot,G);
+      if(lbl)_drawLabel(c,px,py,r);
+    }
+  }
+}
+const DRAW={grid:drawGrid,ring:drawRing,farey:drawFarey,smith:drawSmith};
 
 function redraw(m,st){
   const c=st.cv.getContext('2d');
   c.fillStyle='#04040d';c.fillRect(0,0,CVSZ,CVSZ);
-  DRAW[st.view](c,m,st.G);
+  const n=_effN(st.G);
+  DRAW[st.view](c,m,st.G,n);
   st.cap.textContent=(st.view==='grid'
     ?`grid · r, M = 1…${st.G}`
     :st.view==='ring'
       ?`ring · M = 1…${st.G} · r = 1…M`
-      :`farey · x = r/M · M ↑ 1…${st.G}`)+` · n=${NN}`;
+      :st.view==='farey'
+        ?`farey · x = r/M · M ↑ 1…${st.G}`
+        :`smith · Γ(z)=(z−1)/(z+1) · M = 1…${st.G} · zoom ${SMITH_ZOOM}×`)+` · n=${n}`+(N_LOCK?' (locked = G/2)':'');
+}
+let _redrawPending=false;
+function redrawAll(){
+  if(_redrawPending)return;
+  _redrawPending=true;
+  requestAnimationFrame(()=>{_redrawPending=false;_ALL_STATES.forEach(o=>redraw(o.m,o.st));});
+}
+
+/* ── C(n) = ζ(2)·∏ₚ(1 − min(n+1,p)/p²) — same Euler product as Page 1 ──
+   Extended sieve to 50 000 so the truncated tail is < 3·10⁻⁵ even at n=12. */
+const _CNP=(()=>{const L=50000,S=new Uint8Array(L+1),P=[];for(let i=2;i<=L;i++){if(!S[i]){P.push(i);for(let j=i*i;j<=L;j+=i)S[j]=1;}}return P;})();
+function Cn(n){
+  let prod=Math.PI*Math.PI/6;
+  for(const p of _CNP)prod*=1-Math.min(n+1,p)/(p*p);
+  return prod;
+}
+function updateCn(){
+  const el=document.getElementById('mb-cn-val');
+  if(el)el.textContent='C('+NN+') ≈ '+Cn(NN).toFixed(6);
 }
 
 function makeRow(m){
@@ -539,6 +736,7 @@ function makeRow(m){
           <option value="grid" selected>Grid</option>
           <option value="ring">Ring</option>
           <option value="farey">Farey</option>
+          <option value="smith">Smith</option>
         </select>
         <input id="${id}-g" type="range" min="1" max="${GMAX}" value="56" step="1" title="Lattice size G (max ${GMAX} — twin prime with 107)">
         <span class="gv" id="${id}-gv">56</span>
@@ -547,10 +745,12 @@ function makeRow(m){
     </div>
     <div class="m-body"><span class="frm">\\(${m.tex}\\)</span>${m.desc}</div>
     ${(v=>v?`<div class="m-apply"><span class="ap-lbl">Apply on Page 1 →</span>${Object.keys(v).map(k=>`<a class="${k}" href="index.html#${APPLY_PARAM[k]}=${encodeURIComponent(v[k])}" title="Open Page 1 with the ${APPLY_NAME[k]} color mode set to ${m.name}">${APPLY_NAME[k]}</a>`).join('')}</div>`:'')(APPLY_VALS[m.id])}`;
-  const st={cv:row.querySelector(`#${id}-cv`),cap:row.querySelector(`#${id}-cap`),view:'grid',G:56};
-  row.querySelector(`#${id}-view`).addEventListener('change',e=>{st.view=e.target.value;redraw(m,st);});
+  const st={cv:row.querySelector(`#${id}-cv`),cap:row.querySelector(`#${id}-cap`),view:'grid',G:56,
+            viewSel:row.querySelector(`#${id}-view`)};
+  st.viewSel.addEventListener('change',e=>{st.view=e.target.value;redraw(m,st);});
   const sl=row.querySelector(`#${id}-g`),gv=row.querySelector(`#${id}-gv`);
   sl.addEventListener('input',()=>{st.G=+sl.value;gv.textContent=sl.value;redraw(m,st);});
+  _ALL_STATES.push({m,st});
   redraw(m,st);
   return row;
 }
@@ -562,6 +762,69 @@ function makeRow(m){
   });
   if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
   else window.addEventListener('load',()=>MathJax.typesetPromise&&MathJax.typesetPromise());
+
+  /* ── Master bar wiring ── */
+  updateCn();
+  document.getElementById('mb-view').addEventListener('change',e=>{
+    const v=e.target.value;
+    if(!v)return;
+    _ALL_STATES.forEach(o=>{o.st.view=v;o.st.viewSel.value=v;});
+    redrawAll();
+  });
+  // Block-depth max = (largest prime ≤ GMAX) − 1 — the site's own "n=p−1
+  // saturation point" convention (see index.html's wNextSat), rather than a
+  // flat hardcoded 12. GMAX=109 is already prime, so this resolves to 108.
+  const nSl=document.getElementById('mb-n'),nV=document.getElementById('mb-nv');
+  nSl.max=NMAX;
+  nSl.addEventListener('input',()=>{NN=+nSl.value;nV.textContent=nSl.value;updateCn();redrawAll();});
+  // Lock block depth n to half of each swatch's own G — ported from the same
+  // "🔒 =G/2" pattern as the gap-diagonal lock, but for n instead of g. Since
+  // page 3 has no single master G (every swatch owns its slider), the lock
+  // is per-card: each canvas uses round(its own G / 2) instead of the master
+  // n slider, which is disabled while the lock is on.
+  const nLockBtn=document.getElementById('mb-nlock');
+  nLockBtn.addEventListener('click',()=>{
+    N_LOCK=!N_LOCK;
+    nLockBtn.classList.toggle('on',N_LOCK);
+    nSl.disabled=N_LOCK;
+    nSl.style.opacity=N_LOCK?0.4:1;
+    redrawAll();
+  });
+  document.getElementById('mb-adv-toggle').addEventListener('click',()=>{
+    const a=document.getElementById('mb-adv'),open=a.style.display==='block';
+    a.style.display=open?'none':'block';
+    document.getElementById('mb-adv-toggle').innerHTML='Advanced — custom rings &amp; χ(r) filter '+(open?'▾':'▴');
+  });
+  document.getElementById('mb-chi-sup').addEventListener('change',e=>{CHI_SUP=e.target.checked;redrawAll();});
+  document.getElementById('mb-chi-van').addEventListener('change',e=>{CHI_VAN=e.target.checked;redrawAll();});
+  document.getElementById('mb-gaplock').addEventListener('change',e=>{GAP_LOCK=e.target.checked;redrawAll();});
+  document.getElementById('mb-labels').addEventListener('change',e=>{LABELS_ON=e.target.checked;redrawAll();});
+  document.getElementById('mb-label-pos').addEventListener('change',e=>{LABEL_POS=e.target.value;redrawAll();});
+  const lsSl=document.getElementById('mb-label-size'),lsV=document.getElementById('mb-label-sizev');
+  lsSl.addEventListener('input',()=>{LABEL_SIZE=+lsSl.value;lsV.textContent=lsSl.value+'px';redrawAll();});
+  // Smith zoom-out — global, mirrors index.html's wSmithSetZoomOut but with a
+  // continuous slider layered on top of the discrete 1×/2×/3×/4× presets.
+  const zBtns=[...document.querySelectorAll('.mbz-btn')];
+  const zSl=document.getElementById('mb-smith-zoom'),zV=document.getElementById('mb-smith-zoomv');
+  function setSmithZoom(z){
+    SMITH_ZOOM=z;
+    zSl.value=z;
+    zV.textContent=(Math.round(z*100)/100)+'×';
+    zBtns.forEach(b=>b.classList.toggle('active',+b.dataset.z===z));
+    redrawAll();
+  }
+  zBtns.forEach(b=>b.addEventListener('click',()=>setSmithZoom(+b.dataset.z)));
+  zSl.addEventListener('input',()=>setSmithZoom(+zSl.value));
+  setSmithZoom(1);
+  document.getElementById('mb-rings').addEventListener('input',e=>{
+    const v=e.target.value.trim();
+    if(!v){RINGS=null;}
+    else{
+      const set=new Set(v.split(/[\s,;]+/).map(x=>parseInt(x,10)).filter(x=>x>=1&&x<=GMAX));
+      RINGS=set.size?set:null;
+    }
+    redrawAll();
+  });
 })();
 </script>
 </body>
