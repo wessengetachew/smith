@@ -21104,6 +21104,34 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
       }
       if(q.hcm)_setSel('hero-color-mode',q.hcm,window.heroColorModeChange);
       if(q.gcm)_setSel('global-color',q.gcm,window.onGlobalColorChange);
+      // ── Canvas-state deep links from Page 3's "Send to" links ──
+      // Hero: just scroll it into view — hv/hg/hn above already switched its
+      // view/G/n. Global: the "Block-Coprimality Canvas" (Section 5) is a
+      // collapsed <details> by default, with independent G/n controls for
+      // its Grid and Ring sub-panels; open it, sync both sub-panels' G/n so
+      // whichever one the person looks at matches, and scroll there.
+      if(q.hcm||q.hv){
+        var heroEl=document.getElementById('hero');
+        if(heroEl)setTimeout(function(){heroEl.scrollIntoView({behavior:'smooth',block:'start'});},60);
+      }
+      if(q.gcm||q.gg||q.gn||q.gview){
+        var dd=document.getElementById('s-canvas-dd');
+        if(dd)dd.open=true;
+        if(q.gg){
+          var gg=Math.max(4,+q.gg);
+          var gnum=document.getElementById('grid-g-num'),rnum=document.getElementById('ring-max-num');
+          if(gnum){gnum.value=gg;if(typeof syncGridGInputs==='function')syncGridGInputs('num');}
+          if(rnum){rnum.value=gg;if(typeof syncRingMInputs==='function')syncRingMInputs('num');}
+        }
+        if(q.gn){
+          var gridN=document.getElementById('grid-own-n');
+          if(gridN){gridN.value=+q.gn;if(typeof onGridNChange==='function')onGridNChange();}
+        }
+        if(typeof renderGrid==='function')renderGrid();
+        if(typeof renderRing==='function')renderRing();
+        var sCanvas=document.getElementById('s-canvas');
+        if(sCanvas)setTimeout(function(){sCanvas.scrollIntoView({behavior:'smooth',block:'start'});},60);
+      }
     }catch(e){console.warn('hash state restore:',e);}
   }
   if(document.readyState==='complete')setTimeout(apply,0);

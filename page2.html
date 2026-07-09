@@ -4274,5 +4274,47 @@ function openOpener(){
   window.open('index.html','_blank');
 }
 </script>
+<script>
+// ── Page 3 "Send to" deep links: pcm (color mode) / pv (view: grid, combined,
+// zi, ford) / pg (Grid G) / pn (block depth n). Mirrors the same hash scheme
+// index.html already uses (wcm/hcm/gcm + wv/hv + wg/hg + wn/hn), with a 'p'
+// prefix for Page 2. All setters here (onSliderG/onSliderN/setViewMode) are
+// self-clamping, so out-of-range values from the sender are handled safely. ──
+(function(){
+  function apply(){
+    if(!location.hash||location.hash.length<2)return;
+    var q={};location.hash.slice(1).split('&').forEach(function(kv){var i=kv.indexOf('=');if(i>0)q[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});
+    try{
+      var any=q.pv||q.pcm||q.pg||q.pn;
+      if(any&&typeof switchTab==='function')switchTab('2d');
+      if(q.pg&&typeof onSliderG==='function')onSliderG(+q.pg);
+      if(q.pn&&typeof onSliderN==='function')onSliderN(+q.pn);
+      if(q.pv&&typeof setViewMode==='function'){
+        var v=(q.pv==='grid'||q.pv==='combined'||q.pv==='zi'||q.pv==='ford')?q.pv:'grid';
+        setViewMode(v);
+      }
+      if(q.pcm){
+        var sel=document.getElementById('sel-color');
+        if(sel){
+          var ok=false;
+          for(var i=0;i<sel.options.length;i++)if(sel.options[i].value===q.pcm){ok=true;break;}
+          if(ok){
+            sel.value=q.pcm;
+            if(typeof colorMode!=='undefined')colorMode=q.pcm;
+            var nb2=document.getElementById('nb2-color'); if(nb2)nb2.value=q.pcm;
+            if(typeof render==='function')render();
+          }
+        }
+      }
+      if(any){
+        var anchor=document.getElementById('tab-2d-content');
+        if(anchor)setTimeout(function(){anchor.scrollIntoView({behavior:'smooth',block:'start'});},60);
+      }
+    }catch(e){console.warn('Page 3 send-to state restore:',e);}
+  }
+  if(document.readyState==='complete')setTimeout(apply,0);
+  else window.addEventListener('load',function(){setTimeout(apply,50);});
+})();
+</script>
 </body>
 </html>
