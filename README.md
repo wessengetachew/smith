@@ -9,6 +9,8 @@ https://wessengetachew.github.io/smith/page2.html
      # Color and Lables detailed 
 https://wessengetachew.github.io/smith/page3.html
 
+# Page 4 what is c(n)
+https://wessengetachew.github.io/smith/page4.html
 
 
 An interactive explorer for the block-coprime density function
