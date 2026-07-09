@@ -3989,6 +3989,7 @@ function heroToggleTopBars(){
   var links=[
    ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
    ['page2.html','P2','Gap Diagonal Identity — Page 2','#3dc8b8'],
+   ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
    ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
   ];
   var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
@@ -5410,6 +5411,11 @@ function heroToggleTopBars(){
       <option value="block_window">Block window j-index</option>
       <option value="saturation">Saturation profile</option>
       <option value="depth_grad">Depth gradient</option>
+      <option disabled>── Ported from old project ──</option>
+      <option value="residue_value">By Residue Value (r hue)</option>
+      <option value="ring_hash">By Ring/Modulus (M hue)</option>
+      <option value="phi_position">φ(M) Mathematical Progression</option>
+      <option value="phi_spectrum">φ(M)/M Spectral Distribution</option>
     </select>
     <div class="cv-sep"></div>
     <span class="cv-lbl">Labels:</span>
@@ -10146,8 +10152,7 @@ function getCellColorForMode(r,M,n,mode){
       }
       return'rgba(180,170,150,.35)';
     }
-    case 'quad_res':
-    case 'quadratic_residue':{
+    case 'quad_res':{
       if(!coprime)return'rgba(44,62,80,.5)';
       const qr=_isQR(r%M,M);
       return qr?(block?'rgba(200,168,74,.95)':'rgba(180,148,54,.4)')
@@ -10172,6 +10177,61 @@ function getCellColorForMode(r,M,n,mode){
       if(coprime&&!block){const t2=(dv+1)/(n+1);return`hsla(200,60%,${20+t2*20}%,.5)`;}
       const excess=Math.min(12,dv-n);const hue=180+excess*12;const lum=45+excess*4;
       return`hsla(${hue|0},85%,${lum}%,.92)`;
+    }
+    // ── Numeric legacy modes 0–5 — JS ports of the WebGL grid shader palette.
+    // Makes the hero's "Use global-color" delegation work when global-color is
+    // set to a numeric mode (previously fell through to the 3-state default). ──
+    case 0: case '0':{ // 3-state coprime
+      if(block)return'rgba(242,196,71,.95)';
+      if(coprime)return'rgba(56,184,173,.9)';
+      const pm=M>1&&_smallestPF(M)===M;
+      return pm?'rgba(36,33,66,.92)':'rgba(26,20,46,.92)';
+    }
+    case 1: case '1':{ // survival gradient: first-fail j, red→gold
+      let ff=n+1;
+      for(let j=0;j<=n;j++){if(gcd(r,M+j)>1){ff=j;break;}}
+      const tt=Math.min(1,ff/Math.max(n+1,1));
+      return`rgba(${(209+tt*33)|0},${(51+tt*145)|0},${(51+tt*20)|0},.95)`;
+    }
+    case 2: case '2':{ // first-fail prime spectrum
+      if(block)return'rgba(242,196,71,.95)';
+      let fp=0;
+      for(let j=0;j<=n;j++){const gg=gcd(r,M+j);if(gg>1){fp=_smallestPF(gg);break;}}
+      const PC={2:'rgba(194,56,56,.95)',3:'rgba(224,122,51,.95)',5:'rgba(204,204,51,.95)',7:'rgba(51,184,153,.95)',11:'rgba(89,128,224,.95)',13:'rgba(166,89,224,.95)'};
+      return PC[fp]||'rgba(128,184,89,.95)';
+    }
+    case 3: case '3': // gold / dark
+      return block?'rgba(242,196,71,.95)':'rgba(18,15,33,.95)';
+    case 4: case '4': // density heatmap
+      return block?'rgba(56,140,209,.95)':'rgba(15,15,33,.95)';
+    case 5: case '5':{ // sector: hue by angle r/M
+      const h=((r/M)*360)|0;
+      if(block)return`hsl(${h},75%,55%)`;
+      if(coprime)return`hsla(${h},45%,18%,.9)`;
+      return'rgba(15,13,26,.95)';
+    }
+    // ── Ported from old project — same implementations as the hero/opener
+    // dropdowns, so Grid/Ring/Cube (and hero-via-global) can use them too. ──
+    case 'residue_value':{
+      const h=(r*37)%360;
+      return block?`hsla(${h},80%,68%,.92)`:`hsla(${h},45%,30%,.4)`;
+    }
+    case 'ring_hash':{
+      const h=(M*67)%360;
+      return block?`hsla(${h},78%,62%,.92)`:`hsla(${h},45%,30%,.4)`;
+    }
+    case 'phi_position':{
+      const list=_heroCoprimeList(M);
+      const phiM=list.length||1;
+      const pos=list.indexOf(r);
+      const h=((pos<0?0:pos)*360/phiM+M*7)%360;
+      return block?`hsla(${h|0},82%,66%,.92)`:`hsla(${h|0},50%,30%,.4)`;
+    }
+    case 'phi_spectrum':{
+      const density=phi(M)/M;
+      const h=(density*240+r*15)%360;
+      const sat=60+density*30;
+      return block?`hsla(${h|0},${sat|0}%,65%,.92)`:`hsla(${h|0},${(sat*0.5)|0}%,30%,.4)`;
     }
     default:return block?'rgba(200,168,74,.9)':'rgba(61,200,184,.28)';
   }

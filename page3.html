@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Color &amp; Label Modes — The Mathematics — Page 3</title>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04040d;--bg1:#07071a;--bg2:#0c0c22;
+  --cream:#ddd8cc;--cream2:#b8b2a6;--cream3:#6a6560;
+  --gold:#c8a84a;--teal:#3dc8b8;--coral:#e05060;--violet:#9b7fe8;--lime:#7ec87a;
+  --edge:rgba(255,255,255,.07);--edge2:rgba(255,255,255,.13);
+  --mono:'JetBrains Mono',monospace;--serif:'Spectral',serif;--disp:'Cinzel',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:11px;}
+a{color:var(--teal);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px;}
+
+/* ── HERO ── */
+#p4-hero{padding:56px 0 34px;border-bottom:1px solid var(--edge2);background:linear-gradient(180deg,var(--bg1) 0%,var(--bg) 100%);}
+.eyebrow{font-family:var(--mono);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--violet);margin-bottom:12px;}
+h1{font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,4vw,2.3rem);letter-spacing:.06em;color:var(--cream);}
+h1 b{color:var(--gold);font-weight:500;}
+.lede{font-family:var(--serif);font-weight:300;font-size:13.5px;line-height:1.75;color:var(--cream2);max-width:760px;margin-top:16px;}
+.lede em{color:var(--cream);font-style:italic;}
+
+/* ── SCOPE MAP ── */
+#scope-map{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.scope-card{flex:1;min-width:230px;border:1px solid var(--edge2);background:var(--bg1);padding:13px 15px;}
+.scope-card h3{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;}
+.scope-card p{font-family:var(--serif);font-weight:300;font-size:11.5px;line-height:1.6;color:var(--cream2);}
+.scope-card code{color:var(--cream);font-size:9px;}
+.sc-op h3{color:var(--gold);}.sc-he h3{color:var(--teal);}.sc-gl h3{color:var(--violet);}
+
+/* ── SECTIONS ── */
+section{padding:40px 0 8px;}
+h2{font-family:var(--disp);font-weight:400;font-size:1.15rem;letter-spacing:.1em;color:var(--gold);margin-bottom:6px;}
+h2 .h2tag{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--cream3);vertical-align:middle;margin-left:10px;}
+.secnote{font-family:var(--serif);font-weight:300;font-size:12px;line-height:1.7;color:var(--cream2);max-width:780px;margin-bottom:20px;}
+.secnote code{font-size:9px;color:var(--cream);background:var(--bg2);padding:1px 4px;border:1px solid var(--edge);}
+h4.grp{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:24px 0 8px;border-bottom:1px solid var(--edge);padding-bottom:5px;}
+
+/* ── MODE ROWS ── */
+.mode{display:grid;grid-template-columns:224px 1fr;gap:0 20px;border:1px solid var(--edge);border-left:2px solid var(--edge2);background:var(--bg1);margin-bottom:8px;padding:10px 14px 11px;min-width:0;}
+.mode:hover{border-left-color:var(--gold);}
+.m-head{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.m-name{font-family:var(--mono);font-size:10.5px;color:var(--cream);letter-spacing:.03em;}
+.m-id{font-family:var(--mono);font-size:8px;color:var(--cream3);}
+.m-scopes{margin-left:auto;display:flex;gap:4px;}
+.chip{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border:1px solid;}
+.chip.op{color:var(--gold);border-color:rgba(200,168,74,.45);}
+.chip.he{color:var(--teal);border-color:rgba(61,200,184,.45);}
+.chip.gl{color:var(--violet);border-color:rgba(155,127,232,.45);}
+.m-sw{align-self:start;}
+.m-sw canvas{display:block;width:100%;max-width:224px;aspect-ratio:1;height:auto;image-rendering:pixelated;border:1px solid var(--edge);}
+.m-sw .swcap{font-family:var(--mono);font-size:7px;color:var(--cream3);margin-top:3px;letter-spacing:.05em;}
+.m-body{font-family:var(--serif);font-weight:300;font-size:12px;line-height:1.65;color:var(--cream2);}
+.m-body{min-width:0;}
+.m-body .frm{display:block;font-size:12.5px;color:var(--cream);margin-bottom:5px;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:2px;}
+.m-body .frm::-webkit-scrollbar{height:4px;}
+.m-body .frm::-webkit-scrollbar-thumb{background:var(--edge2);}
+mjx-container{max-width:100%;}
+.m-body b{color:var(--cream);font-weight:500;}
+.m-body .cs{white-space:nowrap;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:-1px;margin-right:3px;border:1px solid rgba(255,255,255,.2);}
+@media(max-width:760px){.mode{grid-template-columns:1fr;}.m-sw{margin-bottom:8px;}.m-sw canvas{max-width:min(320px,100%);margin:0 auto;}}
+body{overflow-x:hidden;}
+
+/* ── PREDICATES / MATH BLOCKS ── */
+.pred{border:1px solid var(--edge2);border-left:2px solid var(--gold);background:var(--bg1);padding:14px 18px;margin-bottom:10px;font-family:var(--serif);font-weight:300;font-size:12.5px;line-height:1.75;color:var(--cream2);}
+.pred b{color:var(--gold);font-weight:500;font-family:var(--mono);font-size:10px;letter-spacing:.08em;}
+
+/* ── LABEL TABLES ── */
+table.lbl{width:100%;border-collapse:collapse;margin-bottom:22px;}
+table.lbl th{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--edge2);}
+table.lbl td{font-family:var(--serif);font-weight:300;font-size:12px;line-height:1.55;color:var(--cream2);padding:7px 10px;border-bottom:1px solid var(--edge);vertical-align:top;}
+table.lbl td:first-child{font-family:var(--mono);font-size:9.5px;color:var(--cream);white-space:nowrap;}
+table.lbl td:nth-child(2){font-family:var(--mono);font-size:9px;color:var(--gold);white-space:nowrap;}
+
+footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--cream3);}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+
+<!-- ── PAGE NAV (same bar as index.html) ── -->
+<script>
+(function(){
+  var links=[
+   ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
+   ['page2.html','P2','Gap Diagonal Identity — Page 2','#3dc8b8'],
+   ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
+   ['#opener','Opener','Open the Welcome / Opener Teaser on the home page','#f2a84a']
+  ];
+  var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
+  bar+='<span style="font-family:\'Cinzel\',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
+  links.forEach(function(L){var href=L[0],lab=L[1],ti=L[2],c=L[3];var cur=(href==='page3.html');
+    if(href==='#opener'){
+      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
+    }
+    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
+    else{bar+='<a href="'+href+'" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
+  });
+  bar+='</div>';
+  document.write(bar);
+})();
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+</script>
+
+<!-- ── HERO ── -->
+<div id="p4-hero"><div class="wrap">
+  <div class="eyebrow">Page 3 · Reference — Color &amp; Label Codex</div>
+  <h1>Every pixel is a <b>function of (r,&thinsp;M,&thinsp;n)</b></h1>
+  <p class="lede">
+    Every lattice on Pages 1–2 colors the point \((r,M)\) by evaluating an arithmetic
+    quantity — a gcd, a totient, a depth, an angle — and mapping it onto the hue wheel.
+    This page documents <em>the exact formula behind each mode</em>, in each of the three
+    coloring scopes, with a live swatch rendered by that same formula: each swatch is the
+    full \(56\times56\) lattice — residues \(r=1\ldots56\) left→right, moduli
+    \(M=1\ldots56\) bottom→top, at block depth \(n=2\) — the same domain as the Grid view.
+  </p>
+  <div id="scope-map">
+    <div class="scope-card sc-op"><h3>Opener</h3>
+      <p>The welcome teaser's five-view lattice (Smith · Ring · Grid · Farey · Gauss). One dropdown, <code>w-color-mode</code> — 5 modes, applied to all five views at once. Points with \(\chi(r)=0\) are always forced coral, regardless of mode.</p></div>
+    <div class="scope-card sc-he"><h3>Hero</h3>
+      <p>The main six-view lattice. <code>hero-color-mode</code> — 23 local modes in five families, plus a <code>global</code> option that delegates to the Global palette. Gap-highlights and focus overrides pre-empt the mode color.</p></div>
+    <div class="scope-card sc-gl"><h3>Global</h3>
+      <p>The shared palette, <code>global-color</code> — six numeric legacy modes (WebGL grid shader) plus the named modes. Consumed by Grid, Ring, the 3D Cube, and the Hero when set to <i>Use global</i>. Ring and Cube add small local overrides on top.</p></div>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<!-- ── SHARED PREDICATES ── -->
+<section id="predicates">
+  <h2>Shared predicates<span class="h2tag">EVERY MODE BUILDS ON THESE</span></h2>
+  <p class="secnote">Four quantities appear in nearly every formula below. All are computed per point \((r,M)\) at the current block depth \(n\).</p>
+  <div class="pred"><b>COPRIMALITY</b> — \(\gcd(r,M)=1\). Equivalently \(\chi(r)\neq0\) for Dirichlet characters mod \(M\). When \(\gcd(r,M)&gt;1\) the point is a zero divisor of \(\mathbb{Z}/M\mathbb{Z}\); the Opener and Hero render it coral <span class="dot" style="background:rgba(224,80,96,.78)"></span>rgba(224,80,96,.78) before any mode logic runs.</div>
+  <div class="pred"><b>BLOCK-COPRIMALITY</b> — the defining predicate of \(C(n)\):
+    \[ B_n(r,M)\iff \gcd(r,\,M+j)=1 \quad\text{for all } j=0,1,\ldots,n. \]
+    Modes call this <i>ok</i> / <i>block</i> / <i>pass</i>; survivors are typically drawn vivid, non-survivors dim.</div>
+  <div class="pred"><b>SURVIVAL DEPTH</b> — \(d(r,M)=\max\{n : B_n(r,M)\}\), the deepest block the point survives. The Hero passes \(d\) into its color function; \(d&lt;0\) means not even coprime to \(M\) itself.</div>
+  <div class="pred"><b>FIRST FAILURE</b> — the smallest \(j\) with \(\gcd(r,M+j)&gt;1\), and its <i>fail prime</i> \(\operatorname{spf}(\gcd(r,M+j))\), the smallest prime factor of that gcd. These drive the survival-gradient and fail-prime spectra.</div>
+</section>
+
+<!-- ── OPENER ── -->
+<section id="opener">
+  <h2>Opener modes<span class="h2tag">w-color-mode · 5 MODES · ALL FIVE VIEWS</span></h2>
+  <p class="secnote">The Opener's palette is the "Residue Coloring Scheme" ported from the original project, plus a modular-distance default. Here <i>ok</i> means the point passes the character filter and block test; failing points keep the same hue but drop to ≈40% saturation and low alpha.</p>
+  <div id="rows-opener"></div>
+</section>
+
+<!-- ── HERO ── -->
+<section id="hero-modes">
+  <h2>Hero modes<span class="h2tag">hero-color-mode · 23 LOCAL + GLOBAL DELEGATION</span></h2>
+  <p class="secnote">The Hero receives the precomputed depth \(d\) and animates: survivors pulse with \(\alpha = a_0 + a_1\sin(\omega t + 0.41r + 0.29M)\) in several modes (swatches below show the static mid-pulse value). Two overrides run before the mode switch: <b>focused</b> points render white, and <b>gap-highlighted</b> points take the gap family's color at full opacity.</p>
+  <div id="rows-hero"></div>
+</section>
+
+<!-- ── GLOBAL ── -->
+<section id="global-modes">
+  <h2>Global modes<span class="h2tag">global-color · 6 NUMERIC + NAMED · GRID / RING / CUBE / HERO-VIA-GLOBAL</span></h2>
+  <p class="secnote">Numeric modes <code>0–5</code> are the WebGL grid shader's palette (now also available as JS ports, so the Hero's <i>Use global</i> delegation resolves them). Named modes render in a Canvas-2D overlay pass. Modes already documented above (rainbow, farey family, gcd spectrum, φ-ratio, Möbius, block window, saturation, fail prime, mod residue, the ported foursome…) are shared verbatim — only the Global-exclusive modes are listed here.</p>
+  <div id="rows-global"></div>
+</section>
+
+<!-- ── LABELS ── -->
+<section id="labels">
+  <h2>Label modes<span class="h2tag">WHAT THE TEXT ON EACH CELL MEANS</span></h2>
+  <p class="secnote">Labels are the textual twin of the color modes: instead of mapping an arithmetic quantity to hue, they print it. The Opener has no label dropdown — its views draw view-specific annotations directly. The Hero and Global scopes each expose a selector.</p>
+
+  <h4 class="grp">Hero — hero-label-mode</h4>
+  <table class="lbl">
+    <tr><th>value</th><th>prints</th><th>meaning</th></tr>
+    <tr><td>none</td><td>—</td><td>No cell text.</td></tr>
+    <tr><td>coords</td><td>r, M</td><td>The raw lattice coordinates of the point.</td></tr>
+    <tr><td>fraction</td><td>r/M</td><td>The Farey fraction in lowest terms: \(\tfrac{r/g}{M/g}\) with \(g=\gcd(r,M)\).</td></tr>
+    <tr><td>angle</td><td>2πr/M °</td><td>The angular position \(\theta = 2\pi r/M\) on the unit circle, printed in degrees \(=360\,r/M\).</td></tr>
+    <tr><td>gcd</td><td>gcd(r,M)</td><td>The greatest common divisor; 1 marks character support, &gt;1 marks a zero divisor.</td></tr>
+    <tr><td>depth</td><td>d</td><td>Survival depth \(d(r,M)\) — the largest \(n\) the point remains block-coprime for.</td></tr>
+    <tr><td>status</td><td>ok / cop / no</td><td>Three-state summary: block-survivor at current \(n\) / merely coprime to \(M\) / zero divisor.</td></tr>
+    <tr><td>fail_j</td><td>j</td><td>The first failure index: smallest \(j\le n\) with \(\gcd(r,M+j)&gt;1\).</td></tr>
+    <tr><td>phi_M</td><td>φ(M)</td><td>Euler's totient of the modulus — the length of the reduced residue system on that ring.</td></tr>
+    <tr><td>mobius_M</td><td>μ(M)</td><td>The Möbius function of \(M\): \(0\) if \(p^2\mid M\), else \((-1)^{\omega(M)}\).</td></tr>
+    <tr><td>gap</td><td>|M−r|</td><td>The diagonal gap — distance to the \(r=M\) diagonal, the coordinate of Page 2's gap identity.</td></tr>
+    <tr><td>r_val ★</td><td>r</td><td>Residue only (default).</td></tr>
+    <tr><td>M_val</td><td>M</td><td>Modulus only.</td></tr>
+  </table>
+
+  <h4 class="grp">Global — global-label-mode (Grid &amp; Ring)</h4>
+  <table class="lbl">
+    <tr><th>value</th><th>prints</th><th>meaning</th></tr>
+    <tr><td>rm</td><td>r/M</td><td>The fraction as written — the cell's Farey coordinate.</td></tr>
+    <tr><td>r ★</td><td>r</td><td>Residue only (default).</td></tr>
+    <tr><td>ar</td><td>0.xxx</td><td>The decimal value \(a_r = r/M \in (0,1)\) — the same quantity the sector and rainbow hues are built from.</td></tr>
+    <tr><td>theta</td><td>θ rad</td><td>\(\theta = 2\pi r/M\) in radians — the ring-view angular coordinate.</td></tr>
+    <tr><td>M</td><td>M</td><td>Modulus only.</td></tr>
+    <tr><td>gcd</td><td>gcd(r,M)</td><td>As above.</td></tr>
+    <tr><td>depth</td><td>d</td><td>Survival depth at the current block \(n\).</td></tr>
+    <tr><td>prop</td><td>varies</td><td>Adaptive: prints the quantity the <i>active color mode</i> is computed from — e.g. the divisor count under <i>divisibility</i>, the nilpotency degree under <i>nilpotents</i> — so text and color always agree.</td></tr>
+    <tr><td>none</td><td>—</td><td>No cell text.</td></tr>
+  </table>
+</section>
+
+<!-- ── SATELLITES ── -->
+<section id="satellites">
+  <h2>Satellite overrides<span class="h2tag">RING &amp; CUBE LOCAL SELECTORS</span></h2>
+  <p class="secnote">Two views layer a small local selector on top of the Global palette; both default to <code>global</code> (pass-through).</p>
+  <table class="lbl">
+    <tr><th>scope</th><th>value</th><th>meaning</th></tr>
+    <tr><td>Ring</td><td>farey_angle</td><td>Hue by \(2\pi r/M\) — identical formula to the shared Farey rainbow, applied only in ring view.</td></tr>
+    <tr><td>Ring</td><td>farey_depth</td><td>Hue by the ring's position in Farey order — colors by \(M\)'s index rather than \(r/M\)'s value.</td></tr>
+    <tr><td>Ring</td><td>angular_dist</td><td>Brightness by angular distance from \(r/M\) to the nearest prime reciprocal \(1/p\) — the ring-view twin of <i>Farey proximity</i>.</td></tr>
+    <tr><td>Ring</td><td>lift_angle</td><td>The lift-shift coloring \(\theta(r \bmod (M{+}1),\,M{+}1)-\theta(r,M)\), restricted to ring view.</td></tr>
+    <tr><td>Cube</td><td>coprime</td><td>Three-state \(\gcd\) status per lattice site.</td></tr>
+    <tr><td>Cube</td><td>depth</td><td>Survival depth \(d\) as height-independent color.</td></tr>
+    <tr><td>Cube</td><td>gcd_rm</td><td>\(\gcd(r,M)\) spectrum, as in the shared mode.</td></tr>
+    <tr><td>Cube</td><td>saturation</td><td>First blocking prime \(p\le n{+}1\) dividing \(\gcd(r,M)\).</td></tr>
+    <tr><td>Cube</td><td>phi</td><td>\(\varphi(M)/M\) density of the site's modulus.</td></tr>
+    <tr><td>Cube</td><td>rainbow</td><td>Hue by angle \(r/M\).</td></tr>
+  </table>
+</section>
+
+<footer class="wrap" style="padding-left:0;padding-right:0;">
+  PAGE 3 · COLOR &amp; LABEL CODEX — SWATCHES RENDERED LIVE FROM THE DOCUMENTED FORMULAS · 56×56 LATTICE · r, M = 1…56 · n = 2
+</footer>
+</div>
+
+<script>
+/* ═══════════ Arithmetic helpers — same definitions as index.html ═══════════ */
+function gcd(a,b){while(b){[a,b]=[b,a%b];}return a;}
+const PRIMES=(()=>{const P=[],S=new Uint8Array(2001);for(let i=2;i<=2000;i++){if(!S[i]){P.push(i);for(let j=i*i;j<=2000;j+=i)S[j]=1;}}return P;})();
+const PS=new Set(PRIMES);
+function spf(v){if(v<2)return v;for(let p=2;p*p<=v;p++)if(v%p===0)return p;return v;}
+function phi(n){let r=n,x=n;for(const p of PRIMES){if(p*p>x)break;if(x%p===0){while(x%p===0)x/=p;r-=r/p;}}if(x>1)r-=r/x;return Math.round(r);}
+function mobius(n){let cnt=0,x=n;for(const p of PRIMES){if(p*p>x)break;if(x%p===0){x/=p;cnt++;if(x%p===0)return 0;}}if(x>1)cnt++;return cnt%2===0?1:-1;}
+function _divCount(v){let c=0;for(let i=1;i*i<=v;i++)if(v%i===0){c+=2;if(i*i===v)c--;}return c;}
+function _isQR(r,M){if(gcd(r,M)>1)return false;for(let a=0;a<M;a++)if((a*a)%M===r)return true;return false;}
+function _nilpDeg(r,M){if(r===0)return 0;let t=r;for(let k=1;k<20;k++){t=(t*r)%M;if(t===0)return k;}return-1;}
+function blockOk(r,M,n){for(let j=0;j<=n;j++)if(gcd(r,M+j)>1)return false;return true;}
+function depthOf(r,M,cap){if(gcd(r,M)>1)return-1;let d=0;while(d<cap&&gcd(r,M+d+1)===1)d++;return d;}
+const cop=new Map();
+function copList(M){if(cop.has(M))return cop.get(M);const L=[];for(let i=1;i<M;i++)if(gcd(i,M)===1)L.push(i);cop.set(M,L);return L;}
+
+/* ═══════════ Mode registry — {id, name, scopes, formula TeX, desc, fn} ═══════════
+   fn(r,M,n) → CSS color; ports of the exact index.html implementations.
+   ok = block-coprime survivor, cp = coprime to M, d = survival depth.      */
+const RED0='rgba(224,80,96,.78)'; // forced χ(r)=0 coral (opener & hero)
+function ctx3(r,M,n){const g=gcd(r,M);return{g,cp:g===1,ok:blockOk(r,M,n),d:depthOf(r,M,14)};}
+
+const MODES=[
+/* ───────── OPENER (5) — also present in hero; foursome now in global too ───────── */
+{sec:'opener',id:'default (opener)',name:'Distance-from-center hue',sc:['op'],
+ tex:'\\mathrm{dist}=\\min(r,\\,M-r),\\quad \\rho=\\frac{\\mathrm{dist}}{\\lfloor M/2\\rfloor},\\quad h=240(1-\\rho)',
+ desc:'How far \\(r\\) sits from the ends of the ring \\(0\\) and \\(M\\): near the boundary is blue (\\(h{=}240\\)), the ring midpoint is red (\\(h{=}0\\)). Identical to the shared <b>modular distance</b> mode.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return RED0;const dist=Math.min(r,M-r),ratio=dist/Math.max(1,Math.floor(M/2)),h=(240-ratio*240)|0;return ok?`hsl(${h},80%,55%)`:`hsla(${h},40%,24%,.6)`;}},
+{sec:'opener',id:'residue_value',name:'By residue value',sc:['op','he','gl'],
+ tex:'h=37\\,r \\bmod 360',
+ desc:'Hue depends on \\(r\\) alone — the same residue receives the same color on every ring, so vertical columns of the lattice light up in a single hue. 37 is coprime to 360, so consecutive residues jump \\(37°\\) around the wheel without repeating for 360 steps.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return RED0;const h=(r*37)%360;return ok?`hsla(${h},80%,68%,.92)`:`hsla(${h},45%,30%,.4)`;}},
+{sec:'opener',id:'ring_hash',name:'By ring / modulus',sc:['op','he','gl'],
+ tex:'h=67\\,M \\bmod 360',
+ desc:'The dual of the previous mode: hue depends on \\(M\\) alone, so every point on the same ring shares one color and the lattice stripes horizontally. \\(\\gcd(67,360)=1\\) again gives a full-period hue walk.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return RED0;const h=(M*67)%360;return ok?`hsla(${h},78%,62%,.92)`:`hsla(${h},45%,30%,.4)`;}},
+{sec:'opener',id:'phi_position',name:'φ(M) mathematical progression',sc:['op','he','gl'],
+ tex:'h=\\Big(\\frac{360\\,\\mathrm{pos}(r)}{\\varphi(M)}+7M\\Big)\\bmod 360',
+ desc:'Here \\(\\mathrm{pos}(r)\\) is the index of \\(r\\) in the reduced residue system \\((\\mathbb{Z}/M\\mathbb{Z})^\\times\\). That system is listed in increasing order and spread <b>evenly</b> around the hue wheel — the \\(k\\)-th unit gets hue \\(360k/\\varphi(M)\\). The \\(+7M\\) term rotates each ring\'s wheel so adjacent rings don\'t align. Default mode of both Opener and Hero.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return RED0;const L=copList(M),ph=L.length||1,pos=L.indexOf(r%M===0?M:((r-1)%M)+1);const pp=pos<0?L.indexOf(r):pos;const h=(((pp<0?0:pp)*360/ph)+M*7)%360;return ok?`hsla(${h|0},82%,66%,.92)`:`hsla(${h|0},50%,30%,.4)`;}},
+{sec:'opener',id:'phi_spectrum',name:'φ(M)/M spectral distribution',sc:['op','he','gl'],
+ tex:'\\rho=\\frac{\\varphi(M)}{M},\\quad h=(240\\rho+15r)\\bmod 360,\\quad S=60+30\\rho',
+ desc:'The Euler density \\(\\varphi(M)/M=\\prod_{p\\mid M}(1-\\tfrac1p)\\) sets both the base hue and the saturation — prime moduli (\\(\\rho\\to1\\)) render hot and saturated, highly composite moduli render cool and washed. The \\(15r\\) term fans each ring into a spectrum.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return RED0;const rho=phi(M)/M,h=((rho*240+r*15)%360)|0,sat=(60+rho*30)|0;return ok?`hsla(${h},${sat}%,65%,.92)`:`hsla(${h},${(sat*0.5)|0}%,30%,.4)`;}},
+
+/* ───────── HERO — 2πr/M · Farey family ───────── */
+{sec:'hero',grp:'2πr/M · Farey family',id:'farey_angle',name:'Farey rainbow',sc:['he','gl'],
+ tex:'h=360\\cdot\\frac{r}{M}\\qquad(\\theta=2\\pi r/M \\text{ mapped once around the hue wheel})',
+ desc:'The core \\(2\\pi r/M\\) visual: hue tracks the point\'s angular position exactly, so the Farey ordering of fractions becomes the color ordering. Survivors pulse in the Hero; coprime non-survivors keep the hue at low luminance; zero divisors fade to near-black in the Global variant.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);const h=((r/M)*360)|0;if(ok)return`hsla(${h},88%,58%,.9)`;if(cp)return`hsla(${h},45%,22%,.55)`;return`hsla(${h},25%,12%,.25)`;}},
+{sec:'hero',id:'farey_prox',name:'Farey proximity 1/p',sc:['he','gl'],
+ tex:'\\mathrm{prox}=1-\\min\\!\\Big(1,\\;10\\min_{p\\ \\mathrm{prime}}\\Big|\\frac{r}{M}-\\frac1p\\Big|\\Big),\\quad L=20+50\\,\\mathrm{prox}',
+ desc:'Brightness measures how close the fraction \\(r/M\\) lands to a <b>prime reciprocal</b> \\(1/2,1/3,1/5,\\ldots\\) — survivors glow gold near those Farey landmarks, everything else stays dim teal. The factor 10 sets the capture radius to \\(\\pm0.1\\).',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);let mD=.5;const f=r/M;for(const p of PRIMES){if(p>200)break;const dp=Math.abs(f-1/p);if(dp<mD)mD=dp;}const prox=1-Math.min(1,mD*10),h=ok?50:200,lum=(20+prox*50)|0,al=ok?(0.2+prox*0.75):(cp?0.12+prox*0.3:0.05);return`hsla(${h},85%,${lum}%,${al.toFixed(2)})`;}},
+{sec:'hero',id:'lift_angle',name:'Lift angle r → M+1',sc:['he','gl'],
+ tex:'\\Delta=\\frac{\\big|\\theta(r\\bmod(M{+}1),\\,M{+}1)-\\theta(r,M)\\big|}{2\\pi},\\quad \\text{teal if }\\gcd(r\\bmod(M{+}1),\\,M{+}1)=1',
+ desc:'Lift the point one ring outward, \\(M\\to M{+}1\\), and measure the angular shift of its fraction. Hue is binary — <span class="cs"><span class="dot" style="background:#3dc8b8"></span>teal if the lift survives</span>, <span class="cs"><span class="dot" style="background:#e05060"></span>coral if it\'s blocked</span> — and brightness \\(1-\\min(1,6\\Delta)\\) rewards small shifts. This is the pointwise picture behind the lift-survival constant \\(\\prod_p\\frac{p^2-2}{p^2-1}\\).',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);const th=2*Math.PI*r/M,rl=r%(M+1),tl=2*Math.PI*rl/(M+1),del=Math.abs(tl-th)/(2*Math.PI),lifts=gcd(rl,M+1)===1,t2=1-Math.min(1,del*6),h=lifts?175:0,lum=(15+t2*55)|0;return ok?`hsla(${h},82%,${lum}%,.92)`:cp?`hsla(${h},60%,${(lum*.5)|0}%,.5)`:'rgba(20,18,35,.3)';}},
+
+/* ───────── HERO — Block structure family ───────── */
+{sec:'hero',grp:'Block structure',id:'default (hero)',name:'3-state gold / teal / dark',sc:['he','gl'],
+ tex:'B_n(r,M)\\Rightarrow\\text{gold};\\quad \\gcd(r,M)=1\\Rightarrow\\text{teal};\\quad\\text{else dark}',
+ desc:'The canonical \\(C(n)\\) coloring: <span class="cs"><span class="dot" style="background:#c8a84a"></span>block-coprime survivor</span>, <span class="cs"><span class="dot" style="background:#3dc8b8"></span>coprime to \\(M\\) but killed by some \\(M{+}j\\)</span>, <span class="cs"><span class="dot" style="background:#181430"></span>zero divisor</span>. Numeric mode <b>0</b> in the Global shader (which also brightens dark cells slightly when \\(M\\) is prime).',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(ok)return'rgba(242,196,71,.95)';if(cp)return'rgba(56,184,173,.9)';const pm=M>1&&spf(M)===M;return pm?'rgba(36,33,66,.92)':'rgba(26,20,46,.92)';}},
+{sec:'hero',id:'depth',name:'Survival depth',sc:['he'],
+ tex:'h=180+12\\,\\min(12,\\,d-n),\\quad L=45+4(d-n)\\quad\\text{for survivors }(d\\ge n)',
+ desc:'How much <b>margin</b> a survivor has: excess depth \\(d-n\\) walks the hue teal→green→gold and brightens. Coprime non-survivors grade by \\((d{+}1)/(n{+}1)\\) in dim blue. The Global\'s static <b>depth_grad</b> is this same map without the pulse.',
+ fn:(r,M,n)=>{const{cp,d}=ctx3(r,M,n);const ok=d>=n;if(!ok){if(cp){const t2=(d+1)/(n+1);return`hsla(200,60%,${(20+t2*20)|0}%,.5)`;}return'rgba(30,25,50,.35)';}const ex=Math.min(12,d-n),h=(180+ex*12)|0,l=45+ex*4;return`hsla(${h},85%,${l}%,.92)`;}},
+{sec:'hero',id:'block_window',name:'Block window j-index',sc:['he','gl'],
+ tex:'j^*=\\min\\{j\\le n:\\gcd(r,M{+}j)>1\\}\\ \\mapsto\\ h\\in\\{0°,30°,60°,120°,180°,240°,270°\\}',
+ desc:'Which slot of the window \\([M,M{+}n]\\) kills the point: failing at \\(j{=}0\\) is red, \\(j{=}1\\) orange, and so on through the fixed 7-hue ladder, with alpha rising \\(0.55+0.06j\\) for later failures. Survivors stay gold.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);if(ok)return'rgba(200,168,74,.9)';for(let j=0;j<=n;j++){if(gcd(r,M+j)>1){const h=j===0?0:j===1?30:j===2?60:j===3?120:j===4?180:j===5?240:270;return`hsla(${h},80%,50%,${(0.55+j*.06).toFixed(2)})`;}}return'rgba(100,95,140,.3)';}},
+{sec:'hero',id:'saturation',name:'Saturation profile',sc:['he','gl'],
+ tex:'\\text{first } p\\le n{+}1 \\text{ with } p\\mid\\gcd(r,M)\\ \\mapsto\\ h\\in\\{2{:}0°,\\,3{:}120°,\\,5{:}200°,\\,7{:}270°\\}',
+ desc:'In the window of length \\(n{+}1\\), primes \\(p\\le n{+}1\\) are <b>saturated</b> — guaranteed to divide some \\(M{+}j\\). This mode asks which saturated prime already divides \\(\\gcd(r,M)\\), coloring the certain-death cells by their killer.',
+ fn:(r,M,n)=>{const{g,ok}=ctx3(r,M,n);if(g===1)return ok?'rgba(200,168,74,.9)':'rgba(200,168,74,.2)';for(const p of PRIMES){if(p>n+1)break;if(g%p===0){const h=(p===2?0:p===3?120:p===5?200:p===7?270:40)|0;return`hsla(${h},80%,48%,${ok?.85:.45})`;}}return'rgba(180,170,150,.35)';}},
+{sec:'hero',id:'fail_prime',name:'Fail prime spectrum',sc:['he','gl'],
+ tex:'p^*=\\operatorname{spf}\\big(\\gcd(r,\\,M{+}j^*)\\big)\\ \\mapsto\\ \\{2{:}\\text{red},\\,3{:}\\text{orange},\\,5{:}\\text{yellow},\\,7{:}\\text{teal},\\,11{:}\\text{blue},\\,13{:}\\text{purple}\\}',
+ desc:'The smallest prime factor of the first failing gcd — <b>which prime does the killing</b>. The six-color code matches the ROYGBIV-ish ladder used across the site; larger fail primes fall back to lime. Numeric mode <b>2</b> in the Global shader.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(ok)return'rgba(200,168,74,.9)';const PC={2:'rgba(192,64,64,.85)',3:'rgba(220,120,50,.85)',5:'rgba(200,200,50,.85)',7:'rgba(50,185,152,.85)',11:'rgba(90,130,220,.85)',13:'rgba(165,90,220,.85)'};if(!cp)return PC[spf(gcd(r,M))]||'rgba(126,200,122,.75)';for(let j=1;j<=n;j++){const g=gcd(r,M+j);if(g>1)return PC[spf(g)]||'rgba(126,200,122,.55)';}return'rgba(100,95,140,.4)';}},
+
+/* ───────── HERO — Arithmetic family ───────── */
+{sec:'hero',grp:'Arithmetic',id:'gcd_val',name:'GCD(r,M) spectrum',sc:['he','gl'],
+ tex:'g=\\gcd(r,M):\\ g\\in\\{2,\\ldots,6\\}\\text{ fixed palette};\\quad g>6:\\ h=53g\\bmod 360',
+ desc:'Colors zero divisors by the <b>size</b> of their gcd: \\(g{=}2\\) coral, \\(3\\) teal, \\(4\\) violet, \\(5\\) lime, \\(6\\) gold, then a golden-step hue hash for larger values. Coprime points stay uniform gold.',
+ fn:(r,M,n)=>{const{g,ok}=ctx3(r,M,n);if(g===1)return ok?'rgba(200,168,74,.9)':'rgba(200,168,74,.22)';const GC={2:'rgba(224,80,96,.85)',3:'rgba(61,200,184,.85)',4:'rgba(155,127,232,.85)',5:'rgba(126,200,122,.85)',6:'rgba(242,196,74,.85)'};return GC[g]||`hsla(${(g*53)%360},75%,55%,.75)`;}},
+{sec:'hero',id:'phi_ratio',name:'φ(M)/M density',sc:['he','gl'],
+ tex:'\\rho=\\frac{\\varphi(M)}{M}=\\prod_{p\\mid M}\\Big(1-\\frac1p\\Big),\\qquad h=200\\rho+100',
+ desc:'Each ring is one solid hue determined by its Euler density: even moduli sink toward blue-green (\\(\\rho\\le\\frac12\\)), prime moduli approach gold (\\(\\rho\\to1\\)). The local factors of the \\(C(n)\\) Euler product, made visible ring by ring.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);const h=((phi(M)/M)*200+100)|0;if(ok)return`hsla(${h},82%,55%,.92)`;if(cp)return`hsla(${h},45%,24%,.55)`;return`hsla(${h},25%,12%,.2)`;}},
+{sec:'hero',id:'mobius',name:'Möbius μ(M)',sc:['he','gl'],
+ tex:'\\mu(M)=0\\Rightarrow\\text{coral (}p^2\\mid M\\text{)};\\quad \\mu=+1\\Rightarrow\\text{gold};\\quad \\mu=-1\\Rightarrow\\text{teal}',
+ desc:'Rings stripe by squarefreeness and factor parity: <span class="cs"><span class="dot" style="background:#e05060"></span>non-squarefree</span>, <span class="cs"><span class="dot" style="background:#c8a84a"></span>even number of prime factors</span>, <span class="cs"><span class="dot" style="background:#3dc8b8"></span>odd</span>. The sign pattern of Möbius inversion, painted directly onto the lattice.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const mu=mobius(M);if(mu===0)return ok?'rgba(224,80,96,.8)':'rgba(100,40,50,.4)';if(mu===1)return ok?'rgba(200,168,74,.92)':'rgba(200,168,74,.22)';return ok?'rgba(61,200,184,.88)':'rgba(61,200,184,.22)';}},
+{sec:'hero',id:'quad_res',name:'Quadratic residue',sc:['he','gl'],
+ tex:'r\\in\\mathrm{QR}(M)\\iff \\exists\\,a:\\ a^2\\equiv r \\pmod M\\ \\Rightarrow\\ \\text{gold};\\ \\text{else violet}',
+ desc:'Splits the units of each ring into <span class="cs"><span class="dot" style="background:#c8a84a"></span>squares</span> and <span class="cs"><span class="dot" style="background:#9b59b6"></span>non-squares</span> — for prime \\(M\\) an exact 50/50 split, the Legendre symbol as pattern. Global lists both spellings <code>quad_res</code> / <code>quadratic_residue</code>.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return'rgba(44,55,80,.4)';const qr=_isQR(r%M,M);if(ok)return qr?'rgba(200,168,74,.95)':'rgba(155,89,182,.9)';return qr?'rgba(180,148,54,.35)':'rgba(100,60,130,.35)';}},
+{sec:'hero',id:'r_prime',name:'r primality',sc:['he'],
+ tex:'r\\ \\text{prime}\\Rightarrow\\text{lime};\\quad r=1\\Rightarrow\\text{grey};\\quad\\text{else hue by }\\operatorname{spf}(r)',
+ desc:'Vertical prime columns: prime residues pulse <span class="cs"><span class="dot" style="background:#7ec87a"></span>lime</span> across every ring, composites take a hue keyed to their smallest prime factor \\(\\{2{:}0°,3{:}30°,5{:}60°,7{:}120°\\}\\). The Global\'s <b>primality</b> mode is the same idea with an spf-proportional hue ramp.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(r===1)return ok?'rgba(184,178,166,.65)':'rgba(80,75,110,.2)';if(PS.has(r))return`rgba(126,200,122,${ok?0.77:0.3})`;const sf=spf(r),h=(sf===2?0:sf===3?30:sf===5?60:sf===7?120:180)|0;return ok?`hsla(${h},70%,50%,.85)`:cp?`hsla(${h},40%,22%,.45)`:'rgba(20,18,35,.2)';}},
+
+/* ───────── HERO — Grid/Ring extended (shared with Global) ───────── */
+{sec:'hero',grp:'Grid / Ring extended (shared with Global)',id:'mod_residue',name:'r mod M / M',sc:['he','gl'],
+ tex:'h=360\\cdot\\frac{r\\bmod M}{M}',
+ desc:'Like the Farey rainbow, but on the <b>wrapped</b> residue \\(r\\bmod M\\) — so the coloring repeats with period \\(M\\) along each row instead of climbing monotonically. On the \\(r&lt;M\\) triangle the two agree.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);const h=(((r%Math.max(1,M))/Math.max(1,M))*360)|0;return ok?`hsla(${h},82%,55%,.9)`:cp?`hsla(${h},40%,24%,.6)`:`hsla(${h},20%,12%,.25)`;}},
+{sec:'hero',id:'rainbow',name:'Rainbow (r/M hue)',sc:['he','gl'],
+ tex:'h=360\\cdot\\frac{r}{M}\\quad\\text{(unwrapped; saturated iff }B_n\\text{)}',
+ desc:'The Global default. Same hue map as the Farey rainbow but with a simpler two-state vividness: full saturation for block survivors, muted for everything else — no coprime middle tier, no pulse.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const h=((r/M)*360)|0;return ok?`hsl(${h},80%,55%)`:`hsla(${h},30%,20%,.65)`;}},
+{sec:'hero',id:'divisibility',name:'Divisibility count',sc:['he','gl'],
+ tex:'h=240-180\\cdot\\frac{d(r)}{M/2},\\qquad d(r)=\\#\\{\\text{divisors of }r\\}',
+ desc:'Coprime points warm from blue toward red as the residue\'s divisor count \\(d(r)\\) grows — highly composite residues run hot. Zero divisors flatten to slate.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return'rgba(44,62,80,.8)';const h=(240-(_divCount(r)/Math.max(1,M/2))*180)|0;return ok?`hsl(${h},70%,55%)`:`hsl(${h},40%,22%)`;}},
+{sec:'hero',id:'zeroDivisors',name:'Zero divisors',sc:['he','gl'],
+ tex:'\\gcd(r,M)>1\\Rightarrow\\text{red};\\qquad \\gcd(r,M)=1\\Rightarrow\\text{blue}',
+ desc:'The bluntest partition of \\(\\mathbb{Z}/M\\mathbb{Z}\\): <span class="cs"><span class="dot" style="background:#e74c3c"></span>zero divisors</span> versus <span class="cs"><span class="dot" style="background:#3498db"></span>units</span>, block status modulating alpha only.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);if(!cp)return ok?'rgba(231,76,60,.9)':'rgba(192,57,43,.45)';return ok?'rgba(52,152,219,.9)':'rgba(41,128,185,.35)';}},
+{sec:'hero',id:'idempotents',name:'Idempotents',sc:['he','gl'],
+ tex:'r^2\\equiv r \\pmod M\\ \\Rightarrow\\ \\text{gold};\\quad\\text{else grey}',
+ desc:'Solutions of \\(r^2=r\\) in \\(\\mathbb{Z}/M\\mathbb{Z}\\) — there are exactly \\(2^{\\omega(M)}\\) of them by CRT, one per subset of \\(M\\)\'s prime factors. Sparse gold sparks on a grey field.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const idem=(r*r)%M===(r%M);if(idem)return ok?'rgba(200,168,74,.95)':'rgba(180,148,54,.45)';return ok?'rgba(149,165,166,.65)':'rgba(100,110,110,.22)';}},
+{sec:'hero',id:'modular_distance',name:'Modular distance',sc:['he','gl'],
+ tex:'h=240\\Big(1-\\frac{\\min(r,M-r)}{\\lfloor M/2\\rfloor}\\Big)',
+ desc:'Same formula as the Opener default — documented there. Included in both Hero and Global dropdowns.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const dist=Math.min(r%M===0?0:Math.min(r%M,M-(r%M)),M),ratio=Math.min(r,Math.abs(M-r))/Math.max(1,Math.floor(M/2)),h=(240-Math.min(1,ratio)*240)|0;return ok?`hsl(${h},80%,55%)`:`hsla(${h},40%,24%,.6)`;}},
+
+/* ───────── GLOBAL-only: numeric shader modes ───────── */
+{sec:'global',grp:'Numeric legacy 0–5 · WebGL grid shader',id:'1 — survival gradient',name:'Survival gradient',sc:['gl'],
+ tex:'t=\\frac{j^*}{n+1}\\ \\ (j^*=n{+}1\\text{ if no failure}),\\qquad \\mathrm{color}=\\mathrm{lerp}(\\text{red},\\text{gold},\\,t)',
+ desc:'A continuous red→gold ramp on the first-failure index: dying immediately at \\(j{=}0\\) is pure red, surviving the whole window is pure gold, and each extra step of survival warms the cell proportionally.',
+ fn:(r,M,n)=>{let ff=n+1;for(let j=0;j<=n;j++){if(gcd(r,M+j)>1){ff=j;break;}}const t=Math.min(1,ff/Math.max(n+1,1));return`rgba(${(209+t*33)|0},${(51+t*145)|0},${(51+t*20)|0},.95)`;}},
+{sec:'global',id:'3 — gold / dark',name:'Gold / dark',sc:['gl'],
+ tex:'B_n(r,M)\\ \\mapsto\\ \\{\\text{gold},\\ \\text{near-black}\\}',
+ desc:'The binary indicator function of \\(B_n\\) itself — the raw density picture whose average over the lattice converges to \\(C(n)/\\zeta(2)\\)-normalized counts. Maximum contrast, no intermediate states.',
+ fn:(r,M,n)=>blockOk(r,M,n)?'rgba(242,196,71,.95)':'rgba(18,15,33,.95)'},
+{sec:'global',id:'4 — density heatmap',name:'Density heatmap',sc:['gl'],
+ tex:'B_n(r,M)\\ \\mapsto\\ \\{\\text{blue},\\ \\text{near-black}\\}',
+ desc:'The same indicator in cool blue — tuned for squint-level density reading rather than cell-level inspection: at a distance the brightness of a region <i>is</i> its local block-coprime density.',
+ fn:(r,M,n)=>blockOk(r,M,n)?'rgba(56,140,209,.95)':'rgba(15,15,33,.95)'},
+{sec:'global',id:'5 — sector',name:'Sector (r/M hue)',sc:['gl'],
+ tex:'h=360\\cdot\\frac{r}{M};\\quad\\text{survivor: vivid HSV}(h,.75,.88);\\ \\text{coprime: }25\\%\\text{ vivid};\\ \\text{else dark}',
+ desc:'The shader\'s angular mode, companion to the Farey Sector Formula \\(C(n,N)\\sim\\frac{3N^2}{\\pi^2 n(n+1)}\\): every directional sector from the origin gets one hue, so counting survivors per sector reads as counting per color.',
+ fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);const h=((r/M)*360)|0;if(ok)return`hsl(${h},75%,55%)`;if(cp)return`hsla(${h},45%,18%,.9)`;return'rgba(15,13,26,.95)';}},
+
+/* ───────── GLOBAL-only named modes ───────── */
+{sec:'global',grp:'Global-exclusive named modes',id:'nilpotent',name:'Nilpotents',sc:['gl'],
+ tex:'k^*=\\min\\{k:\\ r^k\\equiv 0\\ (\\mathrm{mod}\\ M)\\},\\qquad h=12k^*\\ \\text{(no such }k\\Rightarrow\\text{slate)}',
+ desc:'Nilpotency degree in \\(\\mathbb{Z}/M\\mathbb{Z}\\): \\(r\\) is nilpotent iff every prime of \\(M\\) divides \\(r\\), so these cells are rare and cluster on highly composite rings; hue encodes how many powers it takes to reach zero.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const deg=_nilpDeg(r%M,M);if(deg<0)return ok?'rgba(52,73,94,.85)':'rgba(30,44,52,.38)';const h=((deg/10)*120)|0;return ok?`hsl(${h},90%,50%)`:`hsla(${h},60%,28%,.5)`;}},
+{sec:'global',id:'symmetry',name:'Symmetry pattern',sc:['gl'],
+ tex:'\\delta=\\frac{|r-M/2|}{M/2},\\qquad h=360\\,\\delta;\\quad r=\\tfrac M2\\Rightarrow\\text{gold center}',
+ desc:'Distance from the ring\'s midpoint, mirrored — the map is invariant under \\(r\\mapsto M-r\\), so it paints the \\(\\gcd(r,M)=\\gcd(M-r,M)\\) reflection symmetry of every residue system. The exact center cell is picked out in gold.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const rr=r%M||M;const diff=Math.abs(rr-M*0.5)/(M*0.5),h=(Math.min(1,diff)*360)|0;if(rr===Math.round(M/2))return ok?'rgba(200,168,74,.95)':'rgba(150,128,54,.5)';return ok?`hsl(${h},70%,55%)`:`hsla(${h},35%,24%,.58)`;}},
+{sec:'global',id:'heatmap_ext',name:'Heatmap (classic)',sc:['gl'],
+ tex:'t=\\frac rM\\ \\text{through the 4-stop jet ramp}\\ \\text{blue}\\to\\text{cyan}\\to\\text{green}\\to\\text{yellow}\\to\\text{red}',
+ desc:'A classic jet colormap on the raw ratio \\(r/M\\) — piecewise-linear through four RGB stops at \\(t=\\frac14,\\frac12,\\frac34\\). Kept for continuity with the original project\'s heatmap renderings.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);const t=(r%M||M)/Math.max(1,M);let col;if(t<.25){const v=t*4;col=`rgb(0,${(v*100)|0},${(100+v*155)|0})`;}else if(t<.5){const v=(t-.25)*4;col=`rgb(0,${(100+v*155)|0},${(255-v*255)|0})`;}else if(t<.75){const v=(t-.5)*4;col=`rgb(${(v*255)|0},255,0)`;}else{const v=(t-.75)*4;col=`rgb(255,${(255-v*100)|0},0)`;}return ok?col:col.replace('rgb(','rgba(').replace(')',',.35)');}},
+{sec:'global',id:'discrete',name:'Discrete GCD',sc:['gl'],
+ tex:'\\mathrm{color}=\\mathrm{PALETTE}\\big[\\gcd(r,M)\\bmod 20\\big]',
+ desc:'A flat 20-color categorical palette indexed by the gcd — the quantized cousin of the GCD spectrum, giving hard color boundaries between gcd classes instead of a hue ramp.',
+ fn:(r,M,n)=>{const{g,ok}=ctx3(r,M,n);const D=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#34495e','#e67e22','#95a5a6','#d35400','#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad','#16a085','#2c3e50','#d35400','#7f8c8d','#c0392b'];return D[g%20]+(ok?'':'55');}},
+{sec:'global',id:'primality (spf)',name:'Primality (spf ramp)',sc:['gl'],
+ tex:'r\\ \\text{prime}\\Rightarrow\\text{green};\\quad r=1\\Rightarrow\\text{navy};\\quad\\text{else }h=360\\cdot\\frac{\\operatorname{spf}(r)}{19}',
+ desc:'The Global variant of <i>r primality</i>: primes uniform green, composites on a continuous hue ramp proportional to \\(\\operatorname{spf}(r)/19\\) rather than the Hero\'s fixed four-hue code.',
+ fn:(r,M,n)=>{const{ok}=ctx3(r,M,n);if(r===1)return'rgba(22,33,62,.8)';if(PS.has(r))return ok?'rgba(72,187,120,.9)':'rgba(39,174,96,.32)';const h=((spf(r)/19)*360)|0;return ok?`hsl(${h},70%,50%)`:`hsla(${h},40%,28%,.5)`;}},
+{sec:'global',id:'depth_grad',name:'Depth gradient (static)',sc:['gl'],
+ tex:'\\text{same map as Hero \\emph{depth}: } h=180+12(d-n),\\ L=45+4(d-n)\\ \\text{— without animation}',
+ desc:'The static export-safe version of the Hero\'s survival-depth mode, for the Canvas overlay where per-frame pulsing isn\'t wanted.',
+ fn:(r,M,n)=>{const{cp,d}=ctx3(r,M,n);const ok=d>=n;if(!ok&&!cp)return'rgba(30,25,50,.35)';if(cp&&!ok){const t2=(d+1)/(n+1);return`hsla(200,60%,${(20+t2*20)|0}%,.5)`;}const ex=Math.min(12,Math.max(0,d-n)),h=(180+ex*12)|0,l=45+ex*4;return`hsla(${h},85%,${l}%,.92)`;}},
+];
+
+/* ═══════════ Render mode rows + live swatches ═══════════ */
+const SG=56, NN=2, PX=4; // square G×G swatch — same domain as the Grid view
+function makeRow(m){
+  const row=document.createElement('div');row.className='mode';
+  const scopes=m.sc.map(s=>`<span class="chip ${s}">${s==='op'?'Opener':s==='he'?'Hero':'Global'}</span>`).join('');
+  row.innerHTML=`
+    <div class="m-head"><span class="m-name">${m.name}</span><span class="m-id">· ${m.id}</span><span class="m-scopes">${scopes}</span></div>
+    <div class="m-sw"><canvas width="${SG*PX}" height="${SG*PX}"></canvas><div class="swcap">r → 1…${SG} · M ↑ 1…${SG} · n=${NN}</div></div>
+    <div class="m-body"><span class="frm">\\(${m.tex}\\)</span>${m.desc}</div>`;
+  const cv=row.querySelector('canvas'),c=cv.getContext('2d');
+  c.fillStyle='#04040d';c.fillRect(0,0,cv.width,cv.height);
+  for(let M=1;M<=SG;M++){
+    const y=(SG-M)*PX; // M increases upward, matching the lattice convention
+    for(let r=1;r<=SG;r++){
+      try{c.fillStyle=m.fn(r,M,NN);}catch(e){c.fillStyle='#111';}
+      c.fillRect((r-1)*PX,y,PX,PX);
+    }
+  }
+  return row;
+}
+(function(){
+  const secs={opener:document.getElementById('rows-opener'),hero:document.getElementById('rows-hero'),global:document.getElementById('rows-global')};
+  MODES.forEach(m=>{
+    if(m.grp){const h=document.createElement('h4');h.className='grp';h.textContent=m.grp;secs[m.sec].appendChild(h);}
+    secs[m.sec].appendChild(makeRow(m));
+  });
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+  else window.addEventListener('load',()=>MathJax.typesetPromise&&MathJax.typesetPromise());
+})();
+</script>
+</body>
+</html>
