@@ -1609,6 +1609,8 @@ function heroToggleTopBars(){
           style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(200,168,74,.8);font-family:'JetBrains Mono',monospace;font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
         <button id="w-gap-play" onclick="wGapPlayToggle()" title="Loop the gap slider through every class up to G"
           style="background:none;border:1px solid rgba(126,200,122,.45);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;width:20px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
+        <button id="w-gap-lock-half" onclick="wToggleGapLockHalf()" title="Lock diagonal g to half of Grid G — stays in sync as G changes, on every view"
+          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 7px;cursor:pointer;">🔒 g=G/2</button>
         <span id="w-gap-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.8);min-width:38px;">off</span>
         <span id="w-gap-pairs" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(61,200,184,.75);min-width:80px;"></span>
         <span style="flex-basis:100%;height:0;"></span>
@@ -1946,6 +1948,14 @@ function heroToggleTopBars(){
   // same as the hero. Highlight position reuses each view's own coordinate
   // mapping, so it's automatically adaptive to spin/flip/per-ring rotation.
   var _wSectorPts=[]; // [{r,M,s}]
+  // Tracks whether sector tracing is "on" independent of how many points the
+  // last computation found. Gating the G-slider auto-retrace (below) on
+  // _wSectorPts.length instead of this flag meant: drag G down to 1 (no M
+  // in [2,G] exists, so the trace legitimately comes back empty) and every
+  // subsequent G change silently stopped calling wTraceSector() forever,
+  // since length stayed 0 — the path never reappeared even after raising G
+  // back up, until the user manually re-clicked "Trace path".
+  var _wSectorActive=false;
   function _wSectorColor(s){ return s>0?'rgba(61,200,184,.95)':s<0?'rgba(224,80,96,.95)':'rgba(200,168,74,.95)'; }
   // Draws the same label vocabulary as the hero's "Label:" dropdown
   // (_getHeroLabel, global fn) next to a traced sector point. curN comes
@@ -1989,6 +1999,7 @@ function heroToggleTopBars(){
     }
     pts.sort(function(p,q){return p.M-q.M||p.r-q.r;});
     _wSectorPts=pts;
+    _wSectorActive=true;
     if(info){
       var lbl=offs.map(function(o){return o===0?'ray':(o>0?'+1':'−1');}).join(', ');
       info.textContent=pts.length?(pts.length+' point(s) · '+a+'/'+b+' · s = '+lbl):('no lattice points for '+a+'/'+b+' within G='+G);
@@ -1997,6 +2008,7 @@ function heroToggleTopBars(){
   };
   window.wSectorClear=function(){
     _wSectorPts=[];
+    _wSectorActive=false;
     var info=document.getElementById('wsec-info');
     if(info)info.textContent='';
     wRedrawCanvas();
@@ -2264,6 +2276,18 @@ function heroToggleTopBars(){
   window.wRenderCn=function(){
     var sl=document.getElementById('welcome-n-slider');
     _wN=sl?+sl.value:0;
+    // Mirror onto the shared global n so the "Show Working" table — a single
+    // element physically moved in and out of this modal — always reflects
+    // whatever n the opener's own slider is showing, the same way wSetMode/
+    // wSetPrimes already mirror mode + prime count. Without this, dragging
+    // the opener's n slider silently left the (possibly-visible-right-here)
+    // working table stuck on whatever n the hero last set.
+    if(typeof N!=='undefined' && !window._modeSyncGuard){
+      window._modeSyncGuard=true;
+      N=_wN;
+      if(typeof _buildWorkingTable==='function') _buildWorkingTable();
+      window._modeSyncGuard=false;
+    }
     var nLbl=document.getElementById('welcome-n-val');
     var n1Lbl=document.getElementById('welcome-hl-n1');
     var nDisp=document.getElementById('welcome-n-disp');
@@ -2531,6 +2555,31 @@ function heroToggleTopBars(){
   // involved in an active pair gets its whole ring/row/diagonal highlighted
   // in that gap's color, using each view's own existing coordinate mapping.
   var _wActiveGaps=new Set();
+  // Lock the diagonal gap g to half of Grid G — ported from page2's
+  // "🔒 g=G/2" button. Stays applied through G changes (wSetG) until the
+  // user either toggles it off or manually drags the gap slider elsewhere.
+  var _wGapLockHalf=false;
+  window.wToggleGapLockHalf=function(){
+    _wGapLockHalf=!_wGapLockHalf;
+    var btn=document.getElementById('w-gap-lock-half');
+    if(btn){
+      btn.style.background=_wGapLockHalf?'rgba(155,127,232,.22)':'none';
+      btn.style.borderColor=_wGapLockHalf?'rgba(155,127,232,.85)':'rgba(155,127,232,.4)';
+      btn.style.color=_wGapLockHalf?'#9b7fe8':'rgba(155,127,232,.85)';
+    }
+    if(_wGapLockHalf){
+      // Locking is incompatible with the g-cycling ▶ play loop
+      if(_wGapPlayId){window.wGapPlayToggle();}
+      _wApplyGapLockHalf();
+    }
+  };
+  function _wApplyGapLockHalf(){
+    if(!_wGapLockHalf)return;
+    var half=Math.max(1,Math.round(_wG/2));
+    var sl=document.getElementById('w-gap-sl');
+    if(sl)sl.value=half;
+    window.wGapSliderChange(half);
+  }
   var _wGapColors={1:'#e8a0c8',2:'#3dc8b8',4:'#c8a84a',6:'#e05060',8:'#9b7fe8'};
   function _wGapColorFor(g){
     if(_wGapColors[g])return _wGapColors[g];
@@ -2542,6 +2591,11 @@ function heroToggleTopBars(){
     return 'background:'+(on?c+'30':'none')+';border:1px solid '+(on?c:'rgba(255,255,255,.18)')+';color:'+(on?c:'#a8a294')+';font-family:\'JetBrains Mono\',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;';
   }
   window.wToggleGap=function(g){
+    if(_wGapLockHalf){
+      _wGapLockHalf=false;
+      var lb=document.getElementById('w-gap-lock-half');
+      if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
+    }
     if(_wActiveGaps.has(g)) _wActiveGaps.delete(g); else _wActiveGaps.add(g);
     var btn=document.getElementById('wgap-btn-'+g);
     if(btn) btn.setAttribute('style',_wGapBtnStyle(g,_wActiveGaps.has(g)));
@@ -2581,6 +2635,11 @@ function heroToggleTopBars(){
   };
   window.wClearAllGaps=function(){
     _wActiveGaps.clear();
+    if(_wGapLockHalf){
+      _wGapLockHalf=false;
+      var lb=document.getElementById('w-gap-lock-half');
+      if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
+    }
     _wSyncGapButtons();
     var pairs=document.getElementById('w-gap-pairs');if(pairs)pairs.textContent='';
     wRedrawCanvas();
@@ -2607,6 +2666,12 @@ function heroToggleTopBars(){
     if(sl&&+sl.max!==max){sl.max=max;}
     v=Math.max(0,Math.min(max,Math.round(+v||0)));
     if(_gapSemantics==='forward'&&v>1&&v%2){v=Math.min(max,v+1);} // gaps >1 are even
+    // Manually dragging to a value other than the locked half releases the lock
+    if(_wGapLockHalf&&v!==Math.max(1,Math.round(_wG/2))){
+      _wGapLockHalf=false;
+      var lb=document.getElementById('w-gap-lock-half');
+      if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
+    }
     if(sl)sl.value=v;
     _wActiveGaps.clear();
     var pairs=document.getElementById('w-gap-pairs');
@@ -2614,7 +2679,7 @@ function heroToggleTopBars(){
       _wActiveGaps.add(v);
       if(pairs)pairs.textContent=(_gapSemantics==='forward')
         ?('pairs='+fwdGapPairCount(v,_wG)+' (p,p+'+v+') \u2264 G')
-        :('|M\u2212r|='+v+' diagonal');
+        :('|M\u2212r|='+v+' diagonal \u00b7 \u03c6/g='+(phi(v)/v).toFixed(4));
     } else if(pairs)pairs.textContent='';
     _wSyncGapButtons();
     wRedrawCanvas();
@@ -2846,7 +2911,8 @@ function heroToggleTopBars(){
     _wG=Math.max(1,Math.min(2048,Math.round(+v||31)));
     var gsl=document.getElementById('w-gap-sl');
     if(gsl){var gm=Math.max(1,_wG-1);gsl.max=gm;if(+gsl.value>gm)window.wGapSliderChange(0);}
-    if(_wSectorPts&&_wSectorPts.length&&typeof window.wTraceSector==='function')window.wTraceSector();
+    if(typeof _wApplyGapLockHalf==='function')_wApplyGapLockHalf();
+    if(_wSectorActive&&typeof window.wTraceSector==='function')window.wTraceSector();
     _wUpdateFormulaRatios();
     var sl=document.getElementById('ws-g-sl');
     var num=document.getElementById('ws-g-num');
@@ -4703,6 +4769,8 @@ function heroToggleTopBars(){
       style="background:none;border:1px solid var(--edge2);color:rgba(200,168,74,.8);font-family:var(--mono);font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
     <button id="hero-gap-play" onclick="heroGapPlayToggle()" title="Loop the gap slider through every class up to G"
       style="background:none;border:1px solid rgba(126,200,122,.45);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:8px;width:20px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
+    <button id="hero-gap-lock-half" onclick="heroToggleGapLockHalf()" title="Lock diagonal g to half of Grid G — stays in sync as G changes, on every view"
+      style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:var(--mono);font-size:7.5px;padding:3px 7px;cursor:pointer;">🔒 g=G/2</button>
     <span id="hero-gap-lbl" style="font-family:var(--mono);font-size:8px;color:rgba(200,168,74,.8);min-width:60px;">off</span>
     <span id="hero-gap-phi" style="font-family:var(--mono);font-size:7.5px;color:rgba(61,200,184,.75);min-width:80px;"></span>
 
@@ -12941,6 +13009,32 @@ function heroSecSetSize(v){
 }
 
 let _heroActiveGaps=new Set();
+// Lock the diagonal gap g to half of Grid G — mirrors the opener's own
+// "🔒 g=G/2" lock (ported from page2's gLockHalf). Stays applied through G
+// changes (heroLatticeSetG) until toggled off or the slider is dragged
+// manually to something other than the current half.
+let _heroGapLockHalf=false;
+function heroToggleGapLockHalf(){
+  _heroGapLockHalf=!_heroGapLockHalf;
+  const btn=document.getElementById('hero-gap-lock-half');
+  if(btn){
+    btn.style.background=_heroGapLockHalf?'rgba(155,127,232,.22)':'none';
+    btn.style.borderColor=_heroGapLockHalf?'rgba(155,127,232,.85)':'rgba(155,127,232,.4)';
+    btn.style.color=_heroGapLockHalf?'#9b7fe8':'rgba(155,127,232,.85)';
+  }
+  if(_heroGapLockHalf){
+    // Locking is incompatible with the g-cycling ▶ play loop
+    if(typeof _heroGapPlayId2!=='undefined'&&_heroGapPlayId2&&typeof heroGapPlayToggle==='function')heroGapPlayToggle();
+    _applyHeroGapLockHalf();
+  }
+}
+function _applyHeroGapLockHalf(){
+  if(!_heroGapLockHalf)return;
+  const half=Math.max(1,Math.round(_heroG/2));
+  const sl=document.getElementById('hero-gap-sl');
+  if(sl)sl.value=half;
+  heroGapSliderChange(half);
+}
 // ── Advanced mode: custom ring (modulus) selection + χ(r) character filter —
 // shared across all six hero views (Grid/Ring/Farey/Lift/Conformal/Smith). ──
 let _heroActiveRings=null; // null = all rings 1..G active (default); else a Set of specific M values
@@ -13083,6 +13177,7 @@ function heroLatticeSetG(v){
   const gapMax=Math.max(1,_heroG-1);
   const gapSl=document.getElementById('hero-gap-sl');
   if(gapSl){gapSl.max=gapMax;if(+gapSl.value>gapMax){gapSl.value=0;heroGapClear();}}
+  if(typeof _applyHeroGapLockHalf==='function')_applyHeroGapLockHalf();
   // Goldbach slider max = 2G
   const gbSl=document.getElementById('hero-goldbach-n');
   if(gbSl) gbSl.max=Math.max(48,Math.min(200,2*_heroG));
@@ -15449,6 +15544,12 @@ function heroGapSliderChange(v){
       if(sl)sl.value=v;
     }
   }
+  // Manually landing on a value other than the locked half releases the lock
+  if(_heroGapLockHalf&&v!==Math.max(1,Math.round(_heroG/2))){
+    _heroGapLockHalf=false;
+    const lb=document.getElementById('hero-gap-lock-half');
+    if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
+  }
   _heroActiveGaps.clear();
   const lbl=document.getElementById('hero-gap-lbl');
   const philbl=document.getElementById('hero-gap-phi');
@@ -15476,6 +15577,11 @@ function heroGapSliderChange(v){
 // once, mirroring the opener's Active Gaps tab. Does not touch the slider's
 // own single-value state; heroGapSyncButtons() below keeps both in sync.
 function heroGapPresetToggle(g){
+  if(_heroGapLockHalf){
+    _heroGapLockHalf=false;
+    const lb=document.getElementById('hero-gap-lock-half');
+    if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
+  }
   if(_heroActiveGaps.has(g)) _heroActiveGaps.delete(g);
   else _heroActiveGaps.add(g);
   heroGapSyncButtons();
@@ -15502,6 +15608,11 @@ function heroGapSyncButtons(){
 }
 function heroGapClear(){
   _heroActiveGaps.clear();
+  if(_heroGapLockHalf){
+    _heroGapLockHalf=false;
+    const lb=document.getElementById('hero-gap-lock-half');
+    if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
+  }
   const sl=document.getElementById('hero-gap-sl');
   const lbl=document.getElementById('hero-gap-lbl');
   const philbl=document.getElementById('hero-gap-phi');
