@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A guided, plain-language walkthrough of C(n) = ζ(2)·∏(1−min(n+1,p)/p²): what it means, why it's built the way it is, and how to derive it step by step.">
+<title>How C(n) Works — Guided Walkthrough · Wessen Getachew</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { ready() { MathJax.startup.defaultReady(); MathJax.startup.promise.then(()=>MathJax.typesetPromise()); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04040d;--bg1:#07071a;--bg2:#0c0c22;
+  --cream:#ddd8cc;--cream2:#b8b2a6;--cream3:#6a6560;
+  --gold:#c8a84a;--gold2:rgba(200,168,74,.12);
+  --teal:#3dc8b8;--coral:#e05060;--violet:#9b7fe8;--lime:#7ec87a;
+  --edge:rgba(255,255,255,.07);--edge2:rgba(255,255,255,.13);
+  --mono:'JetBrains Mono',monospace;--serif:'Spectral',serif;--disp:'Cinzel',serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.98rem;line-height:1.75;}
+
+/* pagenav — matches P1/P2/P3 */
+#wg-pagenav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:var(--mono);}
+.pn-lnk{display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;flex-shrink:0;white-space:nowrap;transition:all .15s;cursor:pointer;}
+
+/* sticky control bar */
+#nbar4{position:sticky;top:44px;z-index:200;background:var(--bg);border-bottom:1px solid var(--edge2);display:flex;align-items:center;height:48px;overflow-x:auto;scrollbar-width:none;}
+#nbar4::-webkit-scrollbar{display:none;}
+#nbar4-inner{max-width:1200px;margin:0 auto;padding:0 16px;width:100%;display:flex;align-items:center;gap:10px;height:100%;font-family:var(--mono);}
+.n4-brand{font-family:var(--disp);font-size:.7rem;color:var(--lime);letter-spacing:.14em;flex-shrink:0;}
+.n4-sep{width:1px;height:22px;background:var(--edge2);flex-shrink:0;}
+.n4-lbl{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream3);flex-shrink:0;}
+.n4-step{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;font-size:12px;flex-shrink:0;}
+.n4-step:hover{background:rgba(61,200,184,.1);}
+#n4-sl{width:120px;accent-color:var(--lime);flex-shrink:0;}
+#n4-num{width:48px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--lime);font-family:var(--mono);font-size:12px;padding:3px;text-align:center;flex-shrink:0;}
+#n4-cn{font-size:11px;color:var(--gold);white-space:nowrap;}
+
+#content{max-width:840px;margin:0 auto;padding:0 20px 80px;}
+#hero4{text-align:center;padding:52px 16px 30px;}
+.hero4-tag{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);margin-bottom:12px;}
+.hero4-title{font-family:var(--disp);font-size:clamp(1.5rem,5vw,2.3rem);color:var(--cream);margin-bottom:10px;}
+.hero4-sub{font-family:var(--serif);font-style:italic;color:var(--cream2);font-size:1rem;max-width:560px;margin:0 auto;}
+
+h2{font-family:var(--disp);font-size:1.15rem;color:var(--gold);letter-spacing:.02em;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--edge2);}
+h3{font-family:var(--mono);font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);margin:24px 0 10px;}
+p{margin:0 0 14px;color:var(--cream2);}
+strong{color:var(--cream);font-weight:600;}
+code,.mono{font-family:var(--mono);font-size:.85em;color:var(--teal);}
+
+.box{background:rgba(255,255,255,.025);border:1px solid var(--edge2);padding:16px 18px;margin:16px 0;}
+.box.gold{background:var(--gold2);border-color:rgba(200,168,74,.35);}
+.box.teal{background:rgba(61,200,184,.06);border-color:rgba(61,200,184,.3);}
+.box.lime{background:rgba(126,200,122,.06);border-color:rgba(126,200,122,.3);}
+.box.coral{background:rgba(224,80,96,.06);border-color:rgba(224,80,96,.3);}
+
+.formula-big{text-align:center;font-family:var(--mono);font-size:clamp(.85rem,3vw,1.05rem);color:var(--cream);padding:12px 0;}
+
+.step{display:flex;gap:14px;margin:18px 0;}
+.step-num{flex-shrink:0;width:26px;height:26px;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center;}
+.step-body{flex:1;}
+
+.allcv-panel{border:1px solid rgba(200,168,74,.3);background:rgba(200,168,74,.035);padding:14px 16px;margin:18px 0 10px;font-family:var(--mono);}
+.allcv-row1,.allcv-row2,.allcv-row3{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;}
+.allcv-row3{margin-bottom:0;}
+.allcv-lbl{font-size:9px;letter-spacing:.12em;color:var(--cream3);text-transform:uppercase;margin-right:4px;}
+.allcv-sub{font-size:10px;color:var(--cream2);}
+.allcv-div{width:1px;height:20px;background:var(--edge2);margin:0 2px;}
+.allcv-select{background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:10.5px;padding:5px 8px;}
+.allcv-btn{background:none;border:1px solid var(--violet);color:var(--violet);font-family:var(--mono);font-size:10px;padding:5px 12px;cursor:pointer;}
+.allcv-btn:hover{background:rgba(155,127,232,.12);}
+.allcv-btn.active{background:rgba(155,127,232,.2);}
+.allcv-formula{font-family:var(--mono);font-size:10.5px;color:var(--cream);background:rgba(255,255,255,.03);padding:8px 10px;margin-bottom:10px;text-align:center;}
+.allcv-check{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--cream2);cursor:pointer;}
+.allcv-check input{accent-color:var(--gold);}
+.allcv-note{font-size:8.5px;color:var(--cream3);}
+
+.grid-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:18px 0;}
+#c4canvas{width:100%;max-width:480px;aspect-ratio:1/1;background:#07071a;border:1px solid var(--edge2);}
+.grid-ctrl-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;font-family:var(--mono);font-size:9.5px;color:var(--cream3);}
+.grid-ctrl-row input[type=range]{accent-color:var(--teal);width:130px;}
+.grid-stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-family:var(--mono);font-size:10px;}
+.gstat{border:1px solid var(--edge2);padding:6px 12px;text-align:center;min-width:110px;}
+.gstat .k{font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);}
+.gstat .v{font-size:14px;color:var(--gold);margin-top:3px;}
+
+.cmp-table{width:100%;border-collapse:collapse;font-size:.82rem;margin:14px 0;}
+.cmp-table th{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--edge2);}
+.cmp-table td{padding:6px 10px;border-bottom:1px solid var(--edge);color:var(--cream2);font-family:var(--mono);font-size:10px;}
+.cmp-table td:first-child{color:var(--gold);}
+
+.pillnav{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 6px;}
+.pillnav a{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--cream2);border:1px solid var(--edge2);padding:6px 12px;text-decoration:none;}
+.pillnav a:hover{border-color:var(--gold);color:var(--gold);}
+
+footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5px;color:var(--cream3);border-top:1px solid var(--edge);margin-top:50px;}
+</style>
+</head>
+<body>
+
+<!-- PAGENAV -->
+<div id="wg-pagenav">
+  <span style="font-family:var(--disp);font-size:.7rem;color:var(--gold);letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
+  <a class="pn-lnk" href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="background:transparent;border:1px solid rgba(200,168,74,.35);color:var(--gold);">P1</a>
+  <a class="pn-lnk" href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="background:transparent;border:1px solid rgba(61,200,184,.35);color:var(--teal);">P2</a>
+  <a class="pn-lnk" href="page3.html" target="_blank" title="Color & Label Modes — Page 3" style="background:transparent;border:1px solid rgba(155,127,232,.35);color:var(--violet);">P3</a>
+  <a class="pn-lnk" href="page4.html" title="How C(n) Works — Page 4 (current)" style="background:rgba(126,200,122,.14);border:1px solid var(--lime);color:var(--lime);font-weight:600;">P4</a>
+</div>
+
+<!-- STICKY N CONTROL -->
+<nav id="nbar4">
+  <div id="nbar4-inner">
+    <span class="n4-brand">C(n)</span>
+    <div class="n4-sep"></div>
+    <span class="n4-lbl">n</span>
+    <button class="n4-step" onclick="c4Step(-1)">−</button>
+    <input type="range" id="n4-sl" min="0" max="40" value="1" oninput="c4SetN(+this.value)">
+    <input type="number" id="n4-num" min="0" max="500" value="1" oninput="c4SetN(+this.value||0)">
+    <button class="n4-step" onclick="c4Step(1)">+</button>
+    <div class="n4-sep"></div>
+    <span id="n4-cn">C(1) ≈ 0.530711</span>
+  </div>
+</nav>
+
+<div id="content">
+
+  <div id="hero4">
+    <div class="hero4-tag">Analytic Number Theory · Wessen Getachew · 2026</div>
+    <div class="hero4-title">How C(n) Works</div>
+    <div class="hero4-sub">A guided walkthrough of the block‑coprime density formula — for anyone who wants
+    to understand what's being plotted on Pages 1–3, not just look at it.</div>
+  </div>
+
+  <!-- IN ONE SENTENCE -->
+  <div class="box gold">
+    <strong>In one sentence:</strong> pick two random integers, <span class="mono">r</span> and
+    <span class="mono">M</span> — <span class="mono">C(n)</span> tracks (in rescaled form) the chance that
+    <span class="mono">r</span> shares no common factor with <em>any</em> of the <span class="mono">n+1</span>
+    consecutive integers starting at <span class="mono">M</span>.
+  </div>
+
+  <div class="formula-big">
+    $$C(n) \;=\; \zeta(2)\cdot\prod_{p}\left(1-\frac{\min(n{+}1,\,p)}{p^{2}}\right)$$
+  </div>
+
+  <h2>The picture, plainly</h2>
+  <p>"Coprime" just means <strong>sharing no common factor</strong> — <span class="mono">gcd(a,b)=1</span>.
+  Two random integers are coprime about <strong>61%</strong> of the time (that famous
+  <span class="mono">6/π² ≈ 0.6079</span> constant). That's the <span class="mono">n = 0</span> case: one
+  number, one comparison.</p>
+  <p>Now make it harder. Instead of asking whether <span class="mono">r</span> is coprime to a single number
+  <span class="mono">M</span>, ask whether it's coprime to <strong>the whole block</strong>
+  <span class="mono">M, M+1, M+2, …, M+n</span> — all <span class="mono">n+1</span> of them, simultaneously.
+  Every extra integer in the block is one more way for <span class="mono">r</span> to fail. The density has to
+  drop. <span class="mono">C(n)</span> (in its raw form <span class="mono">D(n)</span>, see below) is exactly
+  that shrinking probability, tracked for every block length.</p>
+
+  <!-- INTERACTIVE GRID -->
+  <h2>See it happen</h2>
+  <p>Below is a live <span class="mono">r × M</span> lattice, defaulting to the <strong>Ring</strong> layout used
+  throughout the rest of the site (switch to Grid any time). A point lights up when <span class="mono">r</span>
+  is coprime to <em>every</em> integer in the block <span class="mono">{M, …, M+n}</span>. Drag
+  <span class="mono">n</span> — top bar, panel slider, or Play — and watch the pattern thin out, while the
+  measured density locks onto the formula's prediction.</p>
+
+  <!-- ALL CANVASES control panel — matches Page 3's master control bar -->
+  <div class="allcv-panel">
+    <div class="allcv-row1">
+      <span class="allcv-lbl">ALL CANVASES</span>
+      <span class="allcv-sub">View:</span>
+      <select id="c4-view" class="allcv-select" onchange="c4SetView(this.value)">
+        <option value="ring">Ring</option>
+        <option value="grid">Grid</option>
+      </select>
+      <span class="allcv-div"></span>
+      <span class="allcv-sub">Block depth n:</span>
+    </div>
+    <div class="allcv-row2">
+      <input type="range" id="c4-panel-sl" min="0" max="40" value="1" oninput="c4SetN(+this.value)" style="flex:1;max-width:260px;accent-color:var(--gold);">
+      <span id="c4-panel-n" class="mono" style="color:var(--gold);min-width:18px;">1</span>
+      <button id="c4-play-btn" class="allcv-btn" onclick="c4TogglePlay()">▶ Play</button>
+      <span class="allcv-div"></span>
+      <span class="allcv-sub">Color:</span>
+      <select id="c4-color" class="allcv-select" onchange="c4Redraw()">
+        <option value="modular_distance" selected>Modular distance (default)</option>
+        <option value="residue_value">Residue value — hue by r</option>
+        <option value="ring_hash">Ring / modulus hash — hue by M</option>
+        <option value="phi_position">φ(M) progression</option>
+        <option value="phi_spectrum">φ(M)/M spectrum</option>
+        <option value="binary">Binary (coprime / not)</option>
+      </select>
+    </div>
+    <div class="allcv-formula" id="c4-panel-formula">C(1) = ζ(2)·∏ₚ(1 − min(2,p)/p²) ≈ 0.530711</div>
+    <div class="allcv-row3">
+      <label class="allcv-check"><input type="checkbox" id="c4-labels" onchange="c4Redraw()"> Labels</label>
+      <span class="allcv-note">auto-shown whenever grid size G ≤ 40; check to force on above that</span>
+    </div>
+  </div>
+
+  <div class="grid-wrap">
+    <canvas id="c4canvas" width="480" height="480"></canvas>
+    <div class="grid-ctrl-row">
+      <span>grid size G</span>
+      <input type="range" id="c4-g" min="1" max="200" step="1" value="24" oninput="c4Redraw()">
+      <span id="c4-g-val" class="mono" style="color:var(--gold);">24</span>
+      <span style="width:1px;height:16px;background:var(--edge2);"></span>
+      <span>block length n+1 = <span id="c4-blk" class="mono" style="color:var(--teal);">2</span></span>
+    </div>
+    <div class="grid-stats">
+      <div class="gstat"><div class="k">measured density</div><div class="v" id="c4-measured">—</div></div>
+      <div class="gstat"><div class="k">D(n) predicted</div><div class="v" id="c4-predicted">—</div></div>
+      <div class="gstat"><div class="k">C(n) = D(n)·ζ(2)</div><div class="v" id="c4-cnval">—</div></div>
+    </div>
+  </div>
+
+  <h2>Building the formula, piece by piece</h2>
+  <p>The whole thing is an Euler product — one independent factor per prime, multiplied together. The trick is
+  that a block of <span class="mono">n+1</span> consecutive integers interacts with small primes very
+  differently than with large ones.</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Split the primes into two camps.</strong> For a prime <span class="mono">p</span>, ask: is the
+      block <span class="mono">{M,…,M+n}</span> long enough to be <em>guaranteed</em> to contain a multiple of
+      <span class="mono">p</span>? That happens exactly when the block length exceeds <span class="mono">p</span>,
+      i.e. when <span class="mono">p ≤ n+1</span>. Call those primes <strong>saturated</strong>. Every larger
+      prime is <strong>active</strong> — it may or may not hit the block, depending on where <span class="mono">M</span>
+      lands.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Saturated primes (p ≤ n+1).</strong> Since the block is guaranteed to contain a multiple of
+      <span class="mono">p</span>, and <span class="mono">r</span> just needs to avoid being a multiple of
+      <span class="mono">p</span> itself, the local factor collapses to the ordinary one‑dimensional sieve term:
+      <span class="mono">(1 − 1/p)</span>. The block length no longer matters here — it already did its job by
+      guaranteeing a hit.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Active primes (p &gt; n+1).</strong> Now the block is <em>shorter</em> than the prime, so it only
+      catches a multiple of <span class="mono">p</span> with probability roughly <span class="mono">(n+1)/p</span>.
+      Combine that with <span class="mono">r</span> independently avoiding <span class="mono">p</span> (probability
+      <span class="mono">1/p</span>), and the joint "bad" probability is about <span class="mono">(n+1)/p²</span> —
+      which is exactly where the <span class="mono">p²</span> in the formula comes from. The local factor is
+      <span class="mono">(1 − (n+1)/p²)</span>.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>Notice both cases are one formula.</strong> <span class="mono">min(n+1, p)</span> silently picks
+      the right numerator: it's <span class="mono">p</span> for saturated primes (turning
+      <span class="mono">p/p² = 1/p</span>) and <span class="mono">n+1</span> for active primes. That's the whole
+      reason the <span class="mono">min(·,·)</span> is there — it's a single expression standing in for the
+      two-case product.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <strong>Multiply every prime's factor together.</strong> That product, taken over <em>all</em> primes, is
+      the true, un-rescaled density — call it <span class="mono">D(n)</span>:
+      <div class="formula-big" style="text-align:left;">$$D(n)=\prod_{p}\left(1-\frac{\min(n{+}1,p)}{p^{2}}\right)$$</div>
+      At <span class="mono">n = 0</span> every prime is active (block length 1 never saturates anything), and the
+      product is exactly <span class="mono">∏(1 − 1/p²) = 1/ζ(2) = 6/π² ≈ 0.6079</span> — the classic
+      two-random-integers constant, right where it should be.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-body">
+      <strong>Why multiply by ζ(2) at all?</strong> That last step, <span class="mono">C(n) = ζ(2)·D(n)</span>,
+      is a bookkeeping choice, not a new probability. It rescales things so that the <em>baseline</em> case
+      (<span class="mono">n = 0</span>, just plain coprimality) reads exactly <span class="mono">C(0) = 1</span>.
+      Everything you see on Page 1 as "how far C(n) has fallen from 1" is then a direct read of how much the
+      block condition costs you beyond ordinary coprimality — which is a more legible story than staring at raw
+      probabilities like 0.6079, 0.5307, 0.4931… <span class="mono">C(n)</span> is the same information, just
+      normalized to start at 1.
+    </div>
+  </div>
+
+  <h3>Worked example — n = 1 (block length 2)</h3>
+  <p>Take the smallest nontrivial case: is <span class="mono">r</span> coprime to <em>both</em>
+  <span class="mono">M</span> and <span class="mono">M+1</span>? Block length is 2, so the saturation cutoff is
+  <span class="mono">p ≤ 2</span> — only <span class="mono">p = 2</span> is saturated.</p>
+  <div class="box teal" id="worked-n1"></div>
+
+  <h2>Reading the live table</h2>
+  <p>Move the <span class="mono">n</span> slider at the top of the page and watch this table update — it's the
+  same split you just walked through, computed live.</p>
+  <table class="cmp-table" id="c4-livetable">
+    <tr><th>quantity</th><th>value</th></tr>
+  </table>
+
+  <h2>Why does the pattern repeat?</h2>
+  <p>A reader on the original post asked about a self‑similar, repeating pattern that seemed to "scale at some
+  frequency" in the lattice views. It's not connected to the zeta function's zeros or anything spherical — it's
+  much more down‑to‑earth, and it falls straight out of the sieve structure above.</p>
+  <p>Whether a cell <span class="mono">(r, M)</span> lights up depends only on <span class="mono">r</span> and
+  <span class="mono">M</span> <em>modulo small primes</em> — divisibility by 2 repeats every 2 integers, by 3
+  every 3, by 5 every 5, and so on. Once you've accounted for every saturated prime up to
+  <span class="mono">n+1</span>, the whole coprimality pattern repeats exactly with period
+  <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of those primes. That's the "unknown
+  frequency": it isn't unknown at all, it's the product of the small primes below the block length, and it grows
+  <em>combinatorially</em> (2, 6, 30, 210, 2310, …) rather than smoothly, which is exactly what makes the
+  self‑similarity look like it's "scaling" as you zoom — each new saturated prime multiplies the repeat period by
+  that prime. This is the same mechanism behind the classic Sieve of Eratosthenes visualizations and Stern–Brocot /
+  Farey self‑similarity elsewhere on this site (Page 1's Farey and Ford‑circle views included).</p>
+
+  <div class="pillnav">
+    <a href="index.html">← Page 1 · full explorer</a>
+    <a href="page2.html">Page 2 · Gap Diagonal Identity</a>
+    <a href="page3.html">Page 3 · Color & label modes</a>
+  </div>
+
+</div>
+
+<footer>wessengetachew.github.io · C(n) — Block‑Coprime Density · Page 4 · How C(n) Works</footer>
+
+<script>
+(function(){
+  // ---- prime sieve ----
+  var PR=null;
+  function sieve(){
+    if(PR)return PR;
+    var L=20000,f=new Uint8Array(L+1);PR=[];
+    for(var i=2;i<=L;i++){if(!f[i]){PR.push(i);for(var j=i*i;j<=L;j+=i)f[j]=1;}}
+    return PR;
+  }
+  function gcd(a,b){while(b){var t=b;b=a%b;a=t;}return a;}
+
+  // ---- C(n)/D(n) computation ----
+  function computeCD(n){
+    var pr=sieve(),ZETA2=Math.PI*Math.PI/6;
+    var D=1,C,i,satCount=0;
+    for(i=0;i<pr.length;i++){
+      var p=pr[i];
+      var num=Math.min(n+1,p);
+      D*=(1-num/(p*p));
+      if(p<=n+1)satCount++;
+    }
+    C=D*ZETA2;
+    return {C:C,D:D,sat:satCount};
+  }
+
+  var curN=1, viewMode='ring', playIv=null;
+
+  window.c4SetN=function(n){
+    n=Math.max(0,Math.min(500,Math.round(n||0)));
+    curN=n;
+    document.getElementById('n4-sl').value=Math.min(40,n);
+    document.getElementById('n4-num').value=n;
+    document.getElementById('c4-panel-sl').value=Math.min(40,n);
+    document.getElementById('c4-panel-n').textContent=n;
+    var r=computeCD(n);
+    document.getElementById('n4-cn').textContent='C('+n+') ≈ '+r.C.toFixed(6);
+    document.getElementById('c4-blk').textContent=(n+1);
+    document.getElementById('c4-predicted').textContent=r.D.toFixed(6);
+    document.getElementById('c4-cnval').textContent=r.C.toFixed(6);
+    document.getElementById('c4-panel-formula').textContent=
+      'C('+n+') = ζ(2)·∏ₚ(1 − min('+(n+1)+',p)/p²) ≈ '+r.C.toFixed(6)+'   ·   D('+n+') ≈ '+r.D.toFixed(6);
+    renderLiveTable(n,r);
+    c4Redraw();
+  };
+  window.c4Step=function(d){c4SetN(curN+d);};
+
+  window.c4SetView=function(v){
+    viewMode=v;
+    document.getElementById('c4-view').value=v;
+    c4Redraw();
+  };
+
+  window.c4TogglePlay=function(){
+    var btn=document.getElementById('c4-play-btn');
+    if(playIv){
+      clearInterval(playIv);playIv=null;
+      btn.textContent='▶ Play';btn.classList.remove('active');
+      return;
+    }
+    btn.textContent='⏸ Pause';btn.classList.add('active');
+    playIv=setInterval(function(){
+      var next=curN+1;
+      if(next>24)next=0;
+      c4SetN(next);
+    },900);
+  };
+
+  function renderLiveTable(n,r){
+    var pr=sieve();
+    var satPrimes=[],activePreview=[];
+    for(var i=0;i<pr.length;i++){
+      if(pr[i]<=n+1)satPrimes.push(pr[i]);
+      else if(activePreview.length<5)activePreview.push(pr[i]);
+    }
+    var rows=[
+      ['n (block index)', n],
+      ['block length n+1', n+1],
+      ['saturated primes (p ≤ n+1)', satPrimes.length? (satPrimes.join(', ')+ (satPrimes.length>8?'':'')) : '— none —'],
+      ['count of saturated primes', r.sat],
+      ['first active primes (p &gt; n+1)', activePreview.join(', ')+' …'],
+      ['D(n) — raw density', r.D.toFixed(9)],
+      ['C(n) = D(n)·ζ(2)', r.C.toFixed(9)],
+      ['ζ(2) = π²/6', (Math.PI*Math.PI/6).toFixed(9)]
+    ];
+    var html='<tr><th>quantity</th><th>value</th></tr>';
+    rows.forEach(function(row){html+='<tr><td>'+row[0]+'</td><td>'+row[1]+'</td></tr>';});
+    document.getElementById('c4-livetable').innerHTML=html;
+  }
+
+  // ---- worked example n=1 ----
+  function renderWorked(){
+    var pr=sieve();
+    var lines=[];
+    lines.push('Saturated: just <b>p = 2</b> → factor (1 − 1/2) = 1/2.');
+    var shown=[],prod=0.5;
+    for(var i=1;i<pr.length&&shown.length<5;i++){
+      var p=pr[i],num=(p*p-2),den=p*p;
+      prod*=num/den;
+      shown.push('('+num+'/'+den+')');
+    }
+    lines.push('Active primes p &gt; 2: each contributes (1 − 2/p²): '+shown.join(' · ')+' · …');
+    lines.push('D(1) ≈ <b style="color:#c8a84a;">'+ (function(){var r=computeCD(1);return r.D.toFixed(6);})() +'</b> — this is the <b>Feller–Tornier constant</b>, the probability two random integers are simultaneously coprime to two consecutive integers.');
+    lines.push('C(1) = D(1)·ζ(2) ≈ <b style="color:#c8a84a;">'+ (function(){var r=computeCD(1);return r.C.toFixed(6);})() +'</b>.');
+    document.getElementById('worked-n1').innerHTML=lines.map(function(l){return '<div style="margin:6px 0;">'+l+'</div>';}).join('');
+  }
+
+  // ---- shared block-coprime test ----
+  function blockOk(r,M,n){
+    for(var j=0;j<=n;j++){ if(gcd(r,M+j)!==1) return false; }
+    return true;
+  }
+
+  // ---- Euler phi + reduced-residue list (for φ(M) color modes) ----
+  var _phiCache={},_listCache={};
+  function eulerPhi(M){
+    if(_phiCache[M]!==undefined)return _phiCache[M];
+    var result=M,nn=M;
+    for(var p=2;p*p<=nn;p++){
+      if(nn%p===0){ while(nn%p===0)nn/=p; result-=result/p; }
+    }
+    if(nn>1) result-=result/nn;
+    return _phiCache[M]=result;
+  }
+  function coprimeList(M){
+    if(_listCache[M])return _listCache[M];
+    var list=[];
+    for(var i=1;i<M;i++) if(gcd(i,M)===1) list.push(i);
+    return _listCache[M]=list;
+  }
+
+  // ---- color mode → CSS color string. Ports the exact 5 modes from the
+  // Page-1 opener widget's _wModColor(): hue depends on the mode, but every
+  // mode dims (not hides) points that fail the block-coprime test — so the
+  // n-slider visibly thins/dims the picture no matter which mode is active. ----
+  function colorFor(mode,r,M,ok){
+    if(mode==='binary') return ok?'rgba(61,200,184,.95)':'rgba(224,80,96,.35)';
+    var hue;
+    switch(mode){
+      case 'residue_value': // same r → same hue, ignores M
+        hue=(r*37)%360;
+        return ok?('hsla('+hue+',80%,68%,.92)'):('hsla('+hue+',45%,30%,.4)');
+      case 'ring_hash': // same M → same hue, ignores r
+        hue=(M*67)%360;
+        return ok?('hsla('+hue+',78%,62%,.92)'):('hsla('+hue+',45%,30%,.4)');
+      case 'phi_position':{ // position of r within M's reduced-residue list
+        var list=coprimeList(M),phiM=list.length||1,pos=list.indexOf(r);
+        hue=(((pos<0?0:pos)*360/phiM)+M*7)%360;
+        return ok?('hsla('+(hue|0)+',82%,66%,.92)'):('hsla('+(hue|0)+',50%,30%,.4)');
+      }
+      case 'phi_spectrum':{ // φ(M)/M density drives hue + saturation
+        var density=eulerPhi(M)/Math.max(1,M);
+        hue=(density*240+r*15)%360;
+        var sat=60+density*30;
+        return ok?('hsla('+(hue|0)+','+(sat|0)+'%,65%,.92)'):('hsla('+(hue|0)+','+((sat*0.5)|0)+'%,30%,.4)');
+      }
+      default:{ // modular_distance — distance of r from the ring's midpoint M/2
+        var dist=Math.min(r,M-r);
+        var ratio=dist/Math.max(1,Math.floor(M/2));
+        hue=(240-ratio*240)|0;
+        return ok?('hsl('+hue+',80%,55%)'):('hsla('+hue+',40%,24%,.5)');
+      }
+    }
+  }
+
+  // ---- renderers ----
+  var cv=document.getElementById('c4canvas'),ctx=cv.getContext('2d');
+
+  function drawGridView(G,n,mode,showLabels){
+    var W=cv.width,H=cv.height;
+    ctx.fillStyle='#07071a';ctx.fillRect(0,0,W,H);
+    var cell=W/G;
+    var hits=0,total=0;
+    for(var gy=0;gy<G;gy++){
+      var M=gy+1;
+      for(var gx=0;gx<G;gx++){
+        var r=gx+1;
+        var ok=blockOk(r,M,n);
+        total++;
+        if(ok)hits++;
+        ctx.fillStyle=colorFor(mode,r,Math.max(1,M),ok);
+        ctx.fillRect(gx*cell,gy*cell,Math.ceil(cell),Math.ceil(cell));
+        if(showLabels&&ok&&cell>=10){
+          ctx.fillStyle='rgba(4,4,13,.85)';
+          ctx.font=Math.min(9,cell*0.4)+'px JetBrains Mono, monospace';
+          ctx.fillText(r,gx*cell+2,gy*cell+cell-2);
+        }
+      }
+    }
+    return {hits:hits,total:total};
+  }
+
+  function drawRingView(G,n,mode,showLabels){
+    var W=cv.width,H=cv.height;
+    ctx.fillStyle='#07071a';ctx.fillRect(0,0,W,H);
+    var cx=W/2,cy=H/2,maxR=Math.min(W,H)*0.46,rings=G;
+    var hits=0,total=0;
+    // faint ring guides
+    ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
+    for(var gg=1;gg<=rings;gg+=Math.max(1,Math.floor(rings/8))){
+      var RR=maxR*(gg-1)/Math.max(1,rings-1);
+      ctx.beginPath();ctx.arc(cx,cy,RR,0,Math.PI*2);ctx.stroke();
+    }
+    for(var M=2;M<=rings;M++){
+      var R=maxR*(M-1)/Math.max(1,rings-1);
+      for(var r=1;r<M;r++){
+        if(gcd(r,M)!==1)continue; // ring convention: base points are gcd(r,M)=1
+        total++;
+        var ok=blockOk(r,M,n);
+        if(ok)hits++;
+        var th=2*Math.PI*r/M;
+        var x=cx+R*Math.cos(th),y=cy-R*Math.sin(th);
+        var rad=Math.max(1.1,Math.min(3.2,140/rings));
+        ctx.beginPath();ctx.arc(x,y,ok?rad:rad*0.6,0,Math.PI*2);
+        ctx.fillStyle=colorFor(mode,r,M,ok);
+        ctx.fill();
+        if(showLabels&&ok){
+          ctx.fillStyle='rgba(221,216,204,.8)';
+          ctx.font='7px JetBrains Mono, monospace';
+          ctx.fillText(r,x+4,y-4);
+        }
+      }
+    }
+    return {hits:hits,total:total};
+  }
+
+  window.c4Redraw=function(){
+    var G=+document.getElementById('c4-g').value;
+    document.getElementById('c4-g-val').textContent=G;
+    var n=curN;
+    var mode=document.getElementById('c4-color').value;
+    var showLabels=document.getElementById('c4-labels').checked||G<=40;
+    var stats;
+    if(viewMode==='ring') stats=drawRingView(G,n,mode,showLabels);
+    else stats=drawGridView(G,n,mode,showLabels);
+    document.getElementById('c4-measured').textContent=(stats.total?(stats.hits/stats.total):0).toFixed(6);
+  };
+
+  c4SetView('ring');
+  c4SetN(1);
+  renderWorked();
+  if(document.readyState!=='loading')c4Redraw();
+  else document.addEventListener('DOMContentLoaded',c4Redraw);
+})();
+</script>
+</body>
+</html>
