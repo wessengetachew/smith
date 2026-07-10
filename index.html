@@ -1145,7 +1145,7 @@ function heroToggleTopBars(){
           <span style="color:var(--cream,#e8e3db);padding:0 3px;">=</span>
         </div>
         <div style="text-align:center;margin-top:4px;">
-          <span id="welcome-countup" style="font-family:'JetBrains Mono',monospace;font-size:clamp(1.1rem,5vw,1.5rem);font-weight:700;color:#c8a84a;letter-spacing:-.01em;word-break:break-all;">0.530712</span>
+          <span id="welcome-countup" style="font-family:'JetBrains Mono',monospace;font-size:clamp(1.1rem,5vw,1.5rem);font-weight:700;color:#c8a84a;letter-spacing:-.01em;word-break:break-all;">0.530711820472</span>
           <span id="welcome-pi-ann" style="font-family:'JetBrains Mono',monospace;font-size:.72em;color:rgba(155,127,232,.9);margin-left:.5em;letter-spacing:.01em;white-space:nowrap;"></span>
         </div>
       </div>
@@ -1173,7 +1173,7 @@ function heroToggleTopBars(){
         <summary style="cursor:pointer;padding:5px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(61,200,184,.05);">
           <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#3dc8b8;">▸</span>
           <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3dc8b8;letter-spacing:.06em;">D(n) · BLOCK · SATURATION</span>
-          <span id="w-dn-mini" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(200,168,74,.8);"></span>
+          <span id="w-dn-mini" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(200,168,74,.8);">D=0.32263 · blk 2 · sat 1</span>
         </summary>
         <style>#w-dn-block[open]>summary>span:first-child{transform:rotate(90deg);}</style>
         <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;font-family:'JetBrains Mono',monospace;">
@@ -1219,7 +1219,7 @@ function heroToggleTopBars(){
     <div style="animation:wgFadeUp .6s .3s both;margin:8px 0 10px;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#6a6560;margin-bottom:6px;">Preview canvas view:</div>
       <span id="wfs-anchor-view" style="display:none;"></span>
-      <div id="w-tour-panel"></div>
+      <div id="w-tour-panel" style="min-height:30px;"></div>
       <div id="ws-view-row" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="wv-btn" id="wvb-smith" onclick="wSetView('smith')"
           style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Smith</button>
@@ -1377,6 +1377,32 @@ function heroToggleTopBars(){
           style="width:46px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;text-align:center;padding:2px 3px;outline:none;"
           oninput="wGMarkUserTouched();wSetG(+this.value)">
         <span id="ws-g-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);white-space:nowrap;">G=31  (grid p²=961)</span>
+      </div>
+
+      <!-- p² jumps + global 90°-step rotation — mirrors the hero's p²−/p²+
+           and −i/+i controls; rotation applies to every opener view. -->
+      <div id="ws-rot-row" style="display:flex;align-items:center;gap:6px;margin:4px 0 2px;flex-wrap:wrap;">
+        <button onclick="wGStepPrimeSq(-1)" title="Jump G to the previous prime square p²"
+          style="background:none;border:1px solid rgba(155,127,232,.45);color:rgba(155,127,232,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">p²−</button>
+        <button onclick="wGStepPrimeSq(1)" title="Jump G to the next prime square p²"
+          style="background:none;border:1px solid rgba(155,127,232,.45);color:rgba(155,127,232,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">p²+</button>
+        <button onclick="wGStep(-1)" title="G − 1"
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">−1</button>
+        <button onclick="wGStep(1)" title="G + 1"
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">+1</button>
+        <div style="width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0;"></div>
+        <button onclick="wRotate(-1)" title="Rotate all opener views 90° counter-clockwise (×−i)"
+          style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">−i</button>
+        <span id="ws-rot-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);min-width:26px;text-align:center;">0°</span>
+        <button onclick="wRotate(1)" title="Rotate all opener views 90° clockwise (×i)"
+          style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">+i</button>
+        <div style="width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0;"></div>
+        <button onclick="wSatStep(-1)" title="Jump n down to the previous saturation point (n = p−1, floor at 0)"
+          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">sat−</button>
+        <button onclick="wSatStep(1)" title="Jump n up to the next saturation point (n = p−1)"
+          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">sat+</button>
+        <span id="ws-cn-mini" title="Current n and C(n) — stays visible when the formula block above is collapsed"
+          style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.85);white-space:nowrap;">C(1) = 0.530711820472</span>
       </div>
 
       <!-- Zoom control — always visible (this is a descendant of
@@ -1558,6 +1584,13 @@ function heroToggleTopBars(){
             <option value="r_val" selected>r only</option>
             <option value="M_val">M only</option>
           </select>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Side:</span>
+          <select id="wsec-label-side" onchange="wRedrawCanvas()" title="Where labels sit relative to each point — alternating spreads dense runs apart"
+            style="background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+            <option value="right">right (in line)</option>
+            <option value="updown" selected>alternate ↑↓</option>
+            <option value="leftright">alternate ←→</option>
+          </select>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <button onclick="wTraceSector()" title="Highlight lattice points on this path"
@@ -1568,10 +1601,15 @@ function heroToggleTopBars(){
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Point size:</span>
-          <input type="range" id="wsec-size-sl" min="0.3" max="3" step="0.1" value="0.3"
+          <input type="range" id="wsec-size-sl" min="0.01" max="3" step="0.01" value="0.1"
             style="flex:1;max-width:120px;accent-color:#9b7fe8;"
             oninput="wSecSetSize(+this.value)">
-          <span id="wsec-size-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#9b7fe8;min-width:26px;">0.3×</span>
+          <span id="wsec-size-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#9b7fe8;min-width:30px;">0.10×</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Label size:</span>
+          <input type="range" id="wsec-lblsize-sl" min="0.2" max="2" step="0.05" value="1"
+            style="flex:1;max-width:120px;accent-color:#9b7fe8;"
+            oninput="wSecSetLblSize(+this.value)">
+          <span id="wsec-lblsize-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#9b7fe8;min-width:30px;">1.00×</span>
         </div>
         </div>
       </details>
@@ -1675,7 +1713,7 @@ function heroToggleTopBars(){
         </div>
         <div style="display:flex;align-items:center;gap:5px;">
           <button id="ws-spin-btn" onclick="wsToggleSpin()" title="Continuously rotate"
-            style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;">❙❙ Spin</button>
+            style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;">▶ Spin</button>
           <button onclick="wsFlip()" title="One-shot 180° flip"
             id="ws-flip-btn" style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;">⤾ 180°</button>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#6a6560;margin-left:4px;">speed</span>
@@ -1748,7 +1786,7 @@ function heroToggleTopBars(){
 
 
     <div id="welcome-foot" style="animation:wgFadeUp .6s 1.8s both;justify-content:flex-end;">
-      <button onclick="exportStateReport()" title="Opener + Hero state · parameters · theoretical vs measured · canvas snapshots · print to PDF"
+      <button onclick="exportStateReport('opener')" title="Opener state only · parameters · theoretical vs measured · canvas snapshots · print to PDF"
         style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px;cursor:pointer;margin-right:8px;">State report</button>
       <button id="welcome-enter" onclick="window.closeWelcome()">Show me</button>
     </div>
@@ -1924,20 +1962,27 @@ function heroToggleTopBars(){
     }).join('');
   }
 
-  var _wSecDotScale=0.3; // matches the 0.3× default slider
+  var _wSecLblScale=1; // sector label font scale — independent of point size so tiny dots can keep readable labels (or vice versa)
+  window.wSecSetLblSize=function(v){
+    _wSecLblScale=Math.max(0.2,+v||1);
+    var lbl=document.getElementById('wsec-lblsize-lbl');
+    if(lbl) lbl.textContent=_wSecLblScale.toFixed(2)+'×';
+    wRedrawCanvas();
+  };
+  var _wSecDotScale=0.1; // matches the 0.10× default slider (goes down to 0.01 for dense ranges)
   window.wSecSetSize=function(v){
-    _wSecDotScale=+v||1;
+    _wSecDotScale=Math.max(0.01,+v||0.1);
     var lbl=document.getElementById('wsec-size-lbl');
-    if(lbl) lbl.textContent=_wSecDotScale.toFixed(1)+'×';
+    if(lbl) lbl.textContent=_wSecDotScale.toFixed(2)+'×';
     wRedrawCanvas();
   };
 
-  var _wsSpinning=false;     // starts off — auto-enabled after a delay (see init()), unless the user touches spin/flip first
+  var _wsSpinning=false;     // starts off — manual control only (the old auto-enable is gone)
   var _wsUserTouchedSpin=false; // set true the moment the user manually toggles spin/flip, so the delayed auto-start backs off
   var _wsSpeed=60;           // deg/sec
   var _wsFlipping=false;
-  var _wsFlipScale=-1;       // current animated x-scale: 1 (normal) ↔ -1 (mirrored) — DEFAULTS MIRRORED (the site's canonical Smith orientation; the old auto-flip animation is gone but its end state is kept)
-  var _wsFlipSign=-1;        // target sign toggled by each Flip click
+  var _wsFlipScale=1;        // current animated x-scale: 1 (normal) ↔ -1 (mirrored) — DEFAULTS NORMAL (0°, unmirrored); Flip is a manual control only
+  var _wsFlipSign=1;         // target sign toggled by each Flip click
   var _wsFlipFrom=1,_wsFlipT0=0;
   // Per-ring/per-mod twist — applies to Ring/Grid/Farey (Smith keeps its own θ/flip)
   var _wPerRing=0;           // fraction of a full lap added per ring index (M-1)
@@ -1961,6 +2006,24 @@ function heroToggleTopBars(){
   // (_getHeroLabel, global fn) next to a traced sector point. curN comes
   // from the page's ground-state n so depth/status-based labels agree with
   // whatever n is currently locked, same as the hero.
+  // Draw a label upright to the viewer regardless of the canvas transform:
+  // cancels global rotation, smith flip-mirror, and Gauss quadrant turns by
+  // rebasing to screen axes at the anchor, keeping the dpr·zoom magnitude
+  // so label sizes stay exactly as before.
+  function _wUprightAt(ctx,x,y,draw){
+    var t=ctx.getTransform();
+    var dx=t.a*x+t.c*y+t.e, dy=t.b*x+t.d*y+t.f;
+    var sc=Math.hypot(t.a,t.b)||1;
+    ctx.save();
+    ctx.setTransform(sc,0,0,sc,dx,dy);
+    draw();
+    ctx.restore();
+  }
+  // Per-frame label counter: draw order over the traced points is stable
+  // within a frame, so even/odd alternation is deterministic. Reset each
+  // redraw (see wRedrawCanvas).
+  var _wSecLblIdx=0;
+  window._wSecLblReset=function(){_wSecLblIdx=0;};
   function _wDrawSecLabel(ctx,x,y,r,M,off){
     var mode=document.getElementById('wsec-label-mode')?.value||'none';
     if(mode==='none'||typeof _getHeroLabel!=='function')return;
@@ -1969,13 +2032,28 @@ function heroToggleTopBars(){
     var lbl=_getHeroLabel(r,M,n,d,mode);
     if(!lbl)return;
     off=off||6;
+    var side=document.getElementById('wsec-label-side')?.value||'right';
+    var odd=(_wSecLblIdx++)&1;
     ctx.save();
-    ctx.font='9px \'JetBrains Mono\',monospace';
-    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.font=(9*_wSecLblScale).toFixed(1)+'px \'JetBrains Mono\',monospace';
     ctx.lineWidth=2.5;ctx.strokeStyle='rgba(4,4,13,.85)';
-    ctx.strokeText(lbl,x+off,y);
     ctx.fillStyle='#e8e3db';
-    ctx.fillText(lbl,x+off,y);
+    var ax=off,ay=0;
+    if(side==='updown'){
+      ctx.textAlign='center';
+      ctx.textBaseline=odd?'top':'bottom';
+      ax=0; ay=odd?off:-off;
+    }else if(side==='leftright'){
+      ctx.textAlign=odd?'right':'left';
+      ctx.textBaseline='middle';
+      ax=odd?-off:off; ay=0;
+    }else{
+      ctx.textAlign='left';ctx.textBaseline='middle';
+    }
+    _wUprightAt(ctx,x,y,function(){
+      ctx.strokeText(lbl,ax,ay);
+      ctx.fillText(lbl,ax,ay);
+    });
     ctx.restore();
   }
   window.wTraceSector=function(){
@@ -2237,7 +2315,8 @@ function heroToggleTopBars(){
   window._wStateSnapshot=function(){
     var cv=document.getElementById('welcome-teaser');
     return{view:_wView,G:_wG,n:_wN,mode:_wMode,zoom:_wZoom,panX:_wPanX,panY:_wPanY,
-      perRing:_wPerRing,smithZoomOut:_wSmithZoomOut,flip:_wsFlipScale,
+      perRing:_wPerRing,smithZoomOut:_wSmithZoomOut,flip:_wsFlipScale,rot:(_wRotSteps&3)*90,
+      smithTheta:((_wsTheta%360)+360)%360,spinning:!!_wsSpinning,flipping:!!_wsFlipping,
       colorMode:_wColorMode,charFilter:_wCharFilter,
       primeK:_wPrimeK,
       rings:_wActiveRings&&_wActiveRings.size?[..._wActiveRings].join(' '):'all',
@@ -2261,6 +2340,7 @@ function heroToggleTopBars(){
             var oc=document.createElement('canvas');oc.width=SZ;oc.height=SZ;
             var octx=oc.getContext('2d');octx.fillStyle='#04040d';octx.fillRect(0,0,SZ,SZ);
             octx.save();
+            if(_wRotSteps){octx.translate(SZ/2,SZ/2);octx.rotate(_wRotSteps*Math.PI/2);octx.translate(-SZ/2,-SZ/2);}
             if(v==='smith'&&_wsFlipScale<0){octx.translate(SZ/2,0);octx.scale(-1,1);octx.translate(-SZ/2,0);}
             views[v](octx);octx.restore();out[v]=oc.toDataURL('image/png');
           }catch(e){}
@@ -2308,7 +2388,9 @@ function heroToggleTopBars(){
       var dv=document.getElementById('w-dn-val');
       if(!dv||!_wMathReady)return;
       var Z=Math.PI*Math.PI/6;
-      dv.textContent=(val/Z).toFixed(Math.max(2,Math.min(15,_wDP||12))); // follow the dp slider
+      var _dnDP=Math.max(2,Math.min(15,_wDP||12));
+      var _dnExact=(_wMode!=='finite'&&typeof _asymptoticDecimalStr==='function')?_asymptoticDecimalStr('D',_wN,_dnDP):null;
+      dv.textContent=(_dnExact!==null)?_dnExact:(val/Z).toFixed(_dnDP); // follow the dp slider — OEIS-exact at n=1
       document.getElementById('w-blk-val').textContent=String(_wN+1);
       var sat=0,nx=null;
       for(var i=0;i<_wPrimes.length;i++){
@@ -2351,9 +2433,23 @@ function heroToggleTopBars(){
         // Asymptotic: getCn already folds in the analytic tail correction for
         // primes >1.5M, accurate to full double precision (~15-16 sig figs).
         // Past that a float toFixed has nothing left to show, so cap there.
-        valEl.innerHTML=_wColorDigits(val.toFixed(Math.min(_wDP,15)));
+        // Use the shared OEIS-exact path when available (n=1) — same digits
+        // as the static placeholder, so the first real render changes nothing
+        // and no float-error red digits ever flash at n=1.
+        valEl.innerHTML=(typeof _asymptoticCodedDigits==='function')
+          ? _asymptoticCodedDigits('C',_wN,Math.min(_wDP,50),val)
+          : _wColorDigits(val.toFixed(Math.min(_wDP,15)));
       }
     }
+
+    // ── Mini C(n) readout on the always-visible G/rotation row — gives an
+    // n + value reference when the formula block above is collapsed ──
+    (function(){
+      var mini=document.getElementById('ws-cn-mini');
+      if(!mini||!_wMathReady)return;
+      var ms=(_wMode!=='finite'&&typeof _asymptoticDecimalStr==='function')?_asymptoticDecimalStr('C',_wN,12):null;
+      mini.textContent='C('+_wN+') = '+(ms!==null?ms:val.toFixed(12));
+    })();
 
     // ── π² rational annotation ──────────────────────────────────────────
     var ann=null;
@@ -2876,12 +2972,13 @@ function heroToggleTopBars(){
     wRenderCn();
   };
 
-  // ── Opening sequence: land on a clean dp=6 preset, then shape into the
-  // saved/default state after a few seconds; collapse the intro at 10s. ──
+  // ── Opening sequence: no preset snap — land directly on the default
+  // Smith view at 12 decimal places (URL hash wv= still wins if present);
+  // collapse the intro at 10s. ──
   window._wOpeningSequence=function(){
     var target=_wDP||12;            // whatever is configured (URL hash may set it later)
-    if((location.hash||'').indexOf('wv=')<0&&typeof wSetView==='function')wSetView('grid');
-    window.wSetDP(target);          // dp slider removed — fixed at the configured value (default 12)
+    if((location.hash||'').indexOf('wv=')<0&&typeof wSetView==='function')wSetView('smith'); // same view already rendered — this only syncs button highlight + smith-only controls, no visible snap
+    window.wSetDP(target);          // fixed at the configured value (default 12)
     var dd=document.getElementById('w-intro-dd');
     if(dd){
       var cancel=false;
@@ -2899,6 +2996,29 @@ function heroToggleTopBars(){
     wRenderCn();
   };
 
+  // Global 90°-step rotation for ALL opener views — the ×i / ×−i quarter
+  // turns the hero already has. Applied as a whole-canvas rotation in
+  // wRedrawCanvas, mirrored into thumbnails, 4K export, hit-testing,
+  // the state snapshot, and Send to Hero.
+  var _wRotSteps=0;
+  window.wRotate=function(dir){
+    _wRotSteps=(_wRotSteps+dir+4)%4;
+    var l=document.getElementById('ws-rot-lbl');
+    if(l)l.textContent=['0°','90°','180°','270°'][_wRotSteps];
+    wRedrawCanvas();
+  };
+  window.wGStep=function(d){
+    window.wGMarkUserTouched();
+    window.wSetG(_wG+d);
+  };
+  window.wGStepPrimeSq=function(dir){
+    window.wGMarkUserTouched();
+    var ps=_wGetPrimes(),G=_wG,target=null;
+    if(dir>0){for(var i=0;i<ps.length;i++){var sq=ps[i]*ps[i];if(sq>G){target=sq;break;}}}
+    else{target=4;for(var j=0;j<ps.length;j++){var sq2=ps[j]*ps[j];if(sq2<G)target=sq2;else break;}}
+    if(target===null)return;
+    window.wSetG(Math.max(1,Math.min(2048,target)));
+  };
   window.wGStepPrime=function(dir){
     window.wGMarkUserTouched();
     var v=_wG;
@@ -3018,6 +3138,8 @@ function heroToggleTopBars(){
     // own per-ring/per-mod twist as their rotation mechanism instead, so
     // neither the flip mirror nor the θ canvas-rotation apply to them.
     var flipScale=(_wView==='smith')?_wsFlipScale:1;
+    // Global quarter-turn rotation (×i steps) — applies to every view.
+    if(_wRotSteps)ctx.rotate(_wRotSteps*Math.PI/2);
     // Zoom: apply _wZoom as a true canvas scale in both directions.
     // - Zoom IN  (>1): magnifies, points spread out, fewer visible.
     // - Zoom OUT (<1): shrinks the rendered picture so the whole disc/ring
@@ -3038,6 +3160,7 @@ function heroToggleTopBars(){
     // Smith never widens G regardless of zoom (see note above).
     var drawG=(_wView!=='smith'&&_wZoom<1)?Math.min(400,Math.round(G/_wZoom)):G;
     _wHitPts.length=0; _wHitRec=true;
+    if(typeof window._wSecLblReset==='function')window._wSecLblReset();
     if(_wView==='smith') drawWSmith(ctx,W,H,n,drawG,_wSmithZoomOut);
     else if(_wView==='ring') drawWRing(ctx,W,H,n,drawG);
     else if(_wView==='grid') drawWGrid(ctx,W,H,n,drawG);
@@ -3363,7 +3486,7 @@ function heroToggleTopBars(){
             ctx.fillStyle='rgba(255,255,255,.6)';
             ctx.font=Math.max(5,Math.min(9,cw*0.36)).toFixed(1)+'px \'JetBrains Mono\',monospace';
             ctx.textAlign='center';ctx.textBaseline='middle';
-            ctx.fillText(rA+'/'+mA,x,y);
+            _wUprightAt(ctx,x,y,function(){ctx.fillText(rA+'/'+mA,0,0);});
           }
         }
       }
@@ -3396,15 +3519,16 @@ function heroToggleTopBars(){
     var fs=Math.max(8,Math.floor(side*0.022));
     ctx.font=fs+'px \'JetBrains Mono\',monospace';ctx.fillStyle='rgba(200,168,74,.55)';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('+Re',cx+halfW*0.62,cy);ctx.fillText('-Re',cx-halfW*0.62,cy);
-    ctx.textBaseline='top';ctx.fillText('+Im',cx,cy-halfW*0.82);
-    ctx.textBaseline='bottom';ctx.fillText('-Im',cx,cy+halfW*0.82);
+    _wUprightAt(ctx,cx+halfW*0.62,cy,function(){ctx.fillText('+Re',0,0);});
+    _wUprightAt(ctx,cx-halfW*0.62,cy,function(){ctx.fillText('-Re',0,0);});
+    ctx.textBaseline='top';_wUprightAt(ctx,cx,cy-halfW*0.82,function(){ctx.fillText('+Im',0,0);});
+    ctx.textBaseline='bottom';_wUprightAt(ctx,cx,cy+halfW*0.82,function(){ctx.fillText('-Im',0,0);});
     var fs2=Math.max(6,Math.floor(fs*0.7));
     ctx.font=fs2+'px \'JetBrains Mono\',monospace';ctx.fillStyle='rgba(155,127,232,.4)';
-    ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('z=M+ir',cx+4,cy+4);
-    ctx.textAlign='right';ctx.fillText('z=-r+iM',cx-4,cy+4);
-    ctx.textBaseline='bottom';ctx.fillText('z=-M-ir',cx-4,cy-4);
-    ctx.textAlign='left';ctx.fillText('z=r-iM',cx+4,cy-4);
+    ctx.textAlign='left';ctx.textBaseline='top';_wUprightAt(ctx,cx+4,cy+4,function(){ctx.fillText('z=M+ir',0,0);});
+    ctx.textAlign='right';_wUprightAt(ctx,cx-4,cy+4,function(){ctx.fillText('z=-r+iM',0,0);});
+    ctx.textBaseline='bottom';_wUprightAt(ctx,cx-4,cy-4,function(){ctx.fillText('z=-M-ir',0,0);});
+    ctx.textAlign='left';_wUprightAt(ctx,cx+4,cy-4,function(){ctx.fillText('z=r-iM',0,0);});
   }
 
   function drawWSmith(ctx,W,H,n,G,zoomOut){
@@ -3706,8 +3830,11 @@ function heroToggleTopBars(){
       var W=cv.clientWidth,H=cv.clientHeight;
       var px=cxpx-rect.left, py=cypx-rect.top;
       var flip=(_wView==='smith')?_wsFlipScale:1;
-      var wx=((px-_wPanX)-W/2)/(_wZoom*flip)+W/2;
-      var wy=((py-_wPanY)-H/2)/_wZoom+H/2;
+      var ux=(px-_wPanX)-W/2, uy=(py-_wPanY)-H/2;
+      if(_wRotSteps){var _ith=-_wRotSteps*Math.PI/2,_ic=Math.cos(_ith),_is=Math.sin(_ith);
+        var _rx=ux*_ic-uy*_is, _ry=ux*_is+uy*_ic; ux=_rx; uy=_ry;}
+      var wx=ux/(_wZoom*flip)+W/2;
+      var wy=uy/_wZoom+H/2;
       var tol=Math.max(6,12/_wZoom),tol2=tol*tol;
       var best=-1,bd=Infinity;
       for(var i=0;i<_wHitPts.length;i+=4){
@@ -3796,11 +3923,15 @@ function heroToggleTopBars(){
     var offCtx=offCv.getContext('2d');
     offCtx.fillStyle='#04040d'; offCtx.fillRect(0,0,squareSide,squareSide);
     var drawG=(_wView!=='smith'&&_wZoom<1)?Math.min(400,Math.round(G/_wZoom)):G;
+    offCtx.save();
+    if(_wRotSteps){offCtx.translate(squareSide/2,squareSide/2);offCtx.rotate(_wRotSteps*Math.PI/2);offCtx.translate(-squareSide/2,-squareSide/2);}
+    if(_wView==='smith'&&_wsFlipScale<0){offCtx.translate(squareSide/2,0);offCtx.scale(-1,1);offCtx.translate(-squareSide/2,0);}
     if(_wView==='smith') drawWSmith(offCtx,squareSide,squareSide,n,drawG,_wSmithZoomOut);
     else if(_wView==='ring') drawWRing(offCtx,squareSide,squareSide,n,drawG);
     else if(_wView==='grid') drawWGrid(offCtx,squareSide,squareSide,n,drawG);
     else if(_wView==='farey') drawWFarey(offCtx,squareSide,squareSide,n,drawG);
     else if(_wView==='gauss') drawWGauss(offCtx,squareSide,squareSide,n,drawG);
+    offCtx.restore();
 
     ctx.drawImage(offCv,xOff,ty,squareSide,squareSide);
     ctx.strokeStyle='rgba(200,168,74,.2)';ctx.lineWidth=3;
@@ -3872,10 +4003,15 @@ function heroToggleTopBars(){
     // direct 1:1 copy.
     if(typeof _heroRowShiftApply==='function') _heroRowShiftApply(_wPerRing||0);
 
-    // Global 90°-step rotation — the opener has no equivalent control, so
-    // it's implicitly always "unrotated"; reset the hero to match rather
-    // than leaving a stale rotation from earlier hero-only tinkering.
-    if(typeof _heroRotSteps!=='undefined') _heroRotSteps=0;
+    // Global 90°-step rotation — the opener now has its own −i/+i control;
+    // copy it onto the hero so the transferred canvas matches exactly.
+    if(typeof _heroRotSteps!=='undefined'){
+      _heroRotSteps=_wRotSteps&3;
+      var _hrl=document.getElementById('hero-rot-lbl');
+      if(_hrl)_hrl.textContent=[' 0°',' 90°','180°','270°'][_heroRotSteps];
+    }
+    // (previously the opener had no rotation control, so this used to reset
+    // the hero to 0° — the transfer above replaces that.)
 
     // Zoom — scale-independent, carries over directly. Pan is deliberately
     // NOT copied 1:1 (opener and hero canvases are different pixel sizes,
@@ -3950,7 +4086,9 @@ function heroToggleTopBars(){
     wRenderCn();
     if(typeof window._wOpeningSequence==='function')window._wOpeningSequence();
     if(typeof window._wMoveWorking==='function')window._wMoveWorking(true);
-    // Default sector path traced on load: 1/2, s=0 ray, 0.3× points
+    // Default sector path traced on load: 1/2, s=0 ray — draws once on the
+    // stable Smith open (the old objection was it appearing mid-snap; the
+    // snap itself is gone).
     if(typeof window.wTraceSector==='function')window.wTraceSector();
     // No auto-animations on load: the one-shot Flip demo and the 10s G
     // auto-sweep are removed — the opener now loads steady. Flip, spin,
@@ -4003,6 +4141,7 @@ function heroToggleTopBars(){
     else{bar+='<a href="'+href+'" target="_blank" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
   });
   bar+='<span style="flex:1"></span>';
+  bar+='<button id="wg-status-btn" onclick="if(typeof exportStateReport===\'function\')exportStateReport(\'hero\')" title="Main-page status report \u00b7 hero parameters \u00b7 theoretical vs measured \u00b7 canvas snapshots \u00b7 print to PDF" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.8);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#3dc8b8\';this.style.color=\'#3dc8b8\'" onmouseout="this.style.borderColor=\'rgba(61,200,184,.35)\';this.style.color=\'rgba(61,200,184,.8)\'">\u2399 Status</button>';
   bar+='<button id="wg-credits-btn" onclick="wgToggleCredits()" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.65);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#c8a84a\';this.style.color=\'#c8a84a\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.25)\';this.style.color=\'rgba(255,255,255,.65)\'">Credits ▾</button>';
   bar+='</div>';
 
@@ -4010,12 +4149,12 @@ function heroToggleTopBars(){
   var creditGroups=[
    ['Analytic foundations',[
      ['Leonhard Euler','Euler product formula; the ζ(2)=π²/6 identity underlying the C(n) normalization.'],
-     ['Bernhard Riemann','Analytic continuation of ζ(s); the complex framework echoed in the C(t,s) extension (Page 13/15).'],
-     ['Peter Gustav Lejeune Dirichlet','Dirichlet characters and L-functions, relevant to the modular twist constructions (Page 14).']
+     ['Bernhard Riemann','Analytic continuation of ζ(s); the complex framework echoed in the C(t,s) extension.'],
+     ['Peter Gustav Lejeune Dirichlet','Dirichlet characters and L-functions, relevant to the modular twist constructions.']
    ]],
    ['Density & sieve results',[
      ['William Feller & Erhard Tornier','The Feller–Tornier constant D_FT — a distinct classical object referenced against C(1), not the same quantity.'],
-     ['G. H. Hardy & J. E. Littlewood','Prime k-tuple conjecture and constants, the natural point of comparison for the primorial survivor counts (Page 7).'],
+     ['G. H. Hardy & J. E. Littlewood','Prime k-tuple conjecture and constants, the natural point of comparison for the primorial survivor counts.'],
      ['Franz Mertens','Mertens\' theorems on prime products, foundational to the Euler-product asymptotics used throughout.']
    ]],
    ['Geometric & number-theoretic tools',[
@@ -4031,7 +4170,7 @@ function heroToggleTopBars(){
    ]],
    ['Other classical references noted in the honesty audit',[
      ['Ernesto Cesàro','Cesàro summation/averaging, referenced where relevant and explicitly distinguished from this site\'s own constructions.'],
-     ['J. Franel & E. Landau','Franel–Landau results connecting error terms to the Riemann Hypothesis, cited for context around the decay theorem (Page 16).']
+     ['J. Franel & E. Landau','Franel–Landau results connecting error terms to the Riemann Hypothesis, cited for context around the decay theorem.']
    ]]
   ];
   var cp='<div id="wg-credits-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
@@ -4226,7 +4365,7 @@ function heroToggleTopBars(){
 
 
 
-<div id="hero-tour-panel"></div>
+<div id="hero-tour-panel" style="min-height:30px;"></div>
 <!-- ══════════ N CONTROLLER — above canvas, below the View/Inspect rows ══════════ -->
 <div id="nbar">
 <div id="nbar-inner">
@@ -4709,6 +4848,13 @@ function heroToggleTopBars(){
         <option value="r_val" selected>r only</option>
         <option value="M_val">M only</option>
       </select>
+      <span class="cv-lbl">Side:</span>
+      <select id="hero-sec-label-side" onchange="void 0" title="Where sector labels sit relative to each point — alternating spreads dense runs apart"
+        style="background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+        <option value="up">above (in line)</option>
+        <option value="updown" selected>alternate ↑↓</option>
+        <option value="leftright">alternate ←→</option>
+      </select>
       <div class="cv-sep"></div>
       <button class="cv-btn" onclick="heroTraceSector()" title="Highlight points on this path and list them below">Trace path</button>
       <button class="cv-btn" onclick="heroClearInspect()">Clear</button>
@@ -4716,10 +4862,15 @@ function heroToggleTopBars(){
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
       <span class="cv-lbl">Point size:</span>
-      <input type="range" id="hero-sec-size-sl" min="0.3" max="3" step="0.1" value="1"
+      <input type="range" id="hero-sec-size-sl" min="0.01" max="3" step="0.01" value="1"
         style="width:120px;accent-color:var(--violet);"
         oninput="heroSecSetSize(+this.value)">
       <span id="hero-sec-size-lbl" style="font-size:8px;color:var(--violet);min-width:26px;">1.0×</span>
+      <span class="cv-lbl">Label size:</span>
+      <input type="range" id="hero-sec-lblsize-sl" min="0.2" max="2" step="0.05" value="1"
+        style="width:120px;accent-color:var(--violet);"
+        oninput="heroSecSetLblSize(+this.value)">
+      <span id="hero-sec-lblsize-lbl" style="font-size:8px;color:var(--violet);min-width:30px;">1.00×</span>
     </div>
     <!-- Point detail table — appears here after Trace path -->
     <div id="hero-point-detail" style="margin-top:10px;border-radius:3px;overflow:hidden;">
@@ -4916,7 +5067,7 @@ function heroToggleTopBars(){
     <button onclick="_heroSmithSetAlphaDeg(270)" style="background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;">270°</button>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
     <button id="smith-spin-btn" onclick="_heroSmithToggleSpin()" title="Continuously rotate"
-      style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;">❙❙ Spin</button>
+      style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;">▶ Spin</button>
     <button onclick="_heroSmithFlip()" title="One-shot 180° flip"
       style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;">⤾ Flip</button>
     <span style="font-size:8px;color:var(--cream3);">speed</span>
@@ -9564,7 +9715,7 @@ function _buildWorkingTable(){
         <div style="display:grid;grid-template-columns:1fr;gap:4px;max-width:640px;">
           <div><span style="color:rgba(200,168,74,.7);">substitution:</span> 1 − min(${curN}+1, ${p})/${p}² &nbsp;=&nbsp; 1 − ${minNP1P}/${p*p} &nbsp;=&nbsp; (${p*p}−${minNP1P})/${p*p} &nbsp;=&nbsp; <b style="color:#fff;">${factor.toFixed(10)}</b></div>
           <div><span style="color:rgba(200,168,74,.7);">this factor pulls the running product down by:</span> <b style="color:${pct<0.01?'var(--teal)':pct<1?'var(--lime)':'var(--coral)'}">${pct.toFixed(6)}%</b> &nbsp;(from ${runningBefore.toFixed(10)} → ${running.toFixed(10)})</div>
-          <div><span style="color:rgba(200,168,74,.7);">log-contribution:</span> ln(${factor.toFixed(8)}) = <b style="color:#fff;">${logF.toFixed(8)}</b> &nbsp;<span style="color:var(--cream3);">— this is the term that builds the jump-spectrum on Page 12</span></div>
+          <div><span style="color:rgba(200,168,74,.7);">log-contribution:</span> ln(${factor.toFixed(8)}) = <b style="color:#fff;">${logF.toFixed(8)}</b></div>
           ${saturated?`<div style="color:rgba(224,80,96,.75);">${saturatedSimplified}</div>`:`<div style="color:rgba(61,200,184,.8);">${activeNote}</div>`}
           ${skippedNote?`<div>${skippedNote}</div>`:''}
         </div>
@@ -13062,11 +13213,17 @@ let _heroG=31;
 let _heroRotSteps=0; // 0=0° 1=90°CW 2=180° 3=270°CW — defaults to 0° now, all views start unrotated
 let _heroViewMode='smith'; // 'grid' | 'ring' | 'farey' | 'lift' | 'gauss' | 'smith'
 let _heroColorR=false;
+let _heroSecLblScale=1; // scales the sector/inspect r/M label font
+function heroSecSetLblSize(v){
+  _heroSecLblScale=Math.max(0.2,+v||1);
+  const l=document.getElementById('hero-sec-lblsize-lbl');
+  if(l) l.textContent=_heroSecLblScale.toFixed(2)+'×';
+}
 let _heroSecDotScale=1; // scales the inspect/sector-path highlight size across all 6 views
 function heroSecSetSize(v){
-  _heroSecDotScale=+v||1;
+  _heroSecDotScale=Math.max(0.01,+v||1);
   const lbl=document.getElementById('hero-sec-size-lbl');
-  if(lbl) lbl.textContent=_heroSecDotScale.toFixed(1)+'×';
+  if(lbl) lbl.textContent=_heroSecDotScale.toFixed(2)+'×';
 }
 
 let _heroActiveGaps=new Set();
@@ -13300,7 +13457,9 @@ function _updateHeroRatioLive(G){
 // as displayed after flip+rotation (disp_x/disp_y, screen convention, y down).
 // ── State Report — everything both canvases are currently showing, with
 // theoretical vs measured values, printable to PDF via the browser dialog. ──
-function exportStateReport(){
+function exportStateReport(scope){
+  scope=scope||'both'; // 'opener' — opener only · 'hero' — main page only · 'both' — full report
+  const incOpener=(scope!=='hero'), incHero=(scope!=='opener');
   const Z=Math.PI*Math.PI/6, esc=x=>String(x);
   const row=(k,v)=>'<tr><td>'+k+'</td><td>'+esc(v)+'</td></tr>';
   const cmp=(label,meas,cnt,theo,note)=>'<tr><td>'+label+'</td><td>'+meas+' <span class=n>('+cnt+')</span></td><td>'+theo+'</td><td>'+(meas!=='—'?Math.abs(meas-theo).toExponential(2):'—')+'</td><td class=n>'+note+'</td></tr>';
@@ -13322,22 +13481,29 @@ function exportStateReport(){
     '</table>'+(st.img?'<img src="'+st.img+'">':'')+'</div>';
   }
   let html='<!DOCTYPE html><html><head><meta charset=utf-8><title>C(n) State Report</title><style>body{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#111;margin:24px;}h1{font-size:16px;}h2{font-size:13px;border-bottom:1px solid #999;margin-top:22px;}table{border-collapse:collapse;margin:8px 0;width:100%;}td,th{border:1px solid #ccc;padding:3px 7px;text-align:left;}caption{text-align:left;font-weight:700;padding:3px 0;}img{max-width:420px;border:1px solid #ccc;margin:8px 0;display:block;}.n{color:#555;font-size:9.5px;}@media print{img{max-width:360px;}}</style></head><body>';
-  html+='<h1>C(n) — Block-Coprime Density · State Report</h1><div class=n>'+new Date().toISOString()+' · C(n)=ζ(2)·∏_p(1−min(n+1,p)/p²) — probability that r is coprime to a block of n+1 consecutive integers starting at M, given the lattice below. gcd=1 counts coprime pairs; lift counts pairs surviving the full block; lift/gcd is the conditional survival that converges to C(n).</div>';
+  html+='<h1>C(n) — Block-Coprime Density · State Report'+(scope==='opener'?' (Opener)':scope==='hero'?' (Main page)':'')+'</h1><div class=n>'+new Date().toISOString()+' · C(n)=ζ(2)·∏_p(1−min(n+1,p)/p²) — probability that r is coprime to a block of n+1 consecutive integers starting at M, given the lattice below. gcd=1 counts coprime pairs; lift counts pairs surviving the full block; lift/gcd is the conditional survival that converges to C(n).</div>';
   // Opener
-  if(typeof _wStateSnapshot==='function'){
-    const st=_wStateSnapshot(), c=counts(st.G,st.n,_viewPop(st.view));
+  const _wSt=(incOpener&&typeof _wStateSnapshot==='function')?_wStateSnapshot():null;
+  if(_wSt){
+    const st=_wSt, c=counts(st.G,st.n,_viewPop(st.view));
     const ex=row('view',st.view)+row('G / n',st.G+' / '+st.n)+row('mode',st.mode)+
       row('zoom / pan',st.zoom.toFixed(3)+'× / ('+st.panX.toFixed(0)+','+st.panY.toFixed(0)+')')+
       row('per-ring twist',st.perRing)+
+      row('rotation (×i steps)',(st.rot||0)+'°')+
       (st.mode==='finite'?row('finite product — primes used ('+st.primeK+')',(function(){var P=(typeof PRIMES!=='undefined')?PRIMES:[];var k=Math.min(st.primeK,100);var a=[];for(var i=0;i<k;i++)a.push(P[i]);return a.join(', ')+(st.primeK>100?' … +'+(st.primeK-100)+' more':'');})()):'')+
-      (st.view==='smith'?row('smith zoom-out / flip',st.smithZoomOut+'× / '+(st.flip<0?'mirrored':'normal')):'')+
+      (st.view==='smith'?row('smith θ / zoom-out / flip',(st.smithTheta||0).toFixed(1)+'° / '+st.smithZoomOut+'× / '+(st.flip<0?'mirrored (180°)':'normal (0°)')):'')+
+      row('animations running',[st.spinning?'smith θ spin':'',st.flipping?'flip in progress':''].filter(Boolean).join(' · ')||'none')+
       row('color / χ filter',st.colorMode+' / '+st.charFilter)+
       row('rings / gaps ('+(typeof _gapSemantics!=='undefined'?_gapSemantics:'?')+')',st.rings+' / '+st.gaps);
     html+=section('Opener — '+st.view+' view',st,c,st.Cn,st.n,ex);
   }
-  // Hero
-  {
-    const G=_heroG, n=typeof N!=='undefined'?N:0, c=counts(G,n,_viewPop(_heroViewMode));
+  // Hero — captured live: if the ▶N ping-pong is running, report the n the
+  // canvas is drawing right now (not the resting global N); likewise the
+  // rotation/flip/α rows below read the animated current values.
+  const _hnPlaying=(typeof _heroNPlayId!=='undefined'&&_heroNPlayId&&typeof window._heroNPlayCur==='number');
+  const _heroLiveN=_hnPlaying?window._heroNPlayCur:(typeof N!=='undefined'?N:0);
+  if(incHero){
+    const G=_heroG, n=_heroLiveN, c=counts(G,n,_viewPop(_heroViewMode));
     const Cn=(typeof getCn==='function')?getCn(n):0;
     const cv=document.getElementById('hero-3d');
     const zoomEl=document.getElementById('hero-zoom-num');
@@ -13347,12 +13513,18 @@ function exportStateReport(){
       row('rotation / flip',(_heroRotSteps&3)*90+'° / '+(_heroSmithFlipScale<0?'mirrored':'normal'))+
       row('smith α spin / zoom-out',(_heroSmithAlpha*180/Math.PI).toFixed(2)+'° / '+_heroSmithZoomOut+'×')+
       row('color / χ filter',(_heroColorModeLocal||'default')+' / '+(typeof _heroCharFilter!=='undefined'?_heroCharFilter:'?'))+
-      row('active gaps ('+(typeof _gapSemantics!=='undefined'?_gapSemantics:'?')+')',(typeof _heroActiveGaps!=='undefined'&&_heroActiveGaps.size)?[..._heroActiveGaps].join(' '):'none');
+      row('active gaps ('+(typeof _gapSemantics!=='undefined'?_gapSemantics:'?')+')',(typeof _heroActiveGaps!=='undefined'&&_heroActiveGaps.size)?[..._heroActiveGaps].join(' '):'none')+
+      row('animations running',(function(){const a=[];
+        if(typeof _heroGPlayId!=='undefined'&&_heroGPlayId)a.push('▶G sweep');
+        if(_hnPlaying)a.push('▶N ping-pong (n='+_heroLiveN+' now)');
+        if(typeof _heroSmithSpinning!=='undefined'&&_heroSmithSpinning)a.push('smith α spin');
+        if(typeof _heroSmithFlipping!=='undefined'&&_heroSmithFlipping)a.push('flip in progress');
+        return a.length?a.join(' · '):'none';})());
     html+=section('Hero — '+_heroViewMode+' view',st,c,Cn,n,ex);
   }
   // All-view thumbnails
   function heroAllViews(){
-    const out={},SZ=400,nA=typeof N!=='undefined'?N:0;
+    const out={},SZ=400,nA=_heroLiveN;
     const V={ring:c=>_drawHeroRingMain(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0,_heroRingOpacity),
              farey:c=>_drawHeroFarey(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0),
              lift:c=>_drawHeroLift(c,SZ,SZ,nA,0,1,0,0,_heroRowShift||0),
@@ -13364,6 +13536,7 @@ function exportStateReport(){
         const steps=_heroRotSteps&3;
         x.save();
         if(steps){x.translate(SZ/2,SZ/2);x.rotate(steps*Math.PI/2);x.translate(-SZ/2,-SZ/2);}
+        if(v==='smith'&&typeof _heroSmithFlipScale!=='undefined'&&_heroSmithFlipScale<0){x.translate(SZ/2,0);x.scale(-1,1);x.translate(-SZ/2,0);}
         V[v](x);x.restore();out[v]=oc.toDataURL('image/png');}catch(e){}
     }
     // Grid: render from the depth buffer (dots only), independent of current view
@@ -13391,11 +13564,14 @@ function exportStateReport(){
     for(const v in imgs)if(imgs[v])h+='<figure style="margin:0;"><img src="'+imgs[v]+'" style="max-width:190px;"><figcaption class=n style="text-align:center;">'+v+'</figcaption></figure>';
     return h+'</div>';
   }
-  // Both thumbnail grids at the SAME parameters (hero's G and n) for direct comparison
-  const _cmpG=_heroG,_cmpN=typeof N!=='undefined'?N:0;
-  if(typeof _wRenderAllViews==='function')
-    html+=imgGrid('Opener — all views (rendered at shared G='+_cmpG+', n='+_cmpN+')',_wRenderAllViews(_cmpG,_cmpN));
-  html+=imgGrid('Hero — all views (G='+_cmpG+', n='+_cmpN+'; unzoomed)',heroAllViews());
+  // Each thumbnail grid mirrors its OWN section's live on-screen state:
+  // opener views at the opener slider's G/n (colors, flip, per-ring twist
+  // and χ filter come from the same live opener state the canvas uses);
+  // hero views at the hero's current G/n including any running animation.
+  if(_wSt)
+    html+=imgGrid('Opener — all views (opener state: G='+_wSt.G+', n='+_wSt.n+')',_wSt.imgs||( typeof _wRenderAllViews==='function'?_wRenderAllViews(_wSt.G,_wSt.n):{}));
+  if(incHero)
+    html+=imgGrid('Hero — all views (hero state: G='+_heroG+', n='+_heroLiveN+'; unzoomed)',heroAllViews());
   html+='<div class=n>Limits cited: 1/ζ(2) (Euler), D(n) and C(n) from the C(n) Euler product; measured columns are finite-G lattice counts, so |Δ| is the finite-size error (empirically O(1/G)).</div></body></html>';
   // Mobile-safe: popups + document.write are unreliable on Android Chrome.
   // Print via a hidden same-page iframe; also download the HTML as a fallback
@@ -13403,7 +13579,7 @@ function exportStateReport(){
   try{
     const blob=new Blob([html],{type:'text/html'});
     const a=document.createElement('a');
-    a.download='cn_state_report_'+Date.now()+'.html';
+    a.download='cn_state_report_'+(scope==='both'?'full':scope)+'_'+Date.now()+'.html';
     a.href=URL.createObjectURL(blob);a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){}
@@ -20736,7 +20912,7 @@ function _heroSmithSetZoomOut(f){
   });
 }
 
-let _heroSmithSpinning=false, _heroSmithSpeed=60; // deg/sec — starts off, auto-enabled after a delay (see below)
+let _heroSmithSpinning=false, _heroSmithSpeed=60; // deg/sec — starts off, manual control only
 let _heroSmithFlipping=false;
 let _heroSmithFlipScale=1; // current animated x-scale: 1 ↔ -1 (mirrored across the y-axis) — defaults unmirrored now
 let _heroSmithFlipSign=1, _heroSmithFlipFrom=1, _heroSmithFlipT0=0;
@@ -20973,11 +21149,22 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
         const icol=(_HPI_COLS||['#fff'])[idx>=0?idx%(_HPI_COLS||['#fff']).length:0];
         ctx.strokeStyle=icol;ctx.lineWidth=1.2;
         ctx.beginPath();ctx.arc(px,py,drawR*1.9,0,Math.PI*2);ctx.stroke();
-        // Always label the clicked point (r/M), independent of label mode
-        ctx.font="9px 'JetBrains Mono',monospace";
-        ctx.textAlign='center';ctx.textBaseline='bottom';
+        // Always label the clicked point (r/M), independent of label mode.
+        // Placement follows the sector "Side" select so dense traced runs
+        // alternate above/below (or left/right) instead of stacking in a line.
+        ctx.font=(9*(typeof _heroSecLblScale!=='undefined'?_heroSecLblScale:1)).toFixed(1)+"px 'JetBrains Mono',monospace";
         ctx.fillStyle=icol;
-        ctx.fillText(r+'/'+M,px,py-drawR*1.9-2);
+        {
+          const _side=document.getElementById('hero-sec-label-side')?.value||'up';
+          const _odd=(idx>=0?idx:0)&1;
+          const _off=drawR*1.9+2;
+          let _lx=px,_ly=py;
+          if(_side==='updown'&&_odd){ctx.textAlign='center';ctx.textBaseline='top';_ly=py+_off;}
+          else if(_side==='leftright'){ctx.textBaseline='middle';
+            if(_odd){ctx.textAlign='right';_lx=px-_off;}else{ctx.textAlign='left';_lx=px+_off;}}
+          else{ctx.textAlign='center';ctx.textBaseline='bottom';_ly=py-_off;}
+          ctx.fillText(r+'/'+M,_lx,_ly);
+        }
         if(idx>=0)_smithInspXY[idx]={x:px,y:py};
       }
 
@@ -21211,12 +21398,12 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
       views:['grid','ring','farey','lift','gauss','smith'],
       set:function(v){if(typeof heroSetView==='function')heroSetView(v);},
       stopButtons:['hero-view-grid','hero-view-ring','hero-view-farey','hero-view-lift','hero-view-gauss','hero-view-smith']});
-    // Default on open: land on Grid but do NOT auto-play — the tour is
-    // opt-in now (hit the play button), unless a share-link hash pinned a
-    // specific view, in which case leave it alone entirely.
-    var h=location.hash||'';
-    if(wTour&&h.indexOf('wv=')<0){wTour.goFirst();}
-    if(hTour&&h.indexOf('hv=')<0){hTour.goFirst();}
+    // The tour is fully opt-in: it must NOT touch the view on load. The old
+    // goFirst() here was the hidden "snap to grid" — it fired on
+    // DOMContentLoaded and overrode both the opener's and the hero's default
+    // Smith view (dragging sector-path redraws and ring-lift resets along
+    // with it). Both canvases now simply stay on whatever they initialized
+    // to (Smith, or a wv=/hv= share-link view) until ▶ is pressed.
   }
   if(document.readyState!=='loading')_tourBoot(20);
   else document.addEventListener('DOMContentLoaded',function(){_tourBoot(20);});
