@@ -37,6 +37,8 @@ p.lede{font-size:1.02rem;color:var(--cream2);max-width:70ch;}
 .ctl-row input[type=number]{width:52px;background:rgba(255,255,255,.05);border:1px solid var(--edge);color:var(--cream);font-family:var(--mono);font-size:9px;padding:3px 4px;text-align:center;}
 .tc-btn{background:none;border:1px solid rgba(200,168,74,.4);color:var(--gold);font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;cursor:pointer;}
 .tc-btn.on{background:rgba(200,168,74,.2);}
+.lock-btn.on{background:rgba(224,80,96,.22);border-color:var(--red);color:var(--red);}
+.ctl-row input:disabled{opacity:.35;cursor:not-allowed;}
 canvas{display:block;width:100%;background:#030310;border:1px solid var(--edge2);}
 .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0;}
 .stat{background:var(--bg2);border:1px solid var(--edge2);padding:10px 12px;}
@@ -129,25 +131,45 @@ the same mechanism is what shapes $C(n)$'s Euler product on Page&nbsp;1.
   </div>
   <div class="ctl-row">
     <label class="teal">g₁:</label>
-    <input type="range" id="sl-g1" min="1" max="128" step="1" value="6" oninput="setG1(+this.value)">
+    <input type="range" id="sl-g1" min="1" max="255" step="1" value="6" oninput="setG1(+this.value)">
     <input type="number" id="inp-g1" min="1" value="6" oninput="setG1(+this.value)">
+    <button class="tc-btn lock-btn" id="lock-g1" onclick="toggleLock(1)" title="Lock g₁ = G/2 — tracks G as it moves">🔒 g₁=G/2</button>
     <label class="violet" style="margin-left:10px;">g₂:</label>
-    <input type="range" id="sl-g2" min="1" max="128" step="1" value="10" oninput="setG2(+this.value)">
+    <input type="range" id="sl-g2" min="1" max="255" step="1" value="10" oninput="setG2(+this.value)">
     <input type="number" id="inp-g2" min="1" value="10" oninput="setG2(+this.value)">
+    <button class="tc-btn lock-btn" id="lock-g2" onclick="toggleLock(2)" title="Lock g₂ = G/2 — tracks G as it moves">🔒 g₂=G/2</button>
+  </div>
+  <div class="ctl-row" id="row-g3" style="display:none;">
+    <label class="gold">g₃:</label>
+    <input type="range" id="sl-g3" min="1" max="255" step="1" value="15" oninput="setG3(+this.value)">
+    <input type="number" id="inp-g3" min="1" value="15" oninput="setG3(+this.value)">
+    <button class="tc-btn lock-btn" id="lock-g3" onclick="toggleLock(3)" title="Lock g₃ = G/2 — tracks G as it moves">🔒 g₃=G/2</button>
+    <button class="tc-btn" onclick="removeStrip(3)">✕ remove g₃</button>
+  </div>
+  <div class="ctl-row" id="row-g4" style="display:none;">
+    <label class="red">g₄:</label>
+    <input type="range" id="sl-g4" min="1" max="255" step="1" value="21" oninput="setG4(+this.value)">
+    <input type="number" id="inp-g4" min="1" value="21" oninput="setG4(+this.value)">
+    <button class="tc-btn lock-btn" id="lock-g4" onclick="toggleLock(4)" title="Lock g₄ = G/2 — tracks G as it moves">🔒 g₄=G/2</button>
+    <button class="tc-btn" onclick="removeStrip(4)">✕ remove g₄</button>
   </div>
   <div class="ctl-row">
     <button class="tc-btn" id="btn-play" onclick="togglePlay()">▶ Play g₂</button>
-    <button class="tc-btn" onclick="var t=g1;setG1(g2);setG2(t);">⇄ Swap</button>
+    <button class="tc-btn" onclick="var t=g1;setG1(g2);setG2(t);">⇄ Swap g₁,g₂</button>
     <button class="tc-btn" onclick="setG2(g1)">g₂ = g₁</button>
     <button class="tc-btn" onclick="setG2(2*g1)">g₂ = 2g₁</button>
+    <button class="tc-btn" id="btn-addg3" onclick="addStrip(3)">+ add g₃</button>
+    <button class="tc-btn" id="btn-addg4" onclick="addStrip(4)">+ add g₄</button>
     <span id="gcd-lbl" class="hint"></span>
   </div>
 
   <canvas id="cv-strips" height="420"></canvas>
   <p class="hint" style="margin-top:6px;">
     Lattice triangle (dim) · strip g₁ <span class="teal">teal</span> · strip g₂ <span class="violet">violet</span> ·
-    filled = coprime on that strip · a <span class="gold">gold column</span> connects (r, r+g₁)→(r, r+g₂) where r is coprime to <b>both</b> —
-    the joint event. Columns are what independence would get wrong.
+    optional strip g₃ <span class="gold">gold</span> · optional strip g₄ <span class="red">coral</span> ·
+    filled = coprime on that strip · a <span class="gold">gold column</span> spans (r,r+g₁)…(r,r+g_k) where r is coprime to <b>every active strip</b> —
+    the joint event. Columns are what independence would get wrong. Each g-slider's range adapts to
+    the current G (a strip can never reach or exceed G), and 🔒 pins a strip to exactly G/2, following G as it moves.
   </p>
 
   <div class="statgrid">
@@ -243,7 +265,11 @@ function jointExact(a,b){var r=1;
   Object.keys(seen).forEach(function(p){r*=(1-1/(+p));});return r;}
 function rhoExact(a,b){var r=1;primeFactors(gcd(a,b)).forEach(function(p){r*=p/(p-1);});return r;}
 
-var G=256,g1=6,g2=10,playId=null,playDir=1;
+var G=256,g1=6,g2=10,g3=15,g4=21,playId=null,playDir=1;
+var active=[1,2];                          // which strip indices are in play (1,2 always on; 3,4 optional)
+var lock={1:false,2:false,3:false,4:false}; // per-strip "pin to G/2" state
+var STRIP_COLOR={1:'rgba(61,200,184,0.9)',2:'rgba(155,127,232,0.9)',3:'rgba(200,168,74,0.9)',4:'rgba(224,80,96,0.9)'};
+var STRIP_SUB={1:'₁',2:'₂',3:'₃',4:'₄'};
 
 function fit(cv){
   // The design height is captured ONCE from the height attribute. Setting
@@ -262,19 +288,74 @@ function fit(cv){
 
 function setG(v){G=Math.max(32,Math.min(1024,Math.round(v||256)));
   document.getElementById('sl-G').value=G;document.getElementById('inp-G').value=G;
-  clampG();renderAll();}
-function setG1(v){g1=Math.max(1,Math.min(128,Math.round(v||1)));
-  document.getElementById('sl-g1').value=g1;document.getElementById('inp-g1').value=g1;renderAll();}
-function setG2(v){g2=Math.max(1,Math.min(128,Math.round(v||1)));
-  document.getElementById('sl-g2').value=g2;document.getElementById('inp-g2').value=g2;renderAll();}
-function clampG(){if(g1>=G)setG1(G-1);if(g2>=G)setG2(G-1);}
+  updateGRanges();applyLocks();clampG();renderAll();}
+// Every strip slider's range adapts live to the current G — a strip can
+// never reach or exceed G (strip length is G−g), so max is always G−1.
+function updateGRanges(){
+  var mx=Math.max(1,G-1);
+  [1,2,3,4].forEach(function(i){
+    var sl=document.getElementById('sl-g'+i),inp=document.getElementById('inp-g'+i);
+    if(sl)sl.max=mx; if(inp)inp.max=mx;
+  });
+}
+function setStrip(i,v){
+  var mx=Math.max(1,G-1);
+  var val=Math.max(1,Math.min(mx,Math.round(v||1)));
+  window['g'+i]=val;
+  var sl=document.getElementById('sl-g'+i),inp=document.getElementById('inp-g'+i);
+  if(sl)sl.value=val; if(inp)inp.value=val;
+  renderAll();
+}
+function setG1(v){lock[1]=false;syncLockBtn(1);setStrip(1,v);}
+function setG2(v){lock[2]=false;syncLockBtn(2);setStrip(2,v);}
+function setG3(v){lock[3]=false;syncLockBtn(3);setStrip(3,v);}
+function setG4(v){lock[4]=false;syncLockBtn(4);setStrip(4,v);}
+function clampG(){
+  active.forEach(function(i){
+    var mx=Math.max(1,G-1);
+    if(window['g'+i]>mx){
+      window['g'+i]=mx;
+      var sl=document.getElementById('sl-g'+i),inp=document.getElementById('inp-g'+i);
+      if(sl)sl.value=mx; if(inp)inp.value=mx;
+    }
+  });
+}
+// ── Lock a strip to exactly G/2; it then tracks every G move automatically ──
+function toggleLock(i){
+  lock[i]=!lock[i];
+  syncLockBtn(i);
+  if(lock[i])setStrip(i,Math.round(G/2));
+  else renderAll();
+}
+function syncLockBtn(i){
+  var b=document.getElementById('lock-g'+i),sl=document.getElementById('sl-g'+i),inp=document.getElementById('inp-g'+i);
+  if(b)b.classList.toggle('on',!!lock[i]);
+  if(sl)sl.disabled=!!lock[i]; if(inp)inp.disabled=!!lock[i];
+}
+function applyLocks(){[1,2,3,4].forEach(function(i){if(lock[i])setStrip(i,Math.round(G/2));});}
+// ── Optional third/fourth strip ──
+function addStrip(i){
+  if(active.indexOf(i)!==-1)return;
+  active.push(i);active.sort();
+  var row=document.getElementById('row-g'+i); if(row)row.style.display='';
+  var btn=document.getElementById('btn-addg'+i); if(btn)btn.style.display='none';
+  updateGRanges();renderAll();
+}
+function removeStrip(i){
+  var idx=active.indexOf(i); if(idx===-1)return;
+  active.splice(idx,1);
+  var row=document.getElementById('row-g'+i); if(row)row.style.display='none';
+  var btn=document.getElementById('btn-addg'+i); if(btn)btn.style.display='';
+  lock[i]=false;syncLockBtn(i);renderAll();
+}
 function togglePlay(){
   var b=document.getElementById('btn-play');
   if(playId){clearInterval(playId);playId=null;b.textContent='▶ Play g₂';b.classList.remove('on');return;}
   b.textContent='■ Stop';b.classList.add('on');playDir=1;
   playId=setInterval(function(){
+    var mx=Math.max(1,G-1);
     var next=g2+playDir;
-    if(next>=128){next=128;playDir=-1;}
+    if(next>=mx){next=mx;playDir=-1;}
     else if(next<=1){next=1;playDir=1;}
     setG2(next);
   },140);
@@ -291,16 +372,23 @@ function renderStrips(){
   c.fillStyle='rgba(232,227,219,.05)';
   for(var M=2;M<=G;M+=step)for(var r=1;r<M;r+=step)
     c.fillRect(ox+r*cell,oy+(M-1)*cell,Math.max(.5,cell*step*.7),Math.max(.5,cell*step*.7));
-  // joint gold columns first (under the strip dots)
-  var Rmax=G-Math.max(g1,g2), joint=0, c1=0, c2=0;
+  var gs=active.map(function(i){return window['g'+i];});
+  var gMax=Math.max.apply(null,gs);
+  // joint gold columns first (under the strip dots) — spans every active strip's y at this r
+  var Rmax=G-gMax, joint=0, counts={};
+  active.forEach(function(i){counts[i]=0;});
   for(var r2=1;r2<=Rmax;r2++){
-    var a=gcd(r2,g1)===1, b=gcd(r2,g2)===1;
-    if(a)c1++; if(b)c2++;
-    if(a&&b){joint++;
-      var x=ox+r2*cell;
-      var yA=oy+(r2+g1-1)*cell, yB=oy+(r2+g2-1)*cell;
+    var allCop=true, ys=[];
+    for(var k=0;k<active.length;k++){
+      var idx=active[k], gv=gs[k], cop=gcd(r2,gv)===1;
+      if(cop)counts[idx]++; else allCop=false;
+      ys.push(oy+(r2+gv-1)*cell);
+    }
+    if(allCop){
+      joint++;
+      var x=ox+r2*cell, yMin=Math.min.apply(null,ys), yMax=Math.max.apply(null,ys);
       c.strokeStyle='rgba(200,168,74,.35)';c.lineWidth=Math.max(.6,cell*.5);
-      c.beginPath();c.moveTo(x,Math.min(yA,yB));c.lineTo(x,Math.max(yA,yB));c.stroke();
+      c.beginPath();c.moveTo(x,yMin);c.lineTo(x,yMax);c.stroke();
     }
   }
   // strips
@@ -314,34 +402,50 @@ function renderStrips(){
       else{c.strokeStyle=col.replace(/[\d.]+\)$/,'0.30)');c.lineWidth=.8;c.stroke();}
     }
   }
-  strip(g1,'rgba(61,200,184,0.9)');
-  strip(g2,'rgba(155,127,232,0.9)');
+  active.forEach(function(i){strip(window['g'+i],STRIP_COLOR[i]);});
   // r=M seam
   c.strokeStyle='rgba(224,80,96,.25)';c.setLineDash([3,4]);c.lineWidth=1;
   c.beginPath();c.moveTo(ox+cell,oy);c.lineTo(ox+side,oy+side-cell);c.stroke();c.setLineDash([]);
-  return {joint:joint,c1:c1,c2:c2,Rmax:Rmax};
+  return {joint:joint,counts:counts,Rmax:Rmax,gs:gs};
 }
 
 // ── Stats + per-prime working ──
+function jointExactMulti(gs){
+  var seen={};
+  gs.forEach(function(g){primeFactors(g).forEach(function(p){seen[p]=1;});});
+  var r=1;Object.keys(seen).forEach(function(p){r*=(1-1/(+p));});
+  return r;
+}
 function renderStats(counts){
-  var d1=phiRatio(g1), d2=phiRatio(g2), ind=d1*d2;
-  var J=jointExact(g1,g2), rho=rhoExact(g1,g2);
+  var gs=active.map(function(i){return window['g'+i];});
+  var dens=gs.map(phiRatio);
+  var ind=dens.reduce(function(a,b){return a*b;},1);
+  var J=jointExactMulti(gs);
   var meas=counts.joint/Math.max(1,counts.Rmax);
   var rhoMeas=meas/Math.max(1e-12,ind);
-  var g=gcd(g1,g2);
-  document.getElementById('gcd-lbl').textContent='gcd(g₁,g₂)='+g+'  ·  strip densities φ(g₁)/g₁='+d1.toFixed(4)+', φ(g₂)/g₂='+d2.toFixed(4);
+  var rho=J/Math.max(1e-300,ind);
+  // primes shared by 2+ active strips drive the correlation
+  var primeCount={};
+  gs.forEach(function(g){
+    var seen={};primeFactors(g).forEach(function(p){seen[p]=1;});
+    Object.keys(seen).forEach(function(p){primeCount[p]=(primeCount[p]||0)+1;});
+  });
+  var shared=Object.keys(primeCount).map(Number).filter(function(p){return primeCount[p]>=2;}).sort(function(a,b){return a-b;});
+  var densLbl=active.map(function(i,k){return 'φ(g'+STRIP_SUB[i]+')/g'+STRIP_SUB[i]+'='+dens[k].toFixed(4);}).join(', ');
+  document.getElementById('gcd-lbl').textContent=(shared.length?('shared primes {'+shared.join(',')+'}'):'no shared primes')+'  ·  '+densLbl;
   document.getElementById('st-meas').textContent=meas.toFixed(6);
   document.getElementById('st-meas-sub').textContent=counts.joint+'/'+counts.Rmax+'  ·  |Δ| vs exact = '+Math.abs(meas-J).toExponential(2);
   document.getElementById('st-ind').textContent=ind.toFixed(6);
   document.getElementById('st-exact').textContent=J.toFixed(6);
   document.getElementById('st-rho').textContent=rho.toFixed(6);
-  document.getElementById('st-rho-sub').textContent='measured ρ = '+rhoMeas.toFixed(6)+'  ·  ∏ p/(p−1) over p | '+g;
-  // working table
-  var ps=primeFactors(g);
-  var html='<tr><th>p | gcd(g₁,g₂)</th><th>factor p/(p−1)</th><th>running ρ</th></tr>';
-  if(!ps.length) html+='<tr><td colspan="3">gcd = '+g+' — no shared primes: ρ = 1, the strips really are independent</td></tr>';
-  else{var run=1;ps.forEach(function(p){run*=p/(p-1);
-    html+='<tr><td class="red">'+p+'</td><td>'+p+'/'+(p-1)+' = '+(p/(p-1)).toFixed(6)+'</td><td class="gold">'+run.toFixed(6)+'</td></tr>';});}
+  document.getElementById('st-rho-sub').textContent='measured ρ = '+rhoMeas.toFixed(6)+'  ·  over '+active.length+' strip'+(active.length>1?'s':'');
+  // working table — generalizes gcd(g1,g2) to "primes shared by ≥2 active strips",
+  // each contributing (p/(p−1))^(c−1) where c = how many active strips it divides
+  var html='<tr><th>p shared by ≥2 strips</th><th>#strips ÷ p</th><th>factor (p/(p−1))^(c−1)</th><th>running ρ</th></tr>';
+  if(!shared.length) html+='<tr><td colspan="4">no shared primes across the active strips — ρ = 1, fully independent</td></tr>';
+  else{var run=1;shared.forEach(function(p){
+    var cnt=primeCount[p], f=Math.pow(p/(p-1),cnt-1); run*=f;
+    html+='<tr><td class="red">'+p+'</td><td>'+cnt+'</td><td>'+f.toFixed(6)+'</td><td class="gold">'+run.toFixed(6)+'</td></tr>';});}
   document.getElementById('work-table').innerHTML=html;
 }
 
@@ -408,6 +512,8 @@ window.addEventListener('resize',function(){
   clearTimeout(_rzT);
   _rzT=setTimeout(renderAll,150);
 });
+updateGRanges();
+[1,2,3,4].forEach(syncLockBtn);
 renderAll();
 </script>
 </body>
