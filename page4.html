@@ -313,15 +313,15 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
   </table>
 
   <h2>Why does the pattern repeat?</h2>
-  <p>A reader on the original post asked about a self‑similar, repeating pattern that seemed to "scale at some
-  frequency" in the lattice views. It's not connected to the zeta function's zeros or anything spherical — it's
-  much more down‑to‑earth, and it falls straight out of the sieve structure above.</p>
+  <p>The lattice views show a self‑similar, repeating pattern that appears to "scale at some frequency."
+  It's not connected to the zeta function's zeros or anything spherical — it's much more down‑to‑earth, and
+  it falls straight out of the sieve structure above.</p>
   <p>Whether a cell <span class="mono">(r, M)</span> lights up depends only on <span class="mono">r</span> and
   <span class="mono">M</span> <em>modulo small primes</em> — divisibility by 2 repeats every 2 integers, by 3
   every 3, by 5 every 5, and so on. Once you've accounted for every saturated prime up to
   <span class="mono">n+1</span>, the whole coprimality pattern repeats exactly with period
-  <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of those primes. That's the "unknown
-  frequency": it isn't unknown at all, it's the product of the small primes below the block length, and it grows
+  <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of those primes. That "frequency"
+  isn't unknown at all: it's the product of the small primes below the block length, and it grows
   <em>combinatorially</em> (2, 6, 30, 210, 2310, …) rather than smoothly, which is exactly what makes the
   self‑similarity look like it's "scaling" as you zoom — each new saturated prime multiplies the repeat period by
   that prime. This is the same mechanism behind the classic Sieve of Eratosthenes visualizations and Stern–Brocot /
