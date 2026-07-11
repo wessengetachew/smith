@@ -113,6 +113,8 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
   <a class="pn-lnk" href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="background:transparent;border:1px solid rgba(61,200,184,.35);color:var(--teal);">P2</a>
   <a class="pn-lnk" href="page3.html" target="_blank" title="Color & Label Modes — Page 3" style="background:transparent;border:1px solid rgba(155,127,232,.35);color:var(--violet);">P3</a>
   <a class="pn-lnk" href="page4.html" title="How C(n) Works — Page 4 (current)" style="background:rgba(126,200,122,.14);border:1px solid var(--lime);color:var(--lime);font-weight:600;">P4</a>
+  <a class="pn-lnk" href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="background:transparent;border:1px solid rgba(224,80,96,.35);color:#e05060;">P5</a>
+  <button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
 </div>
 
 <!-- STICKY N CONTROL -->
@@ -580,5 +582,6 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
   else document.addEventListener('DOMContentLoaded',c4Redraw);
 })();
 </script>
+<script>function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}</script>
 </body>
 </html>

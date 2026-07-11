@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strip Correlations — Where Independence Breaks · Wessen Getachew</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04040d; --bg2:#080816; --edge:#ffffff21; --edge2:#ffffff14;
+  --cream:#e8e3db; --cream2:#a8a294; --cream3:#6a6560;
+  --gold:#c8a84a; --teal:#3dc8b8; --violet:#9b7fe8; --red:#e05060; --lime:#7ec87a;
+  --mono:'JetBrains Mono',monospace; --disp:'Cinzel',serif; --body:'Spectral',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--cream);font-family:var(--body);line-height:1.65;}
+a{color:var(--teal);}
+#wrap{max-width:1060px;margin:0 auto;padding:0 18px 80px;}
+h1{font-family:var(--disp);font-weight:500;font-size:clamp(1.5rem,4vw,2.4rem);letter-spacing:.04em;color:var(--cream);margin:34px 0 6px;}
+h2{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--edge2);}
+p.lede{font-size:1.02rem;color:var(--cream2);max-width:70ch;}
+.card{background:var(--bg2);border:1px solid var(--edge2);padding:18px 20px;margin:14px 0;}
+.card p{color:var(--cream2);font-size:.95rem;max-width:72ch;margin:8px 0;}
+.card b{color:var(--cream);}
+.mono{font-family:var(--mono);}
+.hint{font-family:var(--mono);font-size:8px;color:var(--cream3);letter-spacing:.05em;}
+.ctl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;font-family:var(--mono);font-size:9px;}
+.ctl-row label{color:var(--cream2);}
+.ctl-row input[type=range]{flex:1;min-width:100px;max-width:220px;}
+.ctl-row input[type=number]{width:52px;background:rgba(255,255,255,.05);border:1px solid var(--edge);color:var(--cream);font-family:var(--mono);font-size:9px;padding:3px 4px;text-align:center;}
+.tc-btn{background:none;border:1px solid rgba(200,168,74,.4);color:var(--gold);font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;cursor:pointer;}
+.tc-btn.on{background:rgba(200,168,74,.2);}
+canvas{display:block;width:100%;background:#030310;border:1px solid var(--edge2);}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0;}
+.stat{background:var(--bg2);border:1px solid var(--edge2);padding:10px 12px;}
+.stat .lbl{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);}
+.stat .val{font-family:var(--mono);font-size:14px;margin-top:4px;}
+.stat .sub{font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:2px;}
+table.work{border-collapse:collapse;font-family:var(--mono);font-size:9.5px;margin:10px 0;width:100%;max-width:520px;}
+table.work th,table.work td{border:1px solid var(--edge2);padding:5px 10px;text-align:left;color:var(--cream2);}
+table.work th{color:var(--cream3);font-weight:400;letter-spacing:.08em;text-transform:uppercase;font-size:7.5px;}
+.gold{color:var(--gold);} .teal{color:var(--teal);} .violet{color:var(--violet);} .red{color:var(--red);} .lime{color:var(--lime);}
+blockquote{border-left:2px solid var(--gold);padding:10px 16px;margin:26px 0;color:var(--cream2);font-style:italic;}
+blockquote cite{display:block;font-style:normal;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;}
+#foot-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:40px;font-family:var(--mono);font-size:9px;}
+</style>
+</head>
+<body>
+
+<!-- ── PAGE NAV (same bar as index.html) ── -->
+<script>
+(function(){
+  var links=[
+   ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
+   ['page2.html','P2','Gap Diagonal Identity — Page 2','#3dc8b8'],
+   ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
+   ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
+   ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
+   ['#opener','Opener','Open the Welcome / Opener Teaser on the home page','#f2a84a']
+  ];
+  var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
+  bar+='<span style="font-family:\'Cinzel\',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
+  links.forEach(function(L){var href=L[0],lab=L[1],ti=L[2],c=L[3];var cur=(href==='page5.html');
+    if(href==='#opener'){
+      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
+    }
+    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
+    else{bar+='<a href="'+href+'" target="_blank" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
+  });
+  bar+='<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;">\u26f6 Full</button>';
+  bar+='</div>';
+  document.write(bar);
+})();
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+</script>
+
+<div id="wrap">
+
+<h1>Strip Correlations</h1>
+<p class="lede">
+Page 2 reads the lattice as diagonal strips $|M-r|=g$, each with coprime density exactly
+$\varphi(g)/g$ — and notes that the strips are <b>not independent</b>, because they share prime
+factors. This page makes that dependence exact, visible, and measurable. The identities here are
+elementary (CRT / inclusion–exclusion); the point is watching independence break, and seeing that
+the same mechanism is what shapes $C(n)$'s Euler product on Page&nbsp;1.
+</p>
+
+<h2>01 · The exact correlation factor</h2>
+<div class="card">
+  <p>
+  A point of strip $g$ is $(r,\,r+g)$, and $\gcd(r,\,r+g)=\gcd(r,g)$ — so strip $g$'s coprimality is
+  the event "$r$ is coprime to $g$", with density $\varphi(g)/g=\prod_{p\mid g}(1-\tfrac1p)$.
+  Take two strips $g_1,g_2$ and ask for the <b>joint</b> event: the same $r$ coprime to both.
+  By periodicity mod $\mathrm{lcm}(g_1,g_2)$ (CRT), the joint density is
+  </p>
+  <p style="text-align:center;">$$J(g_1,g_2)\;=\;\prod_{p\,\mid\,g_1 g_2}\Bigl(1-\frac1p\Bigr).$$</p>
+  <p>
+  Independence would predict the product $\frac{\varphi(g_1)}{g_1}\cdot\frac{\varphi(g_2)}{g_2}$ — which
+  counts every <b>shared</b> prime twice. The ratio is the correlation factor:
+  </p>
+  <p style="text-align:center;">$$\rho(g_1,g_2)\;=\;\frac{J(g_1,g_2)}{\frac{\varphi(g_1)}{g_1}\frac{\varphi(g_2)}{g_2}}
+  \;=\;\prod_{p\,\mid\,\gcd(g_1,g_2)}\frac{p}{p-1}\;\;\ge\;1.$$</p>
+  <p>
+  So the correlation is <b>always non-negative</b>, depends only on $\gcd(g_1,g_2)$, and equals $1$
+  exactly when the strips are coprime to each other. Two strips sharing a factor of 2 are already
+  $2\times$ more correlated than independence predicts; sharing $2\cdot3$ makes it $3\times$.
+  At $g_1=g_2=g$ the factor is $g/\varphi(g)$ — the strip is perfectly correlated with itself, as it must be.
+  </p>
+</div>
+
+<h2>02 · Two strips, live</h2>
+<div class="card">
+  <div class="ctl-row">
+    <label>G:</label>
+    <input type="range" id="sl-G" min="32" max="1024" step="1" value="256" oninput="setG(+this.value)">
+    <input type="number" id="inp-G" min="32" max="1024" value="256" oninput="setG(+this.value)">
+    <span class="hint">strip length is G−g — finite-size error shrinks as G grows</span>
+  </div>
+  <div class="ctl-row">
+    <label class="teal">g₁:</label>
+    <input type="range" id="sl-g1" min="1" max="128" step="1" value="6" oninput="setG1(+this.value)">
+    <input type="number" id="inp-g1" min="1" value="6" oninput="setG1(+this.value)">
+    <label class="violet" style="margin-left:10px;">g₂:</label>
+    <input type="range" id="sl-g2" min="1" max="128" step="1" value="10" oninput="setG2(+this.value)">
+    <input type="number" id="inp-g2" min="1" value="10" oninput="setG2(+this.value)">
+  </div>
+  <div class="ctl-row">
+    <button class="tc-btn" id="btn-play" onclick="togglePlay()">▶ Play g₂</button>
+    <button class="tc-btn" onclick="var t=g1;setG1(g2);setG2(t);">⇄ Swap</button>
+    <button class="tc-btn" onclick="setG2(g1)">g₂ = g₁</button>
+    <button class="tc-btn" onclick="setG2(2*g1)">g₂ = 2g₁</button>
+    <span id="gcd-lbl" class="hint"></span>
+  </div>
+
+  <canvas id="cv-strips" height="420"></canvas>
+  <p class="hint" style="margin-top:6px;">
+    Lattice triangle (dim) · strip g₁ <span class="teal">teal</span> · strip g₂ <span class="violet">violet</span> ·
+    filled = coprime on that strip · a <span class="gold">gold column</span> connects (r, r+g₁)→(r, r+g₂) where r is coprime to <b>both</b> —
+    the joint event. Columns are what independence would get wrong.
+  </p>
+
+  <div class="statgrid">
+    <div class="stat"><div class="lbl">measured joint (finite G)</div><div class="val gold" id="st-meas">—</div><div class="sub" id="st-meas-sub"></div></div>
+    <div class="stat"><div class="lbl">independent prediction</div><div class="val" id="st-ind">—</div><div class="sub">φ(g₁)/g₁ · φ(g₂)/g₂</div></div>
+    <div class="stat"><div class="lbl">exact joint J(g₁,g₂)</div><div class="val teal" id="st-exact">—</div><div class="sub">∏ over p | g₁g₂ of (1−1/p)</div></div>
+    <div class="stat"><div class="lbl">ρ — correlation factor</div><div class="val red" id="st-rho">—</div><div class="sub" id="st-rho-sub">exact vs measured</div></div>
+  </div>
+
+  <div id="work-wrap">
+    <table class="work" id="work-table"></table>
+  </div>
+</div>
+
+<h2>03 · The whole correlation landscape</h2>
+<div class="card">
+  <p>
+  Because $\rho$ depends only on $\gcd(g_1,g_2)$, the map of all strip pairs inherits the full
+  structure of the gcd function — bright rays along common multiples, brightest on the diagonal
+  where a strip meets itself. <b>Click any cell</b> to load that pair into the live view above.
+  </p>
+  <canvas id="cv-heat" height="520"></canvas>
+  <p class="hint" style="margin-top:6px;">
+    ρ(g₁,g₂) for g₁,g₂ = 1…96, log color scale · dark = ρ=1 (coprime strips, truly independent) ·
+    bright <span class="red">red-gold</span> = strong shared-prime correlation · current pair marked.
+    This picture is exact — no sampling.
+  </p>
+</div>
+
+<h2>04 · Why C(n) has min(n+1, p) in it</h2>
+<div class="card">
+  <p>
+  Page 1's constant is $C(n)=\zeta(2)\prod_p\bigl(1-\min(n{+}1,p)/p^2\bigr)$. The block event behind it —
+  $r$ coprime to all of $M, M{+}1,\dots,M{+}n$ — is a family of $n{+}1$ overlapping strip-type conditions.
+  If those conditions were independent, each prime would contribute $(1-1/p^2)^{\,n+1}$, i.e. the block density
+  would be $\zeta(2)^{-(n+1)}$-shaped. What actually happens, prime by prime:
+  </p>
+  <p>
+  <b class="teal">Large primes, $p &gt; n{+}1$:</b> the block of $n{+}1$ consecutive integers occupies $n{+}1$
+  distinct residues mod $p$, so the pair $(r,M)$ fails for $\min(n{+}1,p)=n{+}1$ of the $p^2$ residue pairs —
+  giving $1-(n{+}1)/p^2$, which is what near-independence looks like to first order:
+  $(1-1/p^2)^{n+1}\approx 1-(n{+}1)/p^2$. The strips barely feel each other.
+  </p>
+  <p>
+  <b class="red">Small primes, $p \le n{+}1$:</b> the block covers <b>every</b> residue class mod $p$ —
+  the conditions collapse into one: "$p \nmid r$". That is total correlation, and it is exactly where
+  $\min(n{+}1,p)$ saturates at $p$, contributing $1-p/p^2 = 1-\tfrac1p$ — the same factor as a
+  $\varphi(g)/g$ strip. The <b>saturation points</b> $n=p-1$ that Page 1's <span class="mono">sat−/sat+</span>
+  buttons jump between are precisely the depths where one more prime crosses from the
+  near-independent regime into the fully-correlated one.
+  </p>
+  <p>
+  So the two regimes of $\min(n{+}1,p)$ are not a formula quirk — they are the independence-to-correlation
+  transition of this page, happening once per prime as $n$ grows.
+  </p>
+</div>
+
+<h2>05 · Honest scope</h2>
+<div class="card">
+  <p>
+  The identities on this page — $\gcd(r,r{+}g)=\gcd(r,g)$, the joint density over
+  $p \mid g_1g_2$, and the correlation factor $\rho=\prod_{p\mid\gcd} p/(p{-}1)$ — are elementary and
+  classical in method (periodicity and CRT). No novelty is claimed for them. What this page contributes
+  is the reading: the diagonal-strip decomposition of Pages 1–2 fails to be independent in an exactly
+  computable way, that failure is gcd-structured, and the $\min(n{+}1,p)$ kernel of $C(n)$ is the same
+  phenomenon seen prime-by-prime. Measured columns are finite-$G$ counts; the |Δ| shown is the
+  finite-size error, empirically $O(1/G)$, consistent with Page 1's reports.
+  </p>
+</div>
+
+<blockquote>
+  Independence between strips is the exception, not the rule — and its failure is not noise.
+  It is a product over the primes the strips share.
+  <cite>— Strip Correlations · wessengetachew.github.io · 2026</cite>
+</blockquote>
+
+<div id="foot-links">
+  <a href="index.html">← Page 1 · full explorer</a>
+  <a href="page2.html">Page 2 · Gap Diagonal Identity</a>
+  <a href="page3.html">Page 3 · Color & label modes</a>
+  <a href="page4.html">Page 4 · Guided walkthrough</a>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+'use strict';
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function primeFactors(x){var ps=[],d=2;while(d*d<=x){if(x%d===0){ps.push(d);while(x%d===0)x=Math.floor(x/d);}d+=(d===2)?1:2;}if(x>1)ps.push(x);return ps;}
+function phiRatio(g){var r=1;primeFactors(g).forEach(function(p){r*=(1-1/p);});return r;}
+function jointExact(a,b){var r=1;
+  var seen={};[a,b].forEach(function(g){primeFactors(g).forEach(function(p){seen[p]=1;});});
+  Object.keys(seen).forEach(function(p){r*=(1-1/(+p));});return r;}
+function rhoExact(a,b){var r=1;primeFactors(gcd(a,b)).forEach(function(p){r*=p/(p-1);});return r;}
+
+var G=256,g1=6,g2=10,playId=null,playDir=1;
+
+function fit(cv){
+  // The design height is captured ONCE from the height attribute. Setting
+  // cv.height rewrites that attribute, so re-reading it every call compounds
+  // by dpr each render (420→1260→3780→…) — the unbounded-canvas crash.
+  if(!cv._baseH)cv._baseH=(+cv.getAttribute('height'))||420;
+  var h=cv._baseH;
+  var w=Math.max(200,Math.min(1400,(cv.parentElement.clientWidth||600)-2));
+  var dpr=Math.min(2,window.devicePixelRatio||1); // cap backing store on high-dpr phones
+  var bw=Math.round(w*dpr),bh=Math.round(h*dpr);
+  if(cv.width!==bw||cv.height!==bh){cv.width=bw;cv.height=bh;} // reallocate only on real size change
+  cv.style.width=w+'px';cv.style.height=h+'px';
+  var c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+  return {c:c,W:w,H:h};
+}
+
+function setG(v){G=Math.max(32,Math.min(1024,Math.round(v||256)));
+  document.getElementById('sl-G').value=G;document.getElementById('inp-G').value=G;
+  clampG();renderAll();}
+function setG1(v){g1=Math.max(1,Math.min(128,Math.round(v||1)));
+  document.getElementById('sl-g1').value=g1;document.getElementById('inp-g1').value=g1;renderAll();}
+function setG2(v){g2=Math.max(1,Math.min(128,Math.round(v||1)));
+  document.getElementById('sl-g2').value=g2;document.getElementById('inp-g2').value=g2;renderAll();}
+function clampG(){if(g1>=G)setG1(G-1);if(g2>=G)setG2(G-1);}
+function togglePlay(){
+  var b=document.getElementById('btn-play');
+  if(playId){clearInterval(playId);playId=null;b.textContent='▶ Play g₂';b.classList.remove('on');return;}
+  b.textContent='■ Stop';b.classList.add('on');playDir=1;
+  playId=setInterval(function(){
+    var next=g2+playDir;
+    if(next>=128){next=128;playDir=-1;}
+    else if(next<=1){next=1;playDir=1;}
+    setG2(next);
+  },140);
+}
+
+// ── Live strips canvas ──
+function renderStrips(){
+  var F=fit(document.getElementById('cv-strips')),c=F.c,W=F.W,H=F.H;
+  c.fillStyle='#030310';c.fillRect(0,0,W,H);
+  var pad=14, side=Math.min(W,H)-pad*2;
+  var ox=(W-side)/2, oy=(H-side)/2, cell=side/G;
+  // triangle backdrop (r<M), sampled sparsely at large G to stay light
+  var step=G>320?Math.ceil(G/320):1;
+  c.fillStyle='rgba(232,227,219,.05)';
+  for(var M=2;M<=G;M+=step)for(var r=1;r<M;r+=step)
+    c.fillRect(ox+r*cell,oy+(M-1)*cell,Math.max(.5,cell*step*.7),Math.max(.5,cell*step*.7));
+  // joint gold columns first (under the strip dots)
+  var Rmax=G-Math.max(g1,g2), joint=0, c1=0, c2=0;
+  for(var r2=1;r2<=Rmax;r2++){
+    var a=gcd(r2,g1)===1, b=gcd(r2,g2)===1;
+    if(a)c1++; if(b)c2++;
+    if(a&&b){joint++;
+      var x=ox+r2*cell;
+      var yA=oy+(r2+g1-1)*cell, yB=oy+(r2+g2-1)*cell;
+      c.strokeStyle='rgba(200,168,74,.35)';c.lineWidth=Math.max(.6,cell*.5);
+      c.beginPath();c.moveTo(x,Math.min(yA,yB));c.lineTo(x,Math.max(yA,yB));c.stroke();
+    }
+  }
+  // strips
+  function strip(g,col){
+    for(var r3=1;r3+g<=G;r3++){
+      var x=ox+r3*cell, y=oy+(r3+g-1)*cell;
+      var cop=gcd(r3,g)===1;
+      var rad=Math.max(.8,cell*(cop?.55:.3));
+      c.beginPath();c.arc(x,y,rad,0,6.2832);
+      if(cop){c.fillStyle=col;c.fill();}
+      else{c.strokeStyle=col.replace(/[\d.]+\)$/,'0.30)');c.lineWidth=.8;c.stroke();}
+    }
+  }
+  strip(g1,'rgba(61,200,184,0.9)');
+  strip(g2,'rgba(155,127,232,0.9)');
+  // r=M seam
+  c.strokeStyle='rgba(224,80,96,.25)';c.setLineDash([3,4]);c.lineWidth=1;
+  c.beginPath();c.moveTo(ox+cell,oy);c.lineTo(ox+side,oy+side-cell);c.stroke();c.setLineDash([]);
+  return {joint:joint,c1:c1,c2:c2,Rmax:Rmax};
+}
+
+// ── Stats + per-prime working ──
+function renderStats(counts){
+  var d1=phiRatio(g1), d2=phiRatio(g2), ind=d1*d2;
+  var J=jointExact(g1,g2), rho=rhoExact(g1,g2);
+  var meas=counts.joint/Math.max(1,counts.Rmax);
+  var rhoMeas=meas/Math.max(1e-12,ind);
+  var g=gcd(g1,g2);
+  document.getElementById('gcd-lbl').textContent='gcd(g₁,g₂)='+g+'  ·  strip densities φ(g₁)/g₁='+d1.toFixed(4)+', φ(g₂)/g₂='+d2.toFixed(4);
+  document.getElementById('st-meas').textContent=meas.toFixed(6);
+  document.getElementById('st-meas-sub').textContent=counts.joint+'/'+counts.Rmax+'  ·  |Δ| vs exact = '+Math.abs(meas-J).toExponential(2);
+  document.getElementById('st-ind').textContent=ind.toFixed(6);
+  document.getElementById('st-exact').textContent=J.toFixed(6);
+  document.getElementById('st-rho').textContent=rho.toFixed(6);
+  document.getElementById('st-rho-sub').textContent='measured ρ = '+rhoMeas.toFixed(6)+'  ·  ∏ p/(p−1) over p | '+g;
+  // working table
+  var ps=primeFactors(g);
+  var html='<tr><th>p | gcd(g₁,g₂)</th><th>factor p/(p−1)</th><th>running ρ</th></tr>';
+  if(!ps.length) html+='<tr><td colspan="3">gcd = '+g+' — no shared primes: ρ = 1, the strips really are independent</td></tr>';
+  else{var run=1;ps.forEach(function(p){run*=p/(p-1);
+    html+='<tr><td class="red">'+p+'</td><td>'+p+'/'+(p-1)+' = '+(p/(p-1)).toFixed(6)+'</td><td class="gold">'+run.toFixed(6)+'</td></tr>';});}
+  document.getElementById('work-table').innerHTML=html;
+}
+
+// ── ρ heatmap (exact, gcd-structured) ──
+var HEAT_N=96, heatGeom=null, _heatCache=null, _heatCacheKey='';
+function renderHeat(){
+  var F=fit(document.getElementById('cv-heat')),c=F.c,W=F.W,H=F.H;
+  var key=W+'x'+H;
+  if(_heatCache&&_heatCacheKey===key){
+    c.clearRect(0,0,W,H);
+    c.drawImage(_heatCache,0,0,W,H);
+    _heatMarker(c);
+    return;
+  }
+  c.fillStyle='#030310';c.fillRect(0,0,W,H);
+  var pad=26, side=Math.min(W,H)-pad*2, cw=side/HEAT_N;
+  var ox=(W-side)/2, oy=(H-side)/2;
+  heatGeom={ox:ox,oy:oy,cw:cw};
+  // ρ ranges from 1 up to ~ (2/1)(3/2)(5/4)… — log scale vs max over the grid
+  var maxLog=Math.log(rhoExact(2*3*5*7, 2*3*5*7)); // primorial self-pair bounds the visible range
+  for(var a=1;a<=HEAT_N;a++)for(var b=1;b<=HEAT_N;b++){
+    var v=Math.log(rhoExact(a,b))/maxLog; // 0..~1
+    v=Math.max(0,Math.min(1,v));
+    var hue=45-35*v, li=8+60*v, sa=30+60*v;
+    c.fillStyle=v<=0?'rgba(232,227,219,.05)':'hsl('+hue.toFixed(0)+','+sa.toFixed(0)+'%,'+li.toFixed(0)+'%)';
+    c.fillRect(ox+(a-1)*cw,oy+(b-1)*cw,Math.ceil(cw),Math.ceil(cw));
+  }
+  // axes ticks every 12
+  c.fillStyle='rgba(168,162,148,.7)';c.font="8px 'JetBrains Mono',monospace";c.textAlign='center';
+  for(var t=12;t<=HEAT_N;t+=12){
+    c.fillText(t,ox+(t-.5)*cw,oy+side+12);
+    c.textAlign='right';c.fillText(t,ox-4,oy+(t-.5)*cw+3);c.textAlign='center';
+  }
+  c.textAlign='left';c.fillText('g₁ →',ox+side-24,oy+side+12);
+  c.save();c.translate(ox-16,oy+22);c.rotate(-Math.PI/2);c.fillText('g₂ →',0,0);c.restore();
+  // Cache the finished field (marker excluded) so slider moves are a blit
+  var cv=document.getElementById('cv-heat');
+  _heatCache=document.createElement('canvas');
+  _heatCache.width=cv.width;_heatCache.height=cv.height;
+  _heatCache.getContext('2d').drawImage(cv,0,0);
+  _heatCacheKey=key;
+  _heatMarker(c);
+}
+function _heatMarker(c){
+  if(!heatGeom||g1>HEAT_N||g2>HEAT_N)return;
+  c.strokeStyle='#3dc8b8';c.lineWidth=1.6;
+  c.strokeRect(heatGeom.ox+(g1-1)*heatGeom.cw-1,heatGeom.oy+(g2-1)*heatGeom.cw-1,heatGeom.cw+2,heatGeom.cw+2);
+}
+document.getElementById('cv-heat').addEventListener('click',function(e){
+  if(!heatGeom)return;
+  var rect=this.getBoundingClientRect();
+  var a=Math.floor((e.clientX-rect.left-heatGeom.ox)/heatGeom.cw)+1;
+  var b=Math.floor((e.clientY-rect.top-heatGeom.oy)/heatGeom.cw)+1;
+  if(a>=1&&a<=HEAT_N&&b>=1&&b<=HEAT_N){setG1(a);setG2(b);}
+});
+
+function renderAll(){
+  var counts=renderStrips();
+  renderStats(counts);
+  renderHeat();
+}
+var _rzT=null;
+window.addEventListener('resize',function(){
+  clearTimeout(_rzT);
+  _rzT=setTimeout(renderAll,150);
+});
+renderAll();
+</script>
+</body>
+</html>

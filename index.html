@@ -1250,6 +1250,23 @@ function heroToggleTopBars(){
         <span style="color:#a8a294;">Thick:</span>
         <input type="range" min="0.2" max="6" step="0.1" value="0.7" style="width:70px;accent-color:rgba(155,127,232,.7);" oninput="liftSetThick(this.value)">
         <span class="lift-thick-lbl" style="color:#a8a294;min-width:30px;">0.7px</span>
+        <span style="color:#a8a294;">Spiral lbl:</span>
+        <select id="lift-lbl-mode" onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(k+1), 1/k], k=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
+          style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+          <option value="none">none</option>
+          <option value="channel">1/n channel</option>
+          <option value="outer" selected>outer point</option>
+        </select>
+        <span id="lift-lbl-channel-wrap" style="display:none;align-items:center;gap:5px;">
+          <span style="color:#a8a294;">which 1/n:</span>
+          <select id="lift-lbl-channel" onchange="liftSetLblChannel(this.value)" title="Restrict labels to a single Farey sector, e.g. (1/2,1] or (1/3,1/2] — matching the way our Farey sectors are defined — or show every channel"
+            style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+            <option value="0" selected>all sectors</option>
+          </select>
+        </span>
+        <span style="color:#a8a294;">Lbl size:</span>
+        <input type="range" id="lift-lbl-size-sl" min="0.3" max="2.5" step="0.05" value="1" style="width:60px;accent-color:rgba(230,120,130,.8);" oninput="liftSetLblSize(this.value)">
+        <span id="lift-lbl-size-lbl" style="color:rgba(230,120,130,.9);min-width:26px;">1.00×</span>
         <button class="lift-mode-btn" data-m="npath" onclick="liftSetMode('npath')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#3dc8b8;border-bottom:2px solid #3dc8b8;padding:2px 1px;">±n</button>
         <button class="lift-mode-btn" data-m="spiral" onclick="liftSetMode('spiral')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Spiral</button>
         <button class="lift-mode-btn" data-m="both" onclick="liftSetMode('both')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Both</button>
@@ -1259,7 +1276,7 @@ function heroToggleTopBars(){
         <span class="lift-pathn-lbl" style="color:#e8e2d4;min-width:14px;text-align:center;">1</span>
         <button onclick="liftSetPathN(1)" style="background:none;border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
         <button onclick="liftCycleSpiralP(-1)" style="background:none;border:1px solid rgba(200,168,74,.35);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 5px;cursor:pointer;">◀</button>
-        <span class="lift-spiralp-lbl" style="color:#c8a84a;min-width:30px;text-align:center;">p=auto</span>
+        <span class="lift-spiralp-lbl" style="color:#c8a84a;min-width:30px;text-align:center;">p=2</span>
         <button onclick="liftCycleSpiralP(1)" style="background:none;border:1px solid rgba(200,168,74,.35);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 5px;cursor:pointer;">▶</button>
         <span style="color:rgba(230,56,72,.85);">● spiral</span>
         <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding" style="background:none;border:1px solid rgba(230,56,72,.4);color:rgba(230,56,72,.85);font-family:inherit;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
@@ -1570,7 +1587,7 @@ function heroToggleTopBars(){
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Label:</span>
           <select id="wsec-label-mode" onchange="wTraceSector()"
             style="background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-            <option value="none">None</option>
+            <option value="none" selected>None</option>
             <option value="coords">r, M</option>
             <option value="fraction">r/M (reduced)</option>
             <option value="angle">2πr/M °</option>
@@ -1581,7 +1598,7 @@ function heroToggleTopBars(){
             <option value="phi_M">φ(M)</option>
             <option value="mobius_M">μ(M)</option>
             <option value="gap">gap |M-r|</option>
-            <option value="r_val" selected>r only</option>
+            <option value="r_val">r only</option>
             <option value="M_val">M only</option>
           </select>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Side:</span>
@@ -3275,6 +3292,23 @@ function heroToggleTopBars(){
     }
     ctx.restore();
   }
+  // Spiral-point label: the Farey channel of r/M — the unique k=⌊M/r⌋ with
+  // 1/(k+1) < r/M ≤ 1/k. 'rich' prefixes direction+prime for the outer-point mode.
+  // When _liftLblChannel>0 and this isn't the 'outer' (rich) call, only the
+  // single chosen Farey sector k gets a label — every other point is skipped.
+  function _wDynSpiralLabel(ctx,x,y,sr,pM,rich){
+    var k=Math.max(1,Math.floor(pM/Math.max(1,sr)));
+    if(!rich && typeof _liftLblChannel!=='undefined' && _liftLblChannel>0 && k!==_liftLblChannel)return;
+    var lbl=rich?(rich+' '+sr+'/'+pM+' · 1/'+k):('1/'+k);
+    var _scl=(typeof _liftLblScale!=='undefined')?_liftLblScale:_wSecLblScale;
+    ctx.save();
+    ctx.font=(8*_scl).toFixed(1)+"px 'JetBrains Mono',monospace";
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.lineWidth=2.2;ctx.strokeStyle='rgba(4,4,13,.85)';
+    ctx.fillStyle='rgba(230,120,130,.95)';
+    _wUprightAt(ctx,x,y,function(){ctx.strokeText(lbl,5,0);ctx.fillText(lbl,5,0);});
+    ctx.restore();
+  }
   // Lift lines + prime spiral + mirror σ + all-primes + dropout row + ±n
   // path for the flat views (Grid / Farey / Gauss) — same shared _lift*
   // toggles and exact residue semantics as the Ring and Smith blocks, so
@@ -3332,13 +3366,17 @@ function heroToggleTopBars(){
       }
     }
     var nList=allNOn?LIFT_ALL_N:[(typeof _liftPathN==='undefined')?1:_liftPathN];
+    var _spOut=null; // outermost spiral point for the 'outer' label mode
     for(var pM=3;pM<=G;pM++){
       if(!_wRingActive(pM))continue;
       if(spOn&&spP<pM){
         var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
         if(sr>=1&&sr<pM){
           var S=xy(sr,pM);
-          if(S){ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();}
+          if(S){ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
+            if(_liftLblMode==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
+            else if(_liftLblMode==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
+          }
           if(mirrorOn&&pM-sr>=1&&pM-sr<pM){
             var SM=xy(pM-sr,pM);
             if(SM){ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();}
@@ -3354,6 +3392,8 @@ function heroToggleTopBars(){
         if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=xy((pM-_nn2)/2,pM);if(D){ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}}
       }
     }
+    if(_liftLblMode==='outer'&&_spOut&&spOn)
+      _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
   }
   // ── Diagonal-g controls ──
   window.wDiagSet=function(v){
@@ -3537,12 +3577,15 @@ function heroToggleTopBars(){
         }
       }
       var nList=allNOn?LIFT_ALL_N:[(typeof _liftPathN==='undefined')?1:_liftPathN];
+      var _spOut=null; // outermost spiral point for the 'outer' label mode
       for(var pM=3;pM<=rings;pM++){
         if(!_wRingActive(pM))continue;
         if(spOn&&spP<pM){
           var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
           var S=ringXY(sr,pM);
           ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
+          if(_liftLblMode==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
+          else if(_liftLblMode==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
           if(mirrorOn){
             var SM=ringXY(pM-sr,pM);
             ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();
@@ -3557,6 +3600,8 @@ function heroToggleTopBars(){
           if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=ringXY((pM-_nn2)/2,pM);ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}
         }
       }
+      if(_liftLblMode==='outer'&&_spOut&&spOn)
+        _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
     }
     // Active Gaps: outline the full ring for every M in a twin/cousin/sexy-prime pair
     var gapSet=_wGapHighlightSet(G);
@@ -3853,7 +3898,9 @@ function heroToggleTopBars(){
           var th=2*Math.PI*prD/pM+alpha;
           var w=_conformalSmithXY(pRingR*Math.cos(th),pRingR*Math.sin(th),R0);
           ctx.fillStyle=color;ctx.beginPath();ctx.arc(cx+w.x,cy+w.y,rad,0,6.2832);ctx.fill();
+          return[cx+w.x,cy+w.y];
         };
+        var _spOutS=null; // outermost spiral point for the 'outer' label mode
         // Dropout ring — the ring M=p itself, where the spiral prime exits (ℤ/Mℤ)*.
         if(_dropoutOn&&spP>=2&&spP<=rings&&_wRingActive(spP)){
           var dRingR=0.5+((spP-1)/Math.max(1,rings-1))*1.5;
@@ -3883,7 +3930,9 @@ function heroToggleTopBars(){
           if(!_wRingActive(pM))continue;
           if(_spOn&&spP<pM){
             var sr=_spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
-            mark(sr,pM,'rgba(230,56,72,.95)',2.6); // red spiral
+            var _sPt=mark(sr,pM,'rgba(230,56,72,.95)',2.6); // red spiral
+            if(_liftLblMode==='channel')_wDynSpiralLabel(ctx,_sPt[0],_sPt[1],sr,pM);
+            else if(_liftLblMode==='outer')_spOutS={x:_sPt[0],y:_sPt[1],sr:sr,pM:pM};
             if(_mirrorOn) mark(pM-sr,pM,'rgba(155,127,232,.85)',2.3); // conjugate σ(r)=M−r
           }
           for(var nI=0;nI<_nList.length;nI++){
@@ -3895,6 +3944,8 @@ function heroToggleTopBars(){
             if(_npDir!=='up'&&(pM-_nn)/2>=1)mark((pM-_nn)/2,pM,nCol,2.2);
           }
         }
+        if(_liftLblMode==='outer'&&_spOutS&&_spOn)
+          _wDynSpiralLabel(ctx,_spOutS.x,_spOutS.y,_spOutS.sr,_spOutS.pM,(_spDir==='up'?'▲p':'▼p')+spP);
       }
       ctx.restore();
     }
@@ -4365,6 +4416,7 @@ function heroToggleTopBars(){
    ['page2.html','P2','Gap Diagonal Identity — Page 2','#3dc8b8'],
    ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
    ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
+   ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
    ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
   ];
   var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
@@ -4377,9 +4429,12 @@ function heroToggleTopBars(){
     else{bar+='<a href="'+href+'" target="_blank" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
   });
   bar+='<span style="flex:1"></span>';
+  bar+='<button id="wg-fs-btn" onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#e8e3db\';this.style.color=\'#e8e3db\'" onmouseout="this.style.borderColor=\'rgba(232,227,219,.3)\';this.style.color=\'rgba(232,227,219,.75)\'">\u26f6 Full</button>';
   bar+='<button id="wg-status-btn" onclick="if(typeof exportStateReport===\'function\')exportStateReport(\'hero\')" title="Main-page status report \u00b7 hero parameters \u00b7 theoretical vs measured \u00b7 canvas snapshots \u00b7 print to PDF" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.8);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#3dc8b8\';this.style.color=\'#3dc8b8\'" onmouseout="this.style.borderColor=\'rgba(61,200,184,.35)\';this.style.color=\'rgba(61,200,184,.8)\'">\u2399 Status</button>';
   bar+='<button id="wg-credits-btn" onclick="wgToggleCredits()" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.65);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#c8a84a\';this.style.color=\'#c8a84a\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.25)\';this.style.color=\'rgba(255,255,255,.65)\'">Credits ▾</button>';
   bar+='</div>';
+
+  window.wgFS=function(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}};
 
   // ── Credits panel — historical / mathematical attributions, collapsed by default ──
   var creditGroups=[
@@ -5496,7 +5551,7 @@ function heroToggleTopBars(){
     <button onclick="liftSetPathN(10)" style="background:none;border:1px solid var(--edge2);color:#3dc8b8;font-family:var(--mono);font-size:8px;padding:2px 6px;cursor:pointer;">+10</button>
     <span style="width:8px;"></span>
     <button onclick="liftCycleSpiralP(-1)" style="background:none;border:1px solid var(--edge2);color:#c8a84a;font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;">◀</button>
-    <span class="lift-spiralp-lbl" style="font-size:9px;color:#c8a84a;min-width:34px;text-align:center;">p=auto</span>
+    <span class="lift-spiralp-lbl" style="font-size:9px;color:#c8a84a;min-width:34px;text-align:center;">p=2</span>
     <button onclick="liftCycleSpiralP(1)" style="background:none;border:1px solid var(--edge2);color:#c8a84a;font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;">▶</button>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 14px;border-bottom:1px solid rgba(155,127,232,.12);background:rgba(155,127,232,.04);">
@@ -13661,10 +13716,12 @@ function heroLatticeSetG(v){
   // smaller G and automatically extend when G grows.
   if(typeof _heroSectorFrac!=='undefined'&&_heroSectorFrac&&typeof heroTraceSector==='function')heroTraceSector();
   _updateHeroRatioLive(_heroG);
-  // Spiral prime re-tracks the grid's own max prime ≤ G on every resize.
-  if(typeof _liftSpiralP!=='undefined'){
-    _liftSpiralP=0;
-    document.querySelectorAll('.lift-spiralp-lbl').forEach(l=>l.textContent='p=auto');
+  // Spiral prime: keep the chosen p across G changes (default p=2); only
+  // clamp down to the largest prime ≤ G if the grid shrank below it.
+  if(typeof _liftSpiralP!=='undefined'&&_liftSpiralP>_heroG){
+    for(let pi=PRIMES.length-1;pi>=0;pi--)if(PRIMES[pi]<=_heroG){_liftSpiralP=PRIMES[pi];break;}
+    if(_liftSpiralP>_heroG)_liftSpiralP=2;
+    document.querySelectorAll('.lift-spiralp-lbl').forEach(l=>l.textContent='p='+_liftSpiralP);
   }
 }
 
@@ -14151,9 +14208,40 @@ function _fareyPanelUpdate(){
 
 // Lift panel
 let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=true, _liftDotScale=1.0;
+let _liftLblMode='outer'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding)
+let _liftLblChannel=0;    // 0 = all sectors; k>0 = only label points whose Farey channel ⌊M/r⌋ equals k
+let _liftLblScale=1;      // spiral label font scale, independent of the sector-trace label size
+function liftSetLblMode(v){
+  _liftLblMode=v||'none';
+  var wrap=document.getElementById('lift-lbl-channel-wrap');
+  if(wrap)wrap.style.display=(_liftLblMode==='channel')?'inline-flex':'none';
+  _liftPopulateLblChannels();
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
+function _liftPopulateLblChannels(){
+  var sel=document.getElementById('lift-lbl-channel');
+  if(!sel||sel.dataset.built)return;
+  sel.dataset.built='1';
+  for(var k=1;k<=16;k++){
+    var opt=document.createElement('option');
+    opt.value=String(k);
+    opt.textContent=(k===1?'1':('1/'+k))+' – 1/'+(k+1);
+    sel.appendChild(opt);
+  }
+}
+function liftSetLblChannel(v){
+  _liftLblChannel=Math.max(0,Math.round(+v||0));
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
+function liftSetLblSize(v){
+  _liftLblScale=Math.max(0.2,+v||1);
+  var lbl=document.getElementById('lift-lbl-size-lbl');
+  if(lbl)lbl.textContent=_liftLblScale.toFixed(2)+'×';
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
 let _liftSurvOn=true, _liftBrokenOn=true, _liftThick=0.7;
 let _liftPathN=1;      // ±n path: r = (M±n)/2 (n=1 is the classic half-barrier)
-let _liftSpiralP=0;    // spiral prime; 0 = auto (largest prime ≤ G)
+let _liftSpiralP=2;    // spiral prime; defaults to p=2 (0 = auto → largest prime ≤ G)
 function _liftRedraw(){if(typeof wRedrawCanvas==='function')wRedrawCanvas();}
 function liftSetPathN(d){
   _liftPathN=Math.max(1,Math.min(999,_liftPathN+d));
@@ -14291,6 +14379,16 @@ function liftPPlay(){
     if(liftSpiralPFor(G)===before){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
   },_liftAnimSpeed);
 }
+
+// Auto-start the spiral-prime animation on load — default-on per design.
+// The opener opens on Smith with its Lift overlay on, so the sweep is
+// visible immediately; the ▶ p button reflects the running state and one
+// tap pauses it.
+(function _liftPAutoStart(){
+  function go(){setTimeout(function(){if(!_liftPPlayId)liftPPlay();},600);}
+  if(document.readyState!=='loading')go();
+  else document.addEventListener('DOMContentLoaded',go);
+})();
 
 // ── ▶ M : reuses the existing hero ring-count play loop ──
 function liftMPlay(){
