@@ -1251,22 +1251,12 @@ function heroToggleTopBars(){
         <input type="range" min="0.2" max="6" step="0.1" value="0.7" style="width:70px;accent-color:rgba(155,127,232,.7);" oninput="liftSetThick(this.value)">
         <span class="lift-thick-lbl" style="color:#a8a294;min-width:30px;">0.7px</span>
         <span style="color:#a8a294;">Spiral lbl:</span>
-        <select id="lift-lbl-mode" onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(k+1), 1/k], k=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
+        <select onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(k+1), 1/k], k=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
           style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-          <option value="none">none</option>
+          <option value="none" selected>none</option>
           <option value="channel">1/n channel</option>
-          <option value="outer" selected>outer point</option>
+          <option value="outer">outer point</option>
         </select>
-        <span id="lift-lbl-channel-wrap" style="display:none;align-items:center;gap:5px;">
-          <span style="color:#a8a294;">which 1/n:</span>
-          <select id="lift-lbl-channel" onchange="liftSetLblChannel(this.value)" title="Restrict labels to a single Farey sector, e.g. (1/2,1] or (1/3,1/2] — matching the way our Farey sectors are defined — or show every channel"
-            style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-            <option value="0" selected>all sectors</option>
-          </select>
-        </span>
-        <span style="color:#a8a294;">Lbl size:</span>
-        <input type="range" id="lift-lbl-size-sl" min="0.3" max="2.5" step="0.05" value="1" style="width:60px;accent-color:rgba(230,120,130,.8);" oninput="liftSetLblSize(this.value)">
-        <span id="lift-lbl-size-lbl" style="color:rgba(230,120,130,.9);min-width:26px;">1.00×</span>
         <button class="lift-mode-btn" data-m="npath" onclick="liftSetMode('npath')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#3dc8b8;border-bottom:2px solid #3dc8b8;padding:2px 1px;">±n</button>
         <button class="lift-mode-btn" data-m="spiral" onclick="liftSetMode('spiral')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Spiral</button>
         <button class="lift-mode-btn" data-m="both" onclick="liftSetMode('both')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Both</button>
@@ -3294,15 +3284,11 @@ function heroToggleTopBars(){
   }
   // Spiral-point label: the Farey channel of r/M — the unique k=⌊M/r⌋ with
   // 1/(k+1) < r/M ≤ 1/k. 'rich' prefixes direction+prime for the outer-point mode.
-  // When _liftLblChannel>0 and this isn't the 'outer' (rich) call, only the
-  // single chosen Farey sector k gets a label — every other point is skipped.
   function _wDynSpiralLabel(ctx,x,y,sr,pM,rich){
     var k=Math.max(1,Math.floor(pM/Math.max(1,sr)));
-    if(!rich && typeof _liftLblChannel!=='undefined' && _liftLblChannel>0 && k!==_liftLblChannel)return;
     var lbl=rich?(rich+' '+sr+'/'+pM+' · 1/'+k):('1/'+k);
-    var _scl=(typeof _liftLblScale!=='undefined')?_liftLblScale:_wSecLblScale;
     ctx.save();
-    ctx.font=(8*_scl).toFixed(1)+"px 'JetBrains Mono',monospace";
+    ctx.font=(8*_wSecLblScale).toFixed(1)+"px 'JetBrains Mono',monospace";
     ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.lineWidth=2.2;ctx.strokeStyle='rgba(4,4,13,.85)';
     ctx.fillStyle='rgba(230,120,130,.95)';
@@ -13776,10 +13762,14 @@ function exportStateReport(scope){
   const incOpener=(scope!=='hero'), incHero=(scope!=='opener');
   const Z=Math.PI*Math.PI/6, esc=x=>String(x);
   const row=(k,v)=>'<tr><td>'+k+'</td><td>'+esc(v)+'</td></tr>';
-  const cmp=(label,meas,cnt,theo,note)=>'<tr><td>'+label+'</td><td>'+meas+' <span class=n>('+cnt+')</span></td><td>'+theo+'</td><td>'+(meas!=='—'?Math.abs(meas-theo).toExponential(2):'—')+'</td><td class=n>'+note+'</td></tr>';
+  const cmp=(label,meas,cnt,theo,note)=>{
+    const ratio=(meas!=='—'&&theo)?(meas/theo):null;
+    return '<tr><td>'+label+'</td><td>'+meas+' <span class=n>('+cnt+')</span></td><td>'+theo+'</td><td>'+(meas!=='—'?Math.abs(meas-theo).toExponential(2):'—')+'</td><td>'+(ratio!==null?ratio.toFixed(6)+'×':'—')+'</td><td class=n>'+note+'</td></tr>';
+  };
   function counts(G,n,pop){return _cnExportCounts(G,n,pop);}
   function section(title,st,c,Cn,n,extra){
     const gcdR=c.total?c.gcd1/c.total:0, liftR=c.total?c.lift/c.total:0, condR=c.gcd1?c.lift/c.gcd1:0;
+    const n0Note=(n===0)?'<div class=n style="margin-top:4px;">n=0 → the block is just one modulus wide, so "raw density D(0)" (lift/total) trivially <i>equals</i> the "gcd ratio" (gcd1/total) above it — both are measuring the same gcd(r,M)=1 condition. That is expected, not a duplicate/bug. C(0)=1 is a separate statement: it\'s the lift/gcd row (conditional survival given coprimality), which is exactly 1 here because with only one step there is nothing left to fail.</div>':'';
     return '<h2>'+title+'</h2><div class=grid><table><caption>Parameters</caption>'+extra+'</table>'+
     '<table><caption>Counts — what is being counted</caption>'+
     row('total lattice points (r,M), M≤G',c.total)+
@@ -13788,11 +13778,11 @@ function exportStateReport(scope){
     row('lift survivors — gcd(r,M+j)=1, j=0..'+n,c.lift)+
     row('lift failures among coprime',c.gcd1-c.lift)+'</table>'+
     '<table class=w><caption>Theoretical vs measured (finite G vs G→∞ limit)</caption>'+
-    '<tr><th></th><th>measured</th><th>limit</th><th>|Δ|</th><th></th></tr>'+
-    cmp('gcd ratio',+gcdR.toFixed(6),c.gcd1+'/'+c.total,+(1/Z).toFixed(6),'→ 1/ζ(2): density of coprime pairs')+
-    cmp('lift ratio',+liftR.toFixed(6),c.lift+'/'+c.total,+(Cn/Z).toFixed(6),'→ D('+n+')=C('+n+')/ζ(2): raw block-coprime density')+
-    cmp('lift/gcd',+condR.toFixed(6),c.lift+'/'+c.gcd1,+Cn.toFixed(6),'→ C('+n+'): survival probability given coprimality — the constant itself')+
-    '</table>'+(st.img?'<img src="'+st.img+'">':'')+'</div>';
+    '<tr><th></th><th>measured</th><th>limit</th><th>|Δ|</th><th>measured/limit</th><th></th></tr>'+
+    cmp('gcd ratio — gcd1/total',+gcdR.toFixed(6),c.gcd1+'/'+c.total,+(1/Z).toFixed(6),'→ 1/ζ(2): density of coprime pairs')+
+    cmp('raw density D('+n+') — lift/total',+liftR.toFixed(6),c.lift+'/'+c.total,+(Cn/Z).toFixed(6),'→ D('+n+')=C('+n+')/ζ(2): raw block-coprime density')+
+    cmp('lift/gcd — C('+n+')',+condR.toFixed(6),c.lift+'/'+c.gcd1,+Cn.toFixed(6),'→ C('+n+'): survival probability given coprimality — the constant itself')+
+    '</table>'+n0Note+(st.img?'<img src="'+st.img+'">':'')+'</div>';
   }
   let html='<!DOCTYPE html><html><head><meta charset=utf-8><title>C(n) State Report</title><style>body{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#111;margin:24px;}h1{font-size:16px;}h2{font-size:13px;border-bottom:1px solid #999;margin-top:22px;}table{border-collapse:collapse;margin:8px 0;width:100%;}td,th{border:1px solid #ccc;padding:3px 7px;text-align:left;}caption{text-align:left;font-weight:700;padding:3px 0;}img{max-width:420px;border:1px solid #ccc;margin:8px 0;display:block;}.n{color:#555;font-size:9.5px;}@media print{img{max-width:360px;}}</style></head><body>';
   html+='<h1>C(n) — Block-Coprime Density · State Report'+(scope==='opener'?' (Opener)':scope==='hero'?' (Main page)':'')+'</h1><div class=n>'+new Date().toISOString()+' · C(n)=ζ(2)·∏_p(1−min(n+1,p)/p²) — probability that r is coprime to a block of n+1 consecutive integers starting at M, given the lattice below. gcd=1 counts coprime pairs; lift counts pairs surviving the full block; lift/gcd is the conditional survival that converges to C(n).</div>';
@@ -14208,35 +14198,9 @@ function _fareyPanelUpdate(){
 
 // Lift panel
 let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=true, _liftDotScale=1.0;
-let _liftLblMode='outer'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding)
-let _liftLblChannel=0;    // 0 = all sectors; k>0 = only label points whose Farey channel ⌊M/r⌋ equals k
-let _liftLblScale=1;      // spiral label font scale, independent of the sector-trace label size
+let _liftLblMode='none'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding)
 function liftSetLblMode(v){
   _liftLblMode=v||'none';
-  var wrap=document.getElementById('lift-lbl-channel-wrap');
-  if(wrap)wrap.style.display=(_liftLblMode==='channel')?'inline-flex':'none';
-  _liftPopulateLblChannels();
-  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
-}
-function _liftPopulateLblChannels(){
-  var sel=document.getElementById('lift-lbl-channel');
-  if(!sel||sel.dataset.built)return;
-  sel.dataset.built='1';
-  for(var k=1;k<=16;k++){
-    var opt=document.createElement('option');
-    opt.value=String(k);
-    opt.textContent=(k===1?'1':('1/'+k))+' – 1/'+(k+1);
-    sel.appendChild(opt);
-  }
-}
-function liftSetLblChannel(v){
-  _liftLblChannel=Math.max(0,Math.round(+v||0));
-  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
-}
-function liftSetLblSize(v){
-  _liftLblScale=Math.max(0.2,+v||1);
-  var lbl=document.getElementById('lift-lbl-size-lbl');
-  if(lbl)lbl.textContent=_liftLblScale.toFixed(2)+'×';
   if(typeof wRedrawCanvas==='function')wRedrawCanvas();
 }
 let _liftSurvOn=true, _liftBrokenOn=true, _liftThick=0.7;
