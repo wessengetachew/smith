@@ -1276,7 +1276,7 @@ function heroToggleTopBars(){
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Mirror conjugate spiral σ(r)=M−r"><input type="checkbox" class="lift-mirror-chk" onchange="liftToggleMirror(this.checked)">Mirror</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.9);cursor:pointer;" title="Highlight the dropout ring M=p"><input type="checkbox" class="lift-dropout-chk" onchange="liftToggleDropout(this.checked)">Dropout</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.7);cursor:pointer;" title="Overlay every prime's spiral"><input type="checkbox" class="lift-allp-chk" onchange="liftToggleAllPrimes(this.checked)">All p</label>
-        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(61,200,184,.9);cursor:pointer;" title="Overlay n=1,3,5,7,9 simultaneously"><input type="checkbox" class="lift-alln-chk" onchange="liftToggleAllN(this.checked)">All n</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Lock n / p / M / gap-diagonal together — starting or stopping any one starts or stops all four in sync"><input type="checkbox" class="lift-lock-chk" onchange="liftToggleLock(this.checked)">🔗 Lock</label>
         <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:none;border:1px solid rgba(61,200,184,.4);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ n</button>
         <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ p</button>
         <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:none;border:1px solid rgba(126,200,122,.4);color:#7ec87a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ M</button>
@@ -1376,8 +1376,8 @@ function heroToggleTopBars(){
           style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ G</button>
         <button onclick="wGStepPrime(-1)" title="Jump G to the previous prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">◂ prime</button>
-        <input type="range" id="ws-g-sl" min="1" max="512" step="1" value="31"
-          style="flex:1;accent-color:rgba(200,168,74,.8);" oninput="wGMarkUserTouched();wSetG(+this.value)">
+        <input type="range" id="ws-g-sl" min="0" max="100" step="1" value="45"
+          style="flex:1;accent-color:rgba(200,168,74,.8);" oninput="wGMarkUserTouched();wSetG(_sliderToG(+this.value))">
         <button onclick="wGStepPrime(1)" title="Jump G to the next prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">prime ▸</button>
         <input type="number" id="ws-g-num" min="1" max="2048" value="31"
@@ -3062,6 +3062,20 @@ function heroToggleTopBars(){
     if(!isPrimeW(v))return; // ran off the end without finding one
     window.wSetG(v);
   };
+  // Log2-scale mapping between the 0-100 slider position and the actual G
+  // value (1..2048) — same convention as _sliderToGridZoom/_gridZoomToSlider.
+  // A linear 1..2048 slider gives almost no usable resolution below G~100
+  // (each notch = ~20 units) while also needing 2048 notches to be precise;
+  // the log curve gives fine control at small G and still reaches 2048 in
+  // 100 steps. The number box next to it still allows exact values.
+  window._sliderToG=function(v){
+    v=Math.max(0,Math.min(100,+v||0));
+    return Math.max(1,Math.min(2048,Math.round(Math.pow(2048,v/100))));
+  };
+  window._gToSlider=function(g){
+    g=Math.max(1,Math.min(2048,Math.round(+g||1)));
+    return Math.max(0,Math.min(100,Math.round(Math.log(g)/Math.log(2048)*100)));
+  };
   window.wSetG=function(v){
     _wG=Math.max(1,Math.min(2048,Math.round(+v||31)));
     var gsl=document.getElementById('w-gap-sl');
@@ -3072,7 +3086,7 @@ function heroToggleTopBars(){
     _wUpdateFormulaRatios();
     var sl=document.getElementById('ws-g-sl');
     var num=document.getElementById('ws-g-num');
-    if(sl)sl.value=_wG;
+    if(sl)sl.value=_gToSlider(_wG);
     if(num)num.value=_wG;
     var lbl=document.getElementById('ws-g-lbl');
     if(lbl)lbl.textContent='G='+_wG+'  (grid p\u00b2='+(_wG*_wG)+')';
@@ -3458,6 +3472,13 @@ function heroToggleTopBars(){
       ctx.strokeStyle=color+'55';ctx.lineWidth=Math.max(1.5,cell*0.5);
       ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox+side,gy);ctx.stroke();
     });
+    // Batch by fillStyle: one Path2D per distinct color, one fill() per
+    // color, instead of one beginPath/arc/fill per point. Colors come from
+    // quantized hues (_wModColor), so the number of distinct strings stays
+    // small (low hundreds) no matter how large G gets — this turns up to
+    // ~4M individual fill() calls (at G=2048) into a few hundred.
+    var _gridBatch=new Map(); // color -> Path2D
+    var _hitCap=200000; // tap-to-inspect precision is moot past this density anyway
     for(var M=1;M<=G;M++){
       if(!_wRingActive(M))continue;
       // Full G×G square (r=1..G for every M) by default — matches the hero
@@ -3475,12 +3496,15 @@ function heroToggleTopBars(){
         var x=ox+rDisp*cell,y=oy+(M-1)*cell;
         var radBase=Math.min(cell*0.45,Math.max(cell*0.28,0.9/_wZoom)); // never-overlap cap, ≥~1px on screen
         var rad=(ok?radBase:radBase*0.55)*_wCharSizeMul(pureCop);
-        if(_wHitRec)_wHitPts.push(x,y,r,M);
-        ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);
-        ctx.fillStyle=_wModColor(r,M,ok,pureCop);
-        ctx.fill();
+        if(_wHitRec&&_wHitPts.length<_hitCap)_wHitPts.push(x,y,r,M);
+        var col=_wModColor(r,M,ok,pureCop);
+        var gp=_gridBatch.get(col);
+        if(!gp){gp=new Path2D();_gridBatch.set(col,gp);}
+        gp.moveTo(x+rad,y); // new subpath per dot — avoids connecting lines between circles
+        gp.arc(x,y,rad,0,Math.PI*2);
       }
     }
+    _gridBatch.forEach(function(path,col){ctx.fillStyle=col;ctx.fill(path);});
     // Sector path — highlight the traced lattice points (not a drawn line),
     // same mechanism as the hero's Trace path.
     for(var si=0;si<_wSectorPts.length;si++){
@@ -5576,7 +5600,7 @@ function heroToggleTopBars(){
     <button class="lift-npath-dir-btn" onclick="liftCycleNPathDir()" title="±1 branch: ↕ both · ▲ +1 only · ▼ −1 only"
       style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:var(--mono);font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" id="lift-show-spiral" checked style="accent-color:rgba(200,168,74,.8);"
+      <input type="checkbox" id="lift-show-spiral" style="accent-color:rgba(200,168,74,.8);"
         onchange="_liftPanelUpdate()">Prime spiral
     </label>
     <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding: ▲ r≡p (mod M) · ▼ mirrored r≡−p (mod M)"
@@ -5595,10 +5619,10 @@ function heroToggleTopBars(){
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(230,56,72,.7);cursor:pointer;white-space:nowrap;">
       <input type="checkbox" class="lift-allp-chk" style="accent-color:rgba(230,56,72,.65);" onchange="liftToggleAllPrimes(this.checked)">All primes
     </label>
-    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(61,200,184,.9);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" class="lift-alln-chk" style="accent-color:rgba(61,200,184,.8);" onchange="liftToggleAllN(this.checked)">n = 1,3,5,7,9
-    </label>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
+    <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(155,127,232,.9);cursor:pointer;white-space:nowrap;" title="Lock n / p / M / gap-diagonal together — starting or stopping any one starts or stops all four in sync">
+      <input type="checkbox" class="lift-lock-chk" style="accent-color:rgba(155,127,232,.8);" onchange="liftToggleLock(this.checked)">🔗 Lock
+    </label>
     <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ n</button>
     <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:rgba(200,168,74,.08);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ p</button>
     <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:rgba(126,200,122,.08);border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ M</button>
@@ -13767,6 +13791,17 @@ function exportStateReport(scope){
     return '<tr><td>'+label+'</td><td>'+meas+' <span class=n>('+cnt+')</span></td><td>'+theo+'</td><td>'+(meas!=='—'?Math.abs(meas-theo).toExponential(2):'—')+'</td><td>'+(ratio!==null?ratio.toFixed(6)+'×':'—')+'</td><td class=n>'+note+'</td></tr>';
   };
   function counts(G,n,pop){return _cnExportCounts(G,n,pop);}
+  // The state report's ratio table needs the TRUE full (r,M) lattice as its
+  // denominator to match the theoretical limits. _viewPop('farey') returns
+  // 'coprime', which makes _cnExportCounts skip every non-coprime point
+  // before counting 'total' — so 'total' silently collapses to gcd1, the
+  // measured gcd ratio becomes a trivial 1, and 'lift/total' quietly turns
+  // into the same value as the conditional lift/gcd ratio while still being
+  // held against the raw-density limit D(n). Swap 'coprime' for the
+  // underlying 'triangle' shape here so every ratio compares apples to
+  // apples; other call sites of _viewPop (live overlays, PNG panels) still
+  // intentionally want the drawn-only population and are untouched.
+  function _reportPop(v){const p=_viewPop(v);return p==='coprime'?'triangle':p;}
   function section(title,st,c,Cn,n,extra){
     const gcdR=c.total?c.gcd1/c.total:0, liftR=c.total?c.lift/c.total:0, condR=c.gcd1?c.lift/c.gcd1:0;
     const n0Note=(n===0)?'<div class=n style="margin-top:4px;">n=0 → the block is just one modulus wide, so "raw density D(0)" (lift/total) trivially <i>equals</i> the "gcd ratio" (gcd1/total) above it — both are measuring the same gcd(r,M)=1 condition. That is expected, not a duplicate/bug. C(0)=1 is a separate statement: it\'s the lift/gcd row (conditional survival given coprimality), which is exactly 1 here because with only one step there is nothing left to fail.</div>':'';
@@ -13789,7 +13824,7 @@ function exportStateReport(scope){
   // Opener
   const _wSt=(incOpener&&typeof _wStateSnapshot==='function')?_wStateSnapshot():null;
   if(_wSt){
-    const st=_wSt, c=counts(st.G,st.n,_viewPop(st.view));
+    const st=_wSt, c=counts(st.G,st.n,_reportPop(st.view));
     const ex=row('view',st.view)+row('G / n',st.G+' / '+st.n)+row('mode',st.mode)+
       row('zoom / pan',st.zoom.toFixed(3)+'× / ('+st.panX.toFixed(0)+','+st.panY.toFixed(0)+')')+
       row('per-ring twist',st.perRing)+
@@ -13808,7 +13843,7 @@ function exportStateReport(scope){
   const _hnPlaying=(typeof _heroNPlayId!=='undefined'&&_heroNPlayId&&typeof window._heroNPlayCur==='number');
   const _heroLiveN=_hnPlaying?window._heroNPlayCur:(typeof N!=='undefined'?N:0);
   if(incHero){
-    const G=_heroG, n=_heroLiveN, c=counts(G,n,_viewPop(_heroViewMode));
+    const G=_heroG, n=_heroLiveN, c=counts(G,n,_reportPop(_heroViewMode));
     const Cn=(typeof getCn==='function')?getCn(n):0;
     const cv=document.getElementById('hero-3d');
     const zoomEl=document.getElementById('hero-zoom-num');
@@ -14197,7 +14232,7 @@ function _fareyPanelUpdate(){
 }
 
 // Lift panel
-let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=true, _liftDotScale=1.0;
+let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=false, _liftShowNPath=true, _liftDotScale=1.0;
 let _liftLblMode='none'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding)
 function liftSetLblMode(v){
   _liftLblMode=v||'none';
@@ -14303,9 +14338,28 @@ function liftSetAnimSpeed(v){
   if(_liftPPlayId){clearInterval(_liftPPlayId);_liftPPlayId=null;liftPPlay();}
 }
 
+// ── Lock: when on, starting or stopping ANY of ▶n / ▶p / ▶M (or the Active
+// Gaps ▶ gap-diagonal sweep) starts or stops all of them together, so they
+// step in a single synchronized sweep instead of drifting independently.
+let _liftPlayLocked=false, _liftLockDispatching=false;
+function liftToggleLock(v){
+  _liftPlayLocked=!!v;
+  document.querySelectorAll('.lift-lock-chk').forEach(c=>{c.checked=_liftPlayLocked;});
+}
+function _liftCascadeIfLocked(skip){
+  if(!_liftPlayLocked||_liftLockDispatching)return;
+  _liftLockDispatching=true;
+  if(skip!=='n')liftNPlay();
+  if(skip!=='p')liftPPlay();
+  if(skip!=='m')liftMPlay();
+  if(typeof heroGapPlayToggle==='function')heroGapPlayToggle();
+  _liftLockDispatching=false;
+}
+
 // ── ▶ n : ping-pong the ±n path offset from 1 up to (ring max − 1) ──
 let _liftNPlayId=null, _liftNPlayDir=1;
 function liftNPlay(){
+  _liftCascadeIfLocked('n');
   const btns=document.querySelectorAll('.lift-n-play-btn');
   if(_liftNPlayId){
     clearInterval(_liftNPlayId);_liftNPlayId=null;
@@ -14328,6 +14382,7 @@ function liftNPlay(){
 // ── ▶ p : ping-pong the spiral prime through PRIMES ≤ current ring max ──
 let _liftPPlayId=null, _liftPPlayDir=1;
 function liftPPlay(){
+  _liftCascadeIfLocked('p');
   const btns=document.querySelectorAll('.lift-p-play-btn');
   if(_liftPPlayId){
     clearInterval(_liftPPlayId);_liftPPlayId=null;
@@ -14344,26 +14399,43 @@ function liftPPlay(){
   },_liftAnimSpeed);
 }
 
-// Auto-start the spiral-prime animation on load — default-on per design.
-// The opener opens on Smith with its Lift overlay on, so the sweep is
-// visible immediately; the ▶ p button reflects the running state and one
-// tap pauses it.
-(function _liftPAutoStart(){
-  function go(){setTimeout(function(){if(!_liftPPlayId)liftPPlay();},600);}
-  if(document.readyState!=='loading')go();
-  else document.addEventListener('DOMContentLoaded',go);
-})();
+// Prime spiral is OFF by default (was auto-starting ▶ p on load, which also
+// meant it was fighting with ▶ M's forced G-reset below — see liftMPlay).
+// The person can still turn it on any time via the "Prime spiral" checkbox
+// or the ▶ p button itself.
 
-// ── ▶ M : reuses the existing hero ring-count play loop ──
-function liftMPlay(){
-  if(typeof heroGPlay==='function') heroGPlay();
-  const running=(typeof _heroGPlayId!=='undefined')&&!!_heroGPlayId;
-  document.querySelectorAll('.lift-m-play-btn').forEach(b=>{
-    b.textContent=running?'■ M':'▶ M';
-    b.style.color=running?'rgba(224,80,96,.9)':'rgba(126,200,122,.9)';
-    b.style.background=running?'rgba(224,80,96,.12)':'rgba(126,200,122,.08)';
-  });
+// ── ▶ M : ping-pong the ring count G from wherever it currently sits, up to
+// gMax and back — deliberately NOT reusing heroGPlay(), which force-resets
+// G to 2 the instant it starts. That reset was clamping _liftSpiralP down
+// to 2 on every ▶ M press (heroLatticeSetG only lowers the spiral prime,
+// never raises it back), which is why the prime spiral visibly "skipped"
+// whenever the M animation kicked in. This version has its own loop/state
+// and never yanks G to a fixed floor at start — it just continues from the
+// current G — so the two animations no longer step on each other.
+let _liftMPlayId=null, _liftMPlayDir=1;
+function _liftMPlayToggle(){
+  const btns=document.querySelectorAll('.lift-m-play-btn');
+  if(_liftMPlayId){
+    clearInterval(_liftMPlayId);_liftMPlayId=null;
+    btns.forEach(b=>{b.textContent='▶ M';b.style.color='rgba(126,200,122,.9)';b.style.background='rgba(126,200,122,.08)';});
+    return;
+  }
+  const gMax=Math.max(8,+document.getElementById('hero-g-num')?.value||_liftCurrentG()||100);
+  _liftMPlayDir=(typeof _heroG!=='undefined'&&_heroG<gMax)?1:-1;
+  btns.forEach(b=>{b.textContent='■ M';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
+  _liftMPlayId=setInterval(()=>{
+    const cur=(typeof _heroG!=='undefined')?_heroG:gMax;
+    let next=cur+_liftMPlayDir;
+    if(next>=gMax){next=gMax;_liftMPlayDir=-1;}
+    else if(next<=2){next=2;_liftMPlayDir=1;}
+    if(typeof heroLatticeSetG==='function')heroLatticeSetG(next);
+  },_liftAnimSpeed);
 }
+function liftMPlay(){
+  _liftCascadeIfLocked('m');
+  _liftMPlayToggle();
+}
+
 
 // Grid panel
 let _gridShowDots=true, _gridDotScale=1.0, _gridShowGridLines=true, _gridGridLineOp=0.07;
