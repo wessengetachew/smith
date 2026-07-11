@@ -1614,6 +1614,35 @@ function heroToggleTopBars(){
         </div>
       </details>
 
+      <!-- Gap Diagonal — Page 2's φ(g)/g strip dynamic, works on all five views -->
+      <details id="w-diag-dd" style="margin-top:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);">
+        <summary style="cursor:pointer;padding:7px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
+          <span style="color:rgba(200,168,74,.7);font-size:8px;">▸</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#c8a84a;letter-spacing:.06em;">GAP DIAGONAL</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#a8a294;">strip |M−r| = g · coprime density exactly φ(g)/g — the Page 2 identity, on every view</span>
+        </summary>
+        <div style="padding:4px 9px 9px;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Diagonal g:</span>
+          <button onclick="wDiagStep(-1)" style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 8px;cursor:pointer;">−</button>
+          <input type="range" id="w-diag-sl" min="0" max="30" step="1" value="0"
+            style="flex:1;min-width:90px;max-width:160px;accent-color:rgba(200,168,74,.7);" oninput="wDiagSet(+this.value)">
+          <button onclick="wDiagStep(1)" style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 8px;cursor:pointer;">+</button>
+          <input type="number" id="w-diag-num" min="0" value="0"
+            style="width:44px;background:rgba(255,255,255,.05);border:1px solid rgba(200,168,74,.3);color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 4px;text-align:center;"
+            oninput="wDiagSet(+this.value)">
+          <span id="w-diag-val" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#c8a84a;min-width:34px;">off</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <button id="w-diag-play" onclick="wDiagPlay()" title="Ping-pong g across 1…G−1 — watch the strip sweep the lattice in every view"
+            style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;">▶ Play g</button>
+          <button id="w-diag-lock" onclick="wDiagLockHalfToggle()" title="Lock g to ⌊G/2⌋ — stays in sync as G changes, across all five views"
+            style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;">🔒 g=G/2</button>
+          <span id="w-diag-phi" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);"></span>
+        </div>
+        </div>
+      </details>
+
       <!-- Active Gaps — twin/cousin/sexy-prime highlighting, works on all five views -->
       <span id="wfs-anchor-gaps" style="display:none;"></span>
       <span id="wfs-anchor-working" style="display:none;"></span>
@@ -1858,7 +1887,7 @@ function heroToggleTopBars(){
     if(b){b.style.background=_wRingLift?'rgba(61,200,184,.18)':'none';
       b.style.color=_wRingLift?'rgba(61,200,184,.95)':'rgba(61,200,184,.55)';}
     var c=document.getElementById('w-ringlift-ctrl');
-    if(c)c.style.display=(_wRingLift&&_wView==='ring')?'flex':'none';
+    if(c)c.style.display=_wRingLift?'flex':'none'; // lift dynamics now render in all five views
     wRedrawCanvas();
   };
   window.wToggleLift=function(v){ _wShowLift=!!v; wRedrawCanvas(); };
@@ -2316,6 +2345,7 @@ function heroToggleTopBars(){
     var cv=document.getElementById('welcome-teaser');
     return{view:_wView,G:_wG,n:_wN,mode:_wMode,zoom:_wZoom,panX:_wPanX,panY:_wPanY,
       perRing:_wPerRing,smithZoomOut:_wSmithZoomOut,flip:_wsFlipScale,rot:(_wRotSteps&3)*90,
+      diagG:_wDiagG,ringLift:!!_wRingLift,
       smithTheta:((_wsTheta%360)+360)%360,spinning:!!_wsSpinning,flipping:!!_wsFlipping,
       colorMode:_wColorMode,charFilter:_wCharFilter,
       primeK:_wPrimeK,
@@ -2420,8 +2450,6 @@ function heroToggleTopBars(){
         var inf=_wCn(_wN);
         var gap=Math.abs(val-inf)/Math.max(inf,1e-12);
         var col=gap<0.00001?'#c8a84a':gap<0.001?'#3dc8b8':gap<0.01?'#a0c040':'#e05060';
-        valEl.style.color=col;
-        valEl.removeAttribute('style'); // clear inline, let color below apply
         valEl.style.cssText='font-family:\'JetBrains Mono\',monospace;font-size:clamp(1.1rem,5vw,1.5rem);font-weight:700;color:'+col+';letter-spacing:-.01em;word-break:break-all;';
         // Exact BigInt/π-to-100dp expansion (same machinery as the hero) — accurate
         // arbitrarily far past double precision, instead of a float toFixed that
@@ -2529,7 +2557,7 @@ function heroToggleTopBars(){
     var gpc=document.getElementById('w-grid-plot-ctrl');
     if(gpc) gpc.style.display=(v==='grid')?'flex':'none';
     var rlc=document.getElementById('w-ringlift-ctrl');
-    if(rlc) rlc.style.display=(v==='ring'&&_wRingLift)?'flex':'none';
+    if(rlc) rlc.style.display=_wRingLift?'flex':'none'; // lift dynamics now render in all five views
     wRedrawCanvas();
   };
 
@@ -3032,6 +3060,7 @@ function heroToggleTopBars(){
     var gsl=document.getElementById('w-gap-sl');
     if(gsl){var gm=Math.max(1,_wG-1);gsl.max=gm;if(+gsl.value>gm)window.wGapSliderChange(0);}
     if(typeof _wApplyGapLockHalf==='function')_wApplyGapLockHalf();
+    if(typeof window._wDiagOnGChange==='function')window._wDiagOnGChange();
     if(_wSectorActive&&typeof window.wTraceSector==='function')window.wTraceSector();
     _wUpdateFormulaRatios();
     var sl=document.getElementById('ws-g-sl');
@@ -3221,6 +3250,172 @@ function heroToggleTopBars(){
     return 1+(((r-1)+(M-1)*frac*mod)%mod+mod)%mod;
   }
 
+  // ══ PAGE-2 DYNAMICS, VIEW-AGNOSTIC — driven by an xy(r,M)→[x,y] closure
+  // supplied by each view, so one implementation serves all five. ══
+  //
+  // Gap Diagonal (Page 2 identity): the strip M−r=g holds pairs (r,r+g)
+  // whose coprime density is exactly φ(g)/g. Gold-filled = coprime on the
+  // strip, faint outline = not.
+  var _wDiagG=0, _wDiagLockHalf=false, _wDiagPlayId=null, _wDiagPlayDir=1;
+  function _wDynDiagOverlay(ctx,xy,G){
+    if(_wDiagG<1)return;
+    var g=_wDiagG;
+    ctx.save();
+    for(var r=1;r+g<=G;r++){
+      var M=r+g;
+      if(!_wRingActive(M))continue;
+      var P=xy(r,M); if(!P)continue;
+      if(gcd(r,M)===1){
+        ctx.fillStyle='rgba(200,168,74,.92)';
+        ctx.beginPath();ctx.arc(P[0],P[1],2.4,0,6.2832);ctx.fill();
+      }else{
+        ctx.strokeStyle='rgba(200,168,74,.35)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.arc(P[0],P[1],1.9,0,6.2832);ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+  // Lift lines + prime spiral + mirror σ + all-primes + dropout row + ±n
+  // path for the flat views (Grid / Farey / Gauss) — same shared _lift*
+  // toggles and exact residue semantics as the Ring and Smith blocks, so
+  // the single Lift control row drives all five views identically.
+  // lineCap: skip the O(G²) lift LINES above this G (markers stay — they're
+  // O(G)) so big lattices don't jank; Ring/Smith keep their native drawing.
+  function _wDynLiftOverlay(ctx,xy,G,n,lineCap){
+    if(!_wRingLift)return;
+    if(G<=(lineCap||400)){
+      var pLift=new Path2D(),pDie=new Path2D();
+      for(var lM=2;lM<G;lM++){
+        if(!_wRingActive(lM)||!_wRingActive(lM+1))continue;
+        for(var lr=1;lr<lM;lr++){
+          if(gcd(lr,lM)!==1)continue;
+          if(n>0&&!_wBlockCoprime2D(lr,lM,n))continue;
+          var lr2=lr%(lM+1);
+          var A=xy(lr,lM),B=xy(lr2,lM+1);
+          if(!A||!B)continue;
+          var _tgt=gcd(lr2,lM+1)===1?pLift:pDie;
+          _tgt.moveTo(A[0],A[1]);_tgt.lineTo(B[0],B[1]);
+        }
+      }
+      ctx.save();ctx.lineWidth=(typeof _liftThick==='undefined')?0.6:_liftThick;
+      if(typeof _liftSurvOn==='undefined'||_liftSurvOn){ctx.strokeStyle='rgba(61,200,184,.32)';ctx.stroke(pLift);}
+      if(typeof _liftBrokenOn==='undefined'||_liftBrokenOn){ctx.strokeStyle='rgba(224,80,96,.28)';ctx.stroke(pDie);}
+      ctx.restore();
+    }
+    var spOn=(typeof _liftShowSpiral==='undefined')||_liftShowSpiral;
+    var npOn=(typeof _liftShowNPath==='undefined')||_liftShowNPath;
+    var spDir=(typeof _liftSpiralDir==='undefined')?'up':_liftSpiralDir;
+    var npDir=(typeof _liftNPathDir==='undefined')?'both':_liftNPathDir;
+    var mirrorOn=(typeof _liftMirrorOn!=='undefined')&&_liftMirrorOn;
+    var dropoutOn=(typeof _liftDropoutOn!=='undefined')&&_liftDropoutOn;
+    var allPOn=(typeof _liftAllPrimesOn!=='undefined')&&_liftAllPrimesOn;
+    var allNOn=(typeof _liftAllNOn!=='undefined')&&_liftAllNOn;
+    var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(G):2;
+    // Dropout row — the spiral prime's own modulus M=p, where it exits (ℤ/Mℤ)*:
+    // the Ring draws a circle; in the flat geometries it's the straight row.
+    if(dropoutOn&&spP>=2&&spP<=G&&_wRingActive(spP)){
+      var E1=xy(1,spP),E2=xy(Math.max(1,spP-1),spP);
+      if(E1&&E2){ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.2;
+        ctx.beginPath();ctx.moveTo(E1[0],E1[1]);ctx.lineTo(E2[0],E2[1]);ctx.stroke();ctx.restore();}
+    }
+    if(allPOn&&typeof PRIMES!=='undefined'){
+      for(var api=0;api<PRIMES.length;api++){
+        var ap=PRIMES[api]; if(ap>=G)break;
+        if(ap===spP)continue;
+        for(var apM=ap+1;apM<=G;apM++){
+          if(!_wRingActive(apM))continue;
+          var apr=spDir==='down'?(((apM-(ap%apM))%apM)||apM):(ap%apM);
+          if(apr<1||apr>=apM)continue;
+          var AP=xy(apr,apM); if(!AP)continue;
+          ctx.fillStyle='rgba(230,56,72,.28)';ctx.beginPath();ctx.arc(AP[0],AP[1],1.5,0,6.2832);ctx.fill();
+        }
+      }
+    }
+    var nList=allNOn?LIFT_ALL_N:[(typeof _liftPathN==='undefined')?1:_liftPathN];
+    for(var pM=3;pM<=G;pM++){
+      if(!_wRingActive(pM))continue;
+      if(spOn&&spP<pM){
+        var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
+        if(sr>=1&&sr<pM){
+          var S=xy(sr,pM);
+          if(S){ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();}
+          if(mirrorOn&&pM-sr>=1&&pM-sr<pM){
+            var SM=xy(pM-sr,pM);
+            if(SM){ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();}
+          }
+        }
+      }
+      for(var nI=0;nI<nList.length;nI++){
+        var _nn2=nList[nI];
+        if(!(npOn&&((pM%2)===(_nn2%2))))continue;
+        var nAlpha=allNOn?(0.35+0.5*(nI/(nList.length-1||1))):0.9;
+        var nCol='rgba(61,200,184,'+nAlpha.toFixed(2)+')';
+        if(npDir!=='down'&&(pM+_nn2)/2<pM){var U=xy((pM+_nn2)/2,pM);if(U){ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(U[0],U[1],2.2,0,6.2832);ctx.fill();}}
+        if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=xy((pM-_nn2)/2,pM);if(D){ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}}
+      }
+    }
+  }
+  // ── Diagonal-g controls ──
+  window.wDiagSet=function(v){
+    _wDiagG=Math.max(0,Math.min(_wG-1,Math.round(+v||0)));
+    if(_wDiagLockHalf&&_wDiagG!==Math.floor(_wG/2)){_wDiagLockHalf=false;_wDiagSyncLockBtn();}
+    _wDiagSyncUI(); wRedrawCanvas();
+  };
+  window.wDiagStep=function(d){window.wDiagSet(_wDiagG+d);};
+  window.wDiagLockHalfToggle=function(){
+    _wDiagLockHalf=!_wDiagLockHalf;
+    if(_wDiagLockHalf){
+      if(_wDiagPlayId)window.wDiagPlay(); // lock and play are incompatible
+      _wDiagG=Math.max(0,Math.min(_wG-1,Math.floor(_wG/2)));
+      _wDiagSyncUI(); wRedrawCanvas();
+    }
+    _wDiagSyncLockBtn();
+  };
+  window.wDiagPlay=function(){
+    var btn=document.getElementById('w-diag-play');
+    if(_wDiagPlayId){
+      clearInterval(_wDiagPlayId);_wDiagPlayId=null;
+      if(btn){btn.textContent='▶ Play g';btn.style.background='none';}
+      return;
+    }
+    if(_wDiagLockHalf){_wDiagLockHalf=false;_wDiagSyncLockBtn();}
+    if(btn){btn.textContent='■ Stop';btn.style.background='rgba(200,168,74,.2)';}
+    _wDiagPlayDir=1;
+    _wDiagPlayId=setInterval(function(){
+      var next=_wDiagG+_wDiagPlayDir, mx=Math.max(1,_wG-1);
+      if(next>=mx){next=mx;_wDiagPlayDir=-1;}
+      else if(next<=1){next=1;_wDiagPlayDir=1;}
+      _wDiagG=next;_wDiagSyncUI();wRedrawCanvas();
+    },120);
+  };
+  window._wDiagOnGChange=function(){
+    var sl=document.getElementById('w-diag-sl');
+    if(sl)sl.max=Math.max(1,_wG-1);
+    if(_wDiagLockHalf){_wDiagG=Math.max(0,Math.min(_wG-1,Math.floor(_wG/2)));}
+    else if(_wDiagG>_wG-1)_wDiagG=Math.max(0,_wG-1);
+    _wDiagSyncUI();
+  };
+  function _wDiagSyncUI(){
+    var sl=document.getElementById('w-diag-sl'),num=document.getElementById('w-diag-num'),
+        vl=document.getElementById('w-diag-val'),ph=document.getElementById('w-diag-phi');
+    if(sl)sl.value=_wDiagG;
+    if(num)num.value=_wDiagG;
+    if(vl)vl.textContent=_wDiagG<1?'off':('g='+_wDiagG);
+    if(ph){
+      if(_wDiagG<1)ph.textContent='';
+      else{var ph_=0;for(var k=1;k<=_wDiagG;k++)if(gcd(k,_wDiagG)===1)ph_++;
+        ph.textContent='φ(g)/g = '+ph_+'/'+_wDiagG+' = '+(ph_/_wDiagG).toFixed(4);}
+    }
+  }
+  function _wDiagSyncLockBtn(){
+    var b=document.getElementById('w-diag-lock');
+    if(!b)return;
+    b.style.background=_wDiagLockHalf?'rgba(155,127,232,.22)':'none';
+    b.style.borderColor=_wDiagLockHalf?'rgba(155,127,232,.85)':'rgba(155,127,232,.4)';
+    b.style.color=_wDiagLockHalf?'#9b7fe8':'rgba(155,127,232,.85)';
+  }
+  window._wGetDiagG=function(){return _wDiagG;};
+
   function drawWGrid(ctx,W,H,n,G){
     // Square cell grid, both axes sized off G (previously one axis used G-1,
     // which skewed the cells and made the coprime triangle read as "half a square").
@@ -3272,6 +3467,11 @@ function heroToggleTopBars(){
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,spRad*1.7+3);
     }
+    // Page-2 dynamics — lift/spiral/±n (rides the +Lift toggle) and the
+    // gap-diagonal strip, at the exact per-ring-shifted dot positions.
+    var _dynXY=function(r,M){var rD=_wPerRingShiftedR(r,M,G,_wPerRing);return[ox+rD*cell,oy+(M-1)*cell];};
+    _wDynLiftOverlay(ctx,_dynXY,G,n,400);
+    _wDynDiagOverlay(ctx,_dynXY,G);
   }
 
   function drawWRing(ctx,W,H,n,G){
@@ -3402,6 +3602,8 @@ function heroToggleTopBars(){
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,2.9*_wSecDotScale+3);
     }
+    // Gap-diagonal strip at true ring positions (lift/spiral/±n already native here)
+    _wDynDiagOverlay(ctx,function(r,M){return ringXY(r,M);},G);
   }
 
   function drawWFarey(ctx,W,H,n,G){
@@ -3444,6 +3646,16 @@ function heroToggleTopBars(){
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.2;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,2.5*_wSecDotScale+3);
     }
+    // Page-2 dynamics at true Farey positions (log-M rows, r/M abscissa)
+    var _dynXY=function(r,M){
+      if(M<2||r<1||r>=M)return null;
+      var yF=Math.log(M)/Math.log(G);
+      var y=H-pad-(H-pad*2)*(1-yF);
+      var rD=_wPerRingShiftedR(r,M,M,_wPerRing);
+      return[pad+(W-pad*2)*(rD/M),y];
+    };
+    _wDynLiftOverlay(ctx,_dynXY,G,n,400);
+    _wDynDiagOverlay(ctx,_dynXY,G);
   }
 
   // ── ℤ[i] view — ported from Page 2's ℤ[i] tab: a full G×G grid mirrored
@@ -3512,6 +3724,22 @@ function heroToggleTopBars(){
           ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
           _wDrawSecLabel(ctx,sx,sy,sp.r,sp.M,spRad*1.7+3);
         }
+        ctx.rotate(Math.PI/2);
+      }
+      ctx.restore();
+    }
+    // Page-2 dynamics — replicated into all 4 quadrants in the same rotated
+    // frame as the dots. Lift-line cap is tighter here (drawn 4×).
+    if(_wRingLift||_wDiagG>0){
+      ctx.save();ctx.translate(cx,cy);
+      var _dynXY=function(r,M){
+        if(r<1||r>G||M<1||M>G)return null;
+        var rD=_wPerRingShiftedR(r,M,G,_wPerRing);
+        return[(rD-1+0.5)*cw,(M-1+0.5)*cw];
+      };
+      for(var dq=0;dq<4;dq++){
+        _wDynLiftOverlay(ctx,_dynXY,G,n,192);
+        _wDynDiagOverlay(ctx,_dynXY,G);
         ctx.rotate(Math.PI/2);
       }
       ctx.restore();
@@ -3709,6 +3937,14 @@ function heroToggleTopBars(){
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,3.0*_wSecDotScale+3);
     }
+    // Gap-diagonal strip through the same Cayley map, live alpha
+    _wDynDiagOverlay(ctx,function(r,M){
+      var rD=(M===1)?0:_wPerRingShiftedR(r,M,M,_wPerRing);
+      var RR=0.5+((M-1)/Math.max(1,rings-1))*1.5;
+      var th=2*Math.PI*rD/M+alpha;
+      var w=_conformalSmithPt(RR,th,R0);
+      return[cx+w.x,cy+w.y];
+    },G);
   }
   // Cayley map Γ(z)=(z−1)/(z+1) for z=ringR·e^{iθ} (ringR dimensionless, O(1)), scaled to canvas radius R0
   function _conformalSmithXY(zr,zi,R0){
@@ -4865,7 +5101,7 @@ function heroToggleTopBars(){
       <input type="range" id="hero-sec-size-sl" min="0.01" max="3" step="0.01" value="1"
         style="width:120px;accent-color:var(--violet);"
         oninput="heroSecSetSize(+this.value)">
-      <span id="hero-sec-size-lbl" style="font-size:8px;color:var(--violet);min-width:26px;">1.0×</span>
+      <span id="hero-sec-size-lbl" style="font-size:8px;color:var(--violet);min-width:30px;">1.00×</span>
       <span class="cv-lbl">Label size:</span>
       <input type="range" id="hero-sec-lblsize-sl" min="0.2" max="2" step="0.05" value="1"
         style="width:120px;accent-color:var(--violet);"
@@ -6374,15 +6610,29 @@ setTimeout(()=>{for(let i=61;i<=600;i++)getCn(i);},50);
 let _finiteMode = false;   // false = asymptotic (full getCn), true = finite
 let _finitePrimes = 1;     // how many primes to use in finite mode
 
+const _cnFinMemo=new Map(); // key n|numPrimes → value; capped
 function getCnFinite(n, numPrimes){
   if(numPrimes <= 0) return ZETA2; // empty product: ζ(2)
-  let ld = 0;
   const lim = Math.min(numPrimes, PRIMES.length);
-  for(let i = 0; i < lim; i++){
+  const k=n+'|'+lim;
+  const hit=_cnFinMemo.get(k);
+  if(hit!==undefined) return hit;
+  // Incremental: extend from the largest cached prefix for this n rather
+  // than re-summing from p=2 — makes slider sweeps O(Δprimes) per tick.
+  let ld=0, start=0;
+  const prev=_cnFinMemo.get(n+'|prefix');
+  if(prev&&prev.lim<=lim){ ld=prev.ld; start=prev.lim; }
+  for(let i = start; i < lim; i++){
     const p = PRIMES[i];
     ld += Math.log(1 - Math.min(n+1, p) / (p*p));
   }
-  return ZETA2 * Math.exp(ld);
+  // Only advance the cached prefix — a downward jump recomputes from 0 but
+  // must not discard the longer prefix (the way back up reuses it).
+  if(!prev||lim>prev.lim)_cnFinMemo.set(n+'|prefix',{lim,ld});
+  const v = ZETA2 * Math.exp(ld);
+  if(_cnFinMemo.size>512)_cnFinMemo.delete(_cnFinMemo.keys().next().value);
+  _cnFinMemo.set(k,v);
+  return v;
 }
 
 // Returns the "display" value of C(n) based on current mode
@@ -11775,9 +12025,13 @@ function exportHeroSideBySide8K(rightPanel){
 // pop: 'triangle' (r<M — ring/smith/lift), 'square' (all r,M ≤ G — grid/gauss),
 //      'coprime' (reduced fractions only — farey)
 function _viewPop(v){return(v==='grid'||v==='gauss')?'square':(v==='farey')?'coprime':'triangle';}
+const _cnCountsMemo=new Map(); // key G|n|pop → {total,gcd1,lift}; pure fn, capped LRU-ish
 function _cnExportCounts(G, n, pop){
   if(typeof n!=='number') n = (typeof N!=='undefined') ? N : 1;
   pop=pop||'triangle';
+  const _ck=G+'|'+n+'|'+pop;
+  const _hit=_cnCountsMemo.get(_ck);
+  if(_hit) return _hit;
   let total=0, gcd1=0, lift=0;
   for(let M=1;M<=G;M++){
     if(pop!=='square'&&M===1){ total++; gcd1++; if(n===0) lift++; continue; } // trivial point r=0, always coprime
@@ -11797,7 +12051,10 @@ function _cnExportCounts(G, n, pop){
       if(survives) lift++;
     }
   }
-  return {total,gcd1,lift};
+  const _res={total,gcd1,lift};
+  if(_cnCountsMemo.size>256)_cnCountsMemo.delete(_cnCountsMemo.keys().next().value);
+  _cnCountsMemo.set(_ck,_res);
+  return _res;
 }
 
 function exportHero4K(){
@@ -13490,6 +13747,7 @@ function exportStateReport(scope){
       row('zoom / pan',st.zoom.toFixed(3)+'× / ('+st.panX.toFixed(0)+','+st.panY.toFixed(0)+')')+
       row('per-ring twist',st.perRing)+
       row('rotation (×i steps)',(st.rot||0)+'°')+
+      row('gap diagonal g / lift overlay',(st.diagG>0?('g='+st.diagG):'off')+' / '+(st.ringLift?'on':'off'))+
       (st.mode==='finite'?row('finite product — primes used ('+st.primeK+')',(function(){var P=(typeof PRIMES!=='undefined')?PRIMES:[];var k=Math.min(st.primeK,100);var a=[];for(var i=0;i<k;i++)a.push(P[i]);return a.join(', ')+(st.primeK>100?' … +'+(st.primeK-100)+' more':'');})()):'')+
       (st.view==='smith'?row('smith θ / zoom-out / flip',(st.smithTheta||0).toFixed(1)+'° / '+st.smithZoomOut+'× / '+(st.flip<0?'mirrored (180°)':'normal (0°)')):'')+
       row('animations running',[st.spinning?'smith θ spin':'',st.flipping?'flip in progress':''].filter(Boolean).join(' · ')||'none')+
