@@ -312,16 +312,50 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
     <tr><th>quantity</th><th>value</th></tr>
   </table>
 
+  <h2>Full working — every prime, nothing left out</h2>
+  <p>The table above summarizes; this one shows the entire Euler product prime by prime, exactly the way it's
+  actually computed — toggle between decimal and exact fraction, click any row to see the substitution worked
+  out, and watch the running product converge on <span class="mono">C(n)</span>.</p>
+  <details id="p4wk-dd" style="background:rgba(255,255,255,.02);border:1px solid var(--edge2);margin:14px 0;">
+    <summary style="cursor:pointer;padding:10px 14px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;" onclick="_p4BuildWorking()">
+      <span id="p4wk-car" style="display:inline-block;transition:transform .15s;">▸</span>
+      Show full working
+      <span style="font-size:7.5px;color:var(--cream3);font-weight:400;letter-spacing:.04em;text-transform:none;margin-left:6px;">prime-by-prime Euler product · decimal or fraction</span>
+    </summary>
+    <style>#p4wk-dd[open] #p4wk-car{transform:rotate(90deg);}</style>
+    <div style="padding:10px 14px;border-top:1px solid var(--edge2);">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-family:var(--mono);">
+        <span style="font-size:8px;color:var(--cream3);">Display:</span>
+        <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;">
+          <input type="radio" name="p4wk-fmt" id="p4wk-dec" value="decimal" checked onchange="_p4BuildWorking()" style="accent-color:var(--gold);">Decimal
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;">
+          <input type="radio" name="p4wk-fmt" id="p4wk-frac" value="fraction" onchange="_p4BuildWorking()" style="accent-color:var(--gold);">Fraction
+        </label>
+        <div style="width:1px;height:16px;background:var(--edge);"></div>
+        <span style="font-size:8px;color:var(--cream3);">Primes:</span>
+        <input type="number" id="p4wk-max-p" min="1" max="500" value="20"
+          style="width:50px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:9px;padding:2px 4px;outline:none;text-align:center;"
+          oninput="_p4BuildWorking()" title="How many primes to show in the table">
+        <div style="width:1px;height:16px;background:var(--edge);"></div>
+        <button onclick="_p4BuildWorking()"
+          style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;">↺ Refresh</button>
+      </div>
+      <div id="p4wk-table-wrap" style="overflow-x:auto;max-height:440px;overflow-y:auto;"></div>
+      <div id="p4wk-summary" style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--cream3);border-top:1px solid var(--edge2);padding-top:8px;"></div>
+    </div>
+  </details>
+
   <h2>Why does the pattern repeat?</h2>
-  <p>The lattice views show a self‑similar, repeating pattern that appears to "scale at some frequency."
-  It's not connected to the zeta function's zeros or anything spherical — it's much more down‑to‑earth, and
-  it falls straight out of the sieve structure above.</p>
+  <p>A reader on the original post asked about a self‑similar, repeating pattern that seemed to "scale at some
+  frequency" in the lattice views. It's not connected to the zeta function's zeros or anything spherical — it's
+  much more down‑to‑earth, and it falls straight out of the sieve structure above.</p>
   <p>Whether a cell <span class="mono">(r, M)</span> lights up depends only on <span class="mono">r</span> and
   <span class="mono">M</span> <em>modulo small primes</em> — divisibility by 2 repeats every 2 integers, by 3
   every 3, by 5 every 5, and so on. Once you've accounted for every saturated prime up to
   <span class="mono">n+1</span>, the whole coprimality pattern repeats exactly with period
-  <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of those primes. That "frequency"
-  isn't unknown at all: it's the product of the small primes below the block length, and it grows
+  <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of those primes. That's the "unknown
+  frequency": it isn't unknown at all, it's the product of the small primes below the block length, and it grows
   <em>combinatorially</em> (2, 6, 30, 210, 2310, …) rather than smoothly, which is exactly what makes the
   self‑similarity look like it's "scaling" as you zoom — each new saturated prime multiplies the repeat period by
   that prime. This is the same mechanism behind the classic Sieve of Eratosthenes visualizations and Stern–Brocot /
@@ -380,6 +414,7 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
     document.getElementById('c4-panel-formula').textContent=
       'C('+n+') = ζ(2)·∏ₚ(1 − min('+(n+1)+',p)/p²) ≈ '+r.C.toFixed(6)+'   ·   D('+n+') ≈ '+r.D.toFixed(6);
     renderLiveTable(n,r);
+    if(typeof _p4BuildWorking==='function' && document.getElementById('p4wk-dd')?.open) _p4BuildWorking();
     c4Redraw();
   };
   window.c4Step=function(d){c4SetN(curN+d);};
@@ -425,6 +460,97 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
     var html='<tr><th>quantity</th><th>value</th></tr>';
     rows.forEach(function(row){html+='<tr><td>'+row[0]+'</td><td>'+row[1]+'</td></tr>';});
     document.getElementById('c4-livetable').innerHTML=html;
+  }
+
+  // ---- fraction helper (continued-fraction-ish best rational approx) ----
+  function _p4ToFrac(x,maxD){
+    maxD=maxD||9999;
+    var bestN=Math.round(x),bestD=1,bestErr=Math.abs(x-bestN);
+    for(var d=2;d<=maxD;d++){
+      var n=Math.round(x*d),err=Math.abs(x-n/d);
+      if(err<bestErr){bestErr=err;bestN=n;bestD=d;}
+      if(bestErr<1e-10)break;
+    }
+    return {n:bestN,d:bestD};
+  }
+
+  // ---- full working table: every prime's factor, decimal or fraction, nothing left out ----
+  function _p4BuildWorking(){
+    var wrap=document.getElementById('p4wk-table-wrap'),sumEl=document.getElementById('p4wk-summary');
+    if(!wrap)return;
+    var isFrac=document.getElementById('p4wk-frac')&&document.getElementById('p4wk-frac').checked;
+    var maxP=Math.max(1,Math.min(500,+((document.getElementById('p4wk-max-p')||{}).value)||20));
+    var pr=sieve(),ZETA2v=Math.PI*Math.PI/6;
+    var n=curN;
+
+    var thS='style="padding:4px 8px;text-align:left;font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:rgba(184,178,166,.6);border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap;"';
+    function tdS(col){return 'style="padding:3px 8px;font-family:var(--mono);font-size:9px;color:'+(col||'rgba(220,215,205,.85)')+';border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap;"';}
+
+    var html='<table id="p4wk-table" style="border-collapse:collapse;width:100%;min-width:600px;">'+
+      '<thead><tr>'+
+      '<th '+thS+'>#</th><th '+thS+'>prime p</th><th '+thS+'>min(n+1,p)</th>'+
+      '<th '+thS+'>factor</th><th '+thS+'>= fraction</th><th '+thS+'>running C(n)</th><th '+thS+'>status</th>'+
+      '</tr></thead><tbody>';
+
+    var z2frac=_p4ToFrac(ZETA2v,9999);
+    html+='<tr><td '+tdS()+'>—</td><td '+tdS('rgba(200,168,74,.7)')+'>ζ(2)</td><td '+tdS()+'>—</td>'+
+      '<td '+tdS('rgba(200,168,74,.85)')+'>'+(isFrac?'π²/6':ZETA2v.toFixed(12))+'</td>'+
+      '<td '+tdS('rgba(200,168,74,.5)')+'>'+(isFrac?(z2frac.n+'/'+z2frac.d):'≈')+'</td>'+
+      '<td '+tdS('rgba(200,168,74,.85)')+'>'+(isFrac?'π²/6':ZETA2v.toFixed(12))+'</td>'+
+      '<td '+tdS('rgba(200,168,74,.5)')+'>seed</td></tr>';
+
+    var running=ZETA2v,rows=[];
+    for(var i=0;i<Math.min(maxP,pr.length);i++){
+      var p=pr[i],minNP1P=Math.min(n+1,p),factor=1-minNP1P/(p*p);
+      var runningBefore=running; running*=factor;
+      var saturated=p<=n+1;
+      rows.push({i:i+1,p:p,minNP1P:minNP1P,factor:factor,running:running,runningBefore:runningBefore,saturated:saturated});
+    }
+    rows.forEach(function(row){
+      var i=row.i,p=row.p,minNP1P=row.minNP1P,factor=row.factor,running=row.running,runningBefore=row.runningBefore,saturated=row.saturated;
+      var col=saturated?'rgba(224,80,96,.85)':'rgba(200,168,74,.85)';
+      var statText=saturated?'saturated p≤n+1':'active';
+      var statCol=saturated?'rgba(224,80,96,.7)':'rgba(61,200,184,.7)';
+      var factorFrac=_p4ToFrac(factor,9999);
+      var numStr=isFrac?('('+(p*p)+'−'+minNP1P+')/'+(p*p)):factor.toFixed(12);
+      var fracStr=isFrac?(factorFrac.n+'/'+factorFrac.d):('≈'+factor.toFixed(6));
+      html+='<tr id="p4wk-row-'+i+'" onclick="_p4ToggleDetail('+i+')" style="cursor:pointer;" onmouseover="this.style.background=\'rgba(200,168,74,.05)\'" onmouseout="this.style.background=\'transparent\'">'+
+        '<td '+tdS('rgba(106,101,96,.6)')+'><span id="p4wk-car-'+i+'" style="display:inline-block;width:9px;transition:transform .15s;">▸</span>'+i+'</td>'+
+        '<td '+tdS(col)+'>'+p+'</td>'+
+        '<td '+tdS()+'>'+minNP1P+'</td>'+
+        '<td '+tdS(col)+'>'+numStr+'</td>'+
+        '<td '+tdS('rgba(155,127,232,.7)')+'>'+fracStr+'</td>'+
+        '<td '+tdS('rgba(255,255,255,.9)')+'>'+running.toFixed(12)+'</td>'+
+        '<td style="padding:3px 8px;font-size:8px;color:'+statCol+';border-bottom:1px solid rgba(255,255,255,.04);">'+statText+'</td>'+
+        '</tr>';
+      var pct=(1-factor)*100,logF=Math.log(factor);
+      var satNote=saturated?(p+'²−'+p+' over '+p+'² simplifies to (p−1)/p = '+((p-1)/p).toFixed(6)+' — once p ≤ n+1, this factor is frozen forever; n growing further never changes it again.'):
+        ('Since n+1 &lt; p, min(n+1,p) = n+1 (the cap never reaches p here). This factor keeps shrinking slowly as n grows, until n+1 reaches p — at that point it freezes too.');
+      html+='<tr id="p4wk-detail-'+i+'" style="display:none;background:rgba(200,168,74,.03);">'+
+        '<td colspan="7" style="padding:10px 16px 12px 28px;border-bottom:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:9px;color:rgba(184,178,166,.85);line-height:1.7;">'+
+        '<div style="display:grid;grid-template-columns:1fr;gap:4px;max-width:640px;">'+
+        '<div><span style="color:rgba(200,168,74,.7);">substitution:</span> 1 − min('+n+'+1, '+p+')/'+p+'² = 1 − '+minNP1P+'/'+(p*p)+' = ('+(p*p)+'−'+minNP1P+')/'+(p*p)+' = <b style="color:#fff;">'+factor.toFixed(10)+'</b></div>'+
+        '<div><span style="color:rgba(200,168,74,.7);">this factor pulls the running product down by:</span> <b style="color:'+(pct<0.01?'var(--teal)':pct<1?'var(--lime)':'var(--coral)')+'">'+pct.toFixed(6)+'%</b> (from '+runningBefore.toFixed(10)+' → '+running.toFixed(10)+')</div>'+
+        '<div><span style="color:rgba(200,168,74,.7);">log-contribution:</span> ln('+factor.toFixed(8)+') = <b style="color:#fff;">'+logF.toFixed(8)+'</b></div>'+
+        '<div style="color:'+(saturated?'rgba(224,80,96,.75)':'rgba(61,200,184,.8)')+';">'+satNote+'</div>'+
+        '</div></td></tr>';
+    });
+    html+='</tbody></table>';
+    wrap.innerHTML=html;
+
+    var trueVal=computeCD(n).C, tail=Math.abs(running-trueVal);
+    if(sumEl) sumEl.innerHTML=
+      '<span style="color:var(--gold)">Partial product over first '+rows.length+' primes</span>'+
+      ' · running value = <b style="color:#fff">'+running.toFixed(12)+'</b>'+
+      ' · true C('+n+') = <b style="color:var(--gold)">'+trueVal.toFixed(12)+'</b>'+
+      ' · tail error = <span style="color:'+(tail<0.0001?'var(--teal)':tail<0.01?'var(--lime)':'var(--coral)')+'">'+tail.toExponential(4)+'</span>';
+  }
+  function _p4ToggleDetail(i){
+    var row=document.getElementById('p4wk-detail-'+i),car=document.getElementById('p4wk-car-'+i);
+    if(!row)return;
+    var open=row.style.display!=='none';
+    row.style.display=open?'none':'table-row';
+    if(car)car.style.transform=open?'rotate(0deg)':'rotate(90deg)';
   }
 
   // ---- worked example n=1 ----
