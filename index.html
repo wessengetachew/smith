@@ -1133,7 +1133,7 @@ function heroToggleTopBars(){
         <summary style="cursor:pointer;padding:6px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.06);">
           <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#c8a84a;">▸</span>
           <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#c8a84a;letter-spacing:.06em;">F</span>
-          <span id="wf-ratios" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(126,200,122,.85);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+          <span id="wf-ratios" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(126,200,122,.85);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">g 308/466 66.1% · L 150/466 32.2% · C 150/308 48.7%</span>
         </summary>
         <style>#welcome-cn-block[open]>summary>span:first-child{transform:rotate(90deg);}</style>
       <div style="background:rgba(200,168,74,.05);padding:10px 14px 12px;margin:2px 0;">
@@ -1225,14 +1225,15 @@ function heroToggleTopBars(){
           style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Smith</button>
         <button class="wv-btn" id="wvb-ring" onclick="wSetView('ring')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Ring</button>
-        <button id="wvb-ring-lift" onclick="wSetView('ring');wSetRingLift(!window._wRingLiftState);window._wRingLiftState=!window._wRingLiftState;" title="Ring sub-mode: lift dynamics arcs r → r mod(M+1) — same foundation as the hero's Lift view"
-          style="background:none;border:1px dashed rgba(61,200,184,.4);color:rgba(61,200,184,.55);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.06em;">+Lift</button>
+
         <button class="wv-btn" id="wvb-grid" onclick="wSetView('grid')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Grid</button>
         <button class="wv-btn" id="wvb-farey" onclick="wSetView('farey')"
           style="background:none;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Farey</button>
         <button class="wv-btn" id="wvb-gauss" onclick="wSetView('gauss')" title="Gaussian integers a+bi, octant 0≤b≤a (8-fold symmetry)"
           style="background:none;border:1px solid rgba(155,127,232,.35);color:rgba(155,127,232,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Gauss</button>
+        <button id="wvb-ring-lift" onclick="wSetRingLift(!window._wRingLiftState);window._wRingLiftState=!window._wRingLiftState;" title="Lift dynamics MODE — r → r mod(M+1) lines, prime spiral, mirror σ, ±n path — overlays whichever view is active (all five)"
+          style="background:none;border:1px dashed rgba(61,200,184,.4);color:rgba(61,200,184,.55);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.06em;margin-left:10px;">⇑ Lift: off</button>
         <button onclick="cnShareLink(this)" title="Copy a shareable link that restores this exact state (view, G, n, gaps, half plot)"
           style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;">🔗 Link</button>
         <button onclick="wExport4K()" title="Export current view as a 4K PNG with title, formula, and stats panel"
@@ -1253,10 +1254,17 @@ function heroToggleTopBars(){
         <span style="color:#a8a294;">Spiral lbl:</span>
         <select onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(k+1), 1/k], k=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
           style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-          <option value="none" selected>none</option>
+          <option value="none">none</option>
           <option value="channel">1/n channel</option>
-          <option value="outer">outer point</option>
+          <option value="outer" selected>outer point</option>
         </select>
+        <span style="color:#a8a294;">sector:</span>
+        <button onclick="liftStepLblChan(-1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(k+1), 1/k] — 'all' labels every channel" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">−</button>
+        <span class="lift-lblchan-lbl" style="color:rgba(230,120,130,.9);min-width:26px;text-align:center;">all</span>
+        <button onclick="liftStepLblChan(1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(k+1), 1/k] — e.g. 1/2 labels only points between 1/3 and 1/2" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
+        <span style="color:#a8a294;">lbl size:</span>
+        <input type="range" min="0.5" max="3" step="0.1" value="1" style="width:60px;accent-color:rgba(230,56,72,.6);" oninput="liftSetLblScale(+this.value)">
+        <span class="lift-lblsize-lbl" style="color:rgba(230,120,130,.9);min-width:26px;">1.0×</span>
         <button class="lift-mode-btn" data-m="npath" onclick="liftSetMode('npath')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#3dc8b8;border-bottom:2px solid #3dc8b8;padding:2px 1px;">±n</button>
         <button class="lift-mode-btn" data-m="spiral" onclick="liftSetMode('spiral')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Spiral</button>
         <button class="lift-mode-btn" data-m="both" onclick="liftSetMode('both')" style="all:unset;cursor:pointer;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;border-bottom:2px solid transparent;padding:2px 1px;">Both</button>
@@ -1277,6 +1285,12 @@ function heroToggleTopBars(){
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.9);cursor:pointer;" title="Highlight the dropout ring M=p"><input type="checkbox" class="lift-dropout-chk" onchange="liftToggleDropout(this.checked)">Dropout</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.7);cursor:pointer;" title="Overlay every prime's spiral"><input type="checkbox" class="lift-allp-chk" onchange="liftToggleAllPrimes(this.checked)">All p</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Lock n / p / M / gap-diagonal together — starting or stopping any one starts or stops all four in sync"><input type="checkbox" class="lift-lock-chk" onchange="liftToggleLock(this.checked)">🔗 Lock</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(232,227,219,.75);cursor:pointer;" title="Dim the base lattice while a dynamic overlay is active — the spiral / ±n / lift / diagonal read clearly without shrinking dot size"><input type="checkbox" class="lift-dim-chk" onchange="wToggleDynDim(this.checked)">Dim</label>
+        <input type="range" class="lift-dim-sl" min="5" max="100" step="5" value="50" style="width:56px;accent-color:rgba(232,227,219,.5);" oninput="wSetDynDim(this.value)" title="Base-lattice brightness while dimming (5% = nearly invisible, 100% = no dim)">
+        <span class="lift-dim-lbl" style="color:rgba(232,227,219,.6);min-width:26px;">50%</span>
+        <span style="color:#a8a294;">speed:</span>
+        <input type="range" class="lift-anim-speed-sl" min="20" max="500" step="10" value="140" style="width:60px;accent-color:rgba(155,127,232,.7);" oninput="liftSetAnimSpeed(this.value)">
+        <span class="lift-anim-speed-lbl" style="color:rgba(155,127,232,.85);min-width:34px;">140ms</span>
         <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:none;border:1px solid rgba(61,200,184,.4);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ n</button>
         <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ p</button>
         <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:none;border:1px solid rgba(126,200,122,.4);color:#7ec87a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ M</button>
@@ -1892,7 +1906,8 @@ function heroToggleTopBars(){
     _wRingLift=!!v;
     var b=document.getElementById('wvb-ring-lift');
     if(b){b.style.background=_wRingLift?'rgba(61,200,184,.18)':'none';
-      b.style.color=_wRingLift?'rgba(61,200,184,.95)':'rgba(61,200,184,.55)';}
+      b.style.color=_wRingLift?'rgba(61,200,184,.95)':'rgba(61,200,184,.55)';
+      b.textContent=_wRingLift?'⇑ Lift: on':'⇑ Lift: off';}
     var c=document.getElementById('w-ringlift-ctrl');
     if(c)c.style.display=_wRingLift?'flex':'none'; // lift dynamics now render in all five views
     wRedrawCanvas();
@@ -2909,10 +2924,38 @@ function heroToggleTopBars(){
   var _wG=31; // opener lattice size — now slider-controlled (was hardcoded)
   // Compact gcd / lift / lift÷gcd readout on the FORMULA summary line —
   // same counts as the hero panel (_cnExportCounts), sized to fit one row.
+  // Early-capable counts: the deferred script's _cnExportCounts takes seconds
+  // to become available on load; these ratios only need gcd, which this
+  // closure already has. Falls through to the shared (memoized) version once
+  // it exists, so there is exactly one source of truth after boot.
+  var _wRatioMemo=new Map();
+  function _wEarlyCounts(G,n,pop){
+    pop=pop||'triangle';
+    var k=G+'|'+n+'|'+pop, hit=_wRatioMemo.get(k);
+    if(hit)return hit;
+    var total=0,gcd1=0,lift=0;
+    for(var M=1;M<=G;M++){
+      if(pop!=='square'&&M===1){total++;gcd1++;if(n===0)lift++;continue;}
+      var rEnd=(pop==='square')?G:M-1;
+      for(var r=1;r<=rEnd;r++){
+        var cop=gcd(r,M)===1;
+        if(pop==='coprime'&&!cop)continue;
+        total++; if(!cop)continue; gcd1++;
+        var sv=true;
+        for(var j=1;j<=n;j++){var Mj=M+j;if(Mj>G||gcd(r,Mj)!==1){sv=false;break;}}
+        if(sv)lift++;
+      }
+    }
+    var res={total:total,gcd1:gcd1,lift:lift};
+    if(_wRatioMemo.size>64)_wRatioMemo.delete(_wRatioMemo.keys().next().value);
+    _wRatioMemo.set(k,res);
+    return res;
+  }
   window._wUpdateFormulaRatios=function(){
     var el=document.getElementById('wf-ratios');
-    if(!el||typeof _cnExportCounts!=='function')return;
-    var c=_cnExportCounts(_wG,_wN,(typeof _viewPop==='function')?_viewPop(_wView):undefined);
+    if(!el)return;
+    var pop=(typeof _viewPop==='function')?_viewPop(_wView):undefined;
+    var c=(typeof _cnExportCounts==='function')?_cnExportCounts(_wG,_wN,pop):_wEarlyCounts(_wG,_wN,pop);
     var pc=function(a,b){return b?(a/b*100).toFixed(1)+'%':'—';};
     el.textContent='g '+c.gcd1+'/'+c.total+' '+pc(c.gcd1,c.total)+' · L '+c.lift+'/'+c.total+' '+pc(c.lift,c.total)+' · C '+c.lift+'/'+c.gcd1+' '+pc(c.lift,c.gcd1);
   };
@@ -2967,7 +3010,7 @@ function heroToggleTopBars(){
       var next=_wG+1;
       if(next>_wGAutoMax) next=1;
       window.wSetG(next);
-    },140);
+    },(typeof _liftAnimSpeed!=='undefined')?_liftAnimSpeed:140);
   }
   window.wGPlay=function(){
     window.wGMarkUserTouched(); // manual Play always takes over from the default auto-loop
@@ -2986,7 +3029,7 @@ function heroToggleTopBars(){
       if(next>=gMax){next=gMax;_wGPlayDir=-1;}
       else if(next<=1){next=1;_wGPlayDir=1;}
       window.wSetG(next);
-    },120);
+    },(typeof _liftAnimSpeed!=='undefined')?_liftAnimSpeed:120);
   };
 
   // Next saturation point: smallest n'=p-1 (p prime) strictly greater than
@@ -3278,6 +3321,26 @@ function heroToggleTopBars(){
   // whose coprime density is exactly φ(g)/g. Gold-filled = coprime on the
   // strip, faint outline = not.
   var _wDiagG=0, _wDiagLockHalf=false, _wDiagPlayId=null, _wDiagPlayDir=1;
+  // Dim the base lattice to 25% while any dynamic overlay (Lift suite or
+  // gap-diagonal) is active, so the dynamic reads without shrinking dots.
+  var _dynDimOn=false;   // off by default — opt in via the Dim checkbox
+  var _dynDimAmt=0.5;    // base-lattice alpha while dimming (50% default)
+  window.wToggleDynDim=function(v){
+    _dynDimOn=!!v;
+    document.querySelectorAll('.lift-dim-chk').forEach(function(c){c.checked=_dynDimOn;});
+    wRedrawCanvas();
+  };
+  window.wSetDynDim=function(v){
+    _dynDimAmt=Math.max(0.05,Math.min(1,(+v||50)/100));
+    document.querySelectorAll('.lift-dim-lbl').forEach(function(l){l.textContent=Math.round(_dynDimAmt*100)+'%';});
+    document.querySelectorAll('.lift-dim-sl').forEach(function(sl){sl.value=Math.round(_dynDimAmt*100);});
+    if(_dynDimOn)wRedrawCanvas();
+  };
+  function _wDynDimA(view){
+    if(!_dynDimOn)return 1;
+    var act=_wDiagG>0||_wRingLift||(view==='smith'&&_wShowLift);
+    return act?_dynDimAmt:1;
+  }
   function _wDynDiagOverlay(ctx,xy,G){
     if(_wDiagG<1)return;
     var g=_wDiagG;
@@ -3296,13 +3359,23 @@ function heroToggleTopBars(){
     }
     ctx.restore();
   }
+  // The _lift* globals live in a later script block; the first paints run
+  // before it, and a bare read of a not-yet-declared `let` is a
+  // ReferenceError that ABORTS the whole draw mid-frame (the "empty smith
+  // with one red dot" first-paint bug). Always read the label mode through
+  // this guard.
+  function _wLblMode(){return (typeof _liftLblMode==='undefined')?'none':_liftLblMode;}
   // Spiral-point label: the Farey channel of r/M — the unique k=⌊M/r⌋ with
   // 1/(k+1) < r/M ≤ 1/k. 'rich' prefixes direction+prime for the outer-point mode.
   function _wDynSpiralLabel(ctx,x,y,sr,pM,rich){
     var k=Math.max(1,Math.floor(pM/Math.max(1,sr)));
+    // Channel-mode sector filter: label only the picked Farey sector
+    // (1/(k+1), 1/k]. The single outer-point label is exempt.
+    if(!rich&&typeof _liftLblChan!=='undefined'&&_liftLblChan>0&&k!==_liftLblChan)return;
     var lbl=rich?(rich+' '+sr+'/'+pM+' · 1/'+k):('1/'+k);
+    var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
     ctx.save();
-    ctx.font=(8*_wSecLblScale).toFixed(1)+"px 'JetBrains Mono',monospace";
+    ctx.font=(8*_lsc).toFixed(1)+"px 'JetBrains Mono',monospace";
     ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.lineWidth=2.2;ctx.strokeStyle='rgba(4,4,13,.85)';
     ctx.fillStyle='rgba(230,120,130,.95)';
@@ -3374,8 +3447,8 @@ function heroToggleTopBars(){
         if(sr>=1&&sr<pM){
           var S=xy(sr,pM);
           if(S){ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
-            if(_liftLblMode==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
-            else if(_liftLblMode==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
+            if(_wLblMode()==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
+            else if(_wLblMode()==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
           }
           if(mirrorOn&&pM-sr>=1&&pM-sr<pM){
             var SM=xy(pM-sr,pM);
@@ -3392,7 +3465,7 @@ function heroToggleTopBars(){
         if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=xy((pM-_nn2)/2,pM);if(D){ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}}
       }
     }
-    if(_liftLblMode==='outer'&&_spOut&&spOn)
+    if(_wLblMode()==='outer'&&_spOut&&spOn)
       _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
   }
   // ── Diagonal-g controls ──
@@ -3420,13 +3493,23 @@ function heroToggleTopBars(){
     }
     if(_wDiagLockHalf){_wDiagLockHalf=false;_wDiagSyncLockBtn();}
     if(btn){btn.textContent='■ Stop';btn.style.background='rgba(200,168,74,.2)';}
+    if(typeof _animSpdRestarting==='undefined'||!_animSpdRestarting){
+      _wDiagG=1;_wDiagSyncUI(); // start the sweep from g=1
+    }
     _wDiagPlayDir=1;
     _wDiagPlayId=setInterval(function(){
       var next=_wDiagG+_wDiagPlayDir, mx=Math.max(1,_wG-1);
       if(next>=mx){next=mx;_wDiagPlayDir=-1;}
       else if(next<=1){next=1;_wDiagPlayDir=1;}
       _wDiagG=next;_wDiagSyncUI();wRedrawCanvas();
-    },120);
+    },(typeof _liftAnimSpeed!=='undefined')?_liftAnimSpeed:120);
+  };
+  // Re-arm hook for the global speed control: restart a running diagonal
+  // sweep at the new cadence without resetting its position.
+  window._wDiagRestartPlay=function(){
+    if(!_wDiagPlayId)return;
+    clearInterval(_wDiagPlayId);_wDiagPlayId=null;
+    window.wDiagPlay();
   };
   window._wDiagOnGChange=function(){
     var sl=document.getElementById('w-diag-sl');
@@ -3504,7 +3587,9 @@ function heroToggleTopBars(){
         gp.arc(x,y,rad,0,Math.PI*2);
       }
     }
+    ctx.save();ctx.globalAlpha=_wDynDimA('grid');
     _gridBatch.forEach(function(path,col){ctx.fillStyle=col;ctx.fill(path);});
+    ctx.restore();
     // Sector path — highlight the traced lattice points (not a drawn line),
     // same mechanism as the hero's Trace path.
     for(var si=0;si<_wSectorPts.length;si++){
@@ -3594,8 +3679,8 @@ function heroToggleTopBars(){
           var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
           var S=ringXY(sr,pM);
           ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
-          if(_liftLblMode==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
-          else if(_liftLblMode==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
+          if(_wLblMode()==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
+          else if(_wLblMode()==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
           if(mirrorOn){
             var SM=ringXY(pM-sr,pM);
             ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();
@@ -3610,7 +3695,7 @@ function heroToggleTopBars(){
           if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=ringXY((pM-_nn2)/2,pM);ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}
         }
       }
-      if(_liftLblMode==='outer'&&_spOut&&spOn)
+      if(_wLblMode()==='outer'&&_spOut&&spOn)
         _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
     }
     // Active Gaps: outline the full ring for every M in a twin/cousin/sexy-prime pair
@@ -3620,10 +3705,10 @@ function heroToggleTopBars(){
       ctx.strokeStyle=color+'70';ctx.lineWidth=1.5;
       ctx.beginPath();ctx.arc(cx,cy,gR,0,Math.PI*2);ctx.stroke();
     });
-    // Dim the base ring points while the Lift overlay is on — they're drawn
+    // Dim the base ring points (Dim slider %) while any dynamic is on — drawn
     // on top of the lift arcs/spirals and at full opacity were flattening
     // them out. Hit-testing (_wHitPts) still records at full fidelity.
-    if(_wRingLift){ctx.save();ctx.globalAlpha=0.4;}
+    var _dimA=_wDynDimA('ring'); if(_dimA<1){ctx.save();ctx.globalAlpha=_dimA;}
     for(var M=1;M<=rings;M++){
       if(!_wRingActive(M))continue;
       var R=maxR*(M-1)/Math.max(1,rings-1);
@@ -3643,7 +3728,7 @@ function heroToggleTopBars(){
         ctx.fill();
       }
     }
-    if(_wRingLift){ctx.restore();}
+    if(_dimA<1){ctx.restore();}
     // Sector path — highlight traced points at their true ring position
     // (same extraRot/per-ring twist as the main lattice, for visual consistency).
     for(var si=0;si<_wSectorPts.length;si++){
@@ -3671,6 +3756,7 @@ function heroToggleTopBars(){
       ctx.strokeStyle=color+'55';ctx.lineWidth=2;
       ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(W-pad,gy);ctx.stroke();
     });
+    ctx.save();ctx.globalAlpha=_wDynDimA('farey');
     for(var M=1;M<=G;M++){
       if(!_wRingActive(M))continue;
       var yFrac=(M===1)?0:Math.log(M)/Math.log(G);
@@ -3689,6 +3775,7 @@ function heroToggleTopBars(){
         ctx.fill();
       }
     }
+    ctx.restore();
     // Sector path — highlight traced points at their true Farey position.
     for(var si=0;si<_wSectorPts.length;si++){
       var sp=_wSectorPts[si];
@@ -3728,6 +3815,7 @@ function heroToggleTopBars(){
     var quadTints=['rgba(200,168,74,.05)','rgba(61,200,184,.05)','rgba(155,127,232,.05)','rgba(224,80,96,.045)'];
     var showLbl=cw>=14;
     ctx.save();ctx.translate(cx,cy);
+    ctx.globalAlpha=_wDynDimA('gauss');
     for(var q=0;q<4;q++){
       for(var ri=0;ri<G;ri++){
         for(var mi=0;mi<G;mi++){
@@ -3941,8 +4029,8 @@ function heroToggleTopBars(){
           if(_spOn&&spP<pM){
             var sr=_spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
             var _sPt=mark(sr,pM,'rgba(230,56,72,.95)',2.6); // red spiral
-            if(_liftLblMode==='channel')_wDynSpiralLabel(ctx,_sPt[0],_sPt[1],sr,pM);
-            else if(_liftLblMode==='outer')_spOutS={x:_sPt[0],y:_sPt[1],sr:sr,pM:pM};
+            if(_wLblMode()==='channel')_wDynSpiralLabel(ctx,_sPt[0],_sPt[1],sr,pM);
+            else if(_wLblMode()==='outer')_spOutS={x:_sPt[0],y:_sPt[1],sr:sr,pM:pM};
             if(_mirrorOn) mark(pM-sr,pM,'rgba(155,127,232,.85)',2.3); // conjugate σ(r)=M−r
           }
           for(var nI=0;nI<_nList.length;nI++){
@@ -3954,11 +4042,12 @@ function heroToggleTopBars(){
             if(_npDir!=='up'&&(pM-_nn)/2>=1)mark((pM-_nn)/2,pM,nCol,2.2);
           }
         }
-        if(_liftLblMode==='outer'&&_spOutS&&_spOn)
+        if(_wLblMode()==='outer'&&_spOutS&&_spOn)
           _wDynSpiralLabel(ctx,_spOutS.x,_spOutS.y,_spOutS.sr,_spOutS.pM,(_spDir==='up'?'▲p':'▼p')+spP);
       }
       ctx.restore();
     }
+    ctx.save();ctx.globalAlpha=_wDynDimA('smith');
     for(var M=1;M<=rings;M++){
       if(!_wRingActive(M))continue;
       // Dimensionless ring radius (0.5..2.0) — NOT pre-scaled to pixels. The Cayley
@@ -3984,6 +4073,7 @@ function heroToggleTopBars(){
         ctx.fill();
       }
     }
+    ctx.restore();
     // Sector path — highlight traced points through the same Cayley map,
     // using the live alpha so it's adaptive to spin/flip/presets.
     for(var si=0;si<_wSectorPts.length;si++){
@@ -5601,7 +5691,7 @@ function heroToggleTopBars(){
       style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:var(--mono);font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--cream2);cursor:pointer;white-space:nowrap;">
       <input type="checkbox" id="lift-show-spiral" style="accent-color:rgba(200,168,74,.8);"
-        onchange="_liftPanelUpdate()">Prime spiral
+        onchange="_liftPanelUpdate()" checked>Prime spiral
     </label>
     <button class="lift-spiral-dir-btn" onclick="liftCycleSpiralDir()" title="Spiral winding: ▲ r≡p (mod M) · ▼ mirrored r≡−p (mod M)"
       style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">▲</button>
@@ -5622,12 +5712,15 @@ function heroToggleTopBars(){
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(155,127,232,.9);cursor:pointer;white-space:nowrap;" title="Lock n / p / M / gap-diagonal together — starting or stopping any one starts or stops all four in sync">
       <input type="checkbox" class="lift-lock-chk" style="accent-color:rgba(155,127,232,.8);" onchange="liftToggleLock(this.checked)">🔗 Lock
+      <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(232,227,219,.75);cursor:pointer;font-size:8px;" title="Dim the base lattice while a dynamic overlay is active"><input type="checkbox" class="lift-dim-chk" style="accent-color:rgba(232,227,219,.6);" onchange="wToggleDynDim(this.checked)">Dim</label>
+      <input type="range" class="lift-dim-sl" min="5" max="100" step="5" value="50" style="width:56px;accent-color:rgba(232,227,219,.5);" oninput="wSetDynDim(this.value)" title="Base-lattice brightness while dimming">
+      <span class="lift-dim-lbl" style="font-size:8px;color:rgba(232,227,219,.6);min-width:26px;">50%</span>
     </label>
     <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ n</button>
     <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:rgba(200,168,74,.08);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ p</button>
     <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:rgba(126,200,122,.08);border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ M</button>
     <span style="font-size:8px;color:var(--cream3);">Speed</span>
-    <input type="range" min="20" max="500" step="10" value="140" style="width:60px;accent-color:rgba(155,127,232,.7);" oninput="liftSetAnimSpeed(this.value)">
+    <input type="range" class="lift-anim-speed-sl" min="20" max="500" step="10" value="140" style="width:60px;accent-color:rgba(155,127,232,.7);" oninput="liftSetAnimSpeed(this.value)">
     <span class="lift-anim-speed-lbl" style="font-size:8px;color:var(--cream3);min-width:34px;">140ms</span>
   </div>
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
@@ -6661,10 +6754,26 @@ function getCn(n){
   ld+=_cnTailLog(n);                       // supply the p>200000 tail analytically
   return(_cn[n]=ZETA2*Math.exp(ld));
 }
-// Warm the cache in two stages: n ≤ 60 synchronously (covers the default UI
-// range instantly), the rest deferred so first paint isn't blocked ~1–4s.
-for(let i=0;i<=60;i++)getCn(i);
-setTimeout(()=>{for(let i=61;i<=600;i++)getCn(i);},50);
+// Warm the C(n) cache WITHOUT blocking. The old version computed n=0..60
+// synchronously at script eval (each call is a full 114k-prime log product,
+// ~40-200ms each → the page froze for ~10s on phones before first
+// interaction), then dumped n=61..600 as ONE deferred chunk that froze it
+// again. Now: only the three values the first paint actually needs are
+// computed inline; everything else fills in through a 12ms-per-tick
+// budgeted loop that yields to the UI between slices. Uncached n hit by the
+// slider before the warm reaches them just compute on demand (getCn caches).
+for(let i=0;i<=2;i++)getCn(i);
+(function _warmCnBudgeted(){
+  let i=3;
+  const CAP=600;
+  function slice(){
+    const t0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+    const now=()=>((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now());
+    while(i<=CAP&&now()-t0<12)getCn(i++);
+    if(i<=CAP)setTimeout(slice,30);
+  }
+  setTimeout(slice,400); // let first paint + handlers attach before warming
+})();
 
 // ── FINITE / ASYMPTOTIC MODE ──────────────────────────────────────────
 // getCnFinite(n, numPrimes) computes the partial Euler product
@@ -14122,7 +14231,7 @@ function heroGPlay(){
     if(next>=gMax){next=gMax;_heroGDir=-1;}
     else if(next<=2){next=2;_heroGDir=1;}
     heroLatticeSetG(next);
-  },120);
+  },(typeof _liftAnimSpeed!=='undefined')?_liftAnimSpeed:120);
 }
 
 // ── HERO N PLAY — ping-pong n from 0 to global N ──
@@ -14148,7 +14257,7 @@ function heroNPlay(){
     window._heroNPlayCur=curN;
     // Keep the equation panel in sync with the animation
     _updateHeroFormula(curN, getCn(curN));
-  },180);
+  },(typeof _liftAnimSpeed!=='undefined')?_liftAnimSpeed:180);
 }
 
 // ── HERO p² GRID NAVIGATION ──
@@ -14232,10 +14341,22 @@ function _fareyPanelUpdate(){
 }
 
 // Lift panel
-let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=false, _liftShowNPath=true, _liftDotScale=1.0;
-let _liftLblMode='none'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding)
+let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=true, _liftDotScale=1.0;
+let _liftLblMode='outer'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding) — outer by default
+let _liftLblChan=0;  // channel-mode sector filter: 0 = all channels; k>0 = only label points in Farey sector (1/(k+1), 1/k]
+let _liftLblScale=1; // spiral label font scale
 function liftSetLblMode(v){
   _liftLblMode=v||'none';
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
+function liftStepLblChan(d){
+  _liftLblChan=Math.max(0,Math.min(999,_liftLblChan+d));
+  document.querySelectorAll('.lift-lblchan-lbl').forEach(function(l){l.textContent=_liftLblChan===0?'all':('1/'+_liftLblChan);});
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+}
+function liftSetLblScale(v){
+  _liftLblScale=Math.max(0.5,Math.min(3,+v||1));
+  document.querySelectorAll('.lift-lblsize-lbl').forEach(function(l){l.textContent=_liftLblScale.toFixed(1)+'\u00d7';});
   if(typeof wRedrawCanvas==='function')wRedrawCanvas();
 }
 let _liftSurvOn=true, _liftBrokenOn=true, _liftThick=0.7;
@@ -14331,11 +14452,20 @@ function liftToggleAllN(v){_liftAllNOn=!!v;document.querySelectorAll('.lift-alln
 
 // Shared tick speed (ms) for the ▶n and ▶p play loops below.
 let _liftAnimSpeed=140;
+let _animSpdRestarting=false; // true only while liftSetAnimSpeed re-arms running sweeps — suppresses the start-from-minimum reset so speed changes don't yank position
 function liftSetAnimSpeed(v){
   _liftAnimSpeed=Math.max(20,Math.min(1000,+v||140));
   document.querySelectorAll('.lift-anim-speed-lbl').forEach(l=>l.textContent=_liftAnimSpeed+'ms');
+  document.querySelectorAll('.lift-anim-speed-sl').forEach(sl=>{sl.value=_liftAnimSpeed;});
+  // Re-arm every running sweep at the new cadence, keeping its position.
+  _animSpdRestarting=true;
+  var wasLock=_liftPlayLocked; _liftPlayLocked=false; // don't cascade during re-arm
   if(_liftNPlayId){clearInterval(_liftNPlayId);_liftNPlayId=null;liftNPlay();}
   if(_liftPPlayId){clearInterval(_liftPPlayId);_liftPPlayId=null;liftPPlay();}
+  if(_liftMPlayId){clearInterval(_liftMPlayId);_liftMPlayId=null;_liftMPlayToggle();}
+  if(typeof _wDiagRestartPlay==='function')_wDiagRestartPlay();
+  _liftPlayLocked=wasLock;
+  _animSpdRestarting=false;
 }
 
 // ── Lock: when on, starting or stopping ANY of ▶n / ▶p / ▶M (or the Active
@@ -14367,6 +14497,10 @@ function liftNPlay(){
     return;
   }
   const nMax=Math.max(3,Math.min(2047,_liftCurrentG()-1));
+  if(!_animSpdRestarting){ // start the sweep from n=1
+    _liftPathN=1;
+    document.querySelectorAll('.lift-pathn-lbl').forEach(l=>l.textContent=_liftPathN);
+  }
   _liftNPlayDir=1;
   btns.forEach(b=>{b.textContent='■ n';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
   _liftNPlayId=setInterval(()=>{
@@ -14390,6 +14524,10 @@ function liftPPlay(){
     return;
   }
   btns.forEach(b=>{b.textContent='■ p';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
+  if(!_animSpdRestarting){ // start the sweep from the first prime, p=2
+    _liftSpiralP=2;
+    document.querySelectorAll('.lift-spiralp-lbl').forEach(l=>l.textContent='p=2');
+  }
   _liftPPlayDir=1;
   _liftPPlayId=setInterval(()=>{
     const G=_liftCurrentG();
@@ -14399,10 +14537,10 @@ function liftPPlay(){
   },_liftAnimSpeed);
 }
 
-// Prime spiral is OFF by default (was auto-starting ▶ p on load, which also
-// meant it was fighting with ▶ M's forced G-reset below — see liftMPlay).
-// The person can still turn it on any time via the "Prime spiral" checkbox
-// or the ▶ p button itself.
+// Prime spiral is VISIBLE by default (static at p=2) but does not auto-play —
+// the old auto-start fought ▶ M's G-reset; visible-but-paused is the stable
+// compromise. ▶ p starts the sweep from p=2 (all plays start from their
+// minimum — "start mod 1").
 
 // ── ▶ M : ping-pong the ring count G from wherever it currently sits, up to
 // gMax and back — deliberately NOT reusing heroGPlay(), which force-resets
@@ -14421,7 +14559,13 @@ function _liftMPlayToggle(){
     return;
   }
   const gMax=Math.max(8,+document.getElementById('hero-g-num')?.value||_liftCurrentG()||100);
-  _liftMPlayDir=(typeof _heroG!=='undefined'&&_heroG<gMax)?1:-1;
+  if(!_animSpdRestarting&&typeof heroLatticeSetG==='function'){
+    // start the sweep from the bottom (M=2 is the smallest lattice with points);
+    // p stays wherever it is unless it exceeds G, in which case the G-change
+    // clamp lowers it — with the default p=2 the two never fight.
+    heroLatticeSetG(2);
+  }
+  _liftMPlayDir=(!_animSpdRestarting)?1:((typeof _heroG!=='undefined'&&_heroG<gMax)?1:-1);
   btns.forEach(b=>{b.textContent='■ M';b.style.color='rgba(224,80,96,.9)';b.style.background='rgba(224,80,96,.12)';});
   _liftMPlayId=setInterval(()=>{
     const cur=(typeof _heroG!=='undefined')?_heroG:gMax;
