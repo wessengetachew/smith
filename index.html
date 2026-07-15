@@ -1222,6 +1222,7 @@ function heroToggleTopBars(){
       <div id="w-tour-panel" style="min-height:30px;"></div>
       <div id="ws-view-row" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="wv-btn" id="wvb-smith" onclick="wSetView('smith')"
+          title="Smith Chart — a conformal map borrowed from RF engineering, repurposed here purely as a lattice projection: Γ(z)=(z−1)/(z+1)"
           style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Smith</button>
         <button class="wv-btn" id="wvb-ring" onclick="wSetView('ring')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Ring</button>
@@ -1707,6 +1708,10 @@ function heroToggleTopBars(){
           style="background:rgba(126,200,122,.16);border:1px solid rgba(126,200,122,.65);color:rgba(126,200,122,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">Δp forward</button>
         <button class="gap-sem-btn" data-mode="diagonal" onclick="setGapSemantics('diagonal')" title="Legacy: highlight every lattice point with |M−r|=g, no primality"
           style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">|M−r| diagonal</button>
+        <div style="width:1px;height:18px;background:rgba(255,255,255,.14);flex-shrink:0;"></div>
+        <button id="w-residue-overlay-btn" onclick="wToggleResidueOverlay()"
+          title="Draw the actual (p, p+g) residue chords mod G — comet-tail descent + outer chord + landing glow, on top of the active gap's row highlighting. Works on all five views."
+          style="background:rgba(74,144,217,.18);border:1px solid rgba(74,144,217,.75);color:rgba(120,180,240,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">⬡ Residue chords</button>
         </div>
 
         <!-- Dynamic Gap Generation — ported from the old project. These build
@@ -2700,7 +2705,7 @@ function heroToggleTopBars(){
   // five views. A gap g is "active" if M and M+g are both prime; every M
   // involved in an active pair gets its whole ring/row/diagonal highlighted
   // in that gap's color, using each view's own existing coordinate mapping.
-  var _wActiveGaps=new Set();
+  var _wActiveGaps=new Set([1,2]); // defaults on: gap 1 (2→3) + twin primes
   // Lock the diagonal gap g to half of Grid G — ported from page2's
   // "🔒 g=G/2" button. Stays applied through G changes (wSetG) until the
   // user either toggles it off or manually drags the gap slider elsewhere.
@@ -2736,6 +2741,134 @@ function heroToggleTopBars(){
     var c=_wGapColorFor(g);
     return 'background:'+(on?c+'30':'none')+';border:1px solid '+(on?c:'rgba(255,255,255,.18)')+';color:'+(on?c:'#a8a294')+';font-family:\'JetBrains Mono\',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;';
   }
+
+  // ── Residue-chord gap overlay — opener-side twin of the hero's
+  // ⬡ Residue chords: projects actual primes (p,p+g) onto residues mod _wG
+  // and draws the comet-tail + chord + landing glow, on top of whichever
+  // opener view is active. Reuses the same _wActiveGaps set as the row-based
+  // Active Gaps highlighting above; the sieve itself is the shared
+  // _heroBuildPairsForGap function (pure, no hero-only state). ──
+  var _wResidueOverlayOn=true; // on by default
+  var _wOverlayPairs=[];
+  var _wOverlayCacheKey='';
+  var _wGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
+  window.wToggleResidueOverlay=function(){
+    _wResidueOverlayOn=!_wResidueOverlayOn;
+    var btn=document.getElementById('w-residue-overlay-btn');
+    if(btn){
+      btn.style.background=_wResidueOverlayOn?'rgba(74,144,217,.18)':'none';
+      btn.style.borderColor=_wResidueOverlayOn?'rgba(74,144,217,.75)':'rgba(255,255,255,.18)';
+      btn.style.color=_wResidueOverlayOn?'rgba(120,180,240,.95)':'#a8a294';
+    }
+    _wOverlayCacheKey='';
+    wRedrawCanvas();
+  };
+  function _wEnsureOverlayPairs(){
+    var modN=_wG;
+    var gapsList=(_wActiveGaps&&_wActiveGaps.size)?Array.from(_wActiveGaps).sort(function(a,b){return a-b;}):[];
+    var key=gapsList.join(',')+'|'+modN;
+    if(key===_wOverlayCacheKey)return _wOverlayPairs;
+    _wOverlayCacheKey=key;
+    if(!gapsList.length){_wOverlayPairs=[];return _wOverlayPairs;}
+    var limit=Math.min(20000,Math.max(5000,modN*30));
+    var all=[];
+    gapsList.forEach(function(g){
+      if(typeof _heroBuildPairsForGap==='function') all=all.concat(_heroBuildPairsForGap(g,modN,limit));
+    });
+    _wOverlayPairs=all;
+    return _wOverlayPairs;
+  }
+  function _drawWResidueChords(ctx,W,H,mMax,ptXY){
+    if(!_wResidueOverlayOn)return;
+    var pairs=_wEnsureOverlayPairs().slice(0,200);
+    if(!pairs.length)return;
+    var overlayAlpha=0.8;
+    ctx.save();
+    var rList=[],rSeen={};
+    pairs.forEach(function(pr){
+      if(!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
+      if(!rSeen[pr.r2]){rSeen[pr.r2]=pr.gap;rList.push(pr.r2);}
+    });
+    rList.forEach(function(r){
+      var col=_wGapColorFor(rSeen[r]);
+      for(var mk=mMax-1;mk>=1;mk--){
+        var A=ptXY(r,mk), B=ptXY(r,mk+1);
+        if(!A||!B)continue;
+        var t=mk/mMax;
+        ctx.beginPath();
+        ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]);
+        ctx.strokeStyle=col;
+        ctx.lineWidth=Math.max(0.8,W*0.003*t);
+        ctx.globalAlpha=(0.25+0.55*t)*overlayAlpha;
+        ctx.stroke();
+      }
+      var o=ptXY(r,mMax);
+      if(o){
+        ctx.beginPath();
+        ctx.arc(o[0],o[1],Math.max(3,W*0.007),0,2*Math.PI);
+        ctx.fillStyle=col; ctx.globalAlpha=0.95;
+        ctx.fill();
+      }
+    });
+    pairs.forEach(function(pr,i){
+      var a=ptXY(pr.r1,pr.m), b=ptXY(pr.r2,pr.m);
+      if(!a||!b)return;
+      ctx.beginPath();
+      ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]);
+      ctx.strokeStyle=_wGapColorFor(pr.gap);
+      ctx.lineWidth=Math.max(1,W*0.002);
+      ctx.globalAlpha=(0.55+0.3*(i/Math.max(pairs.length-1,1)))*overlayAlpha;
+      ctx.stroke();
+    });
+    var r2Count={};
+    pairs.forEach(function(pr){ r2Count[pr.r2]=(r2Count[pr.r2]||0)+1; });
+    var counts=Object.keys(r2Count).map(function(k){return r2Count[k];});
+    var maxCount=Math.max.apply(null,counts.length?counts:[1]);
+    Object.keys(r2Count).forEach(function(rStr){
+      var r2=parseInt(rStr), count=r2Count[r2], norm=count/maxCount;
+      var xy=ptXY(r2,mMax);
+      if(!xy)return;
+      var glowR=Math.max(8,W*0.022*(0.4+0.6*norm));
+      var grad=ctx.createRadialGradient(xy[0],xy[1],0,xy[0],xy[1],glowR);
+      grad.addColorStop(0,'rgba(74,144,217,'+(0.35+0.4*norm)+')');
+      grad.addColorStop(0.4,'rgba(74,144,217,'+(0.14+0.16*norm)+')');
+      grad.addColorStop(1,'rgba(74,144,217,0)');
+      ctx.beginPath(); ctx.arc(xy[0],xy[1],glowR,0,2*Math.PI);
+      ctx.fillStyle=grad; ctx.globalAlpha=overlayAlpha; ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    ctx.restore();
+  }
+  function _drawWResidueLegend(ctx,W,H){
+    if(!_wResidueOverlayOn)return;
+    var pairs=_wOverlayPairs.slice(0,200);
+    if(!pairs.length)return;
+    ctx.save();
+    var lsize=Math.max(9,W*0.013), lpad=W*0.03, lboxH=lsize*3.4, ly0=6;
+    ctx.fillStyle='rgba(6,4,14,0.82)';
+    ctx.strokeStyle=_wGapColorFor(pairs[0].gap);
+    ctx.lineWidth=0.8; ctx.globalAlpha=0.92;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(lpad,ly0,W-lpad*2,lboxH,4); else ctx.rect(lpad,ly0,W-lpad*2,lboxH);
+    ctx.fill(); ctx.stroke(); ctx.globalAlpha=1;
+    var gapsList=[],seenG={};
+    pairs.forEach(function(p){if(!seenG[p.gap]){seenG[p.gap]=1;gapsList.push(p.gap);}});
+    gapsList.sort(function(a,b){return a-b;});
+    var gapLabel=gapsList.length>1?('Gaps '+gapsList.join(', ')):(_wGapNames[gapsList[0]]||('Gap '+gapsList[0]));
+    ctx.font='bold '+lsize+'px Cinzel, serif';
+    ctx.fillStyle=_wGapColorFor(gapsList[0]);
+    ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText(gapLabel+'  ·  '+pairs.length+' pairs  ·  mod '+_wG, lpad+8, ly0+5);
+    ctx.font=(lsize*0.88)+'px Cinzel, serif';
+    ctx.fillStyle='#9a8060';
+    var rset={};
+    pairs.forEach(function(p){rset[p.r1]=1;rset[p.r2]=1;});
+    var uniqueR=Object.keys(rset).map(Number).sort(function(a,b){return a-b;});
+    var shown=uniqueR.slice(0,16).join(', ')+(uniqueR.length>16?' …':'');
+    ctx.fillText('Residues: '+shown, lpad+8, ly0+5+lsize*1.6);
+    ctx.restore();
+  }
+
   window.wToggleGap=function(g){
     if(_wGapLockHalf){
       _wGapLockHalf=false;
@@ -3270,6 +3403,7 @@ function heroToggleTopBars(){
       }
     }
     ctx.restore();
+    _drawWResidueLegend(ctx,W,H);
   }
   // Expose globally — lift-toggle handlers (Mirror/Dropout/All p/All n/etc.)
   // live in a separate <script> block and call this via a typeof-guarded
@@ -3321,6 +3455,11 @@ function heroToggleTopBars(){
   // whose coprime density is exactly φ(g)/g. Gold-filled = coprime on the
   // strip, faint outline = not.
   var _wDiagG=0, _wDiagLockHalf=false, _wDiagPlayId=null, _wDiagPlayDir=1;
+  // Shared-engine plumbing: the hero calls the SAME overlay code through
+  // window._sharedLiftOverlay/_sharedDiagOverlay, passing its own
+  // active-ring predicate; _dynExt bypasses the opener's _wRingLift gate.
+  var _dynExt=false,_dynAct=null;
+  function _dynA(M){return _dynAct?_dynAct(M):_wRingActive(M);}
   // Dim the base lattice to 25% while any dynamic overlay (Lift suite or
   // gap-diagonal) is active, so the dynamic reads without shrinking dots.
   var _dynDimOn=false;   // off by default — opt in via the Dim checkbox
@@ -3347,7 +3486,7 @@ function heroToggleTopBars(){
     ctx.save();
     for(var r=1;r+g<=G;r++){
       var M=r+g;
-      if(!_wRingActive(M))continue;
+      if(!_dynA(M))continue;
       var P=xy(r,M); if(!P)continue;
       if(gcd(r,M)===1){
         ctx.fillStyle='rgba(200,168,74,.92)';
@@ -3389,11 +3528,11 @@ function heroToggleTopBars(){
   // lineCap: skip the O(G²) lift LINES above this G (markers stay — they're
   // O(G)) so big lattices don't jank; Ring/Smith keep their native drawing.
   function _wDynLiftOverlay(ctx,xy,G,n,lineCap){
-    if(!_wRingLift)return;
+    if(!_wRingLift&&!_dynExt)return;
     if(G<=(lineCap||400)){
       var pLift=new Path2D(),pDie=new Path2D();
       for(var lM=2;lM<G;lM++){
-        if(!_wRingActive(lM)||!_wRingActive(lM+1))continue;
+        if(!_dynA(lM)||!_dynA(lM+1))continue;
         for(var lr=1;lr<lM;lr++){
           if(gcd(lr,lM)!==1)continue;
           if(n>0&&!_wBlockCoprime2D(lr,lM,n))continue;
@@ -3420,7 +3559,7 @@ function heroToggleTopBars(){
     var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(G):2;
     // Dropout row — the spiral prime's own modulus M=p, where it exits (ℤ/Mℤ)*:
     // the Ring draws a circle; in the flat geometries it's the straight row.
-    if(dropoutOn&&spP>=2&&spP<=G&&_wRingActive(spP)){
+    if(dropoutOn&&spP>=2&&spP<=G&&_dynA(spP)){
       var E1=xy(1,spP),E2=xy(Math.max(1,spP-1),spP);
       if(E1&&E2){ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.2;
         ctx.beginPath();ctx.moveTo(E1[0],E1[1]);ctx.lineTo(E2[0],E2[1]);ctx.stroke();ctx.restore();}
@@ -3430,7 +3569,7 @@ function heroToggleTopBars(){
         var ap=PRIMES[api]; if(ap>=G)break;
         if(ap===spP)continue;
         for(var apM=ap+1;apM<=G;apM++){
-          if(!_wRingActive(apM))continue;
+          if(!_dynA(apM))continue;
           var apr=spDir==='down'?(((apM-(ap%apM))%apM)||apM):(ap%apM);
           if(apr<1||apr>=apM)continue;
           var AP=xy(apr,apM); if(!AP)continue;
@@ -3441,7 +3580,7 @@ function heroToggleTopBars(){
     var nList=allNOn?LIFT_ALL_N:[(typeof _liftPathN==='undefined')?1:_liftPathN];
     var _spOut=null; // outermost spiral point for the 'outer' label mode
     for(var pM=3;pM<=G;pM++){
-      if(!_wRingActive(pM))continue;
+      if(!_dynA(pM))continue;
       if(spOn&&spP<pM){
         var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
         if(sr>=1&&sr<pM){
@@ -3538,6 +3677,19 @@ function heroToggleTopBars(){
     b.style.color=_wDiagLockHalf?'#9b7fe8':'rgba(155,127,232,.85)';
   }
   window._wGetDiagG=function(){return _wDiagG;};
+  window._sharedLiftOverlay=function(ctx,xy,G,n,lineCap,act){
+    _dynExt=true;_dynAct=act||null;
+    try{_wDynLiftOverlay(ctx,xy,G,n,lineCap);}finally{_dynExt=false;_dynAct=null;}
+  };
+  window._sharedDiagOverlay=function(ctx,xy,G,act){
+    _dynAct=act||null;
+    try{_wDynDiagOverlay(ctx,xy,G);}finally{_dynAct=null;}
+  };
+  // Hero-side dim: same _dynDimOn/_dynDimAmt pair, hero-appropriate activity test.
+  window._heroDynDimA=function(){
+    var act=!!window._heroLiftMode||_wDiagG>0;
+    return(_dynDimOn&&act)?_dynDimAmt:1;
+  };
 
   function drawWGrid(ctx,W,H,n,G){
     // Square cell grid, both axes sized off G (previously one axis used G-1,
@@ -3607,6 +3759,7 @@ function heroToggleTopBars(){
     var _dynXY=function(r,M){var rD=_wPerRingShiftedR(r,M,G,_wPerRing);return[ox+rD*cell,oy+(M-1)*cell];};
     _wDynLiftOverlay(ctx,_dynXY,G,n,400);
     _wDynDiagOverlay(ctx,_dynXY,G);
+    _drawWResidueChords(ctx,W,H,G,_dynXY);
   }
 
   function drawWRing(ctx,W,H,n,G){
@@ -3744,6 +3897,7 @@ function heroToggleTopBars(){
     }
     // Gap-diagonal strip at true ring positions (lift/spiral/±n already native here)
     _wDynDiagOverlay(ctx,function(r,M){return ringXY(r,M);},G);
+    _drawWResidueChords(ctx,W,H,rings,function(r,M){return ringXY(r,M);});
   }
 
   function drawWFarey(ctx,W,H,n,G){
@@ -3798,6 +3952,17 @@ function heroToggleTopBars(){
     };
     _wDynLiftOverlay(ctx,_dynXY,G,n,400);
     _wDynDiagOverlay(ctx,_dynXY,G);
+    // Residue chords need the comet-tail to keep extending as rings shrink
+    // below the residue's value, so this variant skips the r<M gate.
+    _drawWResidueChords(ctx,W,H,G,function(r,M){
+      if(M<1)return null;
+      var yF=Math.log(M)/Math.log(G);
+      var y=H-pad-(H-pad*2)*(1-yF);
+      var rD=_wPerRingShiftedR(r,M,M,_wPerRing);
+      var x=pad+(W-pad*2)*(rD/M);
+      if(x<-40||x>W+40)return null;
+      return[x,y];
+    });
   }
 
   // ── ℤ[i] view — ported from Page 2's ℤ[i] tab: a full G×G grid mirrored
@@ -3885,6 +4050,15 @@ function heroToggleTopBars(){
         _wDynDiagOverlay(ctx,_dynXY,G);
         ctx.rotate(Math.PI/2);
       }
+      ctx.restore();
+    }
+    if(_wResidueOverlayOn){
+      ctx.save();ctx.translate(cx,cy);
+      var _gapXY=function(r,M){
+        var rD=_wPerRingShiftedR(r,M,G,_wPerRing);
+        return[(rD-1+0.5)*cw,(M-1+0.5)*cw];
+      };
+      for(var gq=0;gq<4;gq++){_drawWResidueChords(ctx,W,H,G,_gapXY);ctx.rotate(Math.PI/2);}
       ctx.restore();
     }
     var fs=Math.max(8,Math.floor(side*0.022));
@@ -4096,6 +4270,14 @@ function heroToggleTopBars(){
       var w=_conformalSmithPt(RR,th,R0);
       return[cx+w.x,cy+w.y];
     },G);
+    // Residue-chord gap overlay through the same Cayley map.
+    _drawWResidueChords(ctx,W,H,rings,function(r,M){
+      var rD=(M===1)?0:_wPerRingShiftedR(r,M,M,_wPerRing);
+      var RR=0.5+((M-1)/Math.max(1,rings-1))*1.5;
+      var th=2*Math.PI*rD/M+alpha;
+      var w=_conformalSmithPt(RR,th,R0);
+      return[cx+w.x,cy+w.y];
+    });
   }
   // Cayley map Γ(z)=(z−1)/(z+1) for z=ringR·e^{iθ} (ringR dimensionless, O(1)), scaled to canvas radius R0
   function _conformalSmithXY(zr,zi,R0){
@@ -4390,6 +4572,16 @@ function heroToggleTopBars(){
     // direct 1:1 copy.
     if(typeof _heroRowShiftApply==='function') _heroRowShiftApply(_wPerRing||0);
 
+    // Lift MODE: hero mirrors the opener's ⇑ Lift toggle. The _lift* toggles,
+    // spiral p, labels, Dim, diagonal g, and speed are shared globals — they
+    // are identical on both canvases by construction, nothing to copy.
+    window._heroLiftMode=!!_wRingLift;
+    var _hlb=document.getElementById('hero-lift-mode');
+    if(_hlb){
+      _hlb.style.background=window._heroLiftMode?'rgba(61,200,184,.18)':'none';
+      _hlb.style.color=window._heroLiftMode?'rgba(61,200,184,.95)':'rgba(61,200,184,.55)';
+      _hlb.textContent=window._heroLiftMode?'⇑ Lift: on':'⇑ Lift: off';
+    }
     // Global 90°-step rotation — the opener now has its own −i/+i control;
     // copy it onto the hero so the transferred canvas matches exactly.
     if(typeof _heroRotSteps!=='undefined'){
@@ -4750,8 +4942,10 @@ function heroToggleTopBars(){
     style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:.45;">Lift</button>
   <button id="hero-view-gauss" onclick="heroSetView('gauss')" title="Gaussian integers a+bi, 4-quadrant mirrored lattice"
     style="background:none;border:1px solid rgba(242,168,74,.4);color:rgba(242,168,74,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:.45;">Gauss</button>
-  <button id="hero-view-smith" onclick="heroSetView('smith')" title="Smith Chart — ring-polar lattice (R=ring radius, θ=2πr/M) through Γ(z)=(z−1)/(z+1)"
+  <button id="hero-view-smith" onclick="heroSetView('smith')" title="Smith Chart — a conformal map borrowed from RF engineering, repurposed here purely as a lattice projection: Γ(z)=(z−1)/(z+1), ring-polar (R=ring radius, θ=2πr/M)"
     style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:1;">Smith</button>
+  <button id="hero-lift-mode" onclick="heroToggleLiftMode()" title="Lift dynamics MODE — lift lines r → r mod(M+1), prime spiral, mirror σ, ±n path — overlays whichever hero view is active (the dedicated Lift view chip stays as-is)"
+    style="background:none;border:1px dashed rgba(61,200,184,.4);color:rgba(61,200,184,.55);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.06em;margin-left:10px;">⇑ Lift: off</button>
 </div>
 
 
@@ -5326,6 +5520,10 @@ function heroToggleTopBars(){
       style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">|M−r| diagonal</button>
     <button onclick="heroGapClear()" title="Clear all active gaps"
       style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:3px 9px;cursor:pointer;">✕ Clear all</button>
+    <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
+    <button id="hero-residue-overlay-btn" onclick="heroToggleResidueOverlay()"
+      title="Draw the actual (p, p+g) residue chords mod G — comet-tail descent + outer chord + landing glow, on top of the active gap's row highlighting. Works on all six views."
+      style="background:rgba(74,144,217,.18);border:1px solid rgba(74,144,217,.75);color:rgba(120,180,240,.95);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">⬡ Residue chords</button>
   </div>
   <!-- Dynamic Gap Generation — same control-builders as the opener: these
        CREATE new toggle buttons (off by default); they don't switch gaps on. -->
@@ -13657,7 +13855,7 @@ function heroSecSetSize(v){
   if(lbl) lbl.textContent=_heroSecDotScale.toFixed(2)+'×';
 }
 
-let _heroActiveGaps=new Set();
+let _heroActiveGaps=new Set([1,2]); // defaults on: gap 1 (2→3) + twin primes
 // Lock the diagonal gap g to half of Grid G — mirrors the opener's own
 // "🔒 g=G/2" lock (ported from page2's gLockHalf). Stays applied through G
 // changes (heroLatticeSetG) until toggled off or the slider is dragged
@@ -13690,6 +13888,28 @@ let _heroActiveRings=null; // null = all rings 1..G active (default); else a Set
 let _heroCharFilter='support'; // 'both' | 'support' (χ≠0, gcd=1) | 'vanishing' (χ=0, gcd≠1) — default matches the checkboxes (vanishing OFF)
 let _heroCharSupportSize=1, _heroCharVanishSize=1; // independent point-size multipliers, all 6 views
 function _heroRingActive(M){ return M===1 || !_heroActiveRings || _heroActiveRings.has(M); }
+// ── Hero Lift MODE: the opener's shared dynamics engine overlaid on any hero
+// view (the dedicated Lift VIEW is untouched). Shares every _lift* toggle,
+// the Dim system, and the gap-diagonal g with the opener — identical by
+// construction, so Send-to-Hero has nothing extra to translate for them.
+window._heroLiftMode=false;
+function heroToggleLiftMode(){
+  window._heroLiftMode=!window._heroLiftMode;
+  const b=document.getElementById('hero-lift-mode');
+  if(b){
+    b.style.background=window._heroLiftMode?'rgba(61,200,184,.18)':'none';
+    b.style.color=window._heroLiftMode?'rgba(61,200,184,.95)':'rgba(61,200,184,.55)';
+    b.textContent=window._heroLiftMode?'⇑ Lift: on':'⇑ Lift: off';
+  }
+}
+function _hDynDim(){return (typeof _heroDynDimA==='function')?_heroDynDimA():1;}
+function _heroDynOverlays(ctx,xy,G,n,cap){
+  const dg=(typeof _wGetDiagG==='function')?_wGetDiagG():0;
+  if(window._heroLiftMode&&typeof _sharedLiftOverlay==='function')
+    _sharedLiftOverlay(ctx,xy,G,n,cap,_heroRingActive);
+  if(dg>0&&typeof _sharedDiagOverlay==='function')
+    _sharedDiagOverlay(ctx,xy,G,_heroRingActive);
+}
 function _heroCharPass(pureCop){ return _heroCharFilter==='both' || (_heroCharFilter==='support'&&pureCop) || (_heroCharFilter==='vanishing'&&!pureCop); }
 function _heroCharSizeMul(pureCop){ return pureCop?_heroCharSupportSize:_heroCharVanishSize; }
 window.heroSetCharSize=function(){
@@ -13767,6 +13987,186 @@ function _gapRgbFn(gap){
     return[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];
   }
   return[200,168,74]; // hsl fallback — gold
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   RESIDUE-CHORD GAP OVERLAY — ported from gap-zeta2.html's
+   fareyShowGapOverlay / drawGapOverlay. Distinct from the row-based
+   "Active Gaps" highlighting above: this projects the ACTUAL primes
+   (p, p+g) onto residues mod _heroG and draws the comet-tail descent
+   + outer chord + landing glow, on top of whichever hero view is active.
+   Reuses the SAME _heroActiveGaps set / slider / preset buttons —
+   no duplicate gap-picker UI. Toggle with heroToggleResidueOverlay().
+   ════════════════════════════════════════════════════════════════════ */
+let _heroResidueOverlayOn=true; // on by default
+let _heroOverlayPairs=[];
+let _heroOverlayCacheKey='';
+const _heroGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
+
+function heroToggleResidueOverlay(){
+  _heroResidueOverlayOn=!_heroResidueOverlayOn;
+  const btn=document.getElementById('hero-residue-overlay-btn');
+  if(btn){
+    btn.style.background=_heroResidueOverlayOn?'rgba(74,144,217,.18)':'none';
+    btn.style.borderColor=_heroResidueOverlayOn?'rgba(74,144,217,.75)':'rgba(255,255,255,.18)';
+    btn.style.color=_heroResidueOverlayOn?'rgba(120,180,240,.95)':'#a8a294';
+  }
+  _heroOverlayCacheKey=''; // force rebuild
+}
+
+// Exact-gap prime sieve → residue pairs mod modN. Identical logic to
+// gap-zeta2.html's _builtinPairsForGap: both p and p+gap must be prime,
+// AND nothing prime strictly between them (so it's the *exact* gap, not
+// just any two primes that happen to differ by gap).
+function _heroBuildPairsForGap(gap,modN,limit){
+  limit=limit||10000;
+  const top=limit+gap;
+  const sieve=new Uint8Array(top+1);
+  sieve[0]=sieve[1]=1;
+  for(let i=2;i*i<=top;i++) if(!sieve[i]) for(let j=i*i;j<=top;j+=i) sieve[j]=1;
+  const pairs=[],seen={};
+  for(let p=2;p<=limit;p++){
+    if(sieve[p]||sieve[p+gap])continue;
+    let exact=true;
+    for(let q=p+1;q<p+gap;q++) if(!sieve[q]){exact=false;break;}
+    if(!exact)continue;
+    const r1=((p%modN)+modN)%modN, r2=(((p+gap)%modN)+modN)%modN;
+    if(r1===0||r2===0)continue;
+    if(gcd(r1,modN)!==1||gcd(r2,modN)!==1)continue;
+    const key=r1+','+r2;
+    if(seen[key])continue;
+    seen[key]=true;
+    pairs.push({r1,r2,m:modN,p,gap});
+  }
+  return pairs;
+}
+
+// Rebuilds _heroOverlayPairs for every active gap, cached by (gaps,G) so
+// the sieve doesn't re-run every animation frame.
+function _heroEnsureOverlayPairs(){
+  const modN=_heroG;
+  const gapsList=(_heroActiveGaps&&_heroActiveGaps.size)?Array.from(_heroActiveGaps).sort((a,b)=>a-b):[];
+  const key=gapsList.join(',')+'|'+modN;
+  if(key===_heroOverlayCacheKey)return _heroOverlayPairs;
+  _heroOverlayCacheKey=key;
+  if(!gapsList.length){_heroOverlayPairs=[];return _heroOverlayPairs;}
+  const limit=Math.min(20000,Math.max(5000,modN*30));
+  let all=[];
+  gapsList.forEach(g=>{ all=all.concat(_heroBuildPairsForGap(g,modN,limit)); });
+  _heroOverlayPairs=all;
+  return _heroOverlayPairs;
+}
+
+// Draws the residue-chord overlay on top of any ring-style view that already
+// used (cx,cy,rho-by-ring) geometry. Pass a ptXY(r,M) function matching the
+// caller's own coordinate convention so chords land exactly on that view's
+// existing dots. Call this WHILE any local transform (rotation/flip/translate)
+// the view uses is still active, so the chords inherit it automatically.
+function _drawHeroResidueChords(ctx,W,H,mMax,ptXY){
+  if(!_heroResidueOverlayOn)return;
+  const pairs=_heroEnsureOverlayPairs().slice(0,200); // MAX_DISPLAY, matches gap-zeta2
+  if(!pairs.length)return;
+  const overlayAlpha=0.8;
+
+  ctx.save();
+
+  // ── comet-tail descent lines, one per unique residue ──
+  const rList=[],rSeen={};
+  pairs.forEach(pr=>{
+    if(!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
+    if(!rSeen[pr.r2]){rSeen[pr.r2]=pr.gap;rList.push(pr.r2);}
+  });
+  rList.forEach(r=>{
+    const col=_gapColor(rSeen[r]);
+    for(let mk=mMax-1;mk>=1;mk--){
+      const A=ptXY(r,mk), B=ptXY(r,mk+1);
+      if(!A||!B)continue;
+      const t=mk/mMax;
+      ctx.beginPath();
+      ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]);
+      ctx.strokeStyle=col;
+      ctx.lineWidth=Math.max(0.8,W*0.003*t);
+      ctx.globalAlpha=(0.25+0.55*t)*overlayAlpha;
+      ctx.stroke();
+    }
+    const o=ptXY(r,mMax);
+    if(o){
+      ctx.beginPath();
+      ctx.arc(o[0],o[1],Math.max(3,W*0.007),0,2*Math.PI);
+      ctx.fillStyle=col; ctx.globalAlpha=0.95;
+      ctx.fill();
+    }
+  });
+
+  // ── outer chord r1→r2, the gap itself ──
+  pairs.forEach((pr,i)=>{
+    const a=ptXY(pr.r1,pr.m), b=ptXY(pr.r2,pr.m);
+    if(!a||!b)return;
+    ctx.beginPath();
+    ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]);
+    ctx.strokeStyle=_gapColor(pr.gap);
+    ctx.lineWidth=Math.max(1,W*0.002);
+    ctx.globalAlpha=(0.55+0.3*(i/Math.max(pairs.length-1,1)))*overlayAlpha;
+    ctx.stroke();
+  });
+
+  // ── landing glow on r2 targets — amplitude ∝ how many chords land there ──
+  const r2Count={};
+  pairs.forEach(pr=>{ r2Count[pr.r2]=(r2Count[pr.r2]||0)+1; });
+  const maxCount=Math.max(1,...Object.values(r2Count));
+  Object.keys(r2Count).forEach(rStr=>{
+    const r2=parseInt(rStr), count=r2Count[r2], norm=count/maxCount;
+    const xy=ptXY(r2,mMax);
+    if(!xy)return;
+    const glowR=Math.max(8,W*0.022*(0.4+0.6*norm));
+    const grad=ctx.createRadialGradient(xy[0],xy[1],0,xy[0],xy[1],glowR);
+    grad.addColorStop(0,'rgba(74,144,217,'+(0.35+0.4*norm)+')');
+    grad.addColorStop(0.4,'rgba(74,144,217,'+(0.14+0.16*norm)+')');
+    grad.addColorStop(1,'rgba(74,144,217,0)');
+    ctx.beginPath(); ctx.arc(xy[0],xy[1],glowR,0,2*Math.PI);
+    ctx.fillStyle=grad; ctx.globalAlpha=overlayAlpha; ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  ctx.restore();
+}
+
+// Legend box, top-center. MUST be called with the canvas in its plain
+// (dpr-only) transform — i.e. after any view-local rotate/flip/translate has
+// been restored — since it's positioned in absolute W×H canvas space.
+function _drawHeroResidueLegend(ctx,W,H){
+  if(!_heroResidueOverlayOn)return;
+  const pairs=_heroOverlayPairs.slice(0,200);
+  if(!pairs.length)return;
+
+  ctx.save();
+  const lsize=Math.max(9,W*0.013), lpad=W*0.03, lboxH=lsize*3.4, ly0=6;
+  ctx.fillStyle='rgba(6,4,14,0.82)';
+  ctx.strokeStyle=_gapColor(pairs[0].gap);
+  ctx.lineWidth=0.8; ctx.globalAlpha=0.92;
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(lpad,ly0,W-lpad*2,lboxH,4); else ctx.rect(lpad,ly0,W-lpad*2,lboxH);
+  ctx.fill(); ctx.stroke(); ctx.globalAlpha=1;
+
+  const gapsList=Array.from(new Set(pairs.map(p=>p.gap))).sort((a,b)=>a-b);
+  const gapLabel=gapsList.length>1?('Gaps '+gapsList.join(', ')):(_heroGapNames[gapsList[0]]||('Gap '+gapsList[0]));
+  ctx.font='bold '+lsize+'px Cinzel, serif';
+  ctx.fillStyle=_gapColor(gapsList[0]);
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText(gapLabel+'  ·  '+pairs.length+' pairs  ·  mod '+_heroG, lpad+8, ly0+5);
+
+  ctx.font=(lsize*0.88)+'px Cinzel, serif';
+  ctx.fillStyle='#9a8060';
+  const uniqueR=[...new Set(pairs.flatMap(p=>[p.r1,p.r2]))].sort((a,b)=>a-b);
+  const shown=uniqueR.slice(0,16).join(', ')+(uniqueR.length>16?' …':'');
+  ctx.fillText('Residues: '+shown, lpad+8, ly0+5+lsize*1.6);
+  ctx.restore();
+}
+
+// Convenience wrapper for views with no surrounding transform of their own
+// (chords + legend in one call, both in the same absolute space).
+function _drawHeroResidueOverlay(ctx,W,H,mMax,ptXY){
+  _drawHeroResidueChords(ctx,W,H,mMax,ptXY);
+  _drawHeroResidueLegend(ctx,W,H);
 }
 
 let _heroDepth=null;
@@ -14742,7 +15142,7 @@ function _drawHeroGauss(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
         const onGap=hasGaps&&gap>0&&_heroActiveGaps.has(gap);
         const dimmed=hasGaps&&!onGap;
         const col=onGap?_gapColor(gap):_getHeroColor(r,M,nAnim,d,heroMode,t,null,dimmed,false,false,textHidden);
-        ctx.globalAlpha=dimmed?0.5:1;
+        ctx.globalAlpha=(dimmed?0.5:1)*_hDynDim();
         ctx.fillStyle=col;
         ctx.beginPath();ctx.arc(x,y,dotR*_heroCharSizeMul(pureCop),0,6.2832);ctx.fill();
         ctx.globalAlpha=1;
@@ -14760,6 +15160,31 @@ function _drawHeroGauss(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
     ctx.rotate(Math.PI/2);
   }
   ctx.restore();
+
+  // Lift-mode / gap-diagonal dynamics — replicated into all 4 quadrants
+  if(window._heroLiftMode||((typeof _wGetDiagG==='function')&&_wGetDiagG()>0)){
+    ctx.save();ctx.translate(cx,cy);
+    const _xy=(r,M)=>{
+      if(r<1||r>G||M<1||M>G)return null;
+      const rD=rowShift?_heroRowShiftedR(r,M,G,rowShift):r;
+      return[(rD-1+0.5)*cw,(M-1+0.5)*cw];
+    };
+    for(let dq=0;dq<4;dq++){_heroDynOverlays(ctx,_xy,G,nAnim,192);ctx.rotate(Math.PI/2);}
+    ctx.restore();
+  }
+
+  // Residue-chord gap overlay — same Cartesian a+bi cell layout as the dots
+  // above, replicated into all 4 mirrored quadrants.
+  if(_heroResidueOverlayOn){
+    ctx.save();ctx.translate(cx,cy);
+    const _gapXY=(r,M)=>{
+      const rD=rowShift?_heroRowShiftedR(r,M,G,rowShift):r;
+      return[(rD-1+0.5)*cw,(M-1+0.5)*cw];
+    };
+    for(let dq=0;dq<4;dq++){_drawHeroResidueChords(ctx,W,H,G,_gapXY);ctx.rotate(Math.PI/2);}
+    ctx.restore();
+  }
+  _drawHeroResidueLegend(ctx,W,H);
 
   const fs=Math.max(8,Math.floor(side*0.022));
   ctx.font=fs+'px \'JetBrains Mono\',monospace';ctx.fillStyle='rgba(200,168,74,.55)';
@@ -14821,7 +15246,7 @@ function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
       let gbDimmed=false;
       if(_heroGoldbachActive){const gbPair=PS.has(r)&&PS.has(M)&&r+M===_heroGoldbachN;gbDimmed=!gbPair;}
       const alpha=(gbDimmed?_heroGbDimAlpha:(dimmed?0.5:1))*_heroRingOpacity;
-      ctx.globalAlpha=alpha;ctx.fillStyle=col;
+      ctx.globalAlpha=alpha*_hDynDim();ctx.fillStyle=col;
       const drawR=isInspected?dotR*1.4*_heroSecDotScale:dotR;
       ctx.beginPath();ctx.arc(sx,sy,drawR,0,6.2832);ctx.fill();
       ctx.globalAlpha=1;
@@ -14864,6 +15289,29 @@ function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
       ctx.fillText(v.toFixed(2), sx, H-2);
     });
   }
+
+  // Lift-mode / gap-diagonal dynamics at true Farey positions
+  _heroDynOverlays(ctx,(r,M)=>{
+    if(M<2||r<1||r>=M)return null;
+    const rawY=Math.log(2/M)/Math.log(2/mMax);
+    const logY=Math.pow(Math.max(0,rawY),1/(_fareyYexp||1));
+    const sy=cy+(logY*1.8-0.9)*H/2*zoom;
+    const rD=rowShift?_heroRowShiftedR(r,M,M,rowShift):r;
+    const sx=cx+(rD/M*2-1)*W/2*zoom;
+    return[sx,sy];
+  },mMax,nAnim,400);
+
+  // Residue-chord gap overlay — same log-strip geometry as the dots above.
+  _drawHeroResidueOverlay(ctx,W,H,mMax,(r,M)=>{
+    if(M<1)return null;
+    const rawY=Math.log(2/M)/Math.log(2/mMax);
+    const logY=Math.pow(Math.max(0,rawY),1/(_fareyYexp||1));
+    const sy=cy+(logY*1.8-0.9)*H/2*zoom;
+    const rD=rowShift?_heroRowShiftedR(r,M,M,rowShift):r;
+    const sx=cx+(rD/M*2-1)*W/2*zoom;
+    if(sx<-40||sx>W+40)return null;
+    return[sx,sy];
+  });
 }
 
 // ── HERO LIFT VIEW ────────────────────────────────────────────────────────────
@@ -15016,6 +15464,10 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
       }
     });
   }
+
+  // Residue-chord gap overlay — reuses toXY, the same ring geometry the
+  // lift lines above are drawn with.
+  _drawHeroResidueOverlay(ctx,W,H,mMax,toXY);
 }
 
 // ── CUBE 3D 4K EXPORT ──────────────────────────────────────────────────────────
@@ -15287,7 +15739,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
       }
       const baseAlpha=gbDimmedRing?_heroGbDimAlpha:(dimmed?0.5:1);
       const drawR=(isFocused?dotR*1.6:(isInspected?dotR*1.3*_heroSecDotScale:dotR))*_heroCharSizeMul(coprime);
-      ctx.globalAlpha=baseAlpha*ringOpacity;
+      ctx.globalAlpha=baseAlpha*ringOpacity*_hDynDim();
       ctx.fillStyle=col;
       ctx.beginPath();ctx.arc(x,y,drawR,0,2*Math.PI);ctx.fill();
       ctx.globalAlpha=1;
@@ -15387,6 +15839,25 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
       ctx.fillStyle=PS.has(M)?'rgba(61,200,184,.5)':'rgba(106,101,96,.38)';
       ctx.fillText('M='+M, lx, ly);
     }
+  }
+
+  // Lift-mode / gap-diagonal dynamics at true ring positions
+  _heroDynOverlays(ctx,(r,M)=>{
+    if(M<2||r<1||r>=M)return null;
+    const rho=(M/mMax)*maxR;
+    const th=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
+    return[cx+rho*Math.cos(th),cy-rho*Math.sin(th)];
+  },mMax,nAnim,400);
+
+  // Residue-chord gap overlay — same ring geometry as the dots above, so
+  // chords land exactly on the visible lattice points.
+  if(_heroResidueOverlayOn){
+    _drawHeroResidueOverlay(ctx,W,H,mMax,(r,M)=>{
+      if(M<1)return null;
+      const rho=(M/mMax)*maxR;
+      const th=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
+      return[cx+rho*Math.cos(th),cy-rho*Math.sin(th)];
+    });
   }
 }
 
@@ -17581,10 +18052,11 @@ function initHeroThree(){
         // Not-coprime dimmed cells get 6% (they're already dark in most modes)
         // Goldbach inactive pairs get 10% (heavier dim to make the pathway pop)
         if(gbDimmed) ctx.globalAlpha=d<0?Math.min(0.04,_heroGbDimAlpha*0.4):_heroGbDimAlpha;
-        else if(dimmed) ctx.globalAlpha = 0.5;
+        else if(dimmed) ctx.globalAlpha = 0.5*_hDynDim();
+        else ctx.globalAlpha=_hDynDim();
         ctx.fillStyle=col;
         ctx.beginPath();ctx.arc(x,y,drawR,0,6.2832);ctx.fill();
-        if(dimmed||gbDimmed) ctx.globalAlpha=1;
+        ctx.globalAlpha=1;
 
         // ── Focused dot: pulsing halo ──
         if(isFocused){
@@ -17655,10 +18127,27 @@ function initHeroThree(){
     }
 
     // ── Goldbach lightning overlay ──
+    // Lift-mode / gap-diagonal dynamics at the row-shifted grid positions
+    _heroDynOverlays(ctx,(r,M)=>{
+      if(r<1||r>G||M<1||M>G)return null;
+      const ri=r-1,mi=M-1;
+      const sRi=_heroRowShift===0?ri:((ri+mi*_heroRowShift*G)%G+G)%G;
+      return[originX+(sRi+0.5)*cW,originY+(mi+0.5)*cH];
+    },G,nAnim,400);
     if(_heroGoldbachActive) _drawGoldbachOverlay(ctx,originX,originY,cW,cH,G,t);
+
+    // Residue-chord gap overlay — same row-shifted grid-cell positions.
+    _drawHeroResidueChords(ctx,W,H,G,(r,M)=>{
+      if(r<1||r>G||M<1||M>G)return null;
+      const ri=r-1,mi=M-1;
+      const sRi=_heroRowShift===0?ri:((ri+mi*_heroRowShift*G)%G+G)%G;
+      return[originX+(sRi+0.5)*cW,originY+(mi+0.5)*cH];
+    });
 
     // Restore rotation before drawing text so labels are always upright
     if(_heroViewMode!=='ring'&&(_heroRotSteps&3)) ctx.restore();
+
+    _drawHeroResidueLegend(ctx,W,H);
 
     // ── Focused point: highlight ring only (detail shown in DOM panel below) ──
     if(_heroFocused&&!_heroInspectMode){
@@ -17723,6 +18212,7 @@ let _heroOverlayRAF=null;
 const _heroFsControlIds=[
   'hero-live-ratio-dd',  // C(n) live value & survival ratios (sits above Lattice Controls)
   'hero-lat-ctrl-dd',    // Lattice Controls (Color, View, α, G, rotation, gap, zoom)
+  'hero-gaps-dd',        // Active Gaps (presets, semantics, custom slider, ⬡ Residue chords)
   'hero-adv-dd',         // Advanced — custom rings & χ(r) filter
   'hero-sector-dd',      // Sector Path
   'hero-working-dd',     // Show Working (Euler product, export)
@@ -21674,7 +22164,7 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
       else col=_getHeroColor(r,M,nAnim,d,heroMode,t||0,null,dimmed,false,false,true);
 
       const dimAlpha=(dimmed?0.4:1)*(_heroRingOpacity??1);
-      ctx.globalAlpha=dimAlpha;
+      ctx.globalAlpha=dimAlpha*_hDynDim();
       ctx.fillStyle=col;
       const drawR=(isInspected?dotR*1.6*_heroSecDotScale:dotR)*_heroCharSizeMul(pureCop);
       ctx.beginPath();ctx.arc(px,py,drawR,0,Math.PI*2);ctx.fill();
@@ -21737,8 +22227,34 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
   }
   _smithInspXY.length=0;
 
+  // Lift-mode / gap-diagonal dynamics through the same Cayley map, inside
+  // the flip transform so they mirror with the geometry
+  _heroDynOverlays(ctx,(r,M)=>{
+    if(M<2||r<1||r>=M)return null;
+    const Rr=_heroSmithRingR(M,mMax);
+    const th=2*Math.PI*r/M+alpha+rowShift*2*Math.PI*(M-1);
+    const w=_conformalMap(Rr*Math.cos(th),Rr*Math.sin(th),'smith');
+    if(!w)return null;
+    return[cx+w.u*R,cy-w.v*R];
+  },mMax,nAnim,400);
+
+  // Residue-chord gap overlay, through the same Cayley map — comet-tail +
+  // chord + landing glow all curve naturally with the chart since each ring
+  // radius goes through _conformalMap point-by-point, same as the dots above.
+  _drawHeroResidueChords(ctx,W,H,mMax,(r,M)=>{
+    const Rr=_heroSmithRingR(M,mMax);
+    const th=2*Math.PI*r/M+alpha+rowShift*2*Math.PI*(M-1);
+    const w=_conformalMap(Rr*Math.cos(th),Rr*Math.sin(th),'smith');
+    if(!w)return null;
+    return[cx+w.u*R,cy-w.v*R];
+  });
+
   ctx.restore(); // end y-axis flip transform — label below stays unmirrored
   _smithFlipActive=false;
+
+  // Legend drawn in absolute canvas space, after the flip transform ends,
+  // so it never mirrors/shrinks with the chart.
+  _drawHeroResidueLegend(ctx,W,H);
 
   // ── Boundary label — anchored to the canvas bottom (was cy+R+6, which sat
   // mid-canvas whenever zoom-out shrank the chart radius R) ──
@@ -22028,6 +22544,18 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
     }
   };
 })();
+</script>
+<script>
+// ── Default-state sync: gaps 1+2 and the residue-chord overlay are ON by
+// default for both the opener and hero. Button styles are hardcoded in the
+// HTML above for the no-JS-yet paint, but this reconciles them against the
+// real state objects (_wActiveGaps/_heroActiveGaps) once everything is
+// defined, and forces one redraw so the overlay is visible immediately. ──
+document.addEventListener('DOMContentLoaded',function(){
+  if(typeof _wSyncGapButtons==='function')_wSyncGapButtons();
+  if(typeof heroGapSyncButtons==='function')heroGapSyncButtons();
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+});
 </script>
 </body>
 </html>
