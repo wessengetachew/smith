@@ -96,6 +96,58 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
 
 button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
 button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61,200,184,.08);}
+button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+
+.viewtoggle{display:flex;gap:0;}
+.viewtoggle button{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all .15s;}
+.viewtoggle button:first-child{border-radius:3px 0 0 3px;}
+.viewtoggle button:last-child{border-radius:0 3px 3px 0;border-left:none;}
+.viewtoggle button.active{background:rgba(61,200,184,.14);border-color:var(--teal);color:var(--teal);}
+select.wgselect{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.05em;padding:6px 8px;outline:none;}
+select.wgselect:focus{border-color:var(--violet);}
+
+/* Global decimal-precision bar */
+#decimalBar{
+  position:sticky;top:44px;z-index:500;
+  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
+  display:flex;align-items:center;gap:10px;padding:7px 20px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
+}
+#decimalBar input[type="range"]{width:140px;accent-color:var(--gold);}
+#decimalBar .val{color:var(--gold);font-weight:600;min-width:16px;text-align:center;}
+
+/* Clickable table cells */
+table.dt td.clickable{cursor:pointer;transition:background .12s;}
+table.dt td.clickable:hover{background:rgba(200,168,74,.12);color:var(--gold);}
+
+/* Explain modal */
+#explainOverlay{
+  display:none;position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,4,.72);backdrop-filter:blur(2px);
+  align-items:center;justify-content:center;padding:20px;
+}
+#explainOverlay.open{display:flex;}
+#explainModal{
+  background:var(--bg1);border:1px solid var(--edge2);border-radius:6px;
+  max-width:480px;width:100%;max-height:80vh;overflow-y:auto;padding:22px 22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+#explainModal .em-title{font-family:var(--disp);font-size:.95rem;color:var(--gold);letter-spacing:.04em;margin-bottom:4px;}
+#explainModal .em-sub{font-family:var(--mono);font-size:9px;color:var(--cream3);letter-spacing:.06em;margin-bottom:14px;}
+#explainModal .em-step{padding:9px 0;border-top:1px solid var(--edge);font-size:.82rem;color:var(--cream2);}
+#explainModal .em-step:first-of-type{border-top:none;}
+#explainModal .em-steplabel{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+#explainModal .em-math{font-family:var(--mono);font-size:.92rem;color:var(--cream);word-break:break-all;}
+#explainModal .em-frac{display:inline-block;color:var(--teal);}
+#explainModal .em-close{
+  float:right;background:none;border:1px solid var(--edge2);color:var(--cream3);
+  width:26px;height:26px;cursor:pointer;font-size:14px;line-height:1;border-radius:3px;
+}
+#explainModal .em-close:hover{border-color:var(--coral);color:var(--coral);}
+#explainModal .em-result{
+  margin-top:6px;background:rgba(200,168,74,.08);border-left:3px solid var(--gold);
+  padding:10px 12px;font-family:var(--mono);font-size:.92rem;color:var(--gold);
+}
 </style>
 </head>
 <body>
@@ -114,6 +166,13 @@ button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61
 <a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
 <button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
 <a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="decimalBar">
+  <span>Decimal precision (whole page)</span>
+  <input type="range" id="decimalSl" min="2" max="15" value="6" oninput="setDecimals(+this.value)">
+  <span class="val" id="decimalVal">6</span>
+  <span style="color:var(--cream3);opacity:.6;">digits</span>
 </div>
 
 <div id="hero">
@@ -141,20 +200,24 @@ button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61
         <div class="ctrl-label">n₁ (block 1 length − 1) <span class="val" id="n1val">6</span></div>
         <div class="stepctrl">
           <button class="step-btn" onclick="stepVal('n1',-1)" title="n₁ − 1">−</button>
-          <input type="range" id="n1sl" min="0" max="150" value="6" oninput="onSlide()">
+          <input type="range" id="n1sl" min="0" max="2000" value="6" oninput="onSlide()">
           <button class="step-btn" onclick="stepVal('n1',1)" title="n₁ + 1">+</button>
-          <input type="number" id="n1num" class="step-num" min="0" max="150" value="6" oninput="onNumInput('n1')">
+          <input type="number" id="n1num" class="step-num" min="0" max="2000" value="6" oninput="onNumInput('n1')">
         </div>
       </div>
       <div class="ctrl-block">
         <div class="ctrl-label">n₂ (block 2 length − 1) <span class="val" id="n2val">6</span></div>
         <div class="stepctrl">
           <button class="step-btn" onclick="stepVal('n2',-1)" title="n₂ − 1">−</button>
-          <input type="range" id="n2sl" min="0" max="150" value="6" oninput="onSlide()">
+          <input type="range" id="n2sl" min="0" max="2000" value="6" oninput="onSlide()">
           <button class="step-btn" onclick="stepVal('n2',1)" title="n₂ + 1">+</button>
-          <input type="number" id="n2num" class="step-num" min="0" max="150" value="6" oninput="onNumInput('n2')">
+          <input type="number" id="n2num" class="step-num" min="0" max="2000" value="6" oninput="onNumInput('n2')">
         </div>
       </div>
+    </div>
+    <div class="ctrl-row" style="margin-bottom:14px;">
+      <button id="playBtn" class="wgbtn" onclick="togglePlay()" title="Animate n₁ from 0 upward, everything below updates live" style="min-width:110px;">▶ Play n₁</button>
+      <span class="card-note" style="margin-top:0;">Animates n₁ 0→60 (loops), driving the calculator, per-prime table, heatmap marker, and lattice canvas together.</span>
     </div>
     <div class="result-grid">
       <div class="result-box"><div class="rlabel">C(n₁)</div><div class="rval" id="rC1">—</div></div>
@@ -162,17 +225,99 @@ button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61
       <div class="result-box"><div class="rlabel">C(n₁,n₂)</div><div class="rval" id="rC12">—</div></div>
       <div class="result-box rho"><div class="rlabel">ρ = C(n₁,n₂) / [C(n₁)·C(n₂)]</div><div class="rval" id="rRho">—</div></div>
     </div>
-    <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 (~148,933 primes) — reliable to ~7–8 dp.</div>
+    <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 (~148,933 primes) — reliable to ~7–8 dp. The product cost doesn't depend on n₁/n₂ at all (always the same prime list), so the slider range is 0–2000, not an artificial cap.</div>
 
     <div style="margin-top:18px;">
       <div class="card-title" style="margin-bottom:8px;">Per-Prime Local Factors</div>
-      <div class="tscroll" style="max-height:220px;overflow-y:auto;">
+      <div class="ctrl-row" style="margin-bottom:8px;align-items:center;">
+        <span class="card-note" style="margin:0;flex:1;">Table below shows the first 500 primes (scroll to see more) — click any value to see its exact step-by-step derivation. CSV export computes all ≤2,000,000 (~148,933 rows).</span>
+        <button class="wgbtn" id="csvBtn" onclick="exportPrimeCSV()" style="flex:0;white-space:nowrap;">↓ Export CSV</button>
+      </div>
+      <div class="tscroll" style="max-height:400px;overflow-y:auto;">
         <table class="dt" id="primeTable">
           <thead><tr><th>p</th><th>f_p(n₁)</th><th>f_p(n₂)</th><th>f_p(n₁,n₂)</th><th title="f_p(n1,n2) / [f_p(n1)·f_p(n2)]">local ρ_p</th></tr></thead>
           <tbody id="primeTbody"></tbody>
         </table>
       </div>
     </div>
+  </div>
+
+  <!-- FINITE LATTICE CANVAS -->
+  <div class="card">
+    <div class="card-title">Finite Lattice Canvas — G×G Direct Verification</div>
+    <div class="hero-sub" style="max-width:none;margin-bottom:12px;font-size:.82rem;">
+      Same rendering logic as Page 1's Block-Coprimality Canvas, extended to two blocks: r runs along x,
+      M₁ runs along y, and M₂ is held at a fixed value below (a true 3-free-variable object flattened to 2D).
+      A cell is <span style="color:#f2c44a;">gold</span> if r survives <em>both</em> blocks,
+      <span style="color:#3dc8b8;">teal</span> if it survives block 1 only,
+      <span style="color:#e05060;">coral</span> if it survives block 2 only, and dark if it survives neither.
+      Uses n₁, n₂ from the calculator above.
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">G (grid size) <span class="val" id="gval">80</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('g',-1)" title="G − 1">−</button>
+          <input type="range" id="gsl" min="10" max="300" value="80" oninput="onGridChange()">
+          <button class="step-btn" onclick="stepVal('g',1)" title="G + 1">+</button>
+          <input type="number" id="gnum" class="step-num" min="10" max="300" value="80" oninput="onNumInput('g')">
+        </div>
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">M₂ (block 2 anchor, fixed) <span class="val" id="m2val">1</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('m2',-1)" title="M₂ − 1">−</button>
+          <input type="range" id="m2sl" min="1" max="300" value="1" oninput="onGridChange()">
+          <button class="step-btn" onclick="stepVal('m2',1)" title="M₂ + 1">+</button>
+          <input type="number" id="m2num" class="step-num" min="1" max="300" value="1" oninput="onNumInput('m2')">
+        </div>
+      </div>
+    </div>
+    <div class="ctrl-row" style="margin-bottom:10px;">
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">View</div>
+        <div class="viewtoggle">
+          <button id="viewBtnGrid" class="active" onclick="setLatticeView('grid')">Grid</button>
+          <button id="viewBtnRing" onclick="setLatticeView('ring')">Ring</button>
+        </div>
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Color</div>
+        <select id="colorModeSel" class="wgselect" onchange="renderLattice()">
+          <option value="block">Block status (default)</option>
+          <option value="rainbow">Rainbow (hue by r)</option>
+          <option value="residue">Residue (r mod 6)</option>
+          <option value="gcd_val">GCD spectrum</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px;padding:8px 12px;background:var(--bg2);border:1px solid var(--edge);">
+      <span style="font-size:8px;color:var(--cream3);letter-spacing:.08em;text-transform:uppercase;align-self:center;">Filter (ported from index.html's χ(r) filter pattern):</span>
+      <label style="display:flex;align-items:center;gap:5px;font-size:8px;color:#f2c44a;cursor:pointer;">
+        <input type="checkbox" id="filt-gold" checked onchange="renderLattice()" style="accent-color:#f2c44a;"> Show gold (both)
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:8px;color:#3dc8b8;cursor:pointer;">
+        <input type="checkbox" id="filt-teal" checked onchange="renderLattice()" style="accent-color:#3dc8b8;"> Show teal (block 1 only)
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:8px;color:#e05060;cursor:pointer;">
+        <input type="checkbox" id="filt-coral" checked onchange="renderLattice()" style="accent-color:#e05060;"> Show coral (block 2 only)
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:8px;color:var(--cream3);cursor:pointer;">
+        <input type="checkbox" id="filt-dark" checked onchange="renderLattice()" style="accent-color:var(--cream3);"> Show dark (neither)
+      </label>
+    </div>
+    <canvas id="latticeCv" class="plot" style="height:420px;image-rendering:pixelated;"></canvas>
+    <div class="legend" id="latticeLegend">
+      <span><span class="sw" style="background:#f2c44a;"></span>gold = survives both blocks</span>
+      <span><span class="sw" style="background:#3dc8b8;"></span>teal = block 1 only</span>
+      <span><span class="sw" style="background:#e05060;"></span>coral = block 2 only</span>
+      <span><span class="sw" style="background:#181828;border:1px solid var(--edge2);"></span>dark = survives neither</span>
+    </div>
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">Finite gold fraction (G×G count)</div><div class="rval" id="rFiniteFrac">—</div></div>
+      <div class="result-box rho"><div class="rlabel">Asymptotic D(n₁,n₂) = C(n₁,n₂)/ζ(2)</div><div class="rval" id="rAsympRef">—</div></div>
+    </div>
+    <div class="card-note" id="latticeNote">n from the calculator above is capped at 200 inside this canvas for render speed (each cell costs up to n₁+n₂ gcd calls) — the asymptotic value above uses the true, uncapped n₁,n₂.</div>
   </div>
 
   <!-- HEATMAP -->
@@ -281,13 +426,185 @@ function computeC(ns, primes){
   for(let i=0;i<primes.length;i++) prod *= localFactor(ns, primes[i]);
   return ZETA2*prod;
 }
-function fmt(x, d){ return x.toFixed(d===undefined?6:d); }
+let DECIMALS = 6;
+function setDecimals(v){
+  DECIMALS = v;
+  document.getElementById('decimalVal').textContent = v;
+  document.getElementById('decimalSl').value = v;
+  onSlide();
+}
+function fmt(x, d){ return x.toFixed(d===undefined?DECIMALS:d); }
+
+// ── Finite lattice canvas (ported from Page 1's Block-Coprimality Canvas, extended to 2 blocks) ──
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+let _wg9_view = 'grid';
+function setLatticeView(v){
+  _wg9_view = v;
+  document.getElementById('viewBtnGrid').classList.toggle('active', v==='grid');
+  document.getElementById('viewBtnRing').classList.toggle('active', v==='ring');
+  renderLattice();
+}
+function onGridChange(){
+  const G = +document.getElementById('gsl').value;
+  const m2 = +document.getElementById('m2sl').value;
+  document.getElementById('gval').textContent = G;
+  document.getElementById('gnum').value = G;
+  document.getElementById('m2val').textContent = m2;
+  document.getElementById('m2num').value = m2;
+  renderLattice();
+}
+// GCD-spectrum palette, ported from index.html's 'gcd_val' color mode
+const GCD_PALETTE = {2:'#e05060',3:'#3dc8b8',4:'#9b7fe8',5:'#7ec87a',6:'#f2c44a'};
+function cellColor(r, ok1, ok2, mode){
+  const gold = ok1 && ok2;
+  if(mode==='rainbow'){
+    const h = Math.round((r%300)/300*300);
+    return gold ? 'hsl('+h+',80%,55%)' : (ok1||ok2 ? 'hsla('+h+',45%,26%,.6)' : 'hsla('+h+',20%,12%,.35)');
+  }
+  if(mode==='residue'){
+    const RES_HUES = [0,60,120,180,240,300];
+    const h = RES_HUES[r%6];
+    return gold ? 'hsl('+h+',75%,52%)' : (ok1||ok2 ? 'hsla('+h+',40%,24%,.55)' : 'hsla('+h+',18%,10%,.3)');
+  }
+  if(mode==='gcd_val'){
+    if(gold) return '#f2c44a';
+    for(let p=2;p<=6;p++){ if(r%p===0) return (GCD_PALETTE[p]||'#7ec87a')+(ok1||ok2?'aa':'33'); }
+    return ok1||ok2 ? 'rgba(120,120,130,.5)' : '#181828';
+  }
+  if(gold) return '#f2c44a';
+  if(ok1) return '#3dc8b8';
+  if(ok2) return '#e05060';
+  return '#181828';
+}
+function updateLatticeLegend(mode){
+  const lg = document.getElementById('latticeLegend');
+  if(mode==='block'){
+    lg.innerHTML =
+      '<span><span class="sw" style="background:#f2c44a;"></span>gold = survives both blocks</span>'+
+      '<span><span class="sw" style="background:#3dc8b8;"></span>teal = block 1 only</span>'+
+      '<span><span class="sw" style="background:#e05060;"></span>coral = block 2 only</span>'+
+      '<span><span class="sw" style="background:#181828;border:1px solid var(--edge2);"></span>dark = survives neither</span>';
+  } else if(mode==='rainbow' || mode==='residue'){
+    lg.innerHTML =
+      '<span>hue = r ('+(mode==='residue'?'mod 6':'position around the ring')+')</span>'+
+      '<span>bright = survives both blocks</span>'+
+      '<span>dim = survives one or neither</span>';
+  } else {
+    lg.innerHTML =
+      '<span><span class="sw" style="background:#f2c44a;"></span>gold = survives both blocks</span>'+
+      '<span><span class="sw" style="background:#e05060;"></span>2 | r</span>'+
+      '<span><span class="sw" style="background:#3dc8b8;"></span>3 | r</span>'+
+      '<span><span class="sw" style="background:#9b7fe8;"></span>4 | r</span>'+
+      '<span><span class="sw" style="background:#7ec87a;"></span>5 | r</span>';
+  }
+}
+function renderLattice(){
+  window._wg9_latticeReady = true;
+  const G = +document.getElementById('gsl').value;
+  const M2 = +document.getElementById('m2sl').value;
+  const n1raw = +document.getElementById('n1sl').value;
+  const n2raw = +document.getElementById('n2sl').value;
+  const n1 = Math.min(n1raw, 200), n2 = Math.min(n2raw, 200);
+  const mode = document.getElementById('colorModeSel').value;
+  document.getElementById('latticeNote').textContent =
+    (n1raw>200||n2raw>200)
+      ? 'n capped at 200 inside this canvas for render speed (currently using n\u2081='+n1+', n\u2082='+n2+' of your n\u2081='+n1raw+', n\u2082='+n2raw+') \u2014 the asymptotic value above uses the true, uncapped n\u2081,n\u2082. Note: with M\u2082 fixed (not averaged), the finite fraction converges to D(n\u2081,n\u2082) as G grows, but converges faster for larger/more \u201cgeneric\u201d M\u2082 \u2014 M\u2082=1 specifically converges more slowly since it interacts atypically with small primes.'
+      : 'Using the calculator\u2019s exact n\u2081='+n1+', n\u2082='+n2+' (no cap needed at this size). Note: with M\u2082 fixed (not averaged), the finite fraction converges to D(n\u2081,n\u2082) as G grows, but converges faster for larger/more \u201cgeneric\u201d M\u2082 \u2014 M\u2082=1 specifically converges more slowly since it interacts atypically with small primes.';
+  updateLatticeLegend(mode);
+
+  const showGold = document.getElementById('filt-gold').checked;
+  const showTeal = document.getElementById('filt-teal').checked;
+  const showCoral = document.getElementById('filt-coral').checked;
+  const showDark = document.getElementById('filt-dark').checked;
+  function passesFilter(ok1, ok2){
+    if(ok1 && ok2) return showGold;
+    if(ok1) return showTeal;
+    if(ok2) return showCoral;
+    return showDark;
+  }
+
+  const cv = document.getElementById('latticeCv');
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const cssW = cv.clientWidth||600, cssH = 420;
+  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+  cv.style.height = cssH+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#040409';
+  ctx.fillRect(0,0,cssW,cssH);
+
+  const ok2Arr = new Array(G+1);
+  for(let r=1;r<=G;r++){
+    let ok2 = true;
+    for(let j=0;j<=n2;j++){ if(gcd(r, M2+j) > 1){ ok2=false; break; } }
+    ok2Arr[r] = ok2;
+  }
+
+  let goldCount = 0;
+
+  if(_wg9_view === 'grid'){
+    const cellW = cssW/G, cellH = cssH/G;
+    for(let r=1; r<=G; r++){
+      const ok2 = ok2Arr[r];
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        if(ok1 && ok2) goldCount++;
+        if(!passesFilter(ok1, ok2)) continue;
+        ctx.fillStyle = cellColor(r, ok1, ok2, mode);
+        const px = (r-1)*cellW, py = cssH - M1*cellH;
+        ctx.fillRect(px, py, Math.max(1,cellW-.4), Math.max(1,cellH-.4));
+      }
+    }
+  } else {
+    const cx = cssW/2, cy = cssH/2;
+    const R = Math.min(cssW,cssH)*0.47;
+    const dotR = Math.max(1, R/G*0.9);
+    for(let r=1; r<=G; r++){
+      const ok2 = ok2Arr[r];
+      const theta = 2*Math.PI*(r-1)/G;
+      const cosT = Math.cos(theta), sinT = Math.sin(theta);
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        if(ok1 && ok2) goldCount++;
+        if(!passesFilter(ok1, ok2)) continue;
+        const rho = (M1/G)*R;
+        const x = cx + rho*cosT, y = cy - rho*sinT;
+        ctx.fillStyle = cellColor(r, ok1, ok2, mode);
+        ctx.fillRect(x-dotR/2, y-dotR/2, dotR, dotR);
+      }
+    }
+  }
+  document.getElementById('rFiniteFrac').textContent = fmt(goldCount/(G*G));
+}
+
+let _wg9_playId = null;
+function togglePlay(){
+  const btn = document.getElementById('playBtn');
+  if(_wg9_playId){
+    clearInterval(_wg9_playId); _wg9_playId = null;
+    btn.textContent = '\u25b6 Play n\u2081'; btn.classList.remove('playing');
+    return;
+  }
+  btn.textContent = '\u25a0 Stop'; btn.classList.add('playing');
+  _wg9_playId = setInterval(function(){
+    const sl = document.getElementById('n1sl');
+    let v = (+sl.value) + 1;
+    if(v > 60) v = 0;
+    sl.value = v;
+    document.getElementById('n1num').value = v;
+    onSlide();
+  }, 350);
+}
 
 // ── Stepper / number-input controls ──
 const CTRL = {
   n1:    {sl:'n1sl',    num:'n1num',    fn:function(){onSlide();}},
   n2:    {sl:'n2sl',    num:'n2num',    fn:function(){onSlide();}},
-  n2fix: {sl:'n2fixSl', num:'n2fixnum', fn:function(){onSlideJump();}}
+  n2fix: {sl:'n2fixSl', num:'n2fixnum', fn:function(){onSlideJump();}},
+  g:     {sl:'gsl',     num:'gnum',     fn:function(){onGridChange();}},
+  m2:    {sl:'m2sl',    num:'m2num',    fn:function(){onGridChange();}}
 };
 function stepVal(key, delta){
   const c = CTRL[key];
@@ -324,25 +641,144 @@ function onSlide(){
   document.getElementById('rC1').textContent = fmt(C1);
   document.getElementById('rC2').textContent = fmt(C2);
   document.getElementById('rC12').textContent = fmt(C12);
-  document.getElementById('rRho').textContent = fmt(rho,6);
+  document.getElementById('rRho').textContent = fmt(rho);
   renderPrimeTable(n1,n2);
   if(window._wg9_grid) drawHeatmapMarker(n1,n2);
+  document.getElementById('rAsympRef').textContent = fmt(C12/ZETA2);
+  if(window._wg9_latticeReady) renderLattice();
 }
+const PRIME_TABLE_ROWS = 500;
 function renderPrimeTable(n1,n2){
+  window._wg9_lastN1 = n1; window._wg9_lastN2 = n2;
   const tb = document.getElementById('primeTbody');
   let rows = '';
-  for(let i=0;i<12;i++){
+  const count = Math.min(PRIME_TABLE_ROWS, PRIMES_FULL.length);
+  for(let i=0;i<count;i++){
     const p = PRIMES_FULL[i];
     const f1 = 1-Math.min(n1+1,p)/(p*p);
     const f2 = 1-Math.min(n2+1,p)/(p*p);
     const f12 = localFactor([n1,n2],p);
     const rp = f12/(f1*f2);
-    rows += '<tr><td>'+p+'</td><td>'+fmt(f1,6)+'</td><td>'+fmt(f2,6)+'</td><td>'+fmt(f12,6)+'</td><td>'+fmt(rp,6)+'</td></tr>';
+    rows += '<tr>'
+      + '<td class="clickable" onclick="explainCell('+p+',\'prime\')">'+p+'</td>'
+      + '<td class="clickable" onclick="explainCell('+p+',\'f1\')">'+fmt(f1)+'</td>'
+      + '<td class="clickable" onclick="explainCell('+p+',\'f2\')">'+fmt(f2)+'</td>'
+      + '<td class="clickable" onclick="explainCell('+p+',\'f12\')">'+fmt(f12)+'</td>'
+      + '<td class="clickable" onclick="explainCell('+p+',\'rho\')">'+fmt(rp)+'</td>'
+      + '</tr>';
   }
   tb.innerHTML = rows;
 }
 
-// ── Heatmap ──
+// ── Exact-fraction step-by-step explainer ──
+function fracReduce(num, den){
+  const g = gcd(Math.round(num), Math.round(den)) || 1;
+  return { num: num/g, den: den/g };
+}
+function fracStr(f){ return f.num + '/' + f.den; }
+function openExplain(title, sub, steps, resultVal){
+  document.getElementById('emTitle').textContent = title;
+  document.getElementById('emSub').textContent = sub;
+  document.getElementById('emSteps').innerHTML = steps.map(function(s,i){
+    return '<div class="em-step"><div class="em-steplabel">Step '+(i+1)+' — '+s.label+'</div><div class="em-math">'+s.math+'</div></div>';
+  }).join('');
+  document.getElementById('emResult').innerHTML = resultVal;
+  document.getElementById('explainOverlay').classList.add('open');
+}
+function closeExplain(){ document.getElementById('explainOverlay').classList.remove('open'); }
+function explainCell(p, col){
+  const n1 = window._wg9_lastN1||0, n2 = window._wg9_lastN2||0;
+  const a = Math.min(n1+1, p), b = Math.min(n2+1, p);
+
+  if(col==='prime'){
+    const idx = PRIMES_FULL.indexOf(p);
+    openExplain('Prime p = '+p, 'Position #'+(idx+1)+' in the prime sequence used by this page\u2019s Euler product', [
+      { label:'Identity', math:'p = '+p+' is prime (no divisors other than 1 and itself)' },
+      { label:'Role here', math:'Every prime contributes one local factor f_p to the infinite product for C(n\u2081,n\u2082). This row is that factor at p = '+p+'.' }
+    ], 'Next prime: '+(PRIMES_FULL[idx+1]||'—')+' · Previous: '+(idx>0?PRIMES_FULL[idx-1]:'—'));
+    return;
+  }
+
+  if(col==='f1' || col==='f2'){
+    const n = col==='f1' ? n1 : n2;
+    const m = col==='f1' ? a : b;
+    const fr = fracReduce(p*p - m, p*p);
+    const val = 1 - m/(p*p);
+    openExplain('f_p(n'+(col==='f1'?'\u2081':'\u2082')+') at p = '+p+', n'+(col==='f1'?'\u2081':'\u2082')+' = '+n, 'Page 1\u2019s single-block local factor', [
+      { label:'Formula', math:'f_p(n) = 1 \u2212 min(n+1, p) / p\u00b2' },
+      { label:'Substitute', math:'min('+(n+1)+', '+p+') = '+m },
+      { label:'Plug in', math:'1 \u2212 '+m+' / '+p+'\u00b2 = 1 \u2212 '+m+'/'+(p*p)+' = ('+(p*p)+' \u2212 '+m+') / '+(p*p) },
+      { label:'Exact fraction', math:'<span class="em-frac">'+fracStr(fr)+'</span>'+(fr.den!==p*p?' (reduced from '+(p*p-m)+'/'+(p*p)+')':' (already in lowest terms)') }
+    ], fracStr(fr)+' = '+val.toFixed(DECIMALS));
+    return;
+  }
+
+  if(col==='f12'){
+    const pa = p-a, pb = p-b;
+    const bracketNum = p*p - pa*pb;
+    const f12Num = p*p*p - p*p + pa*pb;
+    const fr = fracReduce(f12Num, p*p*p);
+    const val = localFactor([n1,n2], p);
+    openExplain('f_p(n\u2081,n\u2082) at p = '+p+', (n\u2081,n\u2082) = ('+n1+', '+n2+')', 'Page 9\u2019s two-block local factor', [
+      { label:'Formula', math:'f_p(n\u2081,n\u2082) = 1 \u2212 (1/p)\u00b7[1 \u2212 (1\u2212a/p)(1\u2212b/p)],  a=min(n\u2081+1,p), b=min(n\u2082+1,p)' },
+      { label:'Substitute', math:'a = min('+(n1+1)+', '+p+') = '+a+',  b = min('+(n2+1)+', '+p+') = '+b },
+      { label:'Inner factors', math:'(1\u2212a/p) = '+pa+'/'+p+',  (1\u2212b/p) = '+pb+'/'+p },
+      { label:'Product', math:'('+pa+'/'+p+')\u00b7('+pb+'/'+p+') = '+(pa*pb)+'/'+(p*p) },
+      { label:'Bracket', math:'1 \u2212 '+(pa*pb)+'/'+(p*p)+' = ('+(p*p)+'\u2212'+(pa*pb)+')/'+(p*p)+' = '+bracketNum+'/'+(p*p) },
+      { label:'Final', math:'1 \u2212 (1/'+p+')\u00b7'+bracketNum+'/'+(p*p)+' = (p\u00b3\u2212p\u00b2+(p\u2212a)(p\u2212b)) / p\u00b3 = '+f12Num+'/'+(p*p*p) },
+      { label:'Exact fraction', math:'<span class="em-frac">'+fracStr(fr)+'</span>'+(fr.den!==p*p*p?' (reduced)':' (already in lowest terms)') }
+    ], fracStr(fr)+' = '+val.toFixed(DECIMALS));
+    return;
+  }
+
+  if(col==='rho'){
+    const pa = p-a, pb = p-b;
+    const f12Num = p*p*p - p*p + pa*pb;
+    const f1Num = p*p - a, f2Num = p*p - b;
+    const rhoNum = f12Num * p;
+    const rhoDen = f1Num * f2Num;
+    const fr = fracReduce(rhoNum, rhoDen);
+    const f1v = 1-a/(p*p), f2v = 1-b/(p*p), f12v = localFactor([n1,n2],p);
+    const val = f12v/(f1v*f2v);
+    openExplain('local \u03c1_p at p = '+p, 'How far this single prime is from independence', [
+      { label:'Formula', math:'\u03c1_p = f_p(n\u2081,n\u2082) / [f_p(n\u2081)\u00b7f_p(n\u2082)]' },
+      { label:'f_p(n\u2081,n\u2082) as a fraction', math:'(p\u00b3\u2212p\u00b2+(p\u2212a)(p\u2212b)) / p\u00b3 = '+f12Num+' / '+(p*p*p) },
+      { label:'f_p(n\u2081)\u00b7f_p(n\u2082) as a fraction', math:'[(p\u00b2\u2212a)/p\u00b2]\u00b7[(p\u00b2\u2212b)/p\u00b2] = '+f1Num+'\u00b7'+f2Num+' / p\u2074 = '+(f1Num*f2Num)+' / '+(p*p*p*p) },
+      { label:'Divide fractions', math:'('+f12Num+'/'+(p*p*p)+') \u00f7 ('+(f1Num*f2Num)+'/'+(p*p*p*p)+') = '+f12Num+'\u00b7p\u2074 / (p\u00b3\u00b7'+(f1Num*f2Num)+') = '+rhoNum+' / '+rhoDen },
+      { label:'Exact fraction', math:'<span class="em-frac">'+fracStr(fr)+'</span>'+(fr.den!==rhoDen?' (reduced from '+rhoNum+'/'+rhoDen+')':' (already in lowest terms)') }
+    ], fracStr(fr)+' = '+val.toFixed(DECIMALS));
+    return;
+  }
+}
+
+function exportPrimeCSV(){
+  const btn = document.getElementById('csvBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Generating…';
+  btn.disabled = true;
+  setTimeout(function(){
+    const n1 = window._wg9_lastN1||0, n2 = window._wg9_lastN2||0;
+    const parts = new Array(PRIMES_FULL.length+1);
+    parts[0] = 'p,f_p(n1),f_p(n2),f_p(n1,n2),local_rho_p';
+    for(let i=0;i<PRIMES_FULL.length;i++){
+      const p = PRIMES_FULL[i];
+      const f1 = 1-Math.min(n1+1,p)/(p*p);
+      const f2 = 1-Math.min(n2+1,p)/(p*p);
+      const f12 = localFactor([n1,n2],p);
+      const rp = f12/(f1*f2);
+      parts[i+1] = p+','+f1.toFixed(10)+','+f2.toFixed(10)+','+f12.toFixed(10)+','+rp.toFixed(10);
+    }
+    const csv = parts.join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'page9_local_factors_n1-'+n1+'_n2-'+n2+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    btn.textContent = orig;
+    btn.disabled = false;
+  }, 30);
+}
 function computeHeatGrid(){
   const N = 50, MAXN = 70;
   const grid = new Float64Array(N*N);
@@ -536,13 +972,14 @@ window.addEventListener('load', function(){
   while(idx<PRIMES_FULL.length && PRIMES_FULL[idx]<=60000) idx++;
   PRIMES_FAST = PRIMES_FULL.slice(0, idx);
   document.getElementById('calcNote').textContent =
-    '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp.';
+    '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp. The product cost doesn\u2019t depend on n\u2081/n\u2082 at all (always the same prime list), so the slider range is 0–2000, not an artificial cap.';
   onSlide();
   renderHeatmap();
   onSlideJump();
+  renderLattice();
 });
 window.addEventListener('resize', function(){
-  if(PRIMES_FULL.length){ paintHeatmap(); renderJump(+document.getElementById('n2fixSl').value); }
+  if(PRIMES_FULL.length){ paintHeatmap(); renderJump(+document.getElementById('n2fixSl').value); renderLattice(); }
 });
 
 function openOpener(){
@@ -551,5 +988,15 @@ function openOpener(){
 }
 function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
 </script>
+<div id="explainOverlay" onclick="if(event.target===this) closeExplain()">
+  <div id="explainModal">
+    <button class="em-close" onclick="closeExplain()">×</button>
+    <div class="em-title" id="emTitle">—</div>
+    <div class="em-sub" id="emSub">—</div>
+    <div id="emSteps"></div>
+    <div class="em-result" id="emResult">—</div>
+  </div>
+</div>
+
 </body>
 </html>

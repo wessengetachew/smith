@@ -103,6 +103,61 @@ table.vtab{width:100%;border-collapse:collapse;font-family:var(--mono);font-size
 table.vtab th{text-align:left;padding:5px 8px;color:var(--cream3);font-size:8px;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--edge2);}
 table.vtab td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
 table.vtab td.match{color:var(--lime);}
+
+/* Global decimal-precision bar */
+#decimalBar{
+  position:sticky;top:44px;z-index:500;
+  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
+  display:flex;align-items:center;gap:10px;padding:7px 20px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
+}
+#decimalBar input[type="range"]{width:140px;accent-color:var(--gold);}
+#decimalBar .val{color:var(--gold);font-weight:600;min-width:16px;text-align:center;}
+
+/* Clickable table cells */
+table.dt td.clickable{cursor:pointer;transition:background .12s;}
+table.dt td.clickable:hover{background:rgba(200,168,74,.12);color:var(--gold);}
+
+button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
+button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61,200,184,.08);}
+button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+
+.viewtoggle{display:flex;gap:0;}
+.viewtoggle button{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all .15s;}
+.viewtoggle button:first-child{border-radius:3px 0 0 3px;}
+.viewtoggle button:last-child{border-radius:0 3px 3px 0;border-left:none;}
+.viewtoggle button.active{background:rgba(61,200,184,.14);border-color:var(--teal);color:var(--teal);}
+select.wgselect{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.05em;padding:6px 8px;outline:none;}
+select.wgselect:focus{border-color:var(--violet);}
+
+/* Explain modal */
+#explainOverlay{
+  display:none;position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,4,.72);backdrop-filter:blur(2px);
+  align-items:center;justify-content:center;padding:20px;
+}
+#explainOverlay.open{display:flex;}
+#explainModal{
+  background:var(--bg1);border:1px solid var(--edge2);border-radius:6px;
+  max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:22px 22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+#explainModal .em-title{font-family:var(--disp);font-size:.95rem;color:var(--gold);letter-spacing:.04em;margin-bottom:4px;}
+#explainModal .em-sub{font-family:var(--mono);font-size:9px;color:var(--cream3);letter-spacing:.06em;margin-bottom:14px;}
+#explainModal .em-step{padding:9px 0;border-top:1px solid var(--edge);font-size:.82rem;color:var(--cream2);}
+#explainModal .em-step:first-of-type{border-top:none;}
+#explainModal .em-steplabel{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+#explainModal .em-math{font-family:var(--mono);font-size:.86rem;color:var(--cream);word-break:break-all;}
+#explainModal .em-frac{display:inline-block;color:var(--teal);word-break:break-all;}
+#explainModal .em-close{
+  float:right;background:none;border:1px solid var(--edge2);color:var(--cream3);
+  width:26px;height:26px;cursor:pointer;font-size:14px;line-height:1;border-radius:3px;
+}
+#explainModal .em-close:hover{border-color:var(--coral);color:var(--coral);}
+#explainModal .em-result{
+  margin-top:6px;background:rgba(200,168,74,.08);border-left:3px solid var(--gold);
+  padding:10px 12px;font-family:var(--mono);font-size:.86rem;color:var(--gold);word-break:break-all;
+}
 </style>
 </head>
 <body>
@@ -121,6 +176,13 @@ table.vtab td.match{color:var(--lime);}
 <a href="page10.html" title="k-Block Coprime Density — Page 10 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff2fd022;border:1px solid #ff2fd0;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P10</a>
 <button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
 <a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="decimalBar">
+  <span>Decimal precision (whole page)</span>
+  <input type="range" id="decimalSl" min="2" max="15" value="6" oninput="setDecimals(+this.value)">
+  <span class="val" id="decimalVal">6</span>
+  <span style="color:var(--cream3);opacity:.6;">digits</span>
 </div>
 
 <div id="hero">
@@ -149,13 +211,13 @@ table.vtab td.match{color:var(--lime);}
       precision — this isn't a numerical coincidence, the local-factor derivation is exact combinatorics mod p.
     </div>
     <table class="vtab">
-      <thead><tr><th>(n₁,…,n_k)</th><th>p</th><th>brute-force</th><th>formula</th><th>result</th></tr></thead>
+      <thead><tr><th>(n₁,…,n_k)</th><th>p</th><th>brute-force</th><th>formula</th></tr></thead>
       <tbody>
-        <tr><td>(2, 3, 1)</td><td>7</td><td>0.88213244</td><td>0.88213244</td><td class="match">✓ exact match</td></tr>
-        <tr><td>(0, 0, 0)</td><td>5</td><td>0.90240000</td><td>0.90240000</td><td class="match">✓ exact match</td></tr>
-        <tr><td>(4, 1)</td><td>5</td><td>0.80000000</td><td>0.80000000</td><td class="match">✓ exact match</td></tr>
-        <tr><td>(1, 1, 1, 1)</td><td>5</td><td>0.82592000</td><td>0.82592000</td><td class="match">✓ exact match</td></tr>
-        <tr><td>(10, 2, 7)</td><td>11</td><td>0.90909091</td><td>0.90909091</td><td class="match">✓ exact match</td></tr>
+        <tr><td>(2, 3, 1)</td><td>7</td><td>0.88213244</td><td>0.88213244</td></tr>
+        <tr><td>(0, 0, 0)</td><td>5</td><td>0.90240000</td><td>0.90240000</td></tr>
+        <tr><td>(4, 1)</td><td>5</td><td>0.80000000</td><td>0.80000000</td></tr>
+        <tr><td>(1, 1, 1, 1)</td><td>5</td><td>0.82592000</td><td>0.82592000</td></tr>
+        <tr><td>(10, 2, 7)</td><td>11</td><td>0.90909091</td><td>0.90909091</td></tr>
       </tbody>
     </table>
   </div>
@@ -175,6 +237,10 @@ table.vtab td.match{color:var(--lime);}
       </div>
     </div>
     <div id="nBlocksWrap"></div>
+    <div class="ctrl-row" style="margin-bottom:14px;">
+      <button id="playBtn" class="wgbtn" onclick="togglePlay()" title="Animate n₁ from 0 upward, everything below updates live" style="min-width:110px;">▶ Play n₁</button>
+      <span class="card-note" style="margin-top:0;">Animates n₁ 0→60 (loops), driving the calculator, per-prime table, and lattice canvas together.</span>
+    </div>
     <div class="result-grid">
       <div class="result-box"><div class="rlabel">C(n₁,…,n_k)</div><div class="rval" id="rCk">—</div></div>
       <div class="result-box"><div class="rlabel">∏ᵢ C(nᵢ)</div><div class="rval" id="rProd">—</div></div>
@@ -184,13 +250,67 @@ table.vtab td.match{color:var(--lime);}
 
     <div style="margin-top:18px;">
       <div class="card-title" style="margin-bottom:8px;">Per-Prime Local Factors</div>
-      <div class="tscroll" style="max-height:220px;overflow-y:auto;">
+      <div class="ctrl-row" style="margin-bottom:8px;align-items:center;">
+        <span class="card-note" style="margin:0;flex:1;">First 500 primes shown (scroll for more) — click any value for its exact step-by-step derivation as a fraction. CSV export covers all ≤2,000,000 (~148,933 rows) at the current k.</span>
+        <button class="wgbtn" id="csvBtn" onclick="exportPrimeCSV()" style="flex:0;white-space:nowrap;">↓ Export CSV</button>
+      </div>
+      <div class="tscroll" style="max-height:400px;overflow-y:auto;">
         <table class="dt" id="primeTable">
           <thead><tr><th>p</th><th>f_p(n₁,…,n_k)</th><th>∏ᵢf_p(nᵢ)</th><th title="f_p(n1,...,nk) / prod f_p(ni)">local ρ_p</th></tr></thead>
           <tbody id="primeTbody"></tbody>
         </table>
       </div>
     </div>
+  </div>
+
+  <!-- FINITE LATTICE CANVAS (k-block generalization of Page 9's canvas) -->
+  <div class="card">
+    <div class="card-title">Finite Lattice Canvas — G×G, k Blocks</div>
+    <div class="hero-sub" style="max-width:none;margin-bottom:12px;font-size:.82rem;">
+      Same rendering as Page 9, generalized to k blocks: r runs along x, M₁ (block 1) runs along y, and
+      M₂,…,M_k are held at fixed anchors below. Color encodes how many of the k blocks a cell survives —
+      dark = 0, gold = all k. Use the filter to isolate cells surviving at least a chosen number of blocks.
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">G (grid size) <span class="val" id="gval">80</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepLatVal('g',-1)" title="G − 1">−</button>
+          <input type="range" id="gsl" min="10" max="300" value="80" oninput="onGridChange()">
+          <button class="step-btn" onclick="stepLatVal('g',1)" title="G + 1">+</button>
+          <input type="number" id="gnum" class="step-num" min="10" max="300" value="80" oninput="onLatNumInput('g')">
+        </div>
+      </div>
+    </div>
+    <div id="mAnchorsWrap"></div>
+    <div class="ctrl-row" style="margin-bottom:10px;">
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">View</div>
+        <div class="viewtoggle">
+          <button id="viewBtnGrid" class="active" onclick="setLatticeView('grid')">Grid</button>
+          <button id="viewBtnRing" onclick="setLatticeView('ring')">Ring</button>
+        </div>
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Color</div>
+        <select id="colorModeSel" class="wgselect" onchange="renderLattice()">
+          <option value="count">Survival count (default)</option>
+          <option value="rainbow">Rainbow (hue by r)</option>
+          <option value="residue">Residue (r mod 6)</option>
+        </select>
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">Filter — min blocks survived <span class="val" id="filtMinVal">0</span></div>
+        <input type="range" id="filtMinSl" min="0" max="8" value="0" oninput="onFilterChange()">
+      </div>
+    </div>
+    <canvas id="latticeCv" class="plot" style="height:420px;image-rendering:pixelated;"></canvas>
+    <div class="legend" id="latticeLegend"></div>
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">Finite fraction surviving all k (G×G count)</div><div class="rval" id="rFiniteFrac">—</div></div>
+      <div class="result-box rho"><div class="rlabel">Asymptotic D(n₁,…,n_k) = C(n₁,…,n_k)/ζ(2)</div><div class="rval" id="rAsympRef">—</div></div>
+    </div>
+    <div class="card-note" id="latticeNote">n capped inside this canvas for render speed — the asymptotic value above uses the true, uncapped n values.</div>
   </div>
 
   <!-- GROWTH PLOT -->
@@ -263,8 +383,16 @@ function computeC(ns, primes){
   for(let i=0;i<primes.length;i++) prod *= localFactor(ns, primes[i]);
   return ZETA2*prod;
 }
-function fmt(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toExponential(d===undefined?6:d); }
-function fmtF(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toFixed(d===undefined?6:d); }
+let DECIMALS = 6;
+function setDecimals(v){
+  DECIMALS = v;
+  document.getElementById('decimalVal').textContent = v;
+  document.getElementById('decimalSl').value = v;
+  recompute();
+  if(window._wg10_latticeReady) renderLattice();
+}
+function fmt(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toExponential(d===undefined?DECIMALS:d); }
+function fmtF(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toFixed(d===undefined?DECIMALS:d); }
 
 // ── Dynamic k-block controls ──
 let K = 3;
@@ -309,6 +437,7 @@ function onKChange(){
   document.getElementById('knum').value = K;
   buildBlocks();
   recompute();
+  if(window._wg10_latticeReady){ buildMAnchors(); renderLattice(); }
 }
 function stepN(i, delta){
   const sl = document.getElementById('nsl'+i);
@@ -328,6 +457,7 @@ function onNChange(i){
   document.getElementById('nval'+i).textContent = document.getElementById('nsl'+i).value;
   document.getElementById('nnum'+i).value = document.getElementById('nsl'+i).value;
   recompute();
+  if(window._wg10_latticeReady) renderLattice();
 }
 
 // ── Live calculator ──
@@ -337,23 +467,339 @@ function recompute(){
   let prodC = 1;
   const Ci = ns.map(function(n){ const c = computeC([n],PRIMES_FULL); prodC*=c; return c; });
   const rho = Ck/prodC;
-  document.getElementById('rCk').textContent = fmt(Ck,6);
-  document.getElementById('rProd').textContent = fmt(prodC,6);
-  document.getElementById('rRhoK').textContent = rho>1e6 ? fmt(rho,4) : fmtF(rho,6);
+  document.getElementById('rCk').textContent = fmt(Ck);
+  document.getElementById('rProd').textContent = fmt(prodC);
+  document.getElementById('rRhoK').textContent = rho>1e6 ? fmt(rho) : fmtF(rho);
   renderPrimeTable(ns);
+  const refEl = document.getElementById('rAsympRef');
+  if(refEl) refEl.textContent = fmt(Ck/ZETA2);
 }
+const PRIME_TABLE_ROWS = 500;
 function renderPrimeTable(ns){
+  window._wg10_lastNs = ns.slice();
   const tb = document.getElementById('primeTbody');
   let rows = '';
-  for(let idx=0; idx<12; idx++){
+  const count = Math.min(PRIME_TABLE_ROWS, PRIMES_FULL.length);
+  for(let idx=0; idx<count; idx++){
     const p = PRIMES_FULL[idx];
     const fk = localFactor(ns,p);
     let prodFi = 1;
     ns.forEach(function(n){ prodFi *= (1-Math.min(n+1,p)/(p*p)); });
     const rp = fk/prodFi;
-    rows += '<tr><td>'+p+'</td><td>'+fmtF(fk,6)+'</td><td>'+fmtF(prodFi,6)+'</td><td>'+fmtF(rp,6)+'</td></tr>';
+    rows += '<tr>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'prime\')">'+p+'</td>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'fk\')">'+fmtF(fk)+'</td>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'prodf\')">'+fmtF(prodFi)+'</td>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'rho\')">'+fmtF(rp)+'</td>'
+      + '</tr>';
   }
   tb.innerHTML = rows;
+}
+
+// ── Exact-fraction step-by-step explainer (BigInt, since p^(k+1) can exceed safe-integer range for larger p,k) ──
+function bgcd(a,b){ a=a<0n?-a:a; b=b<0n?-b:b; while(b){ const t=b; b=a%b; a=t; } return a; }
+function bfracReduce(num, den){ const g = bgcd(num,den) || 1n; return { num: num/g, den: den/g }; }
+function bfracStr(f){ return f.num.toString()+'/'+f.den.toString(); }
+function bfracVal(f){ return Number(f.num)/Number(f.den); }
+function openExplain(title, sub, steps, resultVal){
+  document.getElementById('emTitle').textContent = title;
+  document.getElementById('emSub').textContent = sub;
+  document.getElementById('emSteps').innerHTML = steps.map(function(s,i){
+    return '<div class="em-step"><div class="em-steplabel">Step '+(i+1)+' — '+s.label+'</div><div class="em-math">'+s.math+'</div></div>';
+  }).join('');
+  document.getElementById('emResult').innerHTML = resultVal;
+  document.getElementById('explainOverlay').classList.add('open');
+}
+function closeExplain(){ document.getElementById('explainOverlay').classList.remove('open'); }
+function explainCellK(p, col){
+  const ns = window._wg10_lastNs || [6];
+  const k = ns.length;
+  const P = BigInt(p);
+  const as = ns.map(function(n){ return BigInt(Math.min(n+1,p)); });
+  const cs = as.map(function(a){ return P - a; });
+
+  if(col==='prime'){
+    const idx = PRIMES_FULL.indexOf(p);
+    openExplain('Prime p = '+p, 'Position #'+(idx+1)+' in the prime sequence used by this page\u2019s Euler product', [
+      { label:'Identity', math:'p = '+p+' is prime' },
+      { label:'Role here', math:'k = '+k+' blocks (n\u2081,\u2026,n_'+k+') = ('+ns.join(', ')+'). This row is prime p\u2019s local factor contribution to C(n\u2081,\u2026,n_k).' }
+    ], 'Next prime: '+(PRIMES_FULL[idx+1]||'—')+' · Previous: '+(idx>0?PRIMES_FULL[idx-1]:'—'));
+    return;
+  }
+
+  // Shared: f_p(n1,...,nk) = [p^(k+1) - p^k + \u220f c_i] / p^(k+1),  c_i = p - a_i
+  let prodC = 1n; cs.forEach(function(c){ prodC *= c; });
+  const fkNum = P**BigInt(k+1) - P**BigInt(k) + prodC;
+  const fkDen = P**BigInt(k+1);
+  const fkFrac = bfracReduce(fkNum, fkDen);
+  const fkDirect = localFactor(ns, p);
+
+  if(col==='fk'){
+    openExplain('f_p(n\u2081,\u2026,n_k) at p = '+p+', k = '+k, '(n\u2081,\u2026,n_k) = ('+ns.join(', ')+')', [
+      { label:'Formula', math:'f_p(n\u2081,\u2026,n_k) = [p^(k+1) \u2212 p^k + \u220f\u1d62(p\u2212a\u1d62)] / p^(k+1),  a\u1d62 = min(n\u1d62+1, p)' },
+      { label:'Substitute a\u1d62', math:'a = ('+as.map(function(a){return a.toString();}).join(', ')+')  \u2192  (p\u2212a\u1d62) = ('+cs.map(function(c){return c.toString();}).join(', ')+')' },
+      { label:'Product of (p\u2212a\u1d62)', math:'\u220f\u1d62(p\u2212a\u1d62) = '+prodC.toString() },
+      { label:'Assemble', math:'p^'+(k+1)+' \u2212 p^'+k+' + '+prodC.toString()+' = '+fkNum.toString()+',  over p^'+(k+1)+' = '+fkDen.toString() },
+      { label:'Exact fraction', math:'<span class="em-frac">'+bfracStr(fkFrac)+'</span>'+(fkFrac.den!==fkDen?' (reduced)':' (already in lowest terms)') }
+    ], bfracStr(fkFrac)+' \u2248 '+fkDirect.toFixed(DECIMALS));
+    return;
+  }
+
+  if(col==='prodf'){
+    // prod_i f_p(n_i) = prod_i (p^2 - a_i) / p^(2k)
+    let prodFNum = 1n; as.forEach(function(a){ prodFNum *= (P*P - a); });
+    const prodFDen = (P*P)**BigInt(k);
+    const prodFFrac = bfracReduce(prodFNum, prodFDen);
+    let prodFDirect = 1; ns.forEach(function(n){ prodFDirect *= (1-Math.min(n+1,p)/(p*p)); });
+    openExplain('\u220f\u1d62 f_p(n\u1d62) at p = '+p+', k = '+k, 'Product of the k single-block factors, as if independent', [
+      { label:'Formula', math:'f_p(n\u1d62) = (p\u00b2\u2212a\u1d62) / p\u00b2  for each block; multiply all k of them' },
+      { label:'Per-block numerators', math:'(p\u00b2\u2212a\u1d62) = ('+as.map(function(a){return (P*P-a).toString();}).join(', ')+')' },
+      { label:'Multiply numerators', math:'\u220f\u1d62(p\u00b2\u2212a\u1d62) = '+prodFNum.toString() },
+      { label:'Denominator', math:'p^(2k) = p^'+(2*k)+' = '+prodFDen.toString() },
+      { label:'Exact fraction', math:'<span class="em-frac">'+bfracStr(prodFFrac)+'</span>'+(prodFFrac.den!==prodFDen?' (reduced)':' (already in lowest terms)') }
+    ], bfracStr(prodFFrac)+' \u2248 '+prodFDirect.toFixed(DECIMALS));
+    return;
+  }
+
+  if(col==='rho'){
+    let prodFNum = 1n; as.forEach(function(a){ prodFNum *= (P*P - a); });
+    const prodFDen = (P*P)**BigInt(k);
+    // rho = (fkNum/fkDen) / (prodFNum/prodFDen) = fkNum*prodFDen / (fkDen*prodFNum)
+    const rNum = fkNum * prodFDen;
+    const rDen = fkDen * prodFNum;
+    const rFrac = bfracReduce(rNum, rDen);
+    let prodFDirect = 1; ns.forEach(function(n){ prodFDirect *= (1-Math.min(n+1,p)/(p*p)); });
+    const rDirect = fkDirect/prodFDirect;
+    openExplain('local \u03c1_p at p = '+p+', k = '+k, 'How far this prime is from independence across all k blocks', [
+      { label:'Formula', math:'\u03c1_p = f_p(n\u2081,\u2026,n_k) / \u220f\u1d62 f_p(n\u1d62)' },
+      { label:'f_p(n\u2081,\u2026,n_k) as a fraction', math:bfracStr({num:fkNum,den:fkDen}) },
+      { label:'\u220f\u1d62 f_p(n\u1d62) as a fraction', math:bfracStr({num:prodFNum,den:prodFDen}) },
+      { label:'Divide fractions', math:'('+fkNum.toString()+'/'+fkDen.toString()+') \u00f7 ('+prodFNum.toString()+'/'+prodFDen.toString()+') = '+rNum.toString()+' / '+rDen.toString() },
+      { label:'Exact fraction', math:'<span class="em-frac">'+bfracStr(rFrac)+'</span>'+(rFrac.den!==rDen?' (reduced)':' (already in lowest terms)') }
+    ], bfracStr(rFrac)+' \u2248 '+rDirect.toFixed(DECIMALS));
+    return;
+  }
+}
+
+function exportPrimeCSV(){
+  const btn = document.getElementById('csvBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Generating…';
+  btn.disabled = true;
+  setTimeout(function(){
+    const ns = window._wg10_lastNs || currentNs();
+    const parts = new Array(PRIMES_FULL.length+1);
+    parts[0] = 'p,f_p(n1..nk),prod_f_p(ni),local_rho_p';
+    for(let i=0;i<PRIMES_FULL.length;i++){
+      const p = PRIMES_FULL[i];
+      const fk = localFactor(ns,p);
+      let prodFi = 1;
+      ns.forEach(function(n){ prodFi *= (1-Math.min(n+1,p)/(p*p)); });
+      const rp = fk/prodFi;
+      parts[i+1] = p+','+fk.toFixed(10)+','+prodFi.toFixed(10)+','+rp.toFixed(10);
+    }
+    const csv = parts.join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'page10_local_factors_k'+ns.length+'_ns-'+ns.join('-')+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    btn.textContent = orig;
+    btn.disabled = false;
+  }, 30);
+}
+
+// ── Finite lattice canvas, generalized to k blocks (ported from Page 9, extended) ──
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+let _wg10_view = 'grid';
+function setLatticeView(v){
+  _wg10_view = v;
+  document.getElementById('viewBtnGrid').classList.toggle('active', v==='grid');
+  document.getElementById('viewBtnRing').classList.toggle('active', v==='ring');
+  renderLattice();
+}
+function buildMAnchors(){
+  const wrap = document.getElementById('mAnchorsWrap');
+  if(K<2){ wrap.innerHTML=''; return; }
+  let html = '<div class="ctrl-row">';
+  for(let i=2;i<=K;i++){
+    const v = (window._wg10_manc && window._wg10_manc[i]!==undefined) ? window._wg10_manc[i] : 1;
+    html += '<div class="ctrl-block">'
+      + '<div class="ctrl-label">M'+i+' (block '+i+' anchor, fixed) <span class="val" id="manc'+i+'val">'+v+'</span></div>'
+      + '<div class="stepctrl">'
+      + '<button class="step-btn" onclick="stepLatVal(\'m'+i+'\',-1)" title="M'+i+' \u2212 1">\u2212</button>'
+      + '<input type="range" id="manc'+i+'sl" min="1" max="300" value="'+v+'" oninput="onGridChange()">'
+      + '<button class="step-btn" onclick="stepLatVal(\'m'+i+'\',1)" title="M'+i+' + 1">+</button>'
+      + '<input type="number" id="manc'+i+'num" class="step-num" min="1" max="300" value="'+v+'" oninput="onLatNumInput(\'m'+i+'\')">'
+      + '</div></div>';
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+function latIds(key){
+  if(key==='g') return {sl:'gsl', num:'gnum'};
+  const idx = key.slice(1);
+  return {sl:'manc'+idx+'sl', num:'manc'+idx+'num'};
+}
+function stepLatVal(key, delta){
+  const ids = latIds(key);
+  const sl = document.getElementById(ids.sl);
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+delta));
+  sl.value = v; document.getElementById(ids.num).value = v;
+  onGridChange();
+}
+function onLatNumInput(key){
+  const ids = latIds(key);
+  const num = document.getElementById(ids.num);
+  const sl = document.getElementById(ids.sl);
+  let v = Math.round(+num.value||0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v; sl.value = v;
+  onGridChange();
+}
+function onGridChange(){
+  const G = +document.getElementById('gsl').value;
+  document.getElementById('gval').textContent = G;
+  document.getElementById('gnum').value = G;
+  window._wg10_manc = window._wg10_manc || {};
+  for(let i=2;i<=K;i++){
+    const sl = document.getElementById('manc'+i+'sl');
+    if(sl){
+      document.getElementById('manc'+i+'val').textContent = sl.value;
+      document.getElementById('manc'+i+'num').value = sl.value;
+      window._wg10_manc[i] = +sl.value;
+    }
+  }
+  renderLattice();
+}
+function onFilterChange(){
+  const v = +document.getElementById('filtMinSl').value;
+  document.getElementById('filtMinVal').textContent = v;
+  renderLattice();
+}
+// Color for a cell given how many of the k blocks it survives (0..K)
+function countColor(count, mode, r){
+  const t = K>0 ? count/K : 0;
+  if(mode==='rainbow'){
+    const h = Math.round((r%300)/300*300);
+    return 'hsl('+h+','+(40+t*40)+'%,'+(15+t*40)+'%)';
+  }
+  if(mode==='residue'){
+    const RES_HUES=[0,60,120,180,240,300];
+    const h = RES_HUES[r%6];
+    return 'hsl('+h+','+(35+t*40)+'%,'+(12+t*42)+'%)';
+  }
+  // 'count' (default): dark (#181828) \u2192 gold (#f2c44a) gradient
+  const r0=0x18,g0=0x18,b0=0x28, r1=0xf2,g1=0xc4,b1=0x4a;
+  const rr = Math.round(r0+(r1-r0)*t), gg = Math.round(g0+(g1-g0)*t), bb = Math.round(b0+(b1-b0)*t);
+  return 'rgb('+rr+','+gg+','+bb+')';
+}
+function updateLatticeLegendK(mode){
+  const lg = document.getElementById('latticeLegend');
+  lg.innerHTML =
+    '<span><span class="sw" style="background:#181828;border:1px solid var(--edge2);"></span>0 blocks survived</span>'+
+    '<span><span class="sw" style="background:#f2c44a;"></span>all '+K+' blocks survived</span>'+
+    '<span>color interpolates between them by survival count'+(mode!=='count'?' (hue = '+mode+')':'')+'</span>';
+}
+function renderLattice(){
+  window._wg10_latticeReady = true;
+  const G = +document.getElementById('gsl').value;
+  const ns = (window._wg10_lastNs || currentNs()).map(function(n){ return Math.min(n,200); });
+  const mode = document.getElementById('colorModeSel').value;
+  const filtMin = +document.getElementById('filtMinSl').value;
+  updateLatticeLegendK(mode);
+
+  const Ck = computeC(window._wg10_lastNs || currentNs(), PRIMES_FULL);
+  document.getElementById('rAsympRef').textContent = fmt(Ck/ZETA2);
+
+  const cv = document.getElementById('latticeCv');
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const cssW = cv.clientWidth||600, cssH = 420;
+  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+  cv.style.height = cssH+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#040409';
+  ctx.fillRect(0,0,cssW,cssH);
+
+  document.getElementById('latticeNote').textContent =
+    'n\u2081...n_k capped at 200 each inside this canvas for render speed \u2014 the asymptotic value above uses the true, uncapped values. Note: with M\u2082,\u2026,M_k fixed (not averaged), the finite fraction converges to D(n\u2081,\u2026,n_k) as G grows, but converges faster for larger/more \u201cgeneric\u201d anchor values \u2014 the default of 1 converges more slowly since it interacts atypically with small primes.';
+
+  // Fixed-anchor blocks (2..K) depend only on r, hoist out of the M1 loop
+  const fixedOkArr = new Array(G+1);
+  for(let r=1;r<=G;r++){
+    let count = 0;
+    for(let i=2;i<=K;i++){
+      const Mi = window._wg10_manc && window._wg10_manc[i] ? window._wg10_manc[i] : 1;
+      const ni = ns[i-1];
+      let ok = true;
+      for(let j=0;j<=ni;j++){ if(gcd(r, Mi+j) > 1){ ok=false; break; } }
+      if(ok) count++;
+    }
+    fixedOkArr[r] = count;
+  }
+
+  let allCount = 0;
+  const n1 = ns[0];
+
+  if(_wg10_view === 'grid'){
+    const cellW = cssW/G, cellH = cssH/G;
+    for(let r=1; r<=G; r++){
+      const fixedCount = fixedOkArr[r];
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        const total = fixedCount + (ok1?1:0);
+        if(total===K) allCount++;
+        if(total < filtMin) continue;
+        ctx.fillStyle = countColor(total, mode, r);
+        const px = (r-1)*cellW, py = cssH - M1*cellH;
+        ctx.fillRect(px, py, Math.max(1,cellW-.4), Math.max(1,cellH-.4));
+      }
+    }
+  } else {
+    const cx = cssW/2, cy = cssH/2;
+    const R = Math.min(cssW,cssH)*0.47;
+    const dotR = Math.max(1, R/G*0.9);
+    for(let r=1; r<=G; r++){
+      const fixedCount = fixedOkArr[r];
+      const theta = 2*Math.PI*(r-1)/G;
+      const cosT = Math.cos(theta), sinT = Math.sin(theta);
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        const total = fixedCount + (ok1?1:0);
+        if(total===K) allCount++;
+        if(total < filtMin) continue;
+        const rho = (M1/G)*R;
+        const x = cx + rho*cosT, y = cy - rho*sinT;
+        ctx.fillStyle = countColor(total, mode, r);
+        ctx.fillRect(x-dotR/2, y-dotR/2, dotR, dotR);
+      }
+    }
+  }
+  document.getElementById('rFiniteFrac').textContent = fmt(allCount/(G*G));
+}
+
+// ── Play button: animates n\u2081, driving the whole page ──
+let _wg10_playId = null;
+function togglePlay(){
+  const btn = document.getElementById('playBtn');
+  if(_wg10_playId){
+    clearInterval(_wg10_playId); _wg10_playId = null;
+    btn.textContent = '\u25b6 Play n\u2081'; btn.classList.remove('playing');
+    return;
+  }
+  btn.textContent = '\u25a0 Stop'; btn.classList.add('playing');
+  _wg10_playId = setInterval(function(){
+    const sl = document.getElementById('nsl0');
+    let v = (+sl.value) + 1;
+    if(v > 60) v = 0;
+    sl.value = v;
+    document.getElementById('nnum0').value = v;
+    onNChange(0);
+  }, 350);
 }
 
 // ── Growth plot: rho_k(n) vs k, symmetric case ──
@@ -426,10 +872,12 @@ window.addEventListener('load', function(){
     '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp.';
   buildBlocks();
   recompute();
+  buildMAnchors();
+  renderLattice();
   renderGrowth();
 });
 window.addEventListener('resize', function(){
-  if(PRIMES_FULL.length) renderGrowth();
+  if(PRIMES_FULL.length){ renderGrowth(); renderLattice(); }
 });
 
 function openOpener(){
@@ -438,5 +886,15 @@ function openOpener(){
 }
 function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
 </script>
+<div id="explainOverlay" onclick="if(event.target===this) closeExplain()">
+  <div id="explainModal">
+    <button class="em-close" onclick="closeExplain()">×</button>
+    <div class="em-title" id="emTitle">—</div>
+    <div class="em-sub" id="emSub">—</div>
+    <div id="emSteps"></div>
+    <div class="em-result" id="emResult">—</div>
+  </div>
+</div>
+
 </body>
 </html>
