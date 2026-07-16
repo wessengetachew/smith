@@ -178,7 +178,6 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
 #hero-3d.pannable{cursor:grab;}
 #hero-3d.pannable.dragging{cursor:grabbing;}
 #hero-3d.inspect-on{cursor:crosshair;}
-#hero-3d.hero-inverted{filter:invert(1) hue-rotate(180deg);}
 
 /* ── HERO CANVAS FULLSCREEN ── mirrors the opener's canvas-fullscreen UX:
    canvas sticks to top, controls scroll below it, hiding controls grows the canvas */
@@ -1226,6 +1225,9 @@ function heroToggleTopBars(){
           style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Smith</button>
         <button class="wv-btn" id="wvb-ring" onclick="wSetView('ring')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Ring</button>
+        <label style="display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(232,226,214,.75);cursor:pointer;white-space:nowrap;margin-right:6px;">
+          <input type="checkbox" id="w-ring-invert-cb" onchange="wToggleRingInvert(this.checked)" style="accent-color:var(--gold, #c8a84a);" title="Inverts ring order — M=2 moves to the outer edge instead of the center. Order only, no color/background change. Ring view only.">Invert
+        </label>
 
         <button class="wv-btn" id="wvb-grid" onclick="wSetView('grid')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Grid</button>
@@ -1687,6 +1689,12 @@ function heroToggleTopBars(){
         <button id="wgap-btn-8" onclick="wToggleGap(8)" title="Gap-8 prime pairs (M, M+8)"
           style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">8</button>
         <div id="w-gap-dynamic" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <button onclick="wGapSelectAll()" title="Turn on every gap button currently in this list (presets + anything generated below)"
+          style="background:none;border:1px solid rgba(200,168,74,.5);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">☑ Select all</button>
+        <button onclick="wGapExpandUp()" title="Add the next valid gap above your current selection (creates its button if needed)"
+          style="background:none;border:1px solid rgba(126,200,122,.5);color:rgba(126,200,122,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 7px;cursor:pointer;">▲ +gap</button>
+        <button onclick="wGapShrinkDown()" title="Remove the highest gap currently selected"
+          style="background:none;border:1px solid rgba(255,107,107,.4);color:rgba(255,140,140,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 7px;cursor:pointer;">▼ −gap</button>
         <span style="flex-basis:100%;height:0;"></span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Custom g:</span>
         <button onclick="wGapStep(-1)" title="Previous gap"
@@ -1696,7 +1704,7 @@ function heroToggleTopBars(){
           title="Highlight gap class g — slides over the full grid size G; forward mode: consecutive-prime pairs (p, p+g); diagonal mode: |M−r|=g strip">
         <button onclick="wGapStep(1)" title="Next gap"
           style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(200,168,74,.8);font-family:'JetBrains Mono',monospace;font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
-        <button id="w-gap-play" onclick="wGapPlayToggle()" title="Loop the gap slider through every class up to G"
+        <button id="w-gap-play" onclick="wGapPlayToggle()" title="If any gaps are selected, cycles through just those; otherwise sweeps every class up to G"
           style="background:none;border:1px solid rgba(126,200,122,.45);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;width:20px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
         <button id="w-gap-lock-half" onclick="wToggleGapLockHalf()" title="Lock diagonal g to half of Grid G — stays in sync as G changes, on every view"
           style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 7px;cursor:pointer;">🔒 g=G/2</button>
@@ -1704,14 +1712,20 @@ function heroToggleTopBars(){
         <span id="w-gap-pairs" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(61,200,184,.75);min-width:80px;"></span>
         <span style="flex-basis:100%;height:0;"></span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#7a756a;letter-spacing:.06em;">SEMANTICS:</span>
-        <button class="gap-sem-btn" data-mode="forward" onclick="setGapSemantics('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime belongs to exactly one class (a partition)"
+        <button class="gap-sem-btn" data-mode="forward" onclick="toggleGapSemantic('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime belongs to exactly one class (a partition)"
           style="background:rgba(126,200,122,.16);border:1px solid rgba(126,200,122,.65);color:rgba(126,200,122,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">Δp forward</button>
-        <button class="gap-sem-btn" data-mode="diagonal" onclick="setGapSemantics('diagonal')" title="Legacy: highlight every lattice point with |M−r|=g, no primality"
+        <button class="gap-sem-btn" data-mode="diagonal" onclick="toggleGapSemantic('diagonal')" title="Legacy: highlight every lattice point with |M−r|=g, no primality"
           style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">|M−r| diagonal</button>
         <div style="width:1px;height:18px;background:rgba(255,255,255,.14);flex-shrink:0;"></div>
         <button id="w-residue-overlay-btn" onclick="wToggleResidueOverlay()"
           title="Draw the actual (p, p+g) residue chords mod G — comet-tail descent + outer chord + landing glow, on top of the active gap's row highlighting. Works on all five views."
-          style="background:rgba(74,144,217,.18);border:1px solid rgba(74,144,217,.75);color:rgba(120,180,240,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">⬡ Residue chords</button>
+          style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">⬡ Residue chords</button>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Thickness:</span>
+        <input type="range" id="w-line-thick" min="0.2" max="5" step="0.1" value="1"
+          style="width:70px;accent-color:rgba(74,144,217,.7);"
+          oninput="wSetLineThick(+this.value)"
+          title="Line thickness of the residue-chord overlay (comet-tail + chord)">
+        <span id="w-line-thick-lbl" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(120,180,240,.85);min-width:22px;">1.0×</span>
         </div>
 
         <!-- Dynamic Gap Generation — ported from the old project. These build
@@ -2042,6 +2056,13 @@ function heroToggleTopBars(){
   var _wsFlipFrom=1,_wsFlipT0=0;
   // Per-ring/per-mod twist — applies to Ring/Grid/Farey (Smith keeps its own θ/flip)
   var _wPerRing=0;           // fraction of a full lap added per ring index (M-1)
+  // Ring-order invert (opener's own Ring view) — M=2 moves to the outer edge
+  // instead of the center. Order only, matches hero's convention exactly.
+  var _wRingInvert=false;
+  window.wToggleRingInvert=function(checked){
+    _wRingInvert=!!checked;
+    wRedrawCanvas();
+  };
   var _wPerRingSpinning=false, _wPerRingSpeed=60; // deg/sec
   var _wprLastT=null;
   // Sector path — mirrors the hero's "Trace path": b·r−a·M=s for the chosen
@@ -2705,7 +2726,10 @@ function heroToggleTopBars(){
   // five views. A gap g is "active" if M and M+g are both prime; every M
   // involved in an active pair gets its whole ring/row/diagonal highlighted
   // in that gap's color, using each view's own existing coordinate mapping.
-  var _wActiveGaps=new Set([1,2]); // defaults on: gap 1 (2→3) + twin primes
+  var _wActiveGaps=new Set(); // off by default
+  // While Play is cycling, holds the ONE gap currently spotlighted (mirrors
+  // _heroGapSpotlight); null = show every active gap at once.
+  var _wGapSpotlight=null;
   // Lock the diagonal gap g to half of Grid G — ported from page2's
   // "🔒 g=G/2" button. Stays applied through G changes (wSetG) until the
   // user either toggles it off or manually drags the gap slider elsewhere.
@@ -2748,7 +2772,7 @@ function heroToggleTopBars(){
   // opener view is active. Reuses the same _wActiveGaps set as the row-based
   // Active Gaps highlighting above; the sieve itself is the shared
   // _heroBuildPairsForGap function (pure, no hero-only state). ──
-  var _wResidueOverlayOn=true; // on by default
+  var _wResidueOverlayOn=false; // off by default
   var _wOverlayPairs=[];
   var _wOverlayCacheKey='';
   var _wGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
@@ -2765,7 +2789,9 @@ function heroToggleTopBars(){
   };
   function _wEnsureOverlayPairs(){
     var modN=_wG;
-    var gapsList=(_wActiveGaps&&_wActiveGaps.size)?Array.from(_wActiveGaps).sort(function(a,b){return a-b;}):[];
+    var spotlighted=(_wGapSpotlight!=null&&_wActiveGaps.has(_wGapSpotlight));
+    var gapsList=spotlighted?[_wGapSpotlight]
+      :((_wActiveGaps&&_wActiveGaps.size)?Array.from(_wActiveGaps).sort(function(a,b){return a-b;}):[]);
     var key=gapsList.join(',')+'|'+modN;
     if(key===_wOverlayCacheKey)return _wOverlayPairs;
     _wOverlayCacheKey=key;
@@ -2798,7 +2824,7 @@ function heroToggleTopBars(){
         ctx.beginPath();
         ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]);
         ctx.strokeStyle=col;
-        ctx.lineWidth=Math.max(0.8,W*0.003*t);
+        ctx.lineWidth=Math.max(0.8,W*0.003*t)*_wLineThickMul;
         ctx.globalAlpha=(0.25+0.55*t)*overlayAlpha;
         ctx.stroke();
       }
@@ -2816,7 +2842,7 @@ function heroToggleTopBars(){
       ctx.beginPath();
       ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]);
       ctx.strokeStyle=_wGapColorFor(pr.gap);
-      ctx.lineWidth=Math.max(1,W*0.002);
+      ctx.lineWidth=Math.max(1,W*0.002)*_wLineThickMul;
       ctx.globalAlpha=(0.55+0.3*(i/Math.max(pairs.length-1,1)))*overlayAlpha;
       ctx.stroke();
     });
@@ -2870,12 +2896,15 @@ function heroToggleTopBars(){
   }
 
   window.wToggleGap=function(g){
+    g=+g;
+    if(typeof isValidPrimeGap==='function'&&!isValidPrimeGap(g))return; // odd gaps >1 can never have a real prime pair
     if(_wGapLockHalf){
       _wGapLockHalf=false;
       var lb=document.getElementById('w-gap-lock-half');
       if(lb){lb.style.background='none';lb.style.borderColor='rgba(155,127,232,.4)';lb.style.color='rgba(155,127,232,.85)';}
     }
     if(_wActiveGaps.has(g)) _wActiveGaps.delete(g); else _wActiveGaps.add(g);
+    if(typeof _wOverlayCacheKey!=='undefined')_wOverlayCacheKey='';
     var btn=document.getElementById('wgap-btn-'+g);
     if(btn) btn.setAttribute('style',_wGapBtnStyle(g,_wActiveGaps.has(g)));
     if(typeof _wSyncGapButtons==='function')_wSyncGapButtons();
@@ -2885,6 +2914,8 @@ function heroToggleTopBars(){
   // buttons (off by default) rather than activating gaps directly — matches
   // the old project exactly: these are control-builders, not on/off switches.
   function _wEnsureGapBtn(g){
+    g=+g;
+    if(typeof isValidPrimeGap==='function'&&!isValidPrimeGap(g))return; // odd gaps >1 can never have a real prime pair
     if(document.getElementById('wgap-btn-'+g))return; // already exists (static or previously generated)
     var container=document.getElementById('w-gap-dynamic');
     if(!container)return;
@@ -2944,7 +2975,7 @@ function heroToggleTopBars(){
     var max=Math.max(1,_wG-1);
     if(sl&&+sl.max!==max){sl.max=max;}
     v=Math.max(0,Math.min(max,Math.round(+v||0)));
-    if(_gapSemantics==='forward'&&v>1&&v%2){v=Math.min(max,v+1);} // gaps >1 are even
+    if(_gapShowFwd&&v>1&&v%2){v=Math.min(max,v+1);} // gaps >1 are even
     // Manually dragging to a value other than the locked half releases the lock
     if(_wGapLockHalf&&v!==Math.max(1,Math.round(_wG/2))){
       _wGapLockHalf=false;
@@ -2956,7 +2987,7 @@ function heroToggleTopBars(){
     var pairs=document.getElementById('w-gap-pairs');
     if(v>0){
       _wActiveGaps.add(v);
-      if(pairs)pairs.textContent=(_gapSemantics==='forward')
+      if(pairs)pairs.textContent=(_gapShowFwd)
         ?('pairs='+fwdGapPairCount(v,_wG)+' (p,p+'+v+') \u2264 G')
         :('|M\u2212r|='+v+' diagonal \u00b7 \u03c6/g='+(phi(v)/v).toFixed(4));
     } else if(pairs)pairs.textContent='';
@@ -2971,22 +3002,87 @@ function heroToggleTopBars(){
   var _wGapPlayId=null;
   window.wGapPlayToggle=function(){
     var btn=document.getElementById('w-gap-play');
-    if(_wGapPlayId){clearInterval(_wGapPlayId);_wGapPlayId=null;if(btn)btn.textContent='\u25b6';return;}
+    if(_wGapPlayId){
+      clearInterval(_wGapPlayId);_wGapPlayId=null;
+      if(btn)btn.textContent='\u25b6';
+      _wGapSpotlight=null;_wOverlayCacheKey='';wRedrawCanvas();
+      return;
+    }
     if(btn)btn.textContent='\u23f8';
-    _wGapPlayId=setInterval(function(){
-      var sl=document.getElementById('w-gap-sl');
-      var v=sl?+sl.value:0, max=Math.max(1,_wG-1);
-      var nx=_gapStepVal(v,1);
-      if(nx>max)nx=1; // loop
-      window.wGapSliderChange(nx);
-    },800);
+    if(_wActiveGaps.size>0){
+      // Cycle through exactly the gaps already selected, one at a time.
+      var idx=0;
+      var cycle=function(){
+        var sorted=Array.from(_wActiveGaps).sort(function(a,b){return a-b;});
+        if(!sorted.length){_wGapSpotlight=null;return;}
+        _wGapSpotlight=sorted[idx%sorted.length];
+        idx++;
+        _wOverlayCacheKey='';
+        wRedrawCanvas();
+      };
+      cycle();
+      _wGapPlayId=setInterval(cycle,800);
+    } else {
+      _wGapPlayId=setInterval(function(){
+        var sl=document.getElementById('w-gap-sl');
+        var v=sl?+sl.value:0, max=Math.max(1,_wG-1);
+        var nx=_gapStepVal(v,1);
+        if(nx>max)nx=1; // loop
+        window.wGapSliderChange(nx);
+      },800);
+    }
+  };
+  // Turns on every gap button currently in the list (presets + generated).
+  window.wGapSelectAll=function(){
+    document.querySelectorAll('button[id^="wgap-btn-"]').forEach(function(b){
+      var g=parseInt(b.id.replace('wgap-btn-',''));
+      if(typeof isValidPrimeGap!=='function'||isValidPrimeGap(g))_wActiveGaps.add(g);
+    });
+    _wOverlayCacheKey='';
+    if(typeof _wSyncGapButtons==='function')_wSyncGapButtons();
+    wRedrawCanvas();
+  };
+  // Quick +/- : grow or shrink the selection by one valid gap step at the
+  // top end, without opening the Generate/Range panel each time.
+  window.wGapExpandUp=function(){
+    var cur=_wActiveGaps.size?Math.max.apply(null,Array.from(_wActiveGaps)):0;
+    var nxt=_gapStepVal(cur,1);
+    var max=Math.max(1,_wG-1);
+    if(nxt>max)return;
+    _wEnsureGapBtn(nxt);
+    _wActiveGaps.add(nxt);
+    var btn=document.getElementById('wgap-btn-'+nxt);
+    if(btn) btn.setAttribute('style',_wGapBtnStyle(nxt,true));
+    _wOverlayCacheKey='';
+    if(typeof _wSyncGapButtons==='function')_wSyncGapButtons();
+    wRedrawCanvas();
+  };
+  window.wGapShrinkDown=function(){
+    if(!_wActiveGaps.size)return;
+    var mx=Math.max.apply(null,Array.from(_wActiveGaps));
+    _wActiveGaps.delete(mx);
+    if(_wGapSpotlight===mx)_wGapSpotlight=null;
+    var btn=document.getElementById('wgap-btn-'+mx);
+    if(btn) btn.setAttribute('style',_wGapBtnStyle(mx,false));
+    _wOverlayCacheKey='';
+    if(typeof _wSyncGapButtons==='function')_wSyncGapButtons();
+    wRedrawCanvas();
+  };
+  // Line-thickness multiplier for the residue-chord overlay.
+  var _wLineThickMul=1;
+  window.wSetLineThick=function(v){
+    _wLineThickMul=Math.max(0.2,Math.min(5,+v||1));
+    var l=document.getElementById('w-line-thick-lbl');
+    if(l)l.textContent=_wLineThickMul.toFixed(1)+'\u00d7';
+    wRedrawCanvas();
   };
   // Returns the set of M values (2..G) that are part of at least one active gap pair,
   // tagged with the gap color to use.
   function _wGapHighlightSet(G){
     var out=new Map(); // M -> color
     if(_wActiveGaps.size===0) return out;
-    var useFwd=(typeof _gapSemantics==='undefined')||_gapSemantics==='forward';
+    var useFwd=(typeof _gapShowFwd==='undefined')||_gapShowFwd;
+    var useDiag=(typeof _gapShowDiag!=='undefined')&&_gapShowDiag;
     for(var M=2;M<=G;M++){
       if(!isPrimeW(M))continue;
       if(useFwd&&typeof fwdGap==='function'){
@@ -2995,9 +3091,10 @@ function heroToggleTopBars(){
         // with M+g prime — the "same primes for different gaps" bug).
         var g=fwdGap(M);
         if(g&&_wActiveGaps.has(g)&&M+g<=G){ out.set(M,_wGapColorFor(g)); if(!out.has(M+g))out.set(M+g,_wGapColorFor(g)); }
-      } else {
+      }
+      if(useDiag){
         _wActiveGaps.forEach(function(g2){
-          if(M+g2<=G&&isPrimeW(M+g2)){ out.set(M,_wGapColorFor(g2)); out.set(M+g2,_wGapColorFor(g2)); }
+          if(M+g2<=G&&isPrimeW(M+g2)){ if(!out.has(M))out.set(M,_wGapColorFor(g2)); if(!out.has(M+g2))out.set(M+g2,_wGapColorFor(g2)); }
         });
       }
     }
@@ -3767,7 +3864,8 @@ function heroToggleTopBars(){
     var maxR=Math.min(W,H)*0.46;
     var extraTurn=_wPerRing*2*Math.PI;
     function ringXY(r,M){
-      var R=maxR*(M-1)/Math.max(1,rings-1);
+      var Mx=_wRingInvert?(rings+1-M):M;
+      var R=maxR*(Mx-1)/Math.max(1,rings-1);
       // Matches the hero ring's angle convention exactly: theta=2πr/M+twist,
       // x=cx+R·cos(theta), y=cy−R·sin(theta) — no extra phase offset. (Used
       // to start at 12 o'clock and wind clockwise here vs. hero's 3-o'clock/
@@ -3807,7 +3905,8 @@ function heroToggleTopBars(){
       var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(rings):2;
       // Dropout ring — the spiral prime's own modulus, where it exits (ℤ/Mℤ)*.
       if(dropoutOn&&spP>=2&&spP<=rings&&_wRingActive(spP)){
-        var dR=maxR*(spP-1)/Math.max(1,rings-1);
+        var dMx=_wRingInvert?(rings+1-spP):spP;
+        var dR=maxR*(dMx-1)/Math.max(1,rings-1);
         ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.75)';ctx.lineWidth=1.3;
         ctx.beginPath();ctx.arc(cx,cy,dR,0,Math.PI*2);ctx.stroke();ctx.restore();
       }
@@ -3854,7 +3953,8 @@ function heroToggleTopBars(){
     // Active Gaps: outline the full ring for every M in a twin/cousin/sexy-prime pair
     var gapSet=_wGapHighlightSet(G);
     gapSet.forEach(function(color,M){
-      var gR=maxR*(M-1)/Math.max(1,rings-1);
+      var gMx=_wRingInvert?(rings+1-M):M;
+      var gR=maxR*(gMx-1)/Math.max(1,rings-1);
       ctx.strokeStyle=color+'70';ctx.lineWidth=1.5;
       ctx.beginPath();ctx.arc(cx,cy,gR,0,Math.PI*2);ctx.stroke();
     });
@@ -3864,7 +3964,8 @@ function heroToggleTopBars(){
     var _dimA=_wDynDimA('ring'); if(_dimA<1){ctx.save();ctx.globalAlpha=_dimA;}
     for(var M=1;M<=rings;M++){
       if(!_wRingActive(M))continue;
-      var R=maxR*(M-1)/Math.max(1,rings-1);
+      var Mx=_wRingInvert?(rings+1-M):M;
+      var R=maxR*(Mx-1)/Math.max(1,rings-1);
       var extraRot=extraTurn*(M-1);
       var rStart=(M===1)?0:1, rEnd=(M===1)?0:M-1;
       for(var r=rStart;r<=rEnd;r++){
@@ -3882,14 +3983,13 @@ function heroToggleTopBars(){
       }
     }
     if(_dimA<1){ctx.restore();}
-    // Sector path — highlight traced points at their true ring position
-    // (same extraRot/per-ring twist as the main lattice, for visual consistency).
+    // Sector path — highlight traced points at their true ring position.
+    // Reuses ringXY directly (not a separate radius calc) so it automatically
+    // stays correct under per-ring twist AND ring-order invert.
     for(var si=0;si<_wSectorPts.length;si++){
       var sp=_wSectorPts[si];
-      var spR=maxR*(sp.M-1)/Math.max(1,rings-1);
-      var spExtraRot=extraTurn*(sp.M-1);
-      var spTheta=2*Math.PI*sp.r/sp.M+spExtraRot;
-      var spx=cx+spR*Math.cos(spTheta),spy=cy-spR*Math.sin(spTheta);
+      var spXY=ringXY(sp.r,sp.M);
+      var spx=spXY[0],spy=spXY[1];
       ctx.beginPath();ctx.arc(spx,spy,1.7*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,2.9*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
@@ -4709,6 +4809,9 @@ function heroToggleTopBars(){
    ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
    ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
    ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
+   ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
+   ['page7.html','P7','Gap-Class Decomposition of ζ(2) — Page 7','#a855f7'],
+   ['page8.html','2025','Möbius Shell Sieve — Page 8 (2025)','#00d9ff'],
    ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
   ];
   var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
@@ -4724,6 +4827,7 @@ function heroToggleTopBars(){
   bar+='<button id="wg-fs-btn" onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#e8e3db\';this.style.color=\'#e8e3db\'" onmouseout="this.style.borderColor=\'rgba(232,227,219,.3)\';this.style.color=\'rgba(232,227,219,.75)\'">\u26f6 Full</button>';
   bar+='<button id="wg-status-btn" onclick="if(typeof exportStateReport===\'function\')exportStateReport(\'hero\')" title="Main-page status report \u00b7 hero parameters \u00b7 theoretical vs measured \u00b7 canvas snapshots \u00b7 print to PDF" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.8);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#3dc8b8\';this.style.color=\'#3dc8b8\'" onmouseout="this.style.borderColor=\'rgba(61,200,184,.35)\';this.style.color=\'rgba(61,200,184,.8)\'">\u2399 Status</button>';
   bar+='<button id="wg-credits-btn" onclick="wgToggleCredits()" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.65);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#c8a84a\';this.style.color=\'#c8a84a\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.25)\';this.style.color=\'rgba(255,255,255,.65)\'">Credits ▾</button>';
+  bar+='<button id="wg-pageinfo-btn" onclick="wgTogglePageInfo()" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.65);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.borderColor=\'#c8a84a\';this.style.color=\'#c8a84a\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.25)\';this.style.color=\'rgba(255,255,255,.65)\'">Page Info ▾</button>';
   bar+='</div>';
 
   window.wgFS=function(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}};
@@ -4751,6 +4855,10 @@ function heroToggleTopBars(){
      ['D(1) \u2248 0.322634098940','the raw density \u220f\u209a(1\u22122/p\u00b2), the Feller\u2013Tornier Euler product D_FT. <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A065474 \u2197</a>'],
      ['1/\u03b6(2) \u2248 0.607927101854','6/\u03c0\u00b2 \u2014 density of squarefree integers; the total raw ratio C(1)=D(1)/(1/\u03b6(2)). <a href="https://oeis.org/A059956" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A059956 \u2197</a>']
    ]],
+   ['The Wessen Identity — this site\\'s original construction',[
+     ['Exact k-tuple primorial survivor count','\u220f(q\u2212\u03bd_H(q)) \u2014 the identity this site is built around; verified against 2,807 independent checks across primorials to 13#. Original construction by Wessen Getachew.'],
+     ['Twin-prime special case','independently discovered and timestamped via SoME 2025; the general k-tuple form was later found to have prior art \u2014 see arXiv:2502.20470, Corollary 1.2, cited here for that reason.']
+   ]],
    ['Other classical references noted in the honesty audit',[
      ['Ernesto Cesàro','Cesàro summation/averaging, referenced where relevant and explicitly distinguished from this site\'s own constructions.'],
      ['J. Franel & E. Landau','Franel–Landau results connecting error terms to the Riemann Hypothesis, cited for context around the decay theorem.']
@@ -4765,11 +4873,38 @@ function heroToggleTopBars(){
     cp+='</div>';
   });
   cp+='</div>';
-  document.body.insertAdjacentHTML('afterbegin',bar+cp);
+  var pageInfo=[
+   ['Page 1 — C(n): Block-Coprime Density','Six interactive lattice views of the C(n) block-coprime density function: Grid, Ring, Lift, Farey, Gauss, and Smith.','Most interesting: the Smith Chart hero view, which renders C(n) through the Cayley map — a conformal-geometry reuse of a tool built for transmission-line engineering.'],
+   ['Page 2 — Gap Diagonal Identity','Explores the diagonal gap identity that underlies the lattice structure C(n) is built on.','Most interesting: watching how gaps between block-coprime residues line up diagonally as n grows.'],
+   ['Page 3 — Color & Label Modes: The Mathematics','A codex of 34 color/label modes, each pixel a function of (r, M, n), with MathJax swatches and deep-linkable state.','Most interesting: a sticky master control bar drives every canvas on the page simultaneously from one set of controls.'],
+   ['Page 4 — How C(n) Works: Guided Walkthrough','Builds the C(n) formula piece by piece, ending in a full live working table with every prime shown, nothing left out.','Most interesting: the "see it happen" step where the abstract formula turns into a concrete per-prime computation you can watch.'],
+   ['Page 5 — Strip Correlations: Where Independence Breaks','Derives the exact correlation factor between residue strips and explains why C(n) needs min(n+1, p).','Most interesting: the live two-strip comparison showing exactly where the independence assumption used elsewhere on the site stops holding.'],
+   ['Page 6 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
+   ['Page 7 — Gap-Class Decomposition of \u03b6(2) = \u03c0\u00b2/6','Partitions the Euler product for \u03b6(2) by prime gap class, with numerical evidence and open questions.','Most interesting: the ζ Riemann-zeros section links the gap-class partition back to classical zeta structure.'],
+   ['Page 8 (2025) — M\u00f6bius Shell Sieve','A broader interactive number-theory research platform built around a Möbius-based sieve construction.','Most interesting: includes a full Collatz conjecture module — trajectories, stopping-time data, and the Erdős framing that the problem may be premature for current mathematics.']
+  ];
+  var pi='<div id="wg-pageinfo-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
+  pi+='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:.12em;color:#c8a84a;margin-bottom:10px;text-transform:uppercase;">Page Info — What Each Page Does</div>';
+  pageInfo.forEach(function(p){
+    pi+='<div style="margin-bottom:10px;"><div style="color:#9b7fe8;font-size:9.5px;margin-bottom:2px;">'+p[0]+'</div>';
+    pi+='<div style="color:rgba(255,255,255,.72);margin-bottom:2px;">'+p[1]+'</div>';
+    pi+='<div style="color:rgba(255,255,255,.5);font-style:italic;">'+p[2]+'</div></div>';
+  });
+  pi+='</div>';
+  document.body.insertAdjacentHTML('afterbegin',bar+cp+pi);
+  window.wgTogglePageInfo=function(){
+    var p=document.getElementById('wg-pageinfo-panel');
+    var open=p.style.display!=='none';
+    p.style.display=open?'none':'block';
+    var cpanel=document.getElementById('wg-credits-panel');
+    if(!open && cpanel) cpanel.style.display='none';
+  };
   window.wgToggleCredits=function(){
     var p=document.getElementById('wg-credits-panel');
     var open=p.style.display!=='none';
     p.style.display=open?'none':'block';
+    var ipanel=document.getElementById('wg-pageinfo-panel');
+    if(!open && ipanel) ipanel.style.display='none';
   };
 })();
 </script>
@@ -5219,7 +5354,7 @@ function heroToggleTopBars(){
 
   <!-- ── INVERT (ring / lift only) ── -->
   <label id="hero-invert-wrap" style="display:none;align-items:center;gap:4px;font-family:var(--mono);font-size:8px;color:rgba(232,226,214,.75);cursor:pointer;white-space:nowrap;">
-    <input type="checkbox" id="hero-invert-cb" onchange="heroToggleInvert(this.checked)" style="accent-color:var(--gold);">Invert
+    <input type="checkbox" id="hero-invert-cb" onchange="heroToggleInvert(this.checked)" style="accent-color:var(--gold);" title="Inverts ring order — M=2 moves to the outer edge instead of the center (on Smith, to the unit-circle boundary instead of the origin). Order only, no color/background change.">Invert
   </label>
 
   <!-- Ring dot opacity -->
@@ -5493,6 +5628,12 @@ function heroToggleTopBars(){
     <button id="hero-gap-btn-8" class="hero-gap-preset" onclick="heroGapPresetToggle(8)" title="Gap-8 prime pairs (M, M+8)"
       style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">8</button>
     <div id="hero-gap-dynamic" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    <button onclick="heroGapSelectAll()" title="Turn on every gap button currently in this list (presets + anything generated below)"
+      style="background:none;border:1px solid rgba(200,168,74,.5);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">☑ Select all</button>
+    <button onclick="heroGapExpandUp()" title="Add the next valid gap above your current selection (creates its button if needed)"
+      style="background:none;border:1px solid rgba(126,200,122,.5);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:7.5px;padding:3px 7px;cursor:pointer;">▲ +gap</button>
+    <button onclick="heroGapShrinkDown()" title="Remove the highest gap currently selected"
+      style="background:none;border:1px solid rgba(255,107,107,.4);color:rgba(255,140,140,.85);font-family:var(--mono);font-size:7.5px;padding:3px 7px;cursor:pointer;">▼ −gap</button>
 
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
 
@@ -5505,7 +5646,7 @@ function heroToggleTopBars(){
       title="Highlight gap class g — forward mode: consecutive-prime pairs (p, p+g); diagonal mode: |M−r|=g strip">
     <button onclick="heroGapStep(1)" title="Increase gap by 1"
       style="background:none;border:1px solid var(--edge2);color:rgba(200,168,74,.8);font-family:var(--mono);font-size:8px;width:16px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▲</button>
-    <button id="hero-gap-play" onclick="heroGapPlayToggle()" title="Loop the gap slider through every class up to G"
+    <button id="hero-gap-play" onclick="heroGapPlayToggle()" title="If any gaps are selected, cycles through just those; otherwise sweeps every class up to G"
       style="background:none;border:1px solid rgba(126,200,122,.45);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:8px;width:20px;height:16px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>
     <button id="hero-gap-lock-half" onclick="heroToggleGapLockHalf()" title="Lock diagonal g to half of Grid G — stays in sync as G changes, on every view"
       style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:var(--mono);font-size:7.5px;padding:3px 7px;cursor:pointer;">🔒 g=G/2</button>
@@ -5514,16 +5655,22 @@ function heroToggleTopBars(){
 
     <span style="flex-basis:100%;height:0;"></span>
     <span style="font-family:var(--mono);font-size:7px;color:#7a756a;letter-spacing:.06em;">SEMANTICS:</span>
-    <button class="gap-sem-btn" data-mode="forward" onclick="setGapSemantics('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime in exactly one class"
+    <button class="gap-sem-btn" data-mode="forward" onclick="toggleGapSemantic('forward')" title="Forward gap: gap(p)=next_prime(p)−p — each prime in exactly one class"
       style="background:rgba(126,200,122,.16);border:1px solid rgba(126,200,122,.65);color:rgba(126,200,122,.95);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">Δp forward</button>
-    <button class="gap-sem-btn" data-mode="diagonal" onclick="setGapSemantics('diagonal')" title="Legacy diagonal: every point with |M−r|=g, no primality"
+    <button class="gap-sem-btn" data-mode="diagonal" onclick="toggleGapSemantic('diagonal')" title="Legacy diagonal: every point with |M−r|=g, no primality"
       style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">|M−r| diagonal</button>
     <button onclick="heroGapClear()" title="Clear all active gaps"
       style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:3px 9px;cursor:pointer;">✕ Clear all</button>
     <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
     <button id="hero-residue-overlay-btn" onclick="heroToggleResidueOverlay()"
       title="Draw the actual (p, p+g) residue chords mod G — comet-tail descent + outer chord + landing glow, on top of the active gap's row highlighting. Works on all six views."
-      style="background:rgba(74,144,217,.18);border:1px solid rgba(74,144,217,.75);color:rgba(120,180,240,.95);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">⬡ Residue chords</button>
+      style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">⬡ Residue chords</button>
+    <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);">Thickness:</span>
+    <input type="range" id="hero-line-thick" min="0.2" max="5" step="0.1" value="1"
+      style="width:70px;accent-color:rgba(74,144,217,.7);"
+      oninput="heroSetLineThick(+this.value)"
+      title="Line thickness of the residue-chord overlay (comet-tail + chord)">
+    <span id="hero-line-thick-lbl" style="font-family:var(--mono);font-size:7.5px;color:rgba(120,180,240,.85);min-width:22px;">1.0×</span>
   </div>
   <!-- Dynamic Gap Generation — same control-builders as the opener: these
        CREATE new toggle buttons (off by default); they don't switch gaps on. -->
@@ -6868,32 +7015,44 @@ for(let _fg=0;_fg<PRIMES.length-1;_fg++){
   _FWD_GAP.set(PRIMES[_fg],_g);
   _FWD_GAP_UP.set(PRIMES[_fg+1],_g);
 }
-let _gapSemantics='forward'; // 'forward' (consecutive-prime pairs) | 'diagonal' (legacy |M−r| bands)
+let _gapShowFwd=true, _gapShowDiag=false; // independent toggles — was a single 'forward'|'diagonal' mode
+// Derived, display-only string for labels/CSV export/state fingerprints that
+// pre-date the independent toggles above. Not used for any branching logic —
+// pointGapClass/_gapStepVal read the booleans directly. Kept live-updated by
+// toggleGapSemantic()/setGapSemantics() below.
+let _gapSemantics='forward';
+function _updateGapSemanticsLabel(){
+  _gapSemantics=(_gapShowFwd&&_gapShowDiag)?'both':_gapShowDiag?'diagonal':(_gapShowFwd?'forward':'none');
+}
 function fwdGap(p){return _FWD_GAP.get(p)||0;}
 // Shared slider stepper (opener + hero, step buttons + play loops):
 // forward semantics walks the real gap sequence 0,1,2,4,6,…; diagonal is ±1.
 function _gapStepVal(v,dir){
-  if(_gapSemantics==='forward'){
+  if(_gapShowFwd){
     if(dir>0)return (v===0)?1:(v===1)?2:v+2;
     return (v<=1)?v-1:(v===2)?1:v-2;
   }
   return v+dir;
 }
-// Gap class of lattice point (r,M): in forward mode, the class of ROW M
-// (M in a consecutive-prime pair) — same domain the opener highlights.
+// Gap class of lattice point (r,M). Forward and diagonal can both be on at
+// once now; forward wins for a given point when it also matches (it's the
+// mathematically meaningful one — a genuine consecutive-prime pair), and
+// diagonal fills in everywhere forward doesn't apply.
 function pointGapClass(r,M,set){
-  if(_gapSemantics==='diagonal')return Math.abs(M-r);
-  // Forward semantics — ROW-based, matching the opener's Active Gaps: the
-  // whole row/ring M lights (any r) when M is a member of a consecutive-prime
-  // pair (p, p+g) — not just the dots on the |M−r|=g diagonal.
-  const lo=_FWD_GAP.get(M)||0;     // M as lower member (M, M+lo)
-  const up=_FWD_GAP_UP.get(M)||0;  // M as upper member (M−up, M)
-  if(set&&set.size){
-    if(lo&&set.has(lo))return lo;
-    if(up&&set.has(up))return up;
-    return 0;
+  if(_gapShowFwd){
+    const lo=_FWD_GAP.get(M)||0;     // M as lower member (M, M+lo)
+    const up=_FWD_GAP_UP.get(M)||0;  // M as upper member (M−up, M)
+    let fg=0;
+    if(set&&set.size){
+      if(lo&&set.has(lo))fg=lo;
+      else if(up&&set.has(up))fg=up;
+    } else {
+      fg=lo||up;
+    }
+    if(fg)return fg;
   }
-  return lo||up;
+  if(_gapShowDiag)return Math.abs(M-r);
+  return 0;
 }
 // Count of consecutive-prime pairs (p, p+g) with p+g ≤ limit
 function fwdGapPairCount(g,limit){
@@ -6901,18 +7060,40 @@ function fwdGapPairCount(g,limit){
   for(let i=0;i<PRIMES.length-1&&PRIMES[i+1]<=limit;i++)if(PRIMES[i+1]-PRIMES[i]===g)c++;
   return c;
 }
-function setGapSemantics(mode){
-  _gapSemantics=(mode==='diagonal')?'diagonal':'forward';
-  document.querySelectorAll('.gap-sem-btn').forEach(b=>{
-    const on=b.dataset.mode===_gapSemantics;
-    b.style.background=on?'rgba(126,200,122,.16)':'none';
-    b.style.color=on?'rgba(126,200,122,.95)':'rgba(168,162,148,.75)';
-    b.style.borderColor=on?'rgba(126,200,122,.65)':'rgba(255,255,255,.2)';
-  });
+// Toggles ONE semantic on/off independently — forward and diagonal can both
+// be active (or both off) at once now, unlike the old exclusive radio.
+function toggleGapSemantic(mode){
+  if(mode==='diagonal')_gapShowDiag=!_gapShowDiag;
+  else _gapShowFwd=!_gapShowFwd;
+  _updateGapSemanticsLabel();
+  _syncGapSemanticButtons();
+  if(typeof _heroOverlayCacheKey!=='undefined')_heroOverlayCacheKey='';
+  if(typeof _wOverlayCacheKey!=='undefined')_wOverlayCacheKey='';
   if(typeof wRedrawCanvas==='function')wRedrawCanvas();
   if(typeof heroGapSliderChange==='function'){
     const sl=document.getElementById('hero-gap-sl');
     if(sl&&+sl.value>0)heroGapSliderChange(+sl.value); // re-snap & refresh label under new semantics
+  }
+}
+function _syncGapSemanticButtons(){
+  document.querySelectorAll('.gap-sem-btn').forEach(b=>{
+    const on=(b.dataset.mode==='diagonal')?_gapShowDiag:_gapShowFwd;
+    b.style.background=on?'rgba(126,200,122,.16)':'none';
+    b.style.color=on?'rgba(126,200,122,.95)':'rgba(168,162,148,.75)';
+    b.style.borderColor=on?'rgba(126,200,122,.65)':'rgba(255,255,255,.2)';
+  });
+}
+// Compatibility wrapper for the URL deep-link restore (?sem=...), which
+// expects the old exclusive behavior: sets exactly one on, the other off.
+function setGapSemantics(mode){
+  _gapShowFwd=(mode!=='diagonal');
+  _gapShowDiag=(mode==='diagonal');
+  _updateGapSemanticsLabel();
+  _syncGapSemanticButtons();
+  if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+  if(typeof heroGapSliderChange==='function'){
+    const sl=document.getElementById('hero-gap-sl');
+    if(sl&&+sl.value>0)heroGapSliderChange(+sl.value);
   }
 }
 
@@ -13855,7 +14036,15 @@ function heroSecSetSize(v){
   if(lbl) lbl.textContent=_heroSecDotScale.toFixed(2)+'×';
 }
 
-let _heroActiveGaps=new Set([1,2]); // defaults on: gap 1 (2→3) + twin primes
+let _heroActiveGaps=new Set(); // off by default
+// A valid gap between consecutive primes is always even, except the single
+// odd case (2,3)→gap 1. Anything else can never have a real pair, so it's
+// rejected at every entry point instead of silently creating a dead button.
+function isValidPrimeGap(g){ g=+g; return g===1 || (g>0 && g%2===0); }
+// While Play is cycling, this holds the ONE gap currently spotlighted (so
+// the residue-chord overlay shows just that gap at a time); null = show
+// every active gap at once, the normal (non-playing) state.
+let _heroGapSpotlight=null;
 // Lock the diagonal gap g to half of Grid G — mirrors the opener's own
 // "🔒 g=G/2" lock (ported from page2's gLockHalf). Stays applied through G
 // changes (heroLatticeSetG) until toggled off or the slider is dragged
@@ -13998,7 +14187,7 @@ function _gapRgbFn(gap){
    Reuses the SAME _heroActiveGaps set / slider / preset buttons —
    no duplicate gap-picker UI. Toggle with heroToggleResidueOverlay().
    ════════════════════════════════════════════════════════════════════ */
-let _heroResidueOverlayOn=true; // on by default
+let _heroResidueOverlayOn=false; // off by default
 let _heroOverlayPairs=[];
 let _heroOverlayCacheKey='';
 const _heroGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
@@ -14045,7 +14234,9 @@ function _heroBuildPairsForGap(gap,modN,limit){
 // the sieve doesn't re-run every animation frame.
 function _heroEnsureOverlayPairs(){
   const modN=_heroG;
-  const gapsList=(_heroActiveGaps&&_heroActiveGaps.size)?Array.from(_heroActiveGaps).sort((a,b)=>a-b):[];
+  const spotlighted=(_heroGapSpotlight!=null&&_heroActiveGaps.has(_heroGapSpotlight));
+  const gapsList=spotlighted?[_heroGapSpotlight]
+    :((_heroActiveGaps&&_heroActiveGaps.size)?Array.from(_heroActiveGaps).sort((a,b)=>a-b):[]);
   const key=gapsList.join(',')+'|'+modN;
   if(key===_heroOverlayCacheKey)return _heroOverlayPairs;
   _heroOverlayCacheKey=key;
@@ -14085,7 +14276,7 @@ function _drawHeroResidueChords(ctx,W,H,mMax,ptXY){
       ctx.beginPath();
       ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]);
       ctx.strokeStyle=col;
-      ctx.lineWidth=Math.max(0.8,W*0.003*t);
+      ctx.lineWidth=Math.max(0.8,W*0.003*t)*_heroLineThickMul;
       ctx.globalAlpha=(0.25+0.55*t)*overlayAlpha;
       ctx.stroke();
     }
@@ -14105,7 +14296,7 @@ function _drawHeroResidueChords(ctx,W,H,mMax,ptXY){
     ctx.beginPath();
     ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]);
     ctx.strokeStyle=_gapColor(pr.gap);
-    ctx.lineWidth=Math.max(1,W*0.002);
+    ctx.lineWidth=Math.max(1,W*0.002)*_heroLineThickMul;
     ctx.globalAlpha=(0.55+0.3*(i/Math.max(pairs.length-1,1)))*overlayAlpha;
     ctx.stroke();
   });
@@ -15014,7 +15205,7 @@ function heroSetView(mode){
     if(btn) btn.style.opacity=mode===m?'1':'.45';
   });
   const invWrap=document.getElementById('hero-invert-wrap');
-  if(invWrap) invWrap.style.display=(mode==='ring'||mode==='lift')?'flex':'none';
+  if(invWrap) invWrap.style.display=(mode==='ring'||mode==='lift'||mode==='smith')?'flex':'none';
   // Show/hide Smith chart controls panel
   const smithPanel=document.getElementById('hero-smith-panel');
   if(smithPanel) smithPanel.style.display=(mode==='smith')?'block':'none';
@@ -15023,7 +15214,7 @@ function heroSetView(mode){
     const p=document.getElementById('hero-'+v+'-panel');
     if(p) p.style.display=(mode===v)?'block':'none';
   });
-  if(mode!=='ring'&&mode!=='lift'&&_heroInvert){
+  if(mode!=='ring'&&mode!=='lift'&&mode!=='smith'&&_heroInvert){
     _heroInvert=false;
     const cb=document.getElementById('hero-invert-cb');
     if(cb)cb.checked=false;
@@ -15033,12 +15224,14 @@ function heroSetView(mode){
   _updateHeroViewCaps();
 }
 
-// Toggle colour inversion overlay — available for ring & lift views
+// Toggle colour inversion overlay — available for ring, lift & smith views
 let _heroInvert=false;
 function heroToggleInvert(checked){
   _heroInvert=!!checked;
+  // Order-inversion only (M=2 moves to the outer edge) — no color/background
+  // filter. Explicitly clear the class in case it's still applied from before.
   const cv=document.getElementById('hero-3d');
-  if(cv) cv.classList.toggle('hero-inverted',_heroInvert);
+  if(cv) cv.classList.remove('hero-inverted');
 }
 
 // Update above/below caption bars for Farey and Lift views
@@ -15338,14 +15531,14 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
   }
 
   function toXY(r,M){
-    const rho=(M/mMax)*maxR;
+    const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
     const theta=2*Math.PI*r/M + globalRot + rowShift*2*Math.PI*(M-1);
     return[cx+rho*Math.cos(theta), cy-rho*Math.sin(theta)];
   }
 
   // Ring circles
   for(let M=2;M<=mMax;M++){
-    const rho=(M/mMax)*maxR;
+    const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
     ctx.beginPath();ctx.arc(cx,cy,rho,0,2*Math.PI);
     ctx.strokeStyle=PS.has(M)?'rgba(61,200,184,.09)':'rgba(255,255,255,.03)';
     ctx.lineWidth=PS.has(M)?.5:.25;ctx.stroke();
@@ -15690,7 +15883,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
   // Ring circles
   if(_ringShowLines){
     for(let M=2;M<=mMax;M++){
-      const rho=(M/mMax)*maxR;
+      const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
       ctx.beginPath();ctx.arc(cx,cy,rho,0,2*Math.PI);
       ctx.strokeStyle=PS.has(M)?'rgba(61,200,184,.1)':'rgba(255,255,255,.04)';
       ctx.lineWidth=(PS.has(M)?0.5:0.25)*(_ringLineWeight/0.4);ctx.stroke();
@@ -15702,7 +15895,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
 
   for(let M=2;M<=mMax;M++){
     if(!_heroRingActive(M))continue;
-    const rho=(M/mMax)*maxR;
+    const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
     const dotR=Math.max(1,Math.min(4*Math.sqrt(zoom),maxR/mMax*0.38))*(_ringDotScale||1);
     for(let r=1;r<M;r++){
       const ri=r-1, mi=M-1;
@@ -15790,7 +15983,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
   if(_heroFocused&&!_heroInspectMode){
     const{ri,mi,r,M}=_heroFocused;
     if(r>=1&&r<M&&M>=2&&M<=mMax){
-      const rho=(M/mMax)*maxR;
+      const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
       const theta=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
       const sx=cx+rho*Math.cos(theta);
       const sy=cy-rho*Math.sin(theta);
@@ -15834,7 +16027,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
     ctx.font=`7.5px 'JetBrains Mono',monospace`;
     ctx.textAlign='left';ctx.textBaseline='middle';
     for(let M=2;M<=mMax;M+=Math.max(1,Math.floor(mMax/20))){
-      const rho=(M/mMax)*maxR;
+      const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
       const lx=cx+rho+4, ly=cy;
       ctx.fillStyle=PS.has(M)?'rgba(61,200,184,.5)':'rgba(106,101,96,.38)';
       ctx.fillText('M='+M, lx, ly);
@@ -15844,7 +16037,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
   // Lift-mode / gap-diagonal dynamics at true ring positions
   _heroDynOverlays(ctx,(r,M)=>{
     if(M<2||r<1||r>=M)return null;
-    const rho=(M/mMax)*maxR;
+    const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
     const th=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
     return[cx+rho*Math.cos(th),cy-rho*Math.sin(th)];
   },mMax,nAnim,400);
@@ -15854,7 +16047,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
   if(_heroResidueOverlayOn){
     _drawHeroResidueOverlay(ctx,W,H,mMax,(r,M)=>{
       if(M<1)return null;
-      const rho=(M/mMax)*maxR;
+      const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
       const th=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
       return[cx+rho*Math.cos(th),cy-rho*Math.sin(th)];
     });
@@ -16735,20 +16928,42 @@ function heroGapStep(delta){
 let _heroGapPlayId2=null;
 function heroGapPlayToggle(){
   const btn=document.getElementById('hero-gap-play');
-  if(_heroGapPlayId2){clearInterval(_heroGapPlayId2);_heroGapPlayId2=null;if(btn)btn.textContent='\u25b6';return;}
+  if(_heroGapPlayId2){
+    clearInterval(_heroGapPlayId2);_heroGapPlayId2=null;
+    if(btn)btn.textContent='\u25b6';
+    _heroGapSpotlight=null;_heroOverlayCacheKey=''; // stop spotlighting, show every active gap again
+    return;
+  }
   if(btn)btn.textContent='\u23f8';
-  _heroGapPlayId2=setInterval(()=>{
-    const sl=document.getElementById('hero-gap-sl');
-    const max=Math.max(1,_heroG-1);
-    if(sl&&+sl.max!==max)sl.max=max;
-    let nx=_gapStepVal(sl?+sl.value:0,1);
-    if(nx>max)nx=1; // loop back
-    heroGapSliderChange(nx);
-  },800);
+  if(_heroActiveGaps.size>0){
+    // Cycle through exactly the gaps already selected, one at a time —
+    // not a sweep of the whole 0..G range.
+    let idx=0;
+    const cycle=()=>{
+      const sorted=Array.from(_heroActiveGaps).sort((a,b)=>a-b);
+      if(!sorted.length){_heroGapSpotlight=null;return;}
+      _heroGapSpotlight=sorted[idx%sorted.length];
+      idx++;
+      _heroOverlayCacheKey='';
+    };
+    cycle();
+    _heroGapPlayId2=setInterval(cycle,800);
+  } else {
+    _heroGapPlayId2=setInterval(()=>{
+      const sl=document.getElementById('hero-gap-sl');
+      const max=Math.max(1,_heroG-1);
+      if(sl&&+sl.max!==max)sl.max=max;
+      let nx=_gapStepVal(sl?+sl.value:0,1);
+      if(nx>max)nx=1; // loop back
+      heroGapSliderChange(nx);
+    },800);
+  }
 }
 // Dynamic Gap Generation — same control-builders as the opener: create new
 // multi-select toggle buttons (off by default) in #hero-gap-dynamic.
 function heroEnsureGapBtn(g){
+  g=+g;
+  if(!isValidPrimeGap(g))return; // odd gaps >1 can never have a real prime pair
   if(document.getElementById('hero-gap-btn-'+g))return;
   const c=document.getElementById('hero-gap-dynamic');
   if(!c)return;
@@ -16775,7 +16990,7 @@ function heroAddGapRange(){
 }
 function heroGapSliderChange(v){
   {const sl=document.getElementById('hero-gap-sl');const mx=Math.max(1,_heroG-1);if(sl&&+sl.max!==mx)sl.max=mx;}
-  if(_gapSemantics==='forward'){
+  if(_gapShowFwd){
     // Prime gaps above 1 are always even — snap odd slider values up (1 stays,
     // it's the lone odd gap: the pair 2→3)
     if(v>1&&v%2){v++;const sl=document.getElementById('hero-gap-sl');if(sl)sl.value=v;}
@@ -16801,7 +17016,7 @@ function heroGapSliderChange(v){
     _heroActiveGaps.add(v);
     if(lbl){lbl.textContent=`g=${v}`;lbl.style.color=_gapColor(v);}
     if(philbl){
-      if(_gapSemantics==='forward'){
+      if(_gapShowFwd){
         philbl.textContent=`pairs=${fwdGapPairCount(v,_heroG)} (p,p+${v}) ≤ G`;
       } else {
         const phiG=phi(v),dn=(phiG/v).toFixed(4);
@@ -16821,6 +17036,8 @@ function heroGapSliderChange(v){
 // once, mirroring the opener's Active Gaps tab. Does not touch the slider's
 // own single-value state; heroGapSyncButtons() below keeps both in sync.
 function heroGapPresetToggle(g){
+  g=+g;
+  if(!isValidPrimeGap(g))return; // odd gaps >1 can never have a real prime pair
   if(_heroGapLockHalf){
     _heroGapLockHalf=false;
     const lb=document.getElementById('hero-gap-lock-half');
@@ -16852,6 +17069,7 @@ function heroGapSyncButtons(){
 }
 function heroGapClear(){
   _heroActiveGaps.clear();
+  _heroGapSpotlight=null;_heroOverlayCacheKey='';
   if(_heroGapLockHalf){
     _heroGapLockHalf=false;
     const lb=document.getElementById('hero-gap-lock-half');
@@ -16864,6 +17082,44 @@ function heroGapClear(){
   if(lbl){lbl.textContent='off';lbl.style.color='rgba(200,168,74,.65)';}
   if(philbl)philbl.textContent='';
   heroGapSyncButtons();
+}
+// Turns on every gap button currently in the list (presets + anything
+// generated by "Generate Even Gaps" / "Add Range").
+function heroGapSelectAll(){
+  document.querySelectorAll('button[id^="hero-gap-btn-"]').forEach(b=>{
+    const g=parseInt(b.id.replace('hero-gap-btn-',''));
+    if(isValidPrimeGap(g))_heroActiveGaps.add(g);
+  });
+  _heroOverlayCacheKey='';
+  heroGapSyncButtons();
+}
+// Quick +/- : grow or shrink the selection by one valid gap step at the top
+// end, without opening the Generate/Range panel each time.
+function heroGapExpandUp(){
+  const cur=_heroActiveGaps.size?Math.max(..._heroActiveGaps):0;
+  const nxt=_gapStepVal(cur,1);
+  const max=Math.max(1,_heroG-1);
+  if(nxt>max)return;
+  heroEnsureGapBtn(nxt);
+  _heroActiveGaps.add(nxt);
+  _heroOverlayCacheKey='';
+  heroGapSyncButtons();
+}
+function heroGapShrinkDown(){
+  if(!_heroActiveGaps.size)return;
+  const mx=Math.max(..._heroActiveGaps);
+  _heroActiveGaps.delete(mx);
+  if(_heroGapSpotlight===mx)_heroGapSpotlight=null;
+  _heroOverlayCacheKey='';
+  heroGapSyncButtons();
+}
+// Line-thickness multiplier for the residue-chord overlay (comet-tail +
+// outer chord). 1 = default weight from _drawHeroResidueChords.
+let _heroLineThickMul=1;
+function heroSetLineThick(v){
+  _heroLineThickMul=Math.max(0.2,Math.min(5,+v||1));
+  const l=document.getElementById('hero-line-thick-lbl');
+  if(l)l.textContent=_heroLineThickMul.toFixed(1)+'\u00d7';
 }
 // Legacy toggle kept for compatibility (unused now but harmless)
 function heroToggleGap(g){
@@ -17549,7 +17805,7 @@ function initHeroThree(){
     const rowShift=_heroRowShift||0;
     let best=null, bestDist=Infinity;
     for(let M=2;M<=mMax;M++){
-      const rho=(M/mMax)*maxR;
+      const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
       for(let r=1;r<M;r++){
         if(!_heroCharPass(gcd(r,M)===1))continue; // non-coprime dots clickable when the χ filter draws them
         const theta=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
@@ -17605,7 +17861,7 @@ function initHeroThree(){
     let best=null, bestDist=Infinity;
     for(let M=2;M<=mMax;M++){
       if(!_heroRingActive(M))continue;
-      const rho=(M/mMax)*maxR;
+      const rho=_heroInvert?((mMax+1-M)/mMax)*maxR:(M/mMax)*maxR;
       for(let r=1;r<M;r++){
         if(!_heroCharPass(gcd(r,M)===1))continue;
         const theta=2*Math.PI*r/M+globalRot+rowShift*2*Math.PI*(M-1);
@@ -22002,6 +22258,7 @@ window.heroSmithToggleLift=function(v){ _heroSmithShowLift=!!v; };
 window.heroSmithToggleLiftStraight=function(v){ _heroSmithLiftStraight=!!v; };
 
 function _heroSmithRingR(M,mMax){
+  if(_heroInvert)M=mMax+1-M; // swap which M sits at which radius, same convention as Ring/Lift
   const ringIdx=M-2, totalRings=Math.max(1,mMax-1);
   return 0.5+(ringIdx/Math.max(1,totalRings-1))*1.5;
 }
@@ -22319,7 +22576,14 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
     if(!location.hash||location.hash.length<2)return;
     var q={};location.hash.slice(1).split('&').forEach(function(kv){var i=kv.indexOf('=');if(i>0)q[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});
     try{
-      if(q.sem&&typeof setGapSemantics==='function')setGapSemantics(q.sem==='diagonal'?'diagonal':'forward');
+      if(q.sem&&typeof toggleGapSemantic!=='undefined'){
+        if(q.sem==='both'){_gapShowFwd=true;_gapShowDiag=true;}
+        else if(q.sem==='diagonal'){_gapShowFwd=false;_gapShowDiag=true;}
+        else if(q.sem==='none'){_gapShowFwd=false;_gapShowDiag=false;}
+        else {_gapShowFwd=true;_gapShowDiag=false;}
+        if(typeof _updateGapSemanticsLabel==='function')_updateGapSemanticsLabel();
+        if(typeof _syncGapSemanticButtons==='function')_syncGapSemanticButtons();
+      }
       if(q.wg&&typeof wSetG==='function')wSetG(+q.wg);
       if(q.wn){var ns=document.getElementById('welcome-n-slider');if(ns&&typeof wRenderCn==='function'){ns.value=+q.wn;wRenderCn();}}
       if(q.wv&&typeof wSetView==='function')wSetView(q.wv);
