@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C(n₁,…,n_k) — k-Block Coprime Density · Wessen Getachew — Page 10</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #04040d;
+  --bg1:   #07071a;
+  --bg2:   #0c0c22;
+  --cream: #ddd8cc;
+  --cream2:#b8b2a6;
+  --cream3:#6a6560;
+  --gold:  #c8a84a;
+  --gold2: rgba(200,168,74,.12);
+  --teal:  #3dc8b8;
+  --coral: #e05060;
+  --violet:#9b7fe8;
+  --lime:  #7ec87a;
+  --magenta:#ff2fd0;
+  --edge:  rgba(255,255,255,.07);
+  --edge2: rgba(255,255,255,.13);
+  --mono:  'JetBrains Mono', monospace;
+  --serif: 'Spectral', serif;
+  --disp:  'Cinzel', serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.95rem;line-height:1.75;}
+input[type="number"],input[type="range"],select,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+input[type="number"]{font-size:16px;}
+canvas{touch-action:none;}
+
+#content{max-width:1000px;margin:0 auto;padding:0 20px 100px;}
+#hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
+.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
+.hero-formula{font-size:1.0rem;margin:14px 0;color:var(--gold);overflow-x:auto;}
+.hero-sub{max-width:70ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
+
+.card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--edge);}
+.card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
+
+.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
+.ctrl-block{flex:1;min-width:200px;}
+.ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
+.ctrl-label span.val{color:var(--teal);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--violet);height:3px;}
+
+.stepctrl{display:flex;align-items:center;gap:6px;}
+.stepctrl input[type="range"]{flex:1;}
+.step-btn{
+  width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;
+  font-size:13px;font-family:var(--mono);transition:background .1s;
+}
+.step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+.step-num{
+  width:52px;flex-shrink:0;background:var(--bg2);border:1px solid var(--edge2);
+  color:var(--violet);font-family:var(--mono);font-size:12px;font-weight:600;
+  padding:3px 4px;outline:none;text-align:center;
+}
+.step-num:focus{border-color:var(--violet);}
+
+.kblock{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:10px 12px;margin-bottom:8px;}
+.kblock .ctrl-label{margin-bottom:5px;}
+
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;}
+.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:12px 14px;}
+.result-box.rho{border-left-color:var(--coral);}
+.result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
+.result-box .rval{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--cream);word-break:break-all;}
+
+table.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+table.dt th{text-align:left;padding:6px 8px;color:var(--cream3);letter-spacing:.06em;text-transform:uppercase;font-size:8px;border-bottom:1px solid var(--edge2);}
+table.dt td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.dt td:first-child{color:var(--gold);}
+
+.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+
+canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
+.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
+
+.step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
+.step:last-child{border-bottom:none;}
+.step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+table.vtab{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:9px;margin-top:8px;}
+table.vtab th{text-align:left;padding:5px 8px;color:var(--cream3);font-size:8px;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--edge2);}
+table.vtab td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.vtab td.match{color:var(--lime);}
+</style>
+</head>
+<body>
+
+<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
+<span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
+<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
+<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
+<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
+<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
+<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
+<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
+<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
+<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
+<a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
+<a href="page10.html" title="k-Block Coprime Density — Page 10 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff2fd022;border:1px solid #ff2fd0;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P10</a>
+<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
+<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="hero">
+  <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
+  <h1 class="hero-title">C(n₁,…,n_k) — k-Block Coprime Density</h1>
+  <div class="hero-formula">
+    $$C(n_1,\ldots,n_k)\;=\;\zeta(2)\cdot\prod_{p}\left(1-\frac{1}{p}\Big[1-\prod_{i=1}^{k}\Big(1-\tfrac{\min(n_i+1,p)}{p}\Big)\Big]\right)$$
+  </div>
+  <div class="hero-sub">
+    Page 9 built the k=2 case. The same derivation — independence of the M_i across blocks, CRT-independence
+    across primes — carries through for <em>any</em> k with zero modification, and it's exact: verified below
+    by direct combinatorial enumeration mod small primes, not just the asymptotic Euler product. The one new
+    phenomenon at k≥3 is that the correlation ratio ρ_k = C(n₁,…,n_k)/∏ᵢC(nᵢ) doesn't just exceed 1 — it grows
+    geometrically in k, for a clean structural reason (see the derivation card).
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- VERIFICATION -->
+  <div class="card">
+    <div class="card-title">Exact Verification — Brute-Force vs. Formula</div>
+    <div class="vbox">
+      For several (n₁,…,n_k, p), every (r, M₁,…,M_k) tuple mod p was enumerated directly and the survival
+      fraction compared against the closed-form local factor. All five test cases below match to full floating-point
+      precision — this isn't a numerical coincidence, the local-factor derivation is exact combinatorics mod p.
+    </div>
+    <table class="vtab">
+      <thead><tr><th>(n₁,…,n_k)</th><th>p</th><th>brute-force</th><th>formula</th><th>result</th></tr></thead>
+      <tbody>
+        <tr><td>(2, 3, 1)</td><td>7</td><td>0.88213244</td><td>0.88213244</td><td class="match">✓ exact match</td></tr>
+        <tr><td>(0, 0, 0)</td><td>5</td><td>0.90240000</td><td>0.90240000</td><td class="match">✓ exact match</td></tr>
+        <tr><td>(4, 1)</td><td>5</td><td>0.80000000</td><td>0.80000000</td><td class="match">✓ exact match</td></tr>
+        <tr><td>(1, 1, 1, 1)</td><td>5</td><td>0.82592000</td><td>0.82592000</td><td class="match">✓ exact match</td></tr>
+        <tr><td>(10, 2, 7)</td><td>11</td><td>0.90909091</td><td>0.90909091</td><td class="match">✓ exact match</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LIVE CALCULATOR -->
+  <div class="card">
+    <div class="card-title">Live Calculator</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block" style="max-width:260px;">
+        <div class="ctrl-label">k (number of blocks) <span class="val" id="kval">3</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepK(-1)" title="k − 1">−</button>
+          <input type="range" id="ksl" min="1" max="8" value="3" oninput="onKChange()">
+          <button class="step-btn" onclick="stepK(1)" title="k + 1">+</button>
+          <input type="number" id="knum" class="step-num" min="1" max="8" value="3" oninput="onKNumInput()">
+        </div>
+      </div>
+    </div>
+    <div id="nBlocksWrap"></div>
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">C(n₁,…,n_k)</div><div class="rval" id="rCk">—</div></div>
+      <div class="result-box"><div class="rlabel">∏ᵢ C(nᵢ)</div><div class="rval" id="rProd">—</div></div>
+      <div class="result-box rho"><div class="rlabel">ρ_k = C(n₁,…,n_k) / ∏ᵢC(nᵢ)</div><div class="rval" id="rRhoK">—</div></div>
+    </div>
+    <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 — reliable to ~7–8 dp.</div>
+
+    <div style="margin-top:18px;">
+      <div class="card-title" style="margin-bottom:8px;">Per-Prime Local Factors</div>
+      <div class="tscroll" style="max-height:220px;overflow-y:auto;">
+        <table class="dt" id="primeTable">
+          <thead><tr><th>p</th><th>f_p(n₁,…,n_k)</th><th>∏ᵢf_p(nᵢ)</th><th title="f_p(n1,...,nk) / prod f_p(ni)">local ρ_p</th></tr></thead>
+          <tbody id="primeTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROWTH PLOT -->
+  <div class="card">
+    <div class="card-title">Correlation Growth — ρ_k(n) vs. k (symmetric case, n₁=⋯=n_k=n)</div>
+    <canvas id="growthCv" class="plot" style="height:340px;"></canvas>
+    <div class="legend" id="growthLegend"></div>
+    <div class="card-note">Log-scale y-axis (ρ spans orders of magnitude). k runs 1–12, computed at full precision (primes ≤ 2,000,000) for each point.</div>
+  </div>
+
+  <!-- DERIVATION -->
+  <div class="card">
+    <div class="card-title">Why ρ_k Grows Geometrically, Not Just &gt;1</div>
+    <div class="step">
+      <div class="stepnum">1 — The formula generalizes with no new assumptions</div>
+      Same setup as Page 9: k independent random starting points M₁,…,M_k, block i has length nᵢ+1. r survives
+      iff it survives every block. At a prime p, independence of the M_i gives
+      P(no block hits 0 mod p) = ∏ᵢ(1 − min(nᵢ+1,p)/p), exactly as before — nothing about the derivation depended on k=2.
+    </div>
+    <div class="step">
+      <div class="stepnum">2 — Per-prime behavior as k grows, n fixed</div>
+      Write q = min(n+1,p)/p ∈ (0,1]. The single-block factor is f_p(1) = 1 − q/p, so f_p(1)^k → 0
+      <em>exponentially</em> in k (it's a fixed number below 1, raised to the k-th power). But the true joint
+      factor is f_p(k) = 1 − (1/p)[1 − (1−q)^k], and (1−q)^k → 0 as k grows, so f_p(k) → 1 − 1/p — a fixed
+      positive limit, <strong>not</strong> decaying to 0.
+    </div>
+    <div class="step">
+      <div class="stepnum">3 — The gap is structural, not a rounding effect</div>
+      The naive independence model (∏C(nᵢ)) requires every one of the k blocks to individually survive — a
+      probability that compounds down geometrically. The true event only requires that not all k blocks hit
+      the same prime at once — a much weaker requirement that saturates near 1−1/p instead of vanishing.
+      Since this happens at essentially every prime simultaneously, the ratio ρ_k = C(n,…,n)/C(n)^k is a product
+      of per-prime terms that are each individually diverging, so ρ_k itself grows without bound as k→∞, for
+      <em>any</em> fixed n ≥ 0.
+    </div>
+    <div class="step">
+      <div class="stepnum">4 — Sanity checks against Pages 1 and 9</div>
+      k=1 collapses the bracket exactly to Page 1's C(n). k=2 is exactly Page 9's C(n₁,n₂) — same formula,
+      no relabeling needed. The brute-force table above confirms both the k=2 and general-k cases are exact,
+      not asymptotic approximations of a different true object.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Sieve of Eratosthenes ──
+const LIMIT = 2000000;
+function sievePrimes(limit){
+  const comp = new Uint8Array(limit+1);
+  const primes = [];
+  for(let i=2;i<=limit;i++){
+    if(!comp[i]){ primes.push(i); for(let j=i*i;j<=limit;j+=i) comp[j]=1; }
+  }
+  return primes;
+}
+let PRIMES_FULL = [];
+const ZETA2 = Math.PI*Math.PI/6;
+
+function localFactor(ns,p){
+  let inner = 1;
+  for(let i=0;i<ns.length;i++){
+    const m = Math.min(ns[i]+1,p);
+    inner *= (1 - m/p);
+  }
+  return 1 - (1/p)*(1-inner);
+}
+function computeC(ns, primes){
+  let prod = 1;
+  for(let i=0;i<primes.length;i++) prod *= localFactor(ns, primes[i]);
+  return ZETA2*prod;
+}
+function fmt(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toExponential(d===undefined?6:d); }
+function fmtF(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toFixed(d===undefined?6:d); }
+
+// ── Dynamic k-block controls ──
+let K = 3;
+function buildBlocks(){
+  const wrap = document.getElementById('nBlocksWrap');
+  let html = '';
+  for(let i=0;i<K;i++){
+    const v = (window._wg10_vals && window._wg10_vals[i]!==undefined) ? window._wg10_vals[i] : 6;
+    html += '<div class="kblock">'
+      + '<div class="ctrl-label">n'+(i+1)+' (block '+(i+1)+' length − 1) <span class="val" id="nval'+i+'">'+v+'</span></div>'
+      + '<div class="stepctrl">'
+      + '<button class="step-btn" onclick="stepN('+i+',-1)" title="n'+(i+1)+' − 1">−</button>'
+      + '<input type="range" id="nsl'+i+'" min="0" max="150" value="'+v+'" oninput="onNChange('+i+')">'
+      + '<button class="step-btn" onclick="stepN('+i+',1)" title="n'+(i+1)+' + 1">+</button>'
+      + '<input type="number" id="nnum'+i+'" class="step-num" min="0" max="150" value="'+v+'" oninput="onNNumInput('+i+')">'
+      + '</div></div>';
+  }
+  wrap.innerHTML = html;
+}
+function currentNs(){
+  const ns = [];
+  for(let i=0;i<K;i++) ns.push(+document.getElementById('nsl'+i).value);
+  window._wg10_vals = ns.slice();
+  return ns;
+}
+function stepK(delta){
+  const sl = document.getElementById('ksl');
+  let v = Math.max(+sl.min, Math.min(+sl.max, K+delta));
+  sl.value = v; document.getElementById('knum').value = v;
+  onKChange();
+}
+function onKNumInput(){
+  const num = document.getElementById('knum');
+  let v = Math.round(+num.value||1);
+  v = Math.max(1, Math.min(8, v));
+  num.value = v; document.getElementById('ksl').value = v;
+  onKChange();
+}
+function onKChange(){
+  K = +document.getElementById('ksl').value;
+  document.getElementById('kval').textContent = K;
+  document.getElementById('knum').value = K;
+  buildBlocks();
+  recompute();
+}
+function stepN(i, delta){
+  const sl = document.getElementById('nsl'+i);
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+delta));
+  sl.value = v; document.getElementById('nnum'+i).value = v;
+  onNChange(i);
+}
+function onNNumInput(i){
+  const num = document.getElementById('nnum'+i);
+  const sl = document.getElementById('nsl'+i);
+  let v = Math.round(+num.value||0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v; sl.value = v;
+  onNChange(i);
+}
+function onNChange(i){
+  document.getElementById('nval'+i).textContent = document.getElementById('nsl'+i).value;
+  document.getElementById('nnum'+i).value = document.getElementById('nsl'+i).value;
+  recompute();
+}
+
+// ── Live calculator ──
+function recompute(){
+  const ns = currentNs();
+  const Ck = computeC(ns, PRIMES_FULL);
+  let prodC = 1;
+  const Ci = ns.map(function(n){ const c = computeC([n],PRIMES_FULL); prodC*=c; return c; });
+  const rho = Ck/prodC;
+  document.getElementById('rCk').textContent = fmt(Ck,6);
+  document.getElementById('rProd').textContent = fmt(prodC,6);
+  document.getElementById('rRhoK').textContent = rho>1e6 ? fmt(rho,4) : fmtF(rho,6);
+  renderPrimeTable(ns);
+}
+function renderPrimeTable(ns){
+  const tb = document.getElementById('primeTbody');
+  let rows = '';
+  for(let idx=0; idx<12; idx++){
+    const p = PRIMES_FULL[idx];
+    const fk = localFactor(ns,p);
+    let prodFi = 1;
+    ns.forEach(function(n){ prodFi *= (1-Math.min(n+1,p)/(p*p)); });
+    const rp = fk/prodFi;
+    rows += '<tr><td>'+p+'</td><td>'+fmtF(fk,6)+'</td><td>'+fmtF(prodFi,6)+'</td><td>'+fmtF(rp,6)+'</td></tr>';
+  }
+  tb.innerHTML = rows;
+}
+
+// ── Growth plot: rho_k(n) vs k, symmetric case ──
+const GROWTH_NS = [1,5,10,20];
+const GROWTH_COLORS = ['#3dc8b8','#9b7fe8','#f2c14e','#e05060'];
+function computeGrowthData(){
+  const KMAX = 12;
+  const series = GROWTH_NS.map(function(n){
+    const Cn = computeC([n],PRIMES_FULL);
+    const vals = [];
+    for(let k=1;k<=KMAX;k++){
+      const ns = new Array(k).fill(n);
+      const Ck = computeC(ns,PRIMES_FULL);
+      vals.push(Ck/Math.pow(Cn,k));
+    }
+    return {n:n, vals:vals};
+  });
+  return {series:series, KMAX:KMAX};
+}
+function renderGrowth(){
+  const data = computeGrowthData();
+  const cv = document.getElementById('growthCv');
+  const dpr = window.devicePixelRatio||1;
+  const w = cv.clientWidth||900, h = 340;
+  cv.width = w*dpr; cv.height = h*dpr;
+  cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:56,r:16,t:14,b:28};
+  const pw = w-pad.l-pad.r, ph = h-pad.t-pad.b;
+  let ymin=Infinity, ymax=-Infinity;
+  data.series.forEach(function(s){ s.vals.forEach(function(v){ ymin=Math.min(ymin,v); ymax=Math.max(ymax,v); }); });
+  const logMin = Math.log10(Math.max(ymin,1e-9)), logMax = Math.log10(ymax);
+  function X(k){ return pad.l + ((k-1)/(data.KMAX-1))*pw; }
+  function Y(v){ const lv=Math.log10(Math.max(v,1e-9)); return pad.t + (1-(lv-logMin)/(logMax-logMin))*ph; }
+  ctx.strokeStyle='rgba(255,255,255,.13)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ph); ctx.lineTo(pad.l+pw,pad.t+ph); ctx.stroke();
+  ctx.fillStyle='#6a6560'; ctx.font='9px JetBrains Mono, monospace';
+  const decades = Math.ceil(logMax)-Math.floor(logMin);
+  for(let d=Math.floor(logMin); d<=Math.ceil(logMax); d++){
+    const y = pad.t + (1-(d-logMin)/(logMax-logMin))*ph;
+    ctx.fillText('1e'+d, 4, y+3);
+    ctx.strokeStyle='rgba(255,255,255,.06)';
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+pw,y); ctx.stroke();
+  }
+  for(let k=1;k<=data.KMAX;k++){
+    ctx.fillStyle='#6a6560';
+    ctx.fillText(k, X(k)-3, pad.t+ph+16);
+  }
+  ctx.fillStyle='#8a8378'; ctx.fillText('k \u2192', pad.l+pw-14, pad.t+ph+16);
+  data.series.forEach(function(s, si){
+    ctx.strokeStyle = GROWTH_COLORS[si%GROWTH_COLORS.length]; ctx.lineWidth=1.8;
+    ctx.beginPath();
+    s.vals.forEach(function(v,ki){ const x=X(ki+1), y=Y(v); if(ki===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke();
+    ctx.fillStyle = GROWTH_COLORS[si%GROWTH_COLORS.length];
+    s.vals.forEach(function(v,ki){ ctx.beginPath(); ctx.arc(X(ki+1),Y(v),2,0,7); ctx.fill(); });
+  });
+  const lg = document.getElementById('growthLegend');
+  lg.innerHTML = data.series.map(function(s,si){
+    return '<span><span class="sw" style="background:'+GROWTH_COLORS[si%GROWTH_COLORS.length]+';"></span>n = '+s.n+'</span>';
+  }).join('');
+}
+
+// ── Init ──
+window.addEventListener('load', function(){
+  PRIMES_FULL = sievePrimes(LIMIT);
+  document.getElementById('calcNote').textContent =
+    '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp.';
+  buildBlocks();
+  recompute();
+  renderGrowth();
+});
+window.addEventListener('resize', function(){
+  if(PRIMES_FULL.length) renderGrowth();
+});
+
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+</script>
+</body>
+</html>

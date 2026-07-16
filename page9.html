@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C(n₁,n₂) — Multi-Block Coprime Density · Wessen Getachew — Page 9</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #04040d;
+  --bg1:   #07071a;
+  --bg2:   #0c0c22;
+  --cream: #ddd8cc;
+  --cream2:#b8b2a6;
+  --cream3:#6a6560;
+  --gold:  #c8a84a;
+  --gold2: rgba(200,168,74,.12);
+  --teal:  #3dc8b8;
+  --coral: #e05060;
+  --violet:#9b7fe8;
+  --lime:  #7ec87a;
+  --edge:  rgba(255,255,255,.07);
+  --edge2: rgba(255,255,255,.13);
+  --mono:  'JetBrains Mono', monospace;
+  --serif: 'Spectral', serif;
+  --disp:  'Cinzel', serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.95rem;line-height:1.75;}
+input[type="number"],input[type="range"],select,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+input[type="number"]{font-size:16px;}
+canvas{touch-action:none;}
+
+#content{max-width:1000px;margin:0 auto;padding:0 20px 100px;}
+#hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
+.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+h1.hero-title{font-family:var(--disp);font-size:clamp(1.3rem,4vw,2rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
+.hero-formula{font-size:1.05rem;margin:14px 0;color:var(--gold);}
+.hero-sub{max-width:70ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
+
+.card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--edge);}
+.card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
+
+.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
+.ctrl-block{flex:1;min-width:220px;}
+.ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
+.ctrl-label span.val{color:var(--teal);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--violet);height:3px;}
+
+.stepctrl{display:flex;align-items:center;gap:6px;}
+.stepctrl input[type="range"]{flex:1;}
+.step-btn{
+  width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;
+  font-size:13px;font-family:var(--mono);transition:background .1s;
+}
+.step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+.step-num{
+  width:52px;flex-shrink:0;background:var(--bg2);border:1px solid var(--edge2);
+  color:var(--violet);font-family:var(--mono);font-size:12px;font-weight:600;
+  padding:3px 4px;outline:none;text-align:center;
+}
+.step-num:focus{border-color:var(--violet);}
+
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;}
+.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:12px 14px;}
+.result-box.rho{border-left-color:var(--coral);}
+.result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
+.result-box .rval{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--cream);}
+
+table.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+table.dt th{text-align:left;padding:6px 8px;color:var(--cream3);letter-spacing:.06em;text-transform:uppercase;font-size:8px;border-bottom:1px solid var(--edge2);}
+table.dt td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.dt td:first-child{color:var(--gold);}
+
+.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+
+canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
+.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
+
+.step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
+.step:last-child{border-bottom:none;}
+.step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
+button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61,200,184,.08);}
+</style>
+</head>
+<body>
+
+<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
+<span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
+<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
+<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
+<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
+<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
+<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
+<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
+<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
+<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
+<a href="page9.html" title="Multi-Block Coprime Density — Page 9 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff8c4222;border:1px solid #ff8c42;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P9</a>
+<a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
+<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
+<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="hero">
+  <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
+  <h1 class="hero-title">C(n₁,n₂) — Multi-Block Coprime Density</h1>
+  <div class="hero-formula">
+    $$C(n_1,n_2)\;=\;\zeta(2)\cdot\prod_{p\;\text{prime}}\left(1-\frac{1}{p}\Big[1-\Big(1-\tfrac{\min(n_1+1,p)}{p}\Big)\Big(1-\tfrac{\min(n_2+1,p)}{p}\Big)\Big]\right)$$
+  </div>
+  <div class="hero-sub">
+    Density of r surviving <em>two independent</em> blocks simultaneously — gcd(r, M₁+j)=1 for j=0,…,n₁ <em>and</em>
+    gcd(r, M₂+j)=1 for j=0,…,n₂ — with M₁, M₂ independent random starting points. The k=1 case reduces
+    exactly to C(n) from Page 1. This is the natural k-fold generalization of the block-coprime density,
+    and the correlation ratio ρ = C(n₁,n₂)/(C(n₁)·C(n₂)) measures exactly where the shared r breaks
+    independence between the two blocks — the same question Page 5 asks for a single block.
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- LIVE CALCULATOR -->
+  <div class="card">
+    <div class="card-title">Live Calculator</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">n₁ (block 1 length − 1) <span class="val" id="n1val">6</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('n1',-1)" title="n₁ − 1">−</button>
+          <input type="range" id="n1sl" min="0" max="150" value="6" oninput="onSlide()">
+          <button class="step-btn" onclick="stepVal('n1',1)" title="n₁ + 1">+</button>
+          <input type="number" id="n1num" class="step-num" min="0" max="150" value="6" oninput="onNumInput('n1')">
+        </div>
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">n₂ (block 2 length − 1) <span class="val" id="n2val">6</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('n2',-1)" title="n₂ − 1">−</button>
+          <input type="range" id="n2sl" min="0" max="150" value="6" oninput="onSlide()">
+          <button class="step-btn" onclick="stepVal('n2',1)" title="n₂ + 1">+</button>
+          <input type="number" id="n2num" class="step-num" min="0" max="150" value="6" oninput="onNumInput('n2')">
+        </div>
+      </div>
+    </div>
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">C(n₁)</div><div class="rval" id="rC1">—</div></div>
+      <div class="result-box"><div class="rlabel">C(n₂)</div><div class="rval" id="rC2">—</div></div>
+      <div class="result-box"><div class="rlabel">C(n₁,n₂)</div><div class="rval" id="rC12">—</div></div>
+      <div class="result-box rho"><div class="rlabel">ρ = C(n₁,n₂) / [C(n₁)·C(n₂)]</div><div class="rval" id="rRho">—</div></div>
+    </div>
+    <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 (~148,933 primes) — reliable to ~7–8 dp.</div>
+
+    <div style="margin-top:18px;">
+      <div class="card-title" style="margin-bottom:8px;">Per-Prime Local Factors</div>
+      <div class="tscroll" style="max-height:220px;overflow-y:auto;">
+        <table class="dt" id="primeTable">
+          <thead><tr><th>p</th><th>f_p(n₁)</th><th>f_p(n₂)</th><th>f_p(n₁,n₂)</th><th title="f_p(n1,n2) / [f_p(n1)·f_p(n2)]">local ρ_p</th></tr></thead>
+          <tbody id="primeTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="card">
+    <div class="card-title">Correlation Ratio Heatmap — ρ(n₁,n₂)</div>
+    <canvas id="heatCv" class="plot" style="height:560px;cursor:crosshair;"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:rgb(0,0,100);"></span>blue = lowest ρ in view</span>
+      <span><span class="sw" style="background:rgb(0,255,0);"></span>green = mid-range</span>
+      <span><span class="sw" style="background:rgb(255,155,0);"></span>red = highest ρ in view</span>
+      <span>white tick on bar = ρ = 1 (independence)</span>
+    </div>
+    <div class="card-note">Colormap ported from index.html's own heatmap mode, normalized to the actual ρ range in this grid (not a fixed ±1 scale) so the true structure shows instead of solid color. Grid: primes ≤ 60,000, 50×50 resolution, axes 0–70 — click any cell to load its exact (n₁,n₂) into the calculator above (magenta crosshair = current calculator position).</div>
+  </div>
+
+  <!-- JUMP THEOREM SLICE -->
+  <div class="card">
+    <div class="card-title">Coupled Jump Structure — D(n₁, n₂) vs. n₁</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">n₂ held fixed <span class="val" id="n2fixVal">6</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('n2fix',-1)" title="n₂ − 1">−</button>
+          <input type="range" id="n2fixSl" min="0" max="60" value="6" oninput="onSlideJump()">
+          <button class="step-btn" onclick="stepVal('n2fix',1)" title="n₂ + 1">+</button>
+          <input type="number" id="n2fixnum" class="step-num" min="0" max="60" value="6" oninput="onNumInput('n2fix')">
+        </div>
+      </div>
+    </div>
+    <canvas id="jumpCv" class="plot" width="900" height="320"></canvas>
+    <div class="ibox">
+      <strong>What the original Jump Theorem says:</strong> D(x) = C(x)/ζ(2) has an exact discontinuity of size
+      1/(p(p−1)) at every x = p−1, one prime at a time, independent of anything else.
+      <strong>What changes here:</strong> D(n₁,n₂) still jumps exactly at n₁ = p−1 for each prime p, but the jump
+      size is now scaled by the <em>other</em> block's local factor at that same prime:
+      Δ ≈ [1/(p(p−1))] · (1 − min(n₂+1,p)/p). The two blocks are coupled through every prime simultaneously —
+      the jump at n₁=p−1 gets smaller as n₂ grows past p−1 too, since block 2 has already "used up" some of
+      that prime's exclusion budget.
+    </div>
+    <div class="card-note">Dotted vertical lines mark n₁ = p−1 for primes p ≤ 61. Computed at full precision (primes ≤ 2,000,000) at each of the 61 integer points.</div>
+  </div>
+
+  <!-- DERIVATION -->
+  <div class="card">
+    <div class="card-title">Step-by-Step Derivation</div>
+    <div class="step">
+      <div class="stepnum">1 — Setup</div>
+      Fix r. Take two independent random starting points M₁, M₂, and two block lengths n₁+1, n₂+1. We want the
+      density of r such that r survives block 1 <em>and</em> block 2 entirely — coprime to every integer in both.
+    </div>
+    <div class="step">
+      <div class="stepnum">2 — Local failure probability at a prime p</div>
+      r fails at p iff p | r <em>and</em> p divides some entry of some block. Since M₁, M₂ are independent,
+      P(block i hits 0 mod p) = min(nᵢ+1,p)/p, so P(neither block hits) = ∏ᵢ(1 − min(nᵢ+1,p)/p) by independence.
+    </div>
+    <div class="step">
+      <div class="stepnum">3 — Local survival factor</div>
+      $$f_p(n_1,n_2) = 1 - \frac{1}{p}\Big[1-\Big(1-\tfrac{\min(n_1+1,p)}{p}\Big)\Big(1-\tfrac{\min(n_2+1,p)}{p}\Big)\Big]$$
+      This is exact — no approximation. Independence across <em>primes</em> (CRT) is the same assumption the
+      original C(n) Euler product already relies on.
+    </div>
+    <div class="step">
+      <div class="stepnum">4 — Sanity check against Page 1</div>
+      Setting n₂ so its block is empty (formally, drop the second factor) collapses the bracket to
+      1 − min(n₁+1,p)/p, giving f_p(n₁) = 1 − (1/p)·min(n₁+1,p)/p = 1 − min(n₁+1,p)/p² — exactly Page 1's
+      local factor. C(n₁,n₂) is a strict generalization, not a different object.
+    </div>
+    <div class="step">
+      <div class="stepnum">5 — Global product</div>
+      $$C(n_1,n_2) = \zeta(2)\cdot\prod_p f_p(n_1,n_2)$$
+      generalizes immediately to k blocks: replace the single-pair bracket product with ∏ᵢ₌₁ᵏ(1−min(nᵢ+1,p)/p),
+      and the same Euler-product machinery (asymptotic tail, exact n=1 endpoint values, etc.) carries over unchanged.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Sieve of Eratosthenes up to LIMIT, store prime list ──
+const LIMIT = 2000000;
+function sievePrimes(limit){
+  const comp = new Uint8Array(limit+1);
+  const primes = [];
+  for(let i=2;i<=limit;i++){
+    if(!comp[i]){
+      primes.push(i);
+      for(let j=i*i;j<=limit;j+=i) comp[j]=1;
+    }
+  }
+  return primes;
+}
+let PRIMES_FULL = [];
+let PRIMES_FAST = []; // prefix, primes <= 60000
+const ZETA2 = Math.PI*Math.PI/6;
+
+function localFactor(ns,p){
+  let inner = 1;
+  for(let i=0;i<ns.length;i++){
+    const m = Math.min(ns[i]+1,p);
+    inner *= (1 - m/p);
+  }
+  return 1 - (1/p)*(1-inner);
+}
+function computeC(ns, primes){
+  let prod = 1;
+  for(let i=0;i<primes.length;i++) prod *= localFactor(ns, primes[i]);
+  return ZETA2*prod;
+}
+function fmt(x, d){ return x.toFixed(d===undefined?6:d); }
+
+// ── Stepper / number-input controls ──
+const CTRL = {
+  n1:    {sl:'n1sl',    num:'n1num',    fn:function(){onSlide();}},
+  n2:    {sl:'n2sl',    num:'n2num',    fn:function(){onSlide();}},
+  n2fix: {sl:'n2fixSl', num:'n2fixnum', fn:function(){onSlideJump();}}
+};
+function stepVal(key, delta){
+  const c = CTRL[key];
+  const sl = document.getElementById(c.sl);
+  let v = (+sl.value) + delta;
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  sl.value = v;
+  document.getElementById(c.num).value = v;
+  c.fn();
+}
+function onNumInput(key){
+  const c = CTRL[key];
+  const num = document.getElementById(c.num);
+  const sl = document.getElementById(c.sl);
+  let v = Math.round(+num.value || 0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v;
+  sl.value = v;
+  c.fn();
+}
+
+// ── Live calculator ──
+function onSlide(){
+  const n1 = +document.getElementById('n1sl').value;
+  const n2 = +document.getElementById('n2sl').value;
+  document.getElementById('n1val').textContent = n1;
+  document.getElementById('n2val').textContent = n2;
+  document.getElementById('n1num').value = n1;
+  document.getElementById('n2num').value = n2;
+  const C1 = computeC([n1], PRIMES_FULL);
+  const C2 = computeC([n2], PRIMES_FULL);
+  const C12 = computeC([n1,n2], PRIMES_FULL);
+  const rho = C12/(C1*C2);
+  document.getElementById('rC1').textContent = fmt(C1);
+  document.getElementById('rC2').textContent = fmt(C2);
+  document.getElementById('rC12').textContent = fmt(C12);
+  document.getElementById('rRho').textContent = fmt(rho,6);
+  renderPrimeTable(n1,n2);
+  if(window._wg9_grid) drawHeatmapMarker(n1,n2);
+}
+function renderPrimeTable(n1,n2){
+  const tb = document.getElementById('primeTbody');
+  let rows = '';
+  for(let i=0;i<12;i++){
+    const p = PRIMES_FULL[i];
+    const f1 = 1-Math.min(n1+1,p)/(p*p);
+    const f2 = 1-Math.min(n2+1,p)/(p*p);
+    const f12 = localFactor([n1,n2],p);
+    const rp = f12/(f1*f2);
+    rows += '<tr><td>'+p+'</td><td>'+fmt(f1,6)+'</td><td>'+fmt(f2,6)+'</td><td>'+fmt(f12,6)+'</td><td>'+fmt(rp,6)+'</td></tr>';
+  }
+  tb.innerHTML = rows;
+}
+
+// ── Heatmap ──
+function computeHeatGrid(){
+  const N = 50, MAXN = 70;
+  const grid = new Float64Array(N*N);
+  let gridMin = Infinity, gridMax = -Infinity;
+  for(let a=0;a<N;a++){
+    const n1 = Math.round(a*MAXN/(N-1));
+    for(let b=0;b<N;b++){
+      const n2 = Math.round(b*MAXN/(N-1));
+      const C1 = computeC([n1],PRIMES_FAST);
+      const C2 = computeC([n2],PRIMES_FAST);
+      const C12 = computeC([n1,n2],PRIMES_FAST);
+      const rho = C12/(C1*C2);
+      grid[a*N+b] = rho;
+      gridMin = Math.min(gridMin, rho);
+      gridMax = Math.max(gridMax, rho);
+    }
+  }
+  window._wg9_grid = {grid,N,MAXN,gridMin,gridMax};
+}
+// ── Jet-style colormap, ported from index.html's 'heatmap_ext' mode (blue→cyan→green→yellow→red) ──
+function jetColor(t){
+  t = Math.max(0,Math.min(1,t));
+  let r,g,b;
+  if(t<.25){ const v=t*4; r=0; g=(v*100)|0; b=(100+v*155)|0; }
+  else if(t<.5){ const v=(t-.25)*4; r=0; g=(100+v*155)|0; b=(255-v*255)|0; }
+  else if(t<.75){ const v=(t-.5)*4; r=(v*255)|0; g=255; b=0; }
+  else{ const v=(t-.75)*4; r=255; g=(255-v*100)|0; b=0; }
+  return 'rgb('+r+','+g+','+b+')';
+}
+function rhoColor(rho, gridMin, gridMax){
+  const t = (rho-gridMin)/Math.max(1e-9, gridMax-gridMin);
+  return jetColor(t);
+}
+function paintHeatmap(){
+  const g = window._wg9_grid; if(!g) return;
+  const cv = document.getElementById('heatCv');
+  const dpr = window.devicePixelRatio||1;
+  const cssW = cv.clientWidth||600, cssH = 560;
+  cv.width = cssW*dpr; cv.height = cssH*dpr;
+  cv.style.height = cssH+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+  const pad = {l:34, r:78, t:10, b:26};
+  const plotW = cssW-pad.l-pad.r, plotH = cssH-pad.t-pad.b;
+  const cellW = plotW/g.N, cellH = plotH/g.N;
+  g.pad=pad; g.cellW=cellW; g.cellH=cellH; g.cssW=cssW; g.cssH=cssH;
+
+  for(let a=0;a<g.N;a++){
+    for(let b=0;b<g.N;b++){
+      const rho = g.grid[a*g.N+b];
+      ctx.fillStyle = rhoColor(rho, g.gridMin, g.gridMax);
+      const x = pad.l+b*cellW, y = pad.t+plotH-(a+1)*cellH;
+      ctx.fillRect(x, y, cellW+0.6, cellH+0.6);
+    }
+  }
+  ctx.fillStyle = '#6a6560'; ctx.font = '9px JetBrains Mono, monospace';
+  ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.lineWidth=1;
+  const ticks=[0,10,20,30,40,50,60,70];
+  ticks.forEach(function(nv){
+    const a = nv*(g.N-1)/g.MAXN;
+    const y = pad.t+plotH-(a+0.5)*cellH;
+    ctx.fillText(nv, 6, y+3);
+    const b = nv*(g.N-1)/g.MAXN;
+    const x = pad.l+(b+0.5)*cellW;
+    ctx.fillText(nv, x-6, pad.t+plotH+16);
+  });
+  ctx.fillText('n\u2081 \u2192 (y)', 4, pad.t-2);
+  ctx.fillText('n\u2082 \u2192 (x)', pad.l+plotW/2-24, cssH-2);
+
+  // legend gradient bar (vertical, jet colormap, actual data range)
+  const lgX = pad.l+plotW+20, lgW=16, lgY=pad.t, lgH=plotH;
+  for(let i=0;i<lgH;i++){
+    const t = 1-i/lgH;
+    ctx.fillStyle = jetColor(t);
+    ctx.fillRect(lgX, lgY+i, lgW, 2);
+  }
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.strokeRect(lgX,lgY,lgW,lgH);
+  ctx.fillStyle = '#b8b2a6'; ctx.font = '8.5px JetBrains Mono, monospace';
+  ctx.fillText(g.gridMax.toFixed(3), lgX+lgW+4, lgY+8);
+  ctx.fillText(((g.gridMax+g.gridMin)/2).toFixed(3), lgX+lgW+4, lgY+lgH/2+3);
+  ctx.fillText(g.gridMin.toFixed(3), lgX+lgW+4, lgY+lgH-2);
+  // mark rho = 1 (independence) on the bar, if it falls within range
+  if(g.gridMin < 1 && 1 < g.gridMax){
+    const tOne = (1-g.gridMin)/(g.gridMax-g.gridMin);
+    const yOne = lgY+lgH*(1-tOne);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(lgX-4,yOne); ctx.lineTo(lgX+lgW+4,yOne); ctx.stroke();
+    ctx.fillStyle = '#ddd8cc'; ctx.font='8px JetBrains Mono, monospace';
+    ctx.fillText('\u03c1=1', lgX-30, yOne+3);
+  }
+  ctx.save();
+  ctx.translate(cssW-8, lgY+lgH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.fillStyle='#8a8378';
+  ctx.fillText('\u03c1', 0, 0);
+  ctx.restore();
+
+  const n1 = +document.getElementById('n1sl').value, n2 = +document.getElementById('n2sl').value;
+  const ma = Math.min(g.N-1, n1*(g.N-1)/g.MAXN), mb = Math.min(g.N-1, n2*(g.N-1)/g.MAXN);
+  const mx = pad.l+(mb+0.5)*cellW, my = pad.t+plotH-(ma+0.5)*cellH;
+  ctx.strokeStyle = '#ff2fd0'; ctx.lineWidth=2.4;
+  ctx.beginPath(); ctx.arc(mx,my,7,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(mx,my-11); ctx.lineTo(mx,my-4); ctx.moveTo(mx,my+4); ctx.lineTo(mx,my+11); ctx.stroke();
+}
+function renderHeatmap(){ computeHeatGrid(); paintHeatmap(); }
+function drawHeatmapMarker(){ paintHeatmap(); }
+document.getElementById('heatCv').addEventListener('click', function(e){
+  const g = window._wg9_grid; if(!g||!g.pad) return;
+  const rect = this.getBoundingClientRect();
+  const scaleX = g.cssW/rect.width, scaleY = g.cssH/rect.height;
+  const px = (e.clientX-rect.left)*scaleX, py = (e.clientY-rect.top)*scaleY;
+  const b = Math.floor((px-g.pad.l)/g.cellW);
+  const a = g.N-1-Math.floor((py-g.pad.t)/g.cellH);
+  if(b<0||b>=g.N||a<0||a>=g.N) return;
+  const n1 = Math.round(a*g.MAXN/(g.N-1));
+  const n2 = Math.round(b*g.MAXN/(g.N-1));
+  document.getElementById('n1sl').value = n1;
+  document.getElementById('n2sl').value = n2;
+  onSlide();
+  document.getElementById('n1sl').scrollIntoView({behavior:'smooth',block:'center'});
+});
+
+// ── Jump slice ──
+function onSlideJump(){
+  const n2 = +document.getElementById('n2fixSl').value;
+  document.getElementById('n2fixVal').textContent = n2;
+  document.getElementById('n2fixnum').value = n2;
+  renderJump(n2);
+}
+function renderJump(n2){
+  const cv = document.getElementById('jumpCv');
+  const dpr = window.devicePixelRatio||1;
+  const w = cv.clientWidth||900, h = 320;
+  cv.width = w*dpr; cv.height = h*dpr;
+  const ctx = cv.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const MAXN1 = 60;
+  const pad = {l:60,r:20,t:14,b:28};
+  const pw = w-pad.l-pad.r, ph = h-pad.t-pad.b;
+  const D = [];
+  let ymin=1,ymax=0;
+  for(let n1=0;n1<=MAXN1;n1++){
+    const d = computeC([n1,n2],PRIMES_FULL)/ZETA2;
+    D.push(d); ymin=Math.min(ymin,d); ymax=Math.max(ymax,d);
+  }
+  const pady=(ymax-ymin)*0.08||0.01;
+  ymin-=pady; ymax+=pady;
+  function X(n1){ return pad.l + (n1/MAXN1)*pw; }
+  function Y(d){ return pad.t + (1-(d-ymin)/(ymax-ymin))*ph; }
+  // axes
+  ctx.strokeStyle = 'rgba(255,255,255,.13)';
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ph); ctx.lineTo(pad.l+pw,pad.t+ph); ctx.stroke();
+  ctx.fillStyle = '#6a6560'; ctx.font = '9px JetBrains Mono, monospace';
+  ctx.fillText(ymax.toFixed(4), 4, pad.t+8);
+  ctx.fillText(ymin.toFixed(4), 4, pad.t+ph);
+  ctx.fillText('n\u2081 \u2192', pad.l+pw-24, pad.t+ph+20);
+  // prime jump markers
+  ctx.strokeStyle = 'rgba(155,127,232,.35)';
+  ctx.setLineDash([2,3]);
+  for(let i=0;i<PRIMES_FULL.length;i++){
+    const p = PRIMES_FULL[i];
+    if(p-1>MAXN1) break;
+    if(p<2) continue;
+    const x = X(p-1);
+    ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+ph); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // step line
+  ctx.strokeStyle = '#7ec87a'; ctx.lineWidth=1.6;
+  ctx.beginPath();
+  for(let n1=0;n1<=MAXN1;n1++){
+    const x=X(n1), y=Y(D[n1]);
+    if(n1===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  // points
+  ctx.fillStyle = '#7ec87a';
+  for(let n1=0;n1<=MAXN1;n1++){
+    ctx.beginPath(); ctx.arc(X(n1),Y(D[n1]),2,0,7); ctx.fill();
+  }
+}
+
+// ── Init ──
+window.addEventListener('load', function(){
+  PRIMES_FULL = sievePrimes(LIMIT);
+  // prefix up to 60000
+  let idx = 0;
+  while(idx<PRIMES_FULL.length && PRIMES_FULL[idx]<=60000) idx++;
+  PRIMES_FAST = PRIMES_FULL.slice(0, idx);
+  document.getElementById('calcNote').textContent =
+    '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp.';
+  onSlide();
+  renderHeatmap();
+  onSlideJump();
+});
+window.addEventListener('resize', function(){
+  if(PRIMES_FULL.length){ paintHeatmap(); renderJump(+document.getElementById('n2fixSl').value); }
+});
+
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+</script>
+</body>
+</html>
