@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Prime Filter — Sieve View of Block-Coprimality · Wessen Getachew — Page 11</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #04040d;
+  --bg1:   #07071a;
+  --bg2:   #0c0c22;
+  --cream: #ddd8cc;
+  --cream2:#b8b2a6;
+  --cream3:#6a6560;
+  --gold:  #c8a84a;
+  --gold2: rgba(200,168,74,.12);
+  --teal:  #3dc8b8;
+  --coral: #e05060;
+  --violet:#9b7fe8;
+  --lime:  #7ec87a;
+  --magenta:#ff2fd0;
+  --amber: #ff8c42;
+  --edge:  rgba(255,255,255,.07);
+  --edge2: rgba(255,255,255,.13);
+  --mono:  'JetBrains Mono', monospace;
+  --serif: 'Spectral', serif;
+  --disp:  'Cinzel', serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.95rem;line-height:1.75;}
+input[type="number"],input[type="range"],select,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+input[type="number"]{font-size:16px;}
+canvas{touch-action:none;}
+
+#content{max-width:1000px;margin:0 auto;padding:0 20px 100px;}
+#hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
+.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
+.hero-formula{font-size:1.0rem;margin:14px 0;color:var(--gold);overflow-x:auto;}
+.hero-sub{max-width:70ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
+
+.card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--edge);}
+.card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
+
+.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
+.ctrl-block{flex:1;min-width:200px;}
+.ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
+.ctrl-label span.val{color:var(--teal);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--violet);height:3px;}
+
+.stepctrl{display:flex;align-items:center;gap:6px;}
+.stepctrl input[type="range"]{flex:1;}
+.step-btn{
+  width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;
+  font-size:13px;font-family:var(--mono);transition:background .1s;
+}
+.step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+.step-num{
+  width:64px;flex-shrink:0;background:var(--bg2);border:1px solid var(--edge2);
+  color:var(--violet);font-family:var(--mono);font-size:12px;font-weight:600;
+  padding:3px 4px;outline:none;text-align:center;
+}
+.step-num:focus{border-color:var(--violet);}
+
+button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
+button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61,200,184,.08);}
+button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+button.wgbtn:disabled{opacity:.35;cursor:default;}
+
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;}
+.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:12px 14px;}
+.result-box.rho{border-left-color:var(--coral);}
+.result-box.amber{border-left-color:var(--amber);}
+.result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
+.result-box .rval{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--cream);word-break:break-all;}
+
+table.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+table.dt th{text-align:left;padding:6px 8px;color:var(--cream3);letter-spacing:.06em;text-transform:uppercase;font-size:8px;border-bottom:1px solid var(--edge2);}
+table.dt td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.dt td:first-child{color:var(--gold);}
+table.dt tr.processed td{color:var(--cream);}
+table.dt tr.pending td{opacity:.4;}
+.tag{font-size:7.5px;padding:1px 6px;border-radius:2px;letter-spacing:.05em;text-transform:uppercase;}
+.tag.pigeonhole{background:rgba(155,127,232,.15);color:var(--violet);}
+.tag.coincidental{background:rgba(255,140,66,.15);color:var(--amber);}
+
+.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+
+canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;image-rendering:pixelated;}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
+.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
+
+.step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
+.step:last-child{border-bottom:none;}
+.step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+</style>
+</head>
+<body>
+
+<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
+<span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
+<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
+<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
+<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
+<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
+<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
+<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
+<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
+<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
+<a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
+<a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
+<a href="page11.html" title="The Prime Filter — Page 11 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#4a9eff22;border:1px solid #4a9eff;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P11</a>
+<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
+<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="hero">
+  <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
+  <h1 class="hero-title">The Prime Filter — A Sieve-of-Eratosthenes View</h1>
+  <div class="hero-formula">
+    $$\text{density}(M,n) \;=\; \prod_{p \,\in\, \text{Touch}(M,n)} \left(1-\frac{1}{p}\right), \qquad
+    \text{Touch}(M,n) = \{p \le n{+}1\} \,\cup\, \{\, p \mid M(M{+}1)\cdots(M{+}n),\; p > n{+}1 \,\}$$
+  </div>
+  <div class="hero-sub">
+    Pages 1, 9, and 10 all average over <em>every</em> possible block anchor M, which is why they need an
+    infinite Euler product. Fix a <em>specific</em> M instead, and the sieve becomes finite: only the primes
+    that actually divide one of M,…,M+n can ever remove anything. Every prime p ≤ n+1 always touches
+    (pigeonhole — among any p consecutive integers, one is divisible by p); every larger touching prime is
+    there by coincidence, because it happens to divide one specific term. Once you've sieved out every touching
+    prime, the sieve is <em>done</em> — provably, not asymptotically — and the surviving density is an exact,
+    finite product. Verified below against direct enumeration.
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- LIVE SIEVE EXPLORER -->
+  <div class="card">
+    <div class="card-title">Live Sieve Explorer</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">n (block depth) <span class="val" id="nval">6</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('n',-1)" title="n − 1">−</button>
+          <input type="range" id="nsl" min="0" max="60" value="6" oninput="onParamChange()">
+          <button class="step-btn" onclick="stepVal('n',1)" title="n + 1">+</button>
+          <input type="number" id="nnum" class="step-num" min="0" max="60" value="6" oninput="onNumInput('n')">
+        </div>
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">M (block anchor) <span class="val" id="mval">100</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepVal('m',-1)" title="M − 1">−</button>
+          <input type="range" id="msl" min="1" max="100000" value="100" oninput="onParamChange()">
+          <button class="step-btn" onclick="stepVal('m',1)" title="M + 1">+</button>
+          <input type="number" id="mnum" class="step-num" min="1" max="100000" value="100" oninput="onNumInput('m')">
+        </div>
+      </div>
+      <div class="ctrl-block" style="max-width:140px;">
+        <button class="wgbtn" onclick="randomizeM()" style="width:100%;" title="Jump to a random M">⚂ Random M</button>
+      </div>
+    </div>
+
+    <div class="ctrl-row">
+      <button id="playBtn" class="wgbtn" onclick="togglePlay()" style="min-width:110px;">▶ Play Sieve</button>
+      <button class="wgbtn" onclick="stepSieve()" id="stepBtn">Step →</button>
+      <button class="wgbtn" onclick="resetSieve()">↺ Reset</button>
+      <span class="card-note" style="margin-top:0;flex:1;">Steps through the touching primes in increasing order, removing multiples of each from the r-grid — exactly Eratosthenes' original method, applied to this specific block.</span>
+    </div>
+
+    <canvas id="sieveCv" class="plot" style="height:360px;"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:#f2c44a;"></span>alive (survived every prime processed so far)</span>
+      <span><span class="sw" style="background:#e05060;"></span>just removed this step</span>
+      <span><span class="sw" style="background:#3a3f5c;border:1px solid var(--edge2);"></span>removed earlier</span>
+    </div>
+
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">Primes processed</div><div class="rval" id="rStepCount">0 / 0</div></div>
+      <div class="result-box"><div class="rlabel">Alive fraction (grid, N=<span id="rNval">—</span>)</div><div class="rval" id="rAliveFrac">—</div></div>
+      <div class="result-box rho"><div class="rlabel">Exact target ∏(1−1/p) over all touching primes</div><div class="rval" id="rExactTarget">—</div></div>
+      <div class="result-box amber"><div class="rlabel">M-averaged D(n) from Page 1 (for contrast)</div><div class="rval" id="rPage1D">—</div></div>
+    </div>
+    <div class="card-note" id="sieveNote">—</div>
+  </div>
+
+  <!-- TOUCHING PRIMES TABLE -->
+  <div class="card">
+    <div class="card-title">Touching Primes, In Sieve Order</div>
+    <div class="card-note" style="margin:0 0 8px;">Only these primes ever remove anything from the grid — every other prime is a complete no-op for this specific (M,n).</div>
+    <div class="tscroll" style="max-height:320px;overflow-y:auto;">
+      <table class="dt" id="touchTable">
+        <thead><tr><th>step</th><th>p</th><th>why it touches</th><th>factor (1−1/p)</th><th>cumulative product</th></tr></thead>
+        <tbody id="touchTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CLASSICAL SIEVE COMPARISON -->
+  <div class="card">
+    <div class="card-title">Why This Sieve Is Exact (and Most Aren't)</div>
+    <div class="step">
+      <div class="stepnum">1 — Legendre's exact sieve, and why it's usually impractical</div>
+      The classical exact sieve computes |{n ∈ A : gcd(n, P(z)) = 1}| via inclusion–exclusion over every
+      squarefree divisor of P(z) = ∏_{p&lt;z} p — that's 2^π(z) terms. For z around a few hundred, π(z) is
+      already large enough that direct evaluation is hopeless, which is exactly why Brun's and Selberg's sieves
+      exist: they truncate the inclusion–exclusion and trade exactness for a provable upper or lower
+      <em>bound</em> instead of an exact value.
+    </div>
+    <div class="step">
+      <div class="stepnum">2 — Why our sieve skips that problem entirely</div>
+      We never do inclusion–exclusion at all. Fixing M makes the touching-prime set <em>finite and explicitly
+      computable</em> — just factor the n+1 numbers M,…,M+n — and because divisibility by distinct primes is
+      independent (CRT), the surviving density is a straight product over that finite set, not an
+      alternating sum over its power set. No truncation, no bound, no error term: exact by construction.
+    </div>
+    <div class="step">
+      <div class="stepnum">3 — Why this doesn't generalize to hard sieve problems</div>
+      Classical sieve applications (twin primes, Goldbach, prime gaps) don't get this luxury: the relevant
+      "bad" events aren't cleanly independent across primes at every scale the way block-coprimality's are,
+      so no finite touching-set trick is available and bounding sieves remain necessary. This project's object
+      is unusually well-behaved, which is precisely why C(n), C(n₁,…,n_k), and this exact finite sieve are all
+      provable outright rather than conjectural.
+    </div>
+    <div class="step">
+      <div class="stepnum">4 — This density is <em>not</em> D(n), and that's the point</div>
+      Pages 1, 9, and 10 compute D(n) = C(n)/ζ(2), the density averaged over <em>every</em> M. This page computes
+      the exact density for <em>one specific</em> M — a single "phase" of that average, not the average itself.
+      They generally differ (see the result box above) — that gap is exactly what got caught and fixed in the
+      finite-lattice canvases on Pages 9 and 10.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Number theory core ──
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+function isPrime(x){ if(x<2) return false; if(x<4) return true; if(x%2===0) return false; for(let i=3;i*i<=x;i+=2) if(x%i===0) return false; return true; }
+
+function touchingPrimes(M, n){
+  const set = new Map(); // p -> 'pigeonhole' | 'coincidental'
+  for(let p=2;p<=n+1;p++) if(isPrime(p)) set.set(p,'pigeonhole');
+  for(let j=0;j<=n;j++){
+    let x = M+j;
+    for(let p=2;p*p<=x;p++){
+      while(x%p===0){ if(p>n+1 && !set.has(p)) set.set(p,'coincidental'); x/=p; }
+    }
+    if(x>n+1 && x>1 && !set.has(x)) set.set(x,'coincidental');
+  }
+  return Array.from(set.entries()).sort((a,b)=>a[0]-b[0]).map(function(e){ return {p:e[0], why:e[1]}; });
+}
+
+const ZETA2 = Math.PI*Math.PI/6;
+function localFactorPage1(n,p){ return 1-Math.min(n+1,p)/(p*p); }
+let PRIMES_D1 = [];
+function sievePrimesSmall(limit){
+  const comp = new Uint8Array(limit+1); const primes=[];
+  for(let i=2;i<=limit;i++){ if(!comp[i]){ primes.push(i); for(let j=i*i;j<=limit;j+=i) comp[j]=1; } }
+  return primes;
+}
+function page1D(n){
+  let prod=1;
+  for(let i=0;i<PRIMES_D1.length;i++) prod *= localFactorPage1(n, PRIMES_D1[i]);
+  return prod; // C(n)/zeta2, since prod already excludes the leading zeta2 factor
+}
+
+// ── UI state ──
+const CTRL = {
+  n: {sl:'nsl', num:'nnum'},
+  m: {sl:'msl', num:'mnum'}
+};
+function stepVal(key, delta){
+  const c = CTRL[key];
+  const sl = document.getElementById(c.sl);
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+delta));
+  sl.value = v; document.getElementById(c.num).value = v;
+  onParamChange();
+}
+function onNumInput(key){
+  const c = CTRL[key];
+  const num = document.getElementById(c.num);
+  const sl = document.getElementById(c.sl);
+  let v = Math.round(+num.value||0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v; sl.value = v;
+  onParamChange();
+}
+function randomizeM(){
+  const sl = document.getElementById('msl');
+  const v = 1 + Math.floor(Math.random()*100000);
+  sl.value = v; document.getElementById('mnum').value = v;
+  onParamChange();
+}
+function onParamChange(){
+  document.getElementById('nval').textContent = document.getElementById('nsl').value;
+  document.getElementById('nnum').value = document.getElementById('nsl').value;
+  document.getElementById('mval').textContent = document.getElementById('msl').value;
+  document.getElementById('mnum').value = document.getElementById('msl').value;
+  resetSieve();
+}
+
+// ── Sieve state ──
+let SIEVE = { primes:[], step:0, alive:null, N:900, justRemoved:null };
+function resetSieve(){
+  stopPlay();
+  const n = +document.getElementById('nsl').value;
+  const M = +document.getElementById('msl').value;
+  const tp = touchingPrimes(M, n);
+  const N = 900;
+  const alive = new Uint8Array(N+1).fill(1);
+  SIEVE = { primes: tp, step: 0, alive: alive, N: N, justRemoved: null };
+
+  document.getElementById('rNval').textContent = N;
+  const target = tp.reduce(function(acc,e){ return acc*(1-1/e.p); }, 1);
+  document.getElementById('rExactTarget').textContent = target.toFixed(8);
+  document.getElementById('rPage1D').textContent = page1D(n).toFixed(8);
+  renderTouchTable();
+  renderStats();
+  renderSieveCanvas();
+  document.getElementById('sieveNote').textContent =
+    tp.length + ' touching primes total for M=' + M + ', n=' + n + ' (largest: ' + (tp.length?tp[tp.length-1].p:'—') + '). Grid uses N=' + N + ' — not a full period of the touching-prime product (which can be astronomically large), so the alive fraction converges toward, but won\u2019t exactly hit, the target until N is a multiple of that product.';
+}
+function renderTouchTable(){
+  const tb = document.getElementById('touchTbody');
+  let cum = 1;
+  let rows = '';
+  SIEVE.primes.forEach(function(e, i){
+    cum *= (1-1/e.p);
+    const cls = i < SIEVE.step ? 'processed' : 'pending';
+    rows += '<tr class="'+cls+'"><td>'+(i+1)+'</td><td>'+e.p+'</td>'
+      + '<td><span class="tag '+e.why+'">'+e.why+'</span></td>'
+      + '<td>'+(1-1/e.p).toFixed(6)+'</td>'
+      + '<td>'+cum.toFixed(8)+'</td></tr>';
+  });
+  tb.innerHTML = rows || '<tr><td colspan="5" style="opacity:.5;">No touching primes (n=0 with a prime-free… actually impossible, p=2 always touches)</td></tr>';
+}
+function renderStats(){
+  document.getElementById('rStepCount').textContent = SIEVE.step + ' / ' + SIEVE.primes.length;
+  let alive=0;
+  for(let r=1;r<=SIEVE.N;r++) if(SIEVE.alive[r]) alive++;
+  document.getElementById('rAliveFrac').textContent = (alive/SIEVE.N).toFixed(8);
+  const stepBtn = document.getElementById('stepBtn');
+  const playBtn = document.getElementById('playBtn');
+  const done = SIEVE.step >= SIEVE.primes.length;
+  stepBtn.disabled = done;
+  if(done){ stopPlay(); playBtn.textContent = '✓ Sieve complete'; playBtn.disabled = true; }
+  else { playBtn.disabled = false; if(!_wg11_playId) playBtn.textContent = '▶ Play Sieve'; }
+}
+function stepSieve(){
+  if(SIEVE.step >= SIEVE.primes.length) return;
+  const p = SIEVE.primes[SIEVE.step].p;
+  const removed = [];
+  for(let r=p; r<=SIEVE.N; r+=p){
+    if(SIEVE.alive[r]){ SIEVE.alive[r]=0; removed.push(r); }
+  }
+  SIEVE.justRemoved = removed;
+  SIEVE.step++;
+  renderTouchTable();
+  renderStats();
+  renderSieveCanvas();
+}
+let _wg11_playId = null;
+function togglePlay(){
+  if(_wg11_playId){ stopPlay(); return; }
+  const btn = document.getElementById('playBtn');
+  btn.textContent = '■ Stop'; btn.classList.add('playing');
+  _wg11_playId = setInterval(function(){
+    if(SIEVE.step >= SIEVE.primes.length){ stopPlay(); return; }
+    stepSieve();
+  }, 550);
+}
+function stopPlay(){
+  if(_wg11_playId){ clearInterval(_wg11_playId); _wg11_playId=null; }
+  const btn = document.getElementById('playBtn');
+  if(btn && SIEVE.step < SIEVE.primes.length){ btn.textContent = '▶ Play Sieve'; btn.classList.remove('playing'); }
+}
+function renderSieveCanvas(){
+  const cv = document.getElementById('sieveCv');
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const cssW = cv.clientWidth||600, cssH = 360;
+  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+  cv.style.height = cssH+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#020204';
+  ctx.fillRect(0,0,cssW,cssH);
+
+  const N = SIEVE.N;
+  const cols = Math.ceil(Math.sqrt(N * cssW / cssH));
+  const rows = Math.ceil(N/cols);
+  const cellW = cssW/cols, cellH = cssH/rows;
+  const justSet = new Set(SIEVE.justRemoved || []);
+  for(let r=1; r<=N; r++){
+    const idx = r-1;
+    const col = idx % cols, row = (idx / cols)|0;
+    let color;
+    if(SIEVE.alive[r]) color = '#f2c44a';
+    else if(justSet.has(r)) color = '#e05060';
+    else color = '#3a3f5c';
+    ctx.fillStyle = color;
+    ctx.fillRect(col*cellW, row*cellH, Math.max(1,cellW-.5), Math.max(1,cellH-.5));
+  }
+}
+
+window.addEventListener('load', function(){
+  PRIMES_D1 = sievePrimesSmall(2000000);
+  resetSieve();
+});
+window.addEventListener('resize', function(){ renderSieveCanvas(); });
+
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+</script>
+</body>
+</html>
