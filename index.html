@@ -1115,6 +1115,17 @@ function heroToggleTopBars(){
         <input type="checkbox" id="top-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('top-steps-n')?.value||0))"> set ground state (lock to page n)
       </label>
     </div>
+    </details>
+
+    <!-- Formula area — separate collapsible from the intro above, so
+         collapsing the intro/lede doesn't also hide the mode toggle and
+         C(n) display. Open by default. -->
+    <details id="w-formula-wrap" open style="position:relative;z-index:1;">
+    <summary style="list-style:none;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;padding:4px 0;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,74,.7);">Mode &amp; C(n)</span>
+      <span class="wf-chev" style="margin-left:auto;flex-shrink:0;font-size:13px;color:rgba(200,168,74,.7);transition:transform .18s;">▾</span>
+    </summary>
+    <style>#w-formula-wrap>summary::-webkit-details-marker{display:none}#w-formula-wrap:not([open]) .wf-chev{transform:rotate(-90deg)}</style>
 
     <!-- Mode toggle + C(n) display -->
     <div class="welcome-eq" id="welcome-eq-row" style="animation:wgFadeUp .6s .3s both;display:flex;flex-direction:column;gap:10px;align-items:stretch;">
@@ -1247,8 +1258,14 @@ function heroToggleTopBars(){
 
       <!-- Grid-only: plot the full G×G square or just the r<M triangle
            (bottom-left → top-right diagonal), mirroring the hero grid's toggle -->
-      <div id="w-ringlift-ctrl" style="display:none;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;padding:7px 10px;background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.25);font-family:'JetBrains Mono',monospace;font-size:8px;">
-        <span style="color:rgba(61,200,184,.85);letter-spacing:.08em;text-transform:uppercase;font-size:7.5px;">Lift dynamics:</span>
+      <div id="w-ringlift-ctrl" style="display:none;margin-top:6px;">
+      <details id="w-ringlift-dd" style="background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.25);">
+        <summary style="cursor:pointer;padding:6px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(61,200,184,.08);">
+          <span class="wrl-chev" style="display:inline-block;transition:transform .15s;font-size:8px;color:rgba(61,200,184,.85);">▸</span>
+          <span style="color:rgba(61,200,184,.85);letter-spacing:.08em;text-transform:uppercase;font-size:7.5px;">Lift dynamics</span>
+        </summary>
+        <style>#w-ringlift-dd[open]>summary>span.wrl-chev{transform:rotate(90deg);}</style>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;">
         <label style="display:inline-flex;align-items:center;gap:4px;color:rgba(61,200,184,.9);cursor:pointer;"><input type="checkbox" class="lift-surv-chk" checked style="accent-color:rgba(61,200,184,.8);" onchange="liftSetSurv(this.checked)">Surviving</label>
         <label style="display:inline-flex;align-items:center;gap:4px;color:rgba(224,80,96,.9);cursor:pointer;"><input type="checkbox" class="lift-broken-chk" checked style="accent-color:rgba(224,80,96,.8);" onchange="liftSetBroken(this.checked)">Broken</label>
         <span style="color:#a8a294;">Thick:</span>
@@ -1284,8 +1301,8 @@ function heroToggleTopBars(){
         <span style="color:rgba(61,200,184,.85);">● ±1</span>
         <button class="lift-npath-dir-btn" onclick="liftCycleNPathDir()" title="±1 branch" style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.85);font-family:inherit;font-size:9px;width:18px;height:18px;padding:0;cursor:pointer;">↕</button>
         <span style="width:1px;height:14px;background:rgba(255,255,255,.12);display:inline-block;"></span>
-        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Mirror conjugate spiral σ(r)=M−r"><input type="checkbox" class="lift-mirror-chk" onchange="liftToggleMirror(this.checked)">Mirror</label>
-        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.9);cursor:pointer;" title="Highlight the dropout ring M=p"><input type="checkbox" class="lift-dropout-chk" onchange="liftToggleDropout(this.checked)">Dropout</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Mirror conjugate spiral σ(r)=M−r"><input type="checkbox" class="lift-mirror-chk" checked onchange="liftToggleMirror(this.checked)">Mirror</label>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.9);cursor:pointer;" title="Highlight the dropout ring M=p"><input type="checkbox" class="lift-dropout-chk" checked onchange="liftToggleDropout(this.checked)">Dropout</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(230,56,72,.7);cursor:pointer;" title="Overlay every prime's spiral"><input type="checkbox" class="lift-allp-chk" onchange="liftToggleAllPrimes(this.checked)">All p</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(155,127,232,.9);cursor:pointer;" title="Lock n / p / M / gap-diagonal together — starting or stopping any one starts or stops all four in sync"><input type="checkbox" class="lift-lock-chk" onchange="liftToggleLock(this.checked)">🔗 Lock</label>
         <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(232,227,219,.75);cursor:pointer;" title="Dim the base lattice while a dynamic overlay is active — the spiral / ±n / lift / diagonal read clearly without shrinking dot size"><input type="checkbox" class="lift-dim-chk" onchange="wToggleDynDim(this.checked)">Dim</label>
@@ -1296,7 +1313,10 @@ function heroToggleTopBars(){
         <span class="lift-anim-speed-lbl" style="color:rgba(155,127,232,.85);min-width:34px;">140ms</span>
         <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:none;border:1px solid rgba(61,200,184,.4);color:#3dc8b8;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ n</button>
         <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ p</button>
+        <label style="display:inline-flex;align-items:center;gap:3px;color:rgba(200,168,74,.85);cursor:pointer;" title="While ▶ p plays, skip primes already accounted for — both by the active finite p₁..p_k set AND by the current lift depth n (primes p ≤ n+1 are already fully saturated at this block length)"><input type="checkbox" class="lift-psync-chk" checked onchange="liftTogglePSync(this.checked)">Sync w/ C(n)</label>
         <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:none;border:1px solid rgba(126,200,122,.4);color:#7ec87a;font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">▶ M</button>
+        </div>
+      </details>
       </div>
       <div id="w-grid-plot-ctrl" style="display:none;align-items:center;gap:6px;margin-top:6px;">
         <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(155,127,232,.8);white-space:nowrap;">Plot:</span>
@@ -1594,7 +1614,7 @@ function heroToggleTopBars(){
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Label:</span>
           <select id="wsec-label-mode" onchange="wTraceSector()"
             style="background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-            <option value="none" selected>None</option>
+            <option value="none">None</option>
             <option value="coords">r, M</option>
             <option value="fraction">r/M (reduced)</option>
             <option value="angle">2πr/M °</option>
@@ -1605,14 +1625,14 @@ function heroToggleTopBars(){
             <option value="phi_M">φ(M)</option>
             <option value="mobius_M">μ(M)</option>
             <option value="gap">gap |M-r|</option>
-            <option value="r_val">r only</option>
+            <option value="r_val" selected>r only</option>
             <option value="M_val">M only</option>
           </select>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Side:</span>
           <select id="wsec-label-side" onchange="wRedrawCanvas()" title="Where labels sit relative to each point — alternating spreads dense runs apart"
             style="background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-            <option value="right">right (in line)</option>
-            <option value="updown" selected>alternate ↑↓</option>
+            <option value="right" selected>right (in line)</option>
+            <option value="updown">alternate ↑↓</option>
             <option value="leftright">alternate ←→</option>
           </select>
         </div>
@@ -1630,10 +1650,10 @@ function heroToggleTopBars(){
             oninput="wSecSetSize(+this.value)">
           <span id="wsec-size-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#9b7fe8;min-width:30px;">0.10×</span>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Label size:</span>
-          <input type="range" id="wsec-lblsize-sl" min="0.2" max="2" step="0.05" value="1"
+          <input type="range" id="wsec-lblsize-sl" min="0.2" max="2" step="0.05" value="0.6"
             style="flex:1;max-width:120px;accent-color:#9b7fe8;"
             oninput="wSecSetLblSize(+this.value)">
-          <span id="wsec-lblsize-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#9b7fe8;min-width:30px;">1.00×</span>
+          <span id="wsec-lblsize-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#9b7fe8;min-width:30px;">0.60×</span>
         </div>
         </div>
       </details>
@@ -1920,7 +1940,7 @@ function heroToggleTopBars(){
     if(typeof wRedrawCanvas==='function')wRedrawCanvas();
   };
   var _wLiftStraight=false;  // curved through Γ by default; true = straight chords
-  var _wRingLift=false;      // Ring view sub-mode: overlay lift dynamics arcs
+  var _wRingLift=true;      // Ring view sub-mode: overlay lift dynamics arcs — on by default
   window.wSetRingLift=function(v){
     _wRingLift=!!v;
     var b=document.getElementById('wvb-ring-lift');
@@ -2032,7 +2052,7 @@ function heroToggleTopBars(){
     }).join('');
   }
 
-  var _wSecLblScale=1; // sector label font scale — independent of point size so tiny dots can keep readable labels (or vice versa)
+  var _wSecLblScale=0.6; // sector label font scale — independent of point size so tiny dots can keep readable labels (or vice versa)
   window.wSecSetLblSize=function(v){
     _wSecLblScale=Math.max(0.2,+v||1);
     var lbl=document.getElementById('wsec-lblsize-lbl');
@@ -2104,6 +2124,15 @@ function heroToggleTopBars(){
   function _wDrawSecLabel(ctx,x,y,r,M,off){
     var mode=document.getElementById('wsec-label-mode')?.value||'none';
     if(mode==='none'||typeof _getHeroLabel!=='function')return;
+    // Dense grids get crowded with sector-path text — past G=258, collapse
+    // to circle-only (already drawn by the caller before this fn runs)
+    // unless the viewer has zoomed in past 3× or tapped this exact point
+    // via the opener's inspect-tap, in which case that one label still shows.
+    if(_wG>258){
+      var _zoomedIn=_wZoom>=3;
+      var _isInspected=_wInspectPt&&_wInspectPt.r===r&&_wInspectPt.M===M;
+      if(!_zoomedIn&&!_isInspected)return;
+    }
     var n=typeof N!=='undefined'?N:0;
     var d=typeof _heroTrueDepth==='function'?_heroTrueDepth(r,M):-1;
     var lbl=_getHeroLabel(r,M,n,d,mode);
@@ -3373,6 +3402,9 @@ function heroToggleTopBars(){
     wRedrawCanvas();
   };
   window._wGetG=function(){return _wG;}; // read-only accessor — lets the shared Lift Dynamics animation (▶ n / ▶ p) know the opener's own G, since _wG itself lives in this closure
+  window._wGetN=function(){return _wN;}; // read-only accessor — lets ▶ p's "Sync w/ C(n)" know the opener's current lift depth n
+  window._wGetMode=function(){return _wMode;}; // 'asymptotic' | 'finite' — read-only accessor for the same feature
+  window._wGetPrimeK=function(){return _wPrimeK;}; // read-only accessor — index k of the finite mode's active p₁..p_k set
 
   var _wZoom=1; // canvas zoom — center-anchored, applies uniformly to all four views
   var _wZoomMin=0.005, _wZoomMax=256; // effectively unbounded — reachable past the slider's ±2 (0.25×–4×) span via ▲▼, the number box, or pinch
@@ -3618,13 +3650,34 @@ function heroToggleTopBars(){
     _wUprightAt(ctx,x,y,function(){ctx.strokeText(lbl,5,0);ctx.fillText(lbl,5,0);});
     ctx.restore();
   }
+  // Outer-mode spiral label, pinned to the right edge of the canvas in
+  // screen space — the outermost spiral point (esp. in Ring/Farey, where
+  // high-pM points can land past the canvas edge) can be off-screen, so
+  // this draws in a fixed HUD position instead of following the point.
+  // Resets to the DPR-only transform (undoing pan/zoom/rotation, matching
+  // the same W×H frame drawWRing/drawWFarey/drawWGrid already work in).
+  function _wDynSpiralOuterLabel(ctx,W,H,sr,pM,rich){
+    var dpr=window.devicePixelRatio||1;
+    var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
+    ctx.save();
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    var pad=6;
+    ctx.font=(9*_lsc).toFixed(1)+"px 'JetBrains Mono',monospace";
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.lineWidth=2.2;ctx.strokeStyle='rgba(4,4,13,.85)';
+    ctx.fillStyle='rgba(230,120,130,.95)';
+    var lbl=rich+' '+sr+'/'+pM;
+    ctx.strokeText(lbl,W-pad,H/2);
+    ctx.fillText(lbl,W-pad,H/2);
+    ctx.restore();
+  }
   // Lift lines + prime spiral + mirror σ + all-primes + dropout row + ±n
   // path for the flat views (Grid / Farey / Gauss) — same shared _lift*
   // toggles and exact residue semantics as the Ring and Smith blocks, so
   // the single Lift control row drives all five views identically.
   // lineCap: skip the O(G²) lift LINES above this G (markers stay — they're
   // O(G)) so big lattices don't jank; Ring/Smith keep their native drawing.
-  function _wDynLiftOverlay(ctx,xy,G,n,lineCap){
+  function _wDynLiftOverlay(ctx,xy,G,n,lineCap,W,H){
     if(!_wRingLift&&!_dynExt)return;
     if(G<=(lineCap||400)){
       var pLift=new Path2D(),pDie=new Path2D();
@@ -3701,8 +3754,13 @@ function heroToggleTopBars(){
         if(npDir!=='up'&&(pM-_nn2)/2>=1){var D=xy((pM-_nn2)/2,pM);if(D){ctx.fillStyle=nCol;ctx.beginPath();ctx.arc(D[0],D[1],2.2,0,6.2832);ctx.fill();}}
       }
     }
-    if(_wLblMode()==='outer'&&_spOut&&spOn)
-      _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
+    if(_wLblMode()==='outer'&&_spOut&&spOn){
+      var _rich=(spDir==='up'?'▲p':'▼p')+spP;
+      if(typeof W==='number'&&typeof H==='number')
+        _wDynSpiralOuterLabel(ctx,W,H,_spOut.sr,_spOut.pM,_rich);
+      else
+        _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,_rich);
+    }
   }
   // ── Diagonal-g controls ──
   window.wDiagSet=function(v){
@@ -3854,7 +3912,7 @@ function heroToggleTopBars(){
     // Page-2 dynamics — lift/spiral/±n (rides the +Lift toggle) and the
     // gap-diagonal strip, at the exact per-ring-shifted dot positions.
     var _dynXY=function(r,M){var rD=_wPerRingShiftedR(r,M,G,_wPerRing);return[ox+rD*cell,oy+(M-1)*cell];};
-    _wDynLiftOverlay(ctx,_dynXY,G,n,400);
+    _wDynLiftOverlay(ctx,_dynXY,G,n,400,W,H);
     _wDynDiagOverlay(ctx,_dynXY,G);
     _drawWResidueChords(ctx,W,H,G,_dynXY);
   }
@@ -3948,7 +4006,7 @@ function heroToggleTopBars(){
         }
       }
       if(_wLblMode()==='outer'&&_spOut&&spOn)
-        _wDynSpiralLabel(ctx,_spOut.x,_spOut.y,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
+        _wDynSpiralOuterLabel(ctx,W,H,_spOut.sr,_spOut.pM,(spDir==='up'?'▲p':'▼p')+spP);
     }
     // Active Gaps: outline the full ring for every M in a twin/cousin/sexy-prime pair
     var gapSet=_wGapHighlightSet(G);
@@ -4050,7 +4108,7 @@ function heroToggleTopBars(){
       var rD=_wPerRingShiftedR(r,M,M,_wPerRing);
       return[pad+(W-pad*2)*(rD/M),y];
     };
-    _wDynLiftOverlay(ctx,_dynXY,G,n,400);
+    _wDynLiftOverlay(ctx,_dynXY,G,n,400,W,H);
     _wDynDiagOverlay(ctx,_dynXY,G);
     // Residue chords need the comet-tail to keep extending as rings shrink
     // below the residue's value, so this variant skips the r<M gate.
@@ -4769,6 +4827,20 @@ function heroToggleTopBars(){
     // stable Smith open (the old objection was it appearing mid-snap; the
     // snap itself is gone).
     if(typeof window.wTraceSector==='function')window.wTraceSector();
+    // ▶ p now ships on by default (paired with Sync w/ C(n) defaulting on) —
+    // unlike the general auto-animations above, this one is intentionally
+    // left running; liftPPlay lives in a later script block but is a plain
+    // top-level function declaration, so it's already on window by the time
+    // init() runs (DOMContentLoaded fires after the whole document parses).
+    if(typeof window.liftPPlay==='function')window.liftPPlay();
+    // Lift dynamics mode ships on by default (controls panel itself stays
+    // collapsed — see the details' dropped `open` attribute above); sync the
+    // button/container to match, and prime the mirrored toggle flag so the
+    // very first manual click on ⇑ Lift still flips it OFF instead of
+    // re-firing ON (the onclick reads !window._wRingLiftState, which is
+    // undefined — thus falsy — until something sets it explicitly).
+    window._wRingLiftState=true;
+    if(typeof window.wSetRingLift==='function')window.wSetRingLift(true);
     // No auto-animations on load: the one-shot Flip demo and the 10s G
     // auto-sweep are removed — the opener now loads steady. Flip, spin,
     // and ▶G remain available as manual controls.
@@ -5572,7 +5644,8 @@ function heroToggleTopBars(){
       <select id="hero-sec-label-side" onchange="void 0" title="Where sector labels sit relative to each point — alternating spreads dense runs apart"
         style="background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
         <option value="up">above (in line)</option>
-        <option value="updown" selected>alternate ↑↓</option>
+        <option value="right" selected>right (in line)</option>
+        <option value="updown">alternate ↑↓</option>
         <option value="leftright">alternate ←→</option>
       </select>
       <div class="cv-sep"></div>
@@ -5587,10 +5660,10 @@ function heroToggleTopBars(){
         oninput="heroSecSetSize(+this.value)">
       <span id="hero-sec-size-lbl" style="font-size:8px;color:var(--violet);min-width:30px;">1.00×</span>
       <span class="cv-lbl">Label size:</span>
-      <input type="range" id="hero-sec-lblsize-sl" min="0.2" max="2" step="0.05" value="1"
+      <input type="range" id="hero-sec-lblsize-sl" min="0.2" max="2" step="0.05" value="0.6"
         style="width:120px;accent-color:var(--violet);"
         oninput="heroSecSetLblSize(+this.value)">
-      <span id="hero-sec-lblsize-lbl" style="font-size:8px;color:var(--violet);min-width:30px;">1.00×</span>
+      <span id="hero-sec-lblsize-lbl" style="font-size:8px;color:var(--violet);min-width:30px;">0.60×</span>
     </div>
     <!-- Point detail table — appears here after Trace path -->
     <div id="hero-point-detail" style="margin-top:10px;border-radius:3px;overflow:hidden;">
@@ -6046,10 +6119,10 @@ function heroToggleTopBars(){
   <div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:7px 14px;border-top:1px solid rgba(255,255,255,.04);background:rgba(155,127,232,.02);">
     <span style="font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(155,127,232,.8);">Dynamics</span>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(155,127,232,.9);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" class="lift-mirror-chk" style="accent-color:rgba(155,127,232,.8);" onchange="liftToggleMirror(this.checked)">Mirror σ(r)=M−r
+      <input type="checkbox" class="lift-mirror-chk" checked style="accent-color:rgba(155,127,232,.8);" onchange="liftToggleMirror(this.checked)">Mirror σ(r)=M−r
     </label>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(230,56,72,.9);cursor:pointer;white-space:nowrap;">
-      <input type="checkbox" class="lift-dropout-chk" style="accent-color:rgba(230,56,72,.8);" onchange="liftToggleDropout(this.checked)">Dropout ring
+      <input type="checkbox" class="lift-dropout-chk" checked style="accent-color:rgba(230,56,72,.8);" onchange="liftToggleDropout(this.checked)">Dropout ring
     </label>
     <label style="display:flex;align-items:center;gap:4px;font-size:8px;color:rgba(230,56,72,.7);cursor:pointer;white-space:nowrap;">
       <input type="checkbox" class="lift-allp-chk" style="accent-color:rgba(230,56,72,.65);" onchange="liftToggleAllPrimes(this.checked)">All primes
@@ -14023,7 +14096,7 @@ let _heroG=31;
 let _heroRotSteps=0; // 0=0° 1=90°CW 2=180° 3=270°CW — defaults to 0° now, all views start unrotated
 let _heroViewMode='smith'; // 'grid' | 'ring' | 'farey' | 'lift' | 'gauss' | 'smith'
 let _heroColorR=false;
-let _heroSecLblScale=1; // scales the sector/inspect r/M label font
+let _heroSecLblScale=0.6; // scales the sector/inspect r/M label font
 function heroSecSetLblSize(v){
   _heroSecLblScale=Math.max(0.2,+v||1);
   const l=document.getElementById('hero-sec-lblsize-lbl');
@@ -15031,14 +15104,41 @@ function _liftPanelUpdate(){
 //    an all-primes overlay, an all-n overlay, and ▶n/▶p/▶M animations.
 //    Shared by the hero Lift/Ring/Smith views and the opener's Ring +Lift
 //    sub-mode through the same state + redraw pattern used above. ──
-let _liftMirrorOn=false;     // show conjugate spiral σ(r)=M−r alongside the primary one
-let _liftDropoutOn=false;    // mark the ring M=p where the spiral prime exits (ℤ/Mℤ)*
+let _liftMirrorOn=true;      // show conjugate spiral σ(r)=M−r alongside the primary one — on by default
+let _liftDropoutOn=true;     // mark the ring M=p where the spiral prime exits (ℤ/Mℤ)* — on by default
 let _liftAllPrimesOn=false;  // overlay every prime's spiral, dimmed, not just the selected p
 let _liftAllNOn=false;       // overlay n = 1,3,5,7,9 on the ±n path simultaneously
 const LIFT_ALL_N=[1,3,5,7,9];
 function liftToggleMirror(v){_liftMirrorOn=!!v;document.querySelectorAll('.lift-mirror-chk').forEach(c=>c.checked=_liftMirrorOn);_liftRedraw();}
 function liftToggleDropout(v){_liftDropoutOn=!!v;document.querySelectorAll('.lift-dropout-chk').forEach(c=>c.checked=_liftDropoutOn);_liftRedraw();}
 function liftToggleAllPrimes(v){_liftAllPrimesOn=!!v;document.querySelectorAll('.lift-allp-chk').forEach(c=>c.checked=_liftAllPrimesOn);_liftRedraw();}
+// ── ▶ p "Sync w/ C(n)" — while the spiral-prime animation plays, skip any
+// prime already accounted for: (1) inside the active finite p₁..p_k set
+// (only meaningful in finite mode — asymptotic mode has no truncation, so
+// this half is vacuously true there) AND (2) saturated by the current lift
+// depth n, i.e. p ≤ n+1 — the same min(n+1,p)=p case the C(n) formula uses,
+// since any n+1 consecutive integers already contain a multiple of such a
+// prime. Both conditions must hold (opener's own state, since the toggle
+// lives only in the opener panel), so the animation adapts to whichever of
+// finite-mode truncation or lift depth is currently active.
+let _liftPSyncCn=true; // defaults on — pairs naturally with ▶ p also auto-starting on load
+function liftTogglePSync(v){
+  _liftPSyncCn=!!v;
+  document.querySelectorAll('.lift-psync-chk').forEach(c=>c.checked=_liftPSyncCn);
+}
+function _liftPrimeSyncSkip(p){
+  if(!_liftPSyncCn)return false;
+  var n=(typeof window._wGetN==='function')?(window._wGetN()||0):0;
+  var nDepthDone=p<=(n+1);
+  var mode=(typeof window._wGetMode==='function')?window._wGetMode():'asymptotic';
+  var finiteDone=true;
+  if(mode==='finite'){
+    var k=(typeof window._wGetPrimeK==='function')?(window._wGetPrimeK()||1):1;
+    var idx=PRIMES.indexOf(p);
+    finiteDone=(idx>=0&&idx<k);
+  }
+  return nDepthDone&&finiteDone;
+}
 function liftToggleAllN(v){_liftAllNOn=!!v;document.querySelectorAll('.lift-alln-chk').forEach(c=>c.checked=_liftAllNOn);_liftRedraw();}
 
 // Shared tick speed (ms) for the ▶n and ▶p play loops below.
@@ -15125,6 +15225,19 @@ function liftPPlay(){
     const before=liftSpiralPFor(G);
     liftCycleSpiralP(_liftPPlayDir);
     if(liftSpiralPFor(G)===before){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
+    // Sync w/ C(n): keep stepping past primes already accounted for by the
+    // active finite prime set AND the current lift depth n, so only primes
+    // still "live" at this n/k get airtime. Guarded so a fully-saturated
+    // range can't spin forever — it just settles on whatever it reaches.
+    if(_liftPSyncCn){
+      let guard=0;
+      while(_liftPrimeSyncSkip(liftSpiralPFor(G))&&guard<PRIMES.length){
+        const beforeS=liftSpiralPFor(G);
+        liftCycleSpiralP(_liftPPlayDir);
+        if(liftSpiralPFor(G)===beforeS){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
+        guard++;
+      }
+    }
   },_liftAnimSpeed);
 }
 
@@ -22445,6 +22558,7 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
           if(_side==='updown'&&_odd){ctx.textAlign='center';ctx.textBaseline='top';_ly=py+_off;}
           else if(_side==='leftright'){ctx.textBaseline='middle';
             if(_odd){ctx.textAlign='right';_lx=px-_off;}else{ctx.textAlign='left';_lx=px+_off;}}
+          else if(_side==='right'){ctx.textAlign='left';ctx.textBaseline='middle';_lx=px+_off;}
           else{ctx.textAlign='center';ctx.textBaseline='bottom';_ly=py-_off;}
           ctx.fillText(r+'/'+M,_lx,_ly);
         }
