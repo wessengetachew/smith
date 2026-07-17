@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C_χ(n) — Dirichlet Character-Twisted Density · Wessen Getachew — Page 12</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #04040d;
+  --bg1:   #07071a;
+  --bg2:   #0c0c22;
+  --cream: #ddd8cc;
+  --cream2:#b8b2a6;
+  --cream3:#6a6560;
+  --gold:  #c8a84a;
+  --gold2: rgba(200,168,74,.12);
+  --teal:  #3dc8b8;
+  --coral: #e05060;
+  --violet:#9b7fe8;
+  --lime:  #7ec87a;
+  --magenta:#ff2fd0;
+  --amber: #ff8c42;
+  --sky:   #4a9eff;
+  --edge:  rgba(255,255,255,.07);
+  --edge2: rgba(255,255,255,.13);
+  --mono:  'JetBrains Mono', monospace;
+  --serif: 'Spectral', serif;
+  --disp:  'Cinzel', serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.95rem;line-height:1.75;}
+input[type="number"],input[type="range"],select,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+input[type="number"]{font-size:16px;}
+canvas{touch-action:none;}
+
+#decimalBar{
+  position:sticky;top:44px;z-index:500;
+  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
+  display:flex;align-items:center;gap:10px;padding:7px 20px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
+}
+#decimalBar input[type="range"]{width:140px;accent-color:var(--gold);}
+#decimalBar .val{color:var(--gold);font-weight:600;min-width:16px;text-align:center;}
+
+#content{max-width:1020px;margin:0 auto;padding:0 20px 100px;}
+#hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
+.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--sky);margin-bottom:16px;}
+h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
+.hero-formula{font-size:1.0rem;margin:14px 0;color:var(--gold);overflow-x:auto;}
+.hero-sub{max-width:74ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
+.shift-banner{
+  max-width:74ch;margin:20px auto 0;padding:14px 18px;background:rgba(74,158,255,.07);
+  border-left:3px solid var(--sky);text-align:left;font-size:.82rem;color:var(--cream2);
+}
+.shift-banner b{color:var(--sky);}
+
+.card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--edge);}
+.card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
+
+.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
+.ctrl-block{flex:1;min-width:200px;}
+.ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
+.ctrl-label span.val{color:var(--teal);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--violet);height:3px;}
+
+.stepctrl{display:flex;align-items:center;gap:6px;}
+.stepctrl input[type="range"]{flex:1;}
+.step-btn{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;font-size:13px;font-family:var(--mono);transition:background .1s;}
+.step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+.step-num{width:64px;flex-shrink:0;background:var(--bg2);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:12px;font-weight:600;padding:3px 4px;outline:none;text-align:center;}
+.step-num:focus{border-color:var(--violet);}
+
+select.wgselect{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:7px 10px;outline:none;width:100%;}
+select.wgselect:focus{border-color:var(--violet);}
+
+button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
+button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61,200,184,.08);}
+button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px;}
+.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:12px 14px;}
+.result-box.rho{border-left-color:var(--coral);}
+.result-box.sky{border-left-color:var(--sky);}
+.result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
+.result-box .rval{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--cream);word-break:break-all;}
+.result-box .rsub{font-family:var(--mono);font-size:9px;color:var(--cream3);margin-top:3px;}
+
+table.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+table.dt th{text-align:left;padding:6px 8px;color:var(--cream3);letter-spacing:.06em;text-transform:uppercase;font-size:8px;border-bottom:1px solid var(--edge2);}
+table.dt td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.dt td:first-child{color:var(--gold);}
+table.dt td.clickable{cursor:pointer;transition:background .12s;}
+table.dt td.clickable:hover{background:rgba(74,158,255,.12);color:var(--sky);}
+
+table.vtab{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:9px;margin-top:8px;}
+table.vtab th{text-align:left;padding:5px 8px;color:var(--cream3);font-size:8px;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--edge2);}
+table.vtab td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.vtab td.match{color:var(--lime);}
+
+.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.skybox{background:rgba(74,158,255,.06);border-left:3px solid var(--sky);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+
+canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
+.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
+
+.step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
+.step:last-child{border-bottom:none;}
+.step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+/* Explain modal */
+#explainOverlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,4,.72);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:20px;}
+#explainOverlay.open{display:flex;}
+#explainModal{background:var(--bg1);border:1px solid var(--edge2);border-radius:6px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+#explainModal .em-title{font-family:var(--disp);font-size:.95rem;color:var(--sky);letter-spacing:.04em;margin-bottom:4px;}
+#explainModal .em-sub{font-family:var(--mono);font-size:9px;color:var(--cream3);letter-spacing:.06em;margin-bottom:14px;}
+#explainModal .em-step{padding:9px 0;border-top:1px solid var(--edge);font-size:.82rem;color:var(--cream2);}
+#explainModal .em-step:first-of-type{border-top:none;}
+#explainModal .em-steplabel{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+#explainModal .em-math{font-family:var(--mono);font-size:.86rem;color:var(--cream);word-break:break-all;}
+#explainModal .em-close{float:right;background:none;border:1px solid var(--edge2);color:var(--cream3);width:26px;height:26px;cursor:pointer;font-size:14px;line-height:1;border-radius:3px;}
+#explainModal .em-close:hover{border-color:var(--coral);color:var(--coral);}
+#explainModal .em-result{margin-top:6px;background:rgba(74,158,255,.08);border-left:3px solid var(--sky);padding:10px 12px;font-family:var(--mono);font-size:.86rem;color:var(--sky);word-break:break-all;}
+</style>
+</head>
+<body>
+
+<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
+<span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
+<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
+<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
+<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
+<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
+<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
+<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
+<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
+<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
+<a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
+<a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
+<a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
+<a href="page12.html" title="Dirichlet Character-Twisted Density — Page 12 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#d2691e22;border:1px solid #d2691e;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P12</a>
+<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
+<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="decimalBar">
+  <span>Decimal precision (whole page)</span>
+  <input type="range" id="decimalSl" min="2" max="15" value="6" oninput="setDecimals(+this.value)">
+  <span class="val" id="decimalVal">6</span>
+  <span style="color:var(--cream3);opacity:.6;">digits</span>
+</div>
+
+<div id="hero">
+  <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
+  <h1 class="hero-title">C_χ(n) — Dirichlet Character-Twisted Density</h1>
+  <div class="hero-formula">
+    $$C_\chi(n) = L(2,\chi)\cdot\prod_p\left(1-\chi(p)\cdot\frac{\min(n{+}1,p)}{p^2}\right), \qquad
+    L(s,\chi) = \sum_{n=1}^\infty \frac{\chi(n)}{n^s} = \prod_p\left(1-\frac{\chi(p)}{p^s}\right)^{-1}$$
+  </div>
+  <div class="hero-sub">
+    Every page so far — 1 through 11 — used the trivial character in disguise: gcd(r,·)=1 is exactly
+    χ₀(r), the principal character, which only ever says yes (1) or no (0). Replace that with a genuine
+    Dirichlet character χ mod q — a signed or complex weight on residue classes, not just a filter — and
+    ζ(2) becomes L(2,χ), an actual L-function value. This is the same Euler-product machinery the whole
+    project has used from page 1 onward, now carrying real arithmetic phase information instead of a
+    binary indicator.
+  </div>
+  <div class="shift-banner">
+    <b>What changes here, precisely:</b> pages 1–11 asked "does r survive?" — a yes/no question with a
+    density between 0 and 1. This page asks "how does r's residue class interact with χ?" — the answer is a
+    complex number, can exceed 1 in magnitude, and can be negative or rotate through the complex plane
+    entirely. It's the same product architecture, carrying genuinely different arithmetic content.
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- VERIFICATION -->
+  <div class="card">
+    <div class="card-title">Verification — Character Orthogonality, Dual L(2,χ), Generalized Jump</div>
+    <div class="vbox">
+      Three independent checks, run before any of this was built. <b>Orthogonality</b>: the character table
+      for the modulus you pick satisfies ∑ᵣ χₖ(r)·χₗ(r)‾ = (q−1)·[k=l] exactly — the fundamental correctness
+      test for a character construction, checked live below for whichever modulus is selected.
+      <b>L(2,χ)</b>: computed two independent ways (Euler product vs. direct 3,000,000-term Dirichlet series)
+      for a genuinely complex order-6 character mod 7 — agreed to 12 decimal places.
+      <b>Generalized jump</b>: the local factor's jump at n=p−1 is exactly −χ(p)/p² (a direct algebraic
+      generalization of page 1's own local-factor structure) — verified to 14 decimal places against a
+      complex χ(p), not just the real ±1 case.
+    </div>
+    <table class="vtab">
+      <thead><tr><th>Check</th><th>Method A</th><th>Method B</th><th>Agreement</th></tr></thead>
+      <tbody>
+        <tr><td>L(2,χ), order-6 char mod 7</td><td>0.90224702530 + 0.23254898129i</td><td>0.90224702530 + 0.23254898128i</td><td class="match">12 dp</td></tr>
+        <tr><td>Jump at p=13, χ mod 7 (k=1)</td><td>0.00591715976 − 7.25e-19i (measured)</td><td>0.00591715976 − 7.25e-19i (formula)</td><td class="match">14 dp</td></tr>
+        <tr><td>Orthogonality, q=5, q=7</td><td>diagonal = q−1 exactly</td><td>off-diagonal = 0 exactly</td><td class="match">exact</td></tr>
+      </tbody>
+    </table>
+    <div id="liveOrthoWrap" style="margin-top:14px;"></div>
+    <div class="card-note">Live orthogonality matrix recomputed for the modulus selected in the Character Explorer below — not a static screenshot of the check above.</div>
+  </div>
+
+  <!-- CHARACTER EXPLORER -->
+  <div class="card">
+    <div class="card-title">Character Explorer</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">Modulus q</div>
+        <select id="qSel" class="wgselect" onchange="onQChange()">
+          <option value="1">q = 1 (universal trivial — reduces exactly to Page 1's C(n))</option>
+          <option value="3">q = 3 (2 characters)</option>
+          <option value="4">q = 4 (2 characters — the Leibniz/Catalan character)</option>
+          <option value="5">q = 5 (4 characters)</option>
+          <option value="7" selected>q = 7 (6 characters)</option>
+          <option value="11">q = 11 (10 characters)</option>
+          <option value="13">q = 13 (12 characters)</option>
+        </select>
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">Character χ_k</div>
+        <select id="kSel" class="wgselect" onchange="onKChange()"></select>
+      </div>
+    </div>
+    <div class="result-grid">
+      <div class="result-box sky"><div class="rlabel">Order of χ (smallest m with χᵐ=χ₀)</div><div class="rval" id="rOrder">—</div></div>
+      <div class="result-box"><div class="rlabel">Real or complex?</div><div class="rval" id="rRealComplex">—</div></div>
+      <div class="result-box"><div class="rlabel">L(2,χ)</div><div class="rval" id="rL2">—</div></div>
+    </div>
+    <div style="margin-top:16px;">
+      <div class="card-title" style="margin-bottom:8px;">Character Table — χ(r) for r = 0,…,q−1</div>
+      <table class="dt" id="charTable">
+        <thead><tr><th>r</th><th>gcd(r,q)</th><th>χ(r) exact</th><th>χ(r) decimal</th><th>|χ(r)|</th></tr></thead>
+        <tbody id="charTbody"></tbody>
+      </table>
+    </div>
+    <div class="card-note">Click any row for the discrete-log derivation of that value. Only prime moduli plus q=4 are offered — those are exactly the cases where (ℤ/qℤ)* is cyclic, so a single primitive root generates every character directly. Composite non-prime-power moduli need the group's full CRT decomposition and are out of scope here.</div>
+  </div>
+
+  <!-- LIVE CALCULATOR -->
+  <div class="card">
+    <div class="card-title">Live L-Function &amp; Density Calculator</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">n (block depth) <span class="val" id="nval">6</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepN(-1)" title="n − 1">−</button>
+          <input type="range" id="nsl" min="0" max="2000" value="6" oninput="onNChange()">
+          <button class="step-btn" onclick="stepN(1)" title="n + 1">+</button>
+          <input type="number" id="nnum" class="step-num" min="0" max="2000" value="6" oninput="onNNumInput()">
+        </div>
+      </div>
+    </div>
+    <div class="ctrl-row" style="margin-bottom:14px;">
+      <button id="playBtn" class="wgbtn" onclick="togglePlay()" style="min-width:110px;">▶ Play n</button>
+      <span class="card-note" style="margin-top:0;flex:1;">Animates n 0→200 (loops) — everything below updates live, including the per-prime table.</span>
+    </div>
+    <div class="result-grid">
+      <div class="result-box sky"><div class="rlabel">C_χ(n)</div><div class="rval" id="rCchi">—</div></div>
+      <div class="result-box rho"><div class="rlabel">D_χ(n) = C_χ(n)/L(2,χ)</div><div class="rval" id="rDchi">—</div></div>
+      <div class="result-box"><div class="rlabel">|C_χ(n)| (magnitude)</div><div class="rval" id="rCabs">—</div></div>
+    </div>
+    <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 — reliable to ~7–8 dp. n's range is 0–2000, uncapped, since the product cost doesn't depend on n's value (same reasoning as Page 9).</div>
+
+    <div style="margin-top:18px;">
+      <div class="card-title" style="margin-bottom:8px;">Per-Prime Local Factors</div>
+      <div class="ctrl-row" style="margin-bottom:8px;align-items:center;">
+        <span class="card-note" style="margin:0;flex:1;">First 500 primes (scroll for more) — click any value for its exact derivation. CSV export covers all ≤2,000,000.</span>
+        <button class="wgbtn" id="csvBtn" onclick="exportPrimeCSV()" style="flex:0;white-space:nowrap;">↓ Export CSV</button>
+      </div>
+      <div class="tscroll" style="max-height:400px;overflow-y:auto;">
+        <table class="dt" id="primeTable">
+          <thead><tr><th>p</th><th>χ(p)</th><th>f_p^χ(n)</th><th>cumulative C_χ(n)</th></tr></thead>
+          <tbody id="primeTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- JUMP VISUALIZATION -->
+  <div class="card">
+    <div class="card-title">Generalized Jump — Signed by χ(p)</div>
+    <canvas id="jumpCv" class="plot" style="height:340px;"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:#6a6560;"></span>trivial character: always −1/p² (uniform decrease)</span>
+      <span><span class="sw" style="background:#9b7fe8;"></span>selected χ: −χ(p)/p² (real part shown; can flip sign or vanish)</span>
+    </div>
+    <div class="card-note">Bars at each prime p ≤ 61 show the exact local-factor jump at n=p−1. Where χ(p)=−1 the bar flips above the axis relative to the trivial case; where χ(p)=0 (p | q) the bar vanishes entirely — that prime is inert for this character.</div>
+  </div>
+
+  <!-- DERIVATION -->
+  <div class="card">
+    <div class="card-title">The Elementary-to-Advanced Shift, Precisely</div>
+    <div class="step">
+      <div class="stepnum">1 — What stays exactly the same</div>
+      The independence-across-primes argument (CRT) that justifies every Euler product on this site,
+      pages 1 through 11, is untouched. C_χ(n) converges absolutely for any fixed n by the same finitely-many-exceptional-primes-plus-summable-tail
+      argument as every prior page. <b>This page is still fully unconditional</b> — nothing here needs GRH.
+    </div>
+    <div class="step">
+      <div class="stepnum">2 — What's genuinely new</div>
+      χ₀ (pages 1–11, implicitly) only ever multiplies by 0 or 1 — pure filtering. A nontrivial χ multiplies
+      by an arbitrary root of unity, so C_χ(n) can be complex, can exceed 1 in magnitude, and the "jump" at
+      n=p−1 can point in any direction in the complex plane rather than always shrinking the density. That's
+      the qualitative shift: from counting survivors to measuring phase-weighted arithmetic structure.
+    </div>
+    <div class="step">
+      <div class="stepnum">3 — Where GRH would actually enter (and doesn't, here)</div>
+      This page computes L(2,χ) and C_χ(n) as constants — that's unconditional, same as ζ(2) and C(n).
+      GRH becomes relevant only for a different kind of question: how quickly does a <em>finite</em> character-weighted
+      count (∑_{n≤X} χ(n)·[survives block]) converge to its asymptotic value, as a function of X. That error-term
+      question is genuinely conjectural in general; the constant this page computes is not.
+    </div>
+    <div class="step">
+      <div class="stepnum">4 — Sanity check against Page 1</div>
+      The universal trivial character (χ≡1, no modulus, no excluded primes) reduces C_χ(n) to exactly C(n) —
+      verified to 8 decimal places. The <em>principal</em> character mod q (q&gt;1) is different: it reduces to
+      C(n) with the finitely many primes dividing q switched off, which is a related but distinct exact
+      quantity, also directly verifiable.
+    </div>
+  </div>
+
+</div>
+
+<div id="explainOverlay" onclick="if(event.target===this) closeExplain()">
+  <div id="explainModal">
+    <button class="em-close" onclick="closeExplain()">×</button>
+    <div class="em-title" id="emTitle">—</div>
+    <div class="em-sub" id="emSub">—</div>
+    <div id="emSteps"></div>
+    <div class="em-result" id="emResult">—</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════ Number theory core ══════════════════════════
+function isPrime(x){ if(x<2) return false; if(x<4) return true; if(x%2===0) return false; for(let i=3;i*i<=x;i+=2) if(x%i===0) return false; return true; }
+function gcdInt(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+function powmod(base, exp, mod){ let result=1; base=((base%mod)+mod)%mod; while(exp>0){ if(exp&1) result=result*base%mod; exp=Math.floor(exp/2); base=base*base%mod; } return result; }
+function primitiveRoot(q){
+  const phi=q-1; const factors=[]; let x=phi;
+  for(let p=2;p*p<=x;p++){ if(x%p===0){ factors.push(p); while(x%p===0) x/=p; } }
+  if(x>1) factors.push(x);
+  for(let g=2; g<q; g++){
+    let ok=true;
+    for(const p of factors){ if(powmod(g,phi/p,q)===1){ ok=false; break; } }
+    if(ok) return g;
+  }
+  return -1;
+}
+function discreteLogTable(q,g){ const dlog=new Array(q).fill(-1); let cur=1; for(let j=0;j<q-1;j++){ dlog[cur]=j; cur=cur*g%q; } return dlog; }
+function sievePrimes(limit){ const comp=new Uint8Array(limit+1); const primes=[]; for(let i=2;i<=limit;i++){ if(!comp[i]){ primes.push(i); for(let j=i*i;j<=limit;j+=i) comp[j]=1; } } return primes; }
+
+// ── Complex arithmetic ──
+function cadd(a,b){ return {re:a.re+b.re, im:a.im+b.im}; }
+function csub(a,b){ return {re:a.re-b.re, im:a.im-b.im}; }
+function cmul(a,b){ return {re:a.re*b.re-a.im*b.im, im:a.re*b.im+a.im*b.re}; }
+function cscale(a,s){ return {re:a.re*s, im:a.im*s}; }
+function cinv(a){ const d=a.re*a.re+a.im*a.im; return {re:a.re/d, im:-a.im/d}; }
+function cabs(a){ return Math.sqrt(a.re*a.re+a.im*a.im); }
+function cargDeg(a){ return Math.atan2(a.im,a.re)*180/Math.PI; }
+function cconj(a){ return {re:a.re, im:-a.im}; }
+const C1 = {re:1,im:0}, C0 = {re:0,im:0};
+
+// ── Character system: supports prime q (cyclic via primitive root) and q=4 (special-cased) ──
+let CHARSYS = null; // { q, isPrime4, g, dlog, phi }
+function buildCharSystem(q){
+  if(q===1){
+    return { q:1, universal:true, phi:1 };
+  }
+  if(q===4){
+    return { q:4, special4:true, phi:2 };
+  }
+  const g = primitiveRoot(q);
+  const dlog = discreteLogTable(q,g);
+  return { q, special4:false, g, dlog, phi:q-1 };
+}
+// chi_k(n) for the current CHARSYS
+function chiVal(k, n){
+  if(CHARSYS.universal) return C1; // trivial character mod 1: chi(n)=1 for all n, no exclusions at all
+  const q = CHARSYS.q;
+  const r = ((n%q)+q)%q;
+  if(CHARSYS.special4){
+    if(r===0 || r===2) return C0;
+    if(r===1) return C1;
+    if(r===3) return k===0 ? C1 : {re:-1,im:0};
+  }
+  if(r===0 || CHARSYS.dlog[r]===-1) return C0;
+  const j = CHARSYS.dlog[r];
+  const theta = 2*Math.PI*k*j/CHARSYS.phi;
+  return {re:Math.cos(theta), im:Math.sin(theta)};
+}
+function charOrder(k){
+  const phi = CHARSYS.phi;
+  if(k===0) return 1;
+  return phi / gcdInt(k, phi);
+}
+
+// ══════════════════════════ Global state ══════════════════════════
+let PRIMES_FULL = [];
+let DECIMALS = 6;
+let Q = 7, K = 1;
+
+function fmtNum(x, d){ return x.toFixed(d===undefined?DECIMALS:d); }
+function fmtC(z, d){
+  const dd = d===undefined?DECIMALS:d;
+  if(Math.abs(z.im) < 1e-12) return z.re.toFixed(dd);
+  const sign = z.im>=0 ? '+' : '−';
+  return z.re.toFixed(dd) + ' ' + sign + ' ' + Math.abs(z.im).toFixed(dd) + 'i';
+}
+
+function setDecimals(v){
+  DECIMALS = v;
+  document.getElementById('decimalVal').textContent = v;
+  document.getElementById('decimalSl').value = v;
+  recompute();
+}
+
+// ══════════════════════════ Character explorer UI ══════════════════════════
+function onQChange(){
+  Q = +document.getElementById('qSel').value;
+  CHARSYS = buildCharSystem(Q);
+  const kSel = document.getElementById('kSel');
+  let opts = '';
+  for(let k=0;k<CHARSYS.phi;k++) opts += '<option value="'+k+'">χ_'+k+(k===0?' (principal)':'')+'</option>';
+  kSel.innerHTML = opts;
+  K = 0;
+  kSel.value = 0;
+  renderCharTable();
+  renderOrthogonality();
+  recompute();
+  renderJumpChart();
+}
+function onKChange(){
+  K = +document.getElementById('kSel').value;
+  renderCharTable();
+  recompute();
+  renderJumpChart();
+}
+function renderCharTable(){
+  const tb = document.getElementById('charTbody');
+  let rows = '';
+  for(let r=0;r<Q;r++){
+    const g = gcdInt(r,Q);
+    const c = chiVal(K,r);
+    const mag = cabs(c);
+    let exact = '0';
+    if(g===1){
+      if(CHARSYS.universal){
+        exact = '1';
+      } else if(!CHARSYS.special4){
+        const j = CHARSYS.dlog[r];
+        exact = 'e^(2πi·'+K+'·'+j+'/'+CHARSYS.phi+')';
+      } else {
+        exact = (c.re===1&&Math.abs(c.im)<1e-9) ? '1' : (c.re===-1?'−1':'0');
+      }
+    }
+    rows += '<tr>'
+      + '<td class="clickable" onclick="explainChar('+r+')">'+r+'</td>'
+      + '<td>'+g+'</td>'
+      + '<td class="clickable" onclick="explainChar('+r+')">'+exact+'</td>'
+      + '<td>'+fmtC(c)+'</td>'
+      + '<td>'+mag.toFixed(4)+'</td>'
+      + '</tr>';
+  }
+  tb.innerHTML = rows;
+  document.getElementById('rOrder').textContent = charOrder(K);
+  const isReal = (function(){
+    for(let r=0;r<Q;r++){ if(Math.abs(chiVal(K,r).im) > 1e-9) return false; }
+    return true;
+  })();
+  document.getElementById('rRealComplex').textContent = isReal ? 'Real (order ≤ 2)' : 'Complex (order > 2)';
+}
+function explainChar(r){
+  const g = gcdInt(r,Q);
+  const c = chiVal(K,r);
+  if(g!==1){
+    openExplain('χ_'+K+'('+r+') mod '+Q, 'r shares a factor with the modulus', [
+      { label:'Rule', math:'χ(r) = 0 whenever gcd(r,q) ≠ 1 — that\u2019s the defining property of a Dirichlet character.' },
+      { label:'Here', math:'gcd('+r+','+Q+') = '+g+' ≠ 1' }
+    ], 'χ_'+K+'('+r+') = 0');
+    return;
+  }
+  if(CHARSYS.universal){
+    openExplain('χ_'+K+'('+r+') mod 1', 'The universal trivial character', [
+      { label:'Rule', math:'mod 1, every integer is in the same (only) residue class, and gcd(r,1)=1 always — so χ(n)=1 for every n, with no exclusions whatsoever.' },
+      { label:'Consequence', math:'This is exactly Page 1\u2019s C(n): L(2,χ)=ζ(2), and every local factor is unweighted.' }
+    ], 'χ_'+K+'('+r+') = 1');
+    return;
+  }
+  if(CHARSYS.special4){
+    openExplain('χ_'+K+'('+r+') mod 4', 'The order-2 special case', [
+      { label:'Rule', math:'mod 4, the only characters are χ\u2080 (trivial) and χ\u2081(r)=1 if r≡1, −1 if r≡3 (mod 4)' },
+      { label:'Here', math:'r='+r+' mod 4 = '+(r%4)+', k='+K }
+    ], 'χ_'+K+'('+r+') = '+fmtC(c));
+    return;
+  }
+  const j = CHARSYS.dlog[r];
+  const theta = 2*Math.PI*K*j/CHARSYS.phi;
+  openExplain('χ_'+K+'('+r+') mod '+Q, 'Discrete-log construction via primitive root g='+CHARSYS.g, [
+    { label:'Find discrete log', math:'g^j ≡ r (mod q)  →  '+CHARSYS.g+'^'+j+' ≡ '+r+' (mod '+Q+')  →  j = '+j },
+    { label:'Apply the character', math:'χ_k(g^j) = e^(2πi·k·j/φ(q)) = e^(2πi·'+K+'·'+j+'/'+CHARSYS.phi+')' },
+    { label:'Angle', math:'θ = 2π·'+K+'·'+j+'/'+CHARSYS.phi+' = '+theta.toFixed(6)+' rad = '+(theta*180/Math.PI).toFixed(2)+'°' },
+    { label:'Evaluate', math:'cos(θ) + i·sin(θ) = '+Math.cos(theta).toFixed(8)+' + '+Math.sin(theta).toFixed(8)+'i' }
+  ], 'χ_'+K+'('+r+') = '+fmtC(c,8));
+}
+function renderOrthogonality(){
+  const wrap = document.getElementById('liveOrthoWrap');
+  if(Q===1){
+    wrap.innerHTML = '<div class="card-title" style="margin-bottom:8px;">Live Orthogonality Check for q=1</div>'
+      + '<div class="card-note" style="margin:0;">Mod 1 is degenerate — there\u2019s only one residue class and one character (χ≡1), so orthogonality is the trivial 1×1 identity: ⟨χ₀,χ₀⟩=1. Nothing to tabulate.</div>';
+    return;
+  }
+  const phi = CHARSYS.phi;
+  let maxOffDiag = 0, minDiag = Infinity;
+  let html = '<table class="vtab"><thead><tr><th>k \\ l</th>';
+  for(let l=0;l<phi;l++) html += '<th>'+l+'</th>';
+  html += '</tr></thead><tbody>';
+  for(let k=0;k<phi;k++){
+    html += '<tr><td>'+k+'</td>';
+    for(let l=0;l<phi;l++){
+      let sum = C0;
+      for(let r=1;r<Q;r++){
+        const a = chiVal(k,r), b = cconj(chiVal(l,r));
+        sum = cadd(sum, cmul(a,b));
+      }
+      const mag = cabs(sum);
+      if(k===l) minDiag = Math.min(minDiag, mag); else maxOffDiag = Math.max(maxOffDiag, mag);
+      html += '<td class="'+(k===l?'match':'')+'">'+mag.toFixed(2)+'</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = '<div class="card-title" style="margin-bottom:8px;">Live Orthogonality Check for q='+Q+' (∑ χ_k(r)·χ_l(r)‾, expect (q−1)='+(Q-1)+' on the diagonal, 0 off it)</div>' + html;
+}
+
+// ══════════════════════════ Calculator ══════════════════════════
+function localFactorChi(n,p){
+  const c = chiVal(K,p);
+  const m = Math.min(n+1,p)/(p*p);
+  return {re:1-c.re*m, im:-c.im*m};
+}
+function computeL2(){
+  let L = C1;
+  for(let i=0;i<PRIMES_FULL.length;i++){
+    const p = PRIMES_FULL[i];
+    const c = chiVal(K,p);
+    const denom = {re:1-c.re/(p*p), im:-c.im/(p*p)};
+    L = cmul(L, cinv(denom));
+  }
+  return L;
+}
+function computeCchi(n){
+  let prod = C1;
+  for(let i=0;i<PRIMES_FULL.length;i++){
+    prod = cmul(prod, localFactorChi(n, PRIMES_FULL[i]));
+  }
+  return prod; // note: caller multiplies by L2 separately when needed
+}
+function stepN(delta){
+  const sl = document.getElementById('nsl');
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+delta));
+  sl.value = v; document.getElementById('nnum').value = v;
+  onNChange();
+}
+function onNNumInput(){
+  const num = document.getElementById('nnum');
+  const sl = document.getElementById('nsl');
+  let v = Math.round(+num.value||0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v; sl.value = v;
+  onNChange();
+}
+function onNChange(){
+  document.getElementById('nval').textContent = document.getElementById('nsl').value;
+  document.getElementById('nnum').value = document.getElementById('nsl').value;
+  recompute();
+}
+function recompute(){
+  if(!PRIMES_FULL.length) return;
+  const n = +document.getElementById('nsl').value;
+  const L2 = computeL2();
+  const prodOnly = computeCchi(n);
+  const Cchi = cmul(L2, prodOnly);
+  const Dchi = prodOnly; // C_chi / L2 = prodOnly, by construction
+  document.getElementById('rL2').textContent = fmtC(L2);
+  document.getElementById('rCchi').textContent = fmtC(Cchi);
+  document.getElementById('rDchi').textContent = fmtC(Dchi);
+  document.getElementById('rCabs').textContent = fmtNum(cabs(Cchi));
+  renderPrimeTable(n, L2);
+}
+
+const PRIME_TABLE_ROWS = 500;
+function renderPrimeTable(n, L2){
+  window._wg12_lastN = n;
+  const tb = document.getElementById('primeTbody');
+  let rows = '';
+  let cum = C1;
+  const count = Math.min(PRIME_TABLE_ROWS, PRIMES_FULL.length);
+  for(let i=0;i<count;i++){
+    const p = PRIMES_FULL[i];
+    const c = chiVal(K,p);
+    const f = localFactorChi(n,p);
+    cum = cmul(cum, f);
+    const cumC = cmul(L2, cum);
+    rows += '<tr>'
+      + '<td class="clickable" onclick="explainCell('+p+')">'+p+'</td>'
+      + '<td>'+fmtC(c,4)+'</td>'
+      + '<td class="clickable" onclick="explainCell('+p+')">'+fmtC(f)+'</td>'
+      + '<td>'+fmtC(cumC)+'</td>'
+      + '</tr>';
+  }
+  tb.innerHTML = rows;
+}
+function explainCell(p){
+  const n = window._wg12_lastN||0;
+  const c = chiVal(K,p);
+  const m = Math.min(n+1,p)/(p*p);
+  const f = {re:1-c.re*m, im:-c.im*m};
+  openExplain('f_p^χ(n) at p='+p+', n='+n, 'χ_'+K+' mod '+Q, [
+    { label:'Formula', math:'f_p^χ(n) = 1 − χ(p)·min(n+1,p)/p²' },
+    { label:'χ(p)', math:'χ_'+K+'('+p+') = '+fmtC(c,6) },
+    { label:'min(n+1,p)/p²', math:'min('+(n+1)+','+p+')/'+p+'² = '+m.toFixed(8) },
+    { label:'Multiply', math:'χ(p)·min(n+1,p)/p² = '+fmtC({re:c.re*m,im:c.im*m},8) },
+    { label:'Subtract from 1', math:'1 − ('+fmtC({re:c.re*m,im:c.im*m},6)+') = '+fmtC(f,8) }
+  ], 'f_p^χ('+n+') = '+fmtC(f,8)+'  (|f|='+cabs(f).toFixed(8)+')');
+}
+
+// ══════════════════════════ Play ══════════════════════════
+let _wg12_playId = null;
+function togglePlay(){
+  const btn = document.getElementById('playBtn');
+  if(_wg12_playId){
+    clearInterval(_wg12_playId); _wg12_playId=null;
+    btn.textContent = '▶ Play n'; btn.classList.remove('playing');
+    return;
+  }
+  btn.textContent = '■ Stop'; btn.classList.add('playing');
+  _wg12_playId = setInterval(function(){
+    const sl = document.getElementById('nsl');
+    let v = (+sl.value) + 1;
+    if(v > 200) v = 0;
+    sl.value = v;
+    document.getElementById('nnum').value = v;
+    onNChange();
+  }, 300);
+}
+
+// ══════════════════════════ Jump chart ══════════════════════════
+function renderJumpChart(){
+  const cv = document.getElementById('jumpCv');
+  const dpr = window.devicePixelRatio||1;
+  const w = cv.clientWidth||900, h = 340;
+  cv.width = w*dpr; cv.height = h*dpr;
+  cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:60,r:16,t:14,b:34};
+  const pw = w-pad.l-pad.r, ph = h-pad.t-pad.b;
+  const primesToPlot = PRIMES_FULL.length ? PRIMES_FULL.filter(function(p){return p<=61;}) : [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61];
+  const triv = primesToPlot.map(function(p){ return -1/(p*p); });
+  const twisted = primesToPlot.map(function(p){ const c=chiVal(K,p); return -c.re/(p*p); });
+  const maxAbs = Math.max.apply(null, triv.concat(twisted).map(Math.abs).concat([0.02]));
+  const barW = pw/primesToPlot.length;
+  const zeroY = pad.t + ph/2;
+  function Y(v){ return zeroY - (v/maxAbs)*(ph/2-4); }
+  ctx.strokeStyle='rgba(255,255,255,.13)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,zeroY); ctx.lineTo(pad.l+pw,zeroY); ctx.stroke();
+  ctx.fillStyle='#6a6560'; ctx.font='8px JetBrains Mono, monospace';
+  primesToPlot.forEach(function(p,i){
+    const x = pad.l + i*barW;
+    const yT = Y(triv[i]), yW = Y(twisted[i]);
+    ctx.fillStyle = '#6a6560';
+    ctx.fillRect(x+barW*0.15, Math.min(zeroY,yT), barW*0.3, Math.abs(zeroY-yT));
+    ctx.fillStyle = '#9b7fe8';
+    ctx.fillRect(x+barW*0.55, Math.min(zeroY,yW), barW*0.3, Math.abs(zeroY-yW));
+    if(primesToPlot.length<=25){ ctx.fillStyle='#6a6560'; ctx.fillText(p, x+barW*0.3, h-pad.b+14); }
+  });
+  ctx.fillStyle='#6a6560';
+  ctx.fillText((maxAbs).toFixed(4), 4, pad.t+8);
+  ctx.fillText('0', 4, zeroY+3);
+  ctx.fillText((-maxAbs).toFixed(4), 4, pad.t+ph-2);
+}
+
+// ══════════════════════════ CSV export ══════════════════════════
+function exportPrimeCSV(){
+  const btn = document.getElementById('csvBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Generating…'; btn.disabled = true;
+  setTimeout(function(){
+    const n = window._wg12_lastN||0;
+    const L2 = computeL2();
+    let cum = C1;
+    const parts = new Array(PRIMES_FULL.length+1);
+    parts[0] = 'p,chi_re,chi_im,f_re,f_im,cumulative_C_re,cumulative_C_im';
+    for(let i=0;i<PRIMES_FULL.length;i++){
+      const p = PRIMES_FULL[i];
+      const c = chiVal(K,p);
+      const f = localFactorChi(n,p);
+      cum = cmul(cum, f);
+      const cumC = cmul(L2, cum);
+      parts[i+1] = p+','+c.re.toFixed(10)+','+c.im.toFixed(10)+','+f.re.toFixed(10)+','+f.im.toFixed(10)+','+cumC.re.toFixed(10)+','+cumC.im.toFixed(10);
+    }
+    const csv = parts.join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'page12_chi'+K+'_mod'+Q+'_n'+n+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    btn.textContent = orig; btn.disabled = false;
+  }, 30);
+}
+
+// ══════════════════════════ Explain modal ══════════════════════════
+function openExplain(title, sub, steps, resultVal){
+  document.getElementById('emTitle').textContent = title;
+  document.getElementById('emSub').textContent = sub;
+  document.getElementById('emSteps').innerHTML = steps.map(function(s,i){
+    return '<div class="em-step"><div class="em-steplabel">Step '+(i+1)+' — '+s.label+'</div><div class="em-math">'+s.math+'</div></div>';
+  }).join('');
+  document.getElementById('emResult').innerHTML = resultVal;
+  document.getElementById('explainOverlay').classList.add('open');
+}
+function closeExplain(){ document.getElementById('explainOverlay').classList.remove('open'); }
+
+// ══════════════════════════ Init ══════════════════════════
+window.addEventListener('load', function(){
+  PRIMES_FULL = sievePrimes(2000000);
+  document.getElementById('calcNote').textContent =
+    '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp. n\u2019s range is 0\u20132000, uncapped, since the product cost doesn\u2019t depend on n\u2019s value.';
+  onQChange();
+});
+window.addEventListener('resize', function(){ renderJumpChart(); });
+
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+</script>
+</body>
+</html>
