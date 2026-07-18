@@ -4882,8 +4882,7 @@ function heroToggleTopBars(){
    ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
    ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
    ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
-   ['page7.html','P7','Gap-Class Decomposition of ζ(2) — Page 7','#a855f7'],
-   ['page8.html','2025','Möbius Shell Sieve — Page 8 (2025)','#00d9ff'],
+   ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
    ['page9.html','P9','Multi-Block Coprime Density — Page 9','#ff8c42'],
    ['page10.html','P10','k-Block Coprime Density — Page 10','#ff2fd0'],
    ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
@@ -4952,8 +4951,11 @@ function heroToggleTopBars(){
    ['Page 4 — How C(n) Works: Guided Walkthrough','Builds the C(n) formula piece by piece, ending in a full live working table with every prime shown, nothing left out.','Most interesting: the "see it happen" step where the abstract formula turns into a concrete per-prime computation you can watch.'],
    ['Page 5 — Strip Correlations: Where Independence Breaks','Derives the exact correlation factor between residue strips and explains why C(n) needs min(n+1, p).','Most interesting: the live two-strip comparison showing exactly where the independence assumption used elsewhere on the site stops holding.'],
    ['Page 6 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
-   ['Page 7 — Gap-Class Decomposition of \u03b6(2) = \u03c0\u00b2/6','Partitions the Euler product for \u03b6(2) by prime gap class, with numerical evidence and open questions.','Most interesting: the ζ Riemann-zeros section links the gap-class partition back to classical zeta structure.'],
-   ['Page 8 (2025) — M\u00f6bius Shell Sieve','A broader interactive number-theory research platform built around a Möbius-based sieve construction.','Most interesting: includes a full Collatz conjecture module — trajectories, stopping-time data, and the Erdős framing that the problem may be premature for current mathematics.']
+   ['Page 7 — Farey & Unit Circle','Farey modular residue rings on concentric circles: ten representations of the unit circle, cyclotomic presets, Ford circles, and the Franel\u2013Landau discrepancy connection to RH.','Most interesting: the spectral-correlation panel comparing Farey gap statistics against GUE, Poisson, and the actual Riemann zeros.'],
+   ['Page 9 — C(n\u2081,n\u2082): Multi-Block Coprime Density','Extends C(n) to two independent blocks with lengths n\u2081+1 and n\u2082+1, anchored at independent random M\u2081, M\u2082.','Most interesting: the correlation ratio \u03c1 = C(n\u2081,n\u2082)/[C(n\u2081)\u00b7C(n\u2082)] — a live readout of exactly how much the shared residue r couples the two blocks together.'],
+   ['Page 10 — C(n\u2081,\u2026,n_k): k-Block Coprime Density','The full k-fold generalization — any number of independent blocks, each with its own depth n\u1d62, unified in one Euler product.','Most interesting: the 3D Ring view, which stacks the flat Ring picture into layers by block-1 depth n\u2081, giving the survival pattern a genuine helicoid shape you can drag to orbit.'],
+   ['Page 11 — The Prime Filter','A sieve-construction view showing how successive prime moduli filter down the surviving residues, building intuition for why the Euler product converges the way it does.','Most interesting: watching the live filter count shrink prime by prime toward the asymptotic density.'],
+   ['Page 12 — Dirichlet Character-Twisted Density','Twists the block-coprime density by a Dirichlet character \u03c7 mod Q, connecting C(n) to L-functions and character orthogonality.','Most interesting: the L(s,\u03c7) Euler product explorer sitting right next to the character explorer, so you can watch the same \u03c7 drive both a residue-class picture and a classical L-function at once.'],
   ];
   var pi='<div id="wg-pageinfo-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
   pi+='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:.12em;color:#c8a84a;margin-bottom:10px;text-transform:uppercase;">Page Info — What Each Page Does</div>';
@@ -22269,7 +22271,7 @@ function _conformalMap(rx,ry,mapType){
 
 // ── HERO SMITH CHART VIEW ────────────────────────────────────────────────────
 // Distinct from the Conformal map dropdown: here z = R·e^{iθ} is built the same
-// way page8 built it — R is a per-ring radius (ring index M), θ = 2πr/M + α is
+// same construction as the Möbius-shell ring-polar layout — R is a per-ring radius (ring index M), θ = 2πr/M + α is
 // the same angular convention as the Ring view — then Γ(z)=(z−1)/(z+1) is applied.
 // Grid shown is the image of the ACTUAL ring radii used (not borrowed R/X labels
 // that wouldn't correspond to this polar construction).

@@ -115,8 +115,7 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
   <a class="pn-lnk" href="page4.html" title="How C(n) Works — Page 4 (current)" style="background:rgba(126,200,122,.14);border:1px solid var(--lime);color:var(--lime);font-weight:600;">P4</a>
   <a class="pn-lnk" href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="background:transparent;border:1px solid rgba(224,80,96,.35);color:#e05060;">P5</a>
   <a class="pn-lnk" href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="background:transparent;border:1px solid rgba(242,193,78,.35);color:#f2c14e;">P6</a>
-  <a class="pn-lnk" href="page7.html" target="_blank" title="Gap-Class Decomposition of ζ(2) — Page 7" style="background:transparent;border:1px solid rgba(168,85,247,.35);color:#a855f7;">P7</a>
-  <a class="pn-lnk" href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="background:transparent;border:1px solid rgba(0,217,255,.35);color:#00d9ff;">2025</a>
+  <a class="pn-lnk" href="page7.html" target="_blank" title="Farey & Unit Circle — Page 7" style="background:transparent;border:1px solid rgba(168,85,247,.35);color:#a855f7;">P7</a>
   <a class="pn-lnk" href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="background:transparent;border:1px solid rgba(255,140,66,.35);color:#ff8c42;">P9</a>
   <a class="pn-lnk" href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="background:transparent;border:1px solid rgba(255,47,208,.35);color:#ff2fd0;">P10</a>
   <a class="pn-lnk" href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="background:transparent;border:1px solid rgba(74,158,255,.35);color:#4a9eff;">P11</a>
@@ -240,8 +239,8 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
     <div class="step-body">
       <strong>Split the primes into two camps.</strong> For a prime <span class="mono">p</span>, ask: is the
       block <span class="mono">{M,…,M+n}</span> long enough to be <em>guaranteed</em> to contain a multiple of
-      <span class="mono">p</span>? That happens exactly when the block length exceeds <span class="mono">p</span>,
-      i.e. when <span class="mono">p ≤ n+1</span>. Call those primes <strong>saturated</strong>. Every larger
+      <span class="mono">p</span>? That happens exactly when the block length is at least <span class="mono">p</span>,
+      i.e. when <span class="mono">n+1 ≥ p</span>, equivalently <span class="mono">p ≤ n+1</span>. Call those primes <strong>saturated</strong>. Every larger
       prime is <strong>active</strong> — it may or may not hit the block, depending on where <span class="mono">M</span>
       lands.
     </div>
@@ -263,7 +262,7 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
     <div class="step-body">
       <strong>Active primes (p &gt; n+1).</strong> Now the block is <em>shorter</em> than the prime, so it only
       catches a multiple of <span class="mono">p</span> with probability roughly <span class="mono">(n+1)/p</span>.
-      Combine that with <span class="mono">r</span> independently avoiding <span class="mono">p</span> (probability
+      Combine that with <span class="mono">r</span> independently landing on a multiple of <span class="mono">p</span> (probability
       <span class="mono">1/p</span>), and the joint "bad" probability is about <span class="mono">(n+1)/p²</span> —
       which is exactly where the <span class="mono">p²</span> in the formula comes from. The local factor is
       <span class="mono">(1 − (n+1)/p²)</span>.

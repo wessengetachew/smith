@@ -484,7 +484,7 @@
    ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
    ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
    ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
-   ['page7.html','P7','Gap-Class Decomposition of ζ(2) — Page 7','#a855f7'],
+   ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
    ['page9.html','P9','Multi-Block Coprime Density — Page 9','#ff8c42'],
    ['page10.html','P10','k-Block Coprime Density — Page 10','#ff2fd0'],
    ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
@@ -1979,7 +1979,7 @@ function openOpener(){
     <div id="tab-erroranalysis" class="tab-content">
         <div class="panel">
             <h2 style="color:#a78bfa;margin-bottom:5px;">Error Analysis</h2>
-            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula C(n,N) = 3N²/(π²n(n+1)) applied to intervals. Error patterns may provide computational insight into classical results like the Franel-Landau connection to RH.</p>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula C(n,N) = 3N²/(π²n(n+1)) applied to intervals. The error patterns give a computational window on classical results such as the Franel–Landau connection to RH.</p>
             
             <!-- Range Controls -->
             <div style="background:#1e1b4b;border-radius:8px;padding:15px;margin-bottom:20px;border:1px solid #6366f1;">
@@ -2005,7 +2005,7 @@ function openOpener(){
                 </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #8b5cf6;">
                     <h5 style="color:#8b5cf6;margin:0 0 8px 0;">Spectral Analysis</h5>
-                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">FFT of error sequence may show peaks at frequencies related to imaginary parts of zeta zeros (14.13, 21.02, 25.01...). This would indicate explicit formula structure.</p>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The FFT of the error sequence is checked for peaks at the imaginary parts of the zeta zeros (14.13, 21.02, 25.01, …); peaks there would reflect explicit-formula structure.</p>
                 </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #f59e0b;">
                     <h5 style="color:#f59e0b;margin:0 0 8px 0;">Möbius Function</h5>
@@ -2523,7 +2523,7 @@ function openOpener(){
         <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #8b5cf6;margin-bottom:20px;">
             <h3 style="color:#a78bfa;margin-top:0;">Farey Gap Analysis</h3>
             <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.2em;text-align:center;color:#8b5cf6;">gap(a/b, c/d) = |c/d - a/b| = 1/(b*d)</div>
-            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">For consecutive Farey fractions a/b and c/d, the gap between them equals exactly 1/(b*d). This elegant formula shows that gaps decrease as denominators grow. The distribution reveals how fractions cluster and spread across the unit interval.</p>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">For consecutive Farey fractions a/b and c/d, the gap between them equals exactly 1/(b*d). Gaps therefore decrease as denominators grow. The distribution reveals how fractions cluster and spread across the unit interval.</p>
         </div>
         <div class="stat-grid" id="gapStats" style="margin-top:12px;"></div>
         <div class="grid-2" style="margin-top:15px;">
@@ -2654,7 +2654,7 @@ function openOpener(){
                 <div class="chart-box"><h4>Max Partial Quotient</h4><canvas id="cfMaxChart"></canvas></div>
             </div>
             <div class="derivation-box" style="margin-top:15px;">
-                <strong>Gauss-Kuzmin Distribution:</strong> For almost all real numbers, the probability that a partial quotient a_k equals n approaches log₂(1 - 1/(n+1)²) as k → ∞. For n=1, this is about 41.5%; for n=2, about 17.0%; for n=3, about 9.3%.
+                <strong>Gauss-Kuzmin Distribution:</strong> For almost all real numbers, the probability that a partial quotient a_k equals n approaches −log₂(1 − 1/(n+1)²) = log₂(1 + 1/(n(n+2))) as k → ∞. For n=1, this is about 41.5%; for n=2, about 17.0%; for n=3, about 9.3%.
             </div>
             <div class="connection-box" style="margin-top:12px;">
                 <strong>Golden Ratio Connection:</strong> The golden ratio φ = [1; 1, 1, 1, ...] has all partial quotients equal to 1, making it the "most irrational" number - hardest to approximate by rationals. Fractions with small partial quotients are harmonically simple.
@@ -17873,8 +17873,8 @@ function playFraction(r, m, duration = 0.5) {
 
 function playSelectedFraction() {
     playFraction(selectedHarmonicFraction.r, selectedHarmonicFraction.m, 1.0);
-    document.getElementById('playBtn').classList.add('playing');
-    setTimeout(() => document.getElementById('playBtn').classList.remove('playing'), 1000);
+    const playBtnEl = document.getElementById('playBtn');
+    if (playBtnEl) { playBtnEl.classList.add('playing'); setTimeout(() => playBtnEl.classList.remove('playing'), 1000); }
 }
 
 function playArpeggio() {

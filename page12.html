@@ -147,7 +147,6 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
 <a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
 <a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
 <a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
-<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
 <a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
 <a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
 <a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
@@ -193,7 +192,7 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
     <div class="card-title">Verification — Character Orthogonality, Dual L(2,χ), Generalized Jump</div>
     <div class="vbox">
       Three independent checks, run before any of this was built. <b>Orthogonality</b>: the character table
-      for the modulus you pick satisfies ∑ᵣ χₖ(r)·χₗ(r)‾ = (q−1)·[k=l] exactly — the fundamental correctness
+      for the modulus you pick satisfies ∑ᵣ χₖ(r)·χₗ(r)‾ = φ(q)·[k=l] exactly (φ(q) = q−1 for prime q; φ(4) = 2) — the fundamental correctness
       test for a character construction, checked live below for whichever modulus is selected.
       <b>L(2,χ)</b>: computed two independent ways (Euler product vs. direct 3,000,000-term Dirichlet series)
       for a genuinely complex order-6 character mod 7 — agreed to 12 decimal places.
@@ -206,7 +205,7 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
       <tbody>
         <tr><td>L(2,χ), order-6 char mod 7</td><td>0.90224702530 + 0.23254898129i</td><td>0.90224702530 + 0.23254898128i</td><td class="match">12 dp</td></tr>
         <tr><td>Jump at p=13, χ mod 7 (k=1)</td><td>0.00591715976 − 7.25e-19i (measured)</td><td>0.00591715976 − 7.25e-19i (formula)</td><td class="match">14 dp</td></tr>
-        <tr><td>Orthogonality, q=5, q=7</td><td>diagonal = q−1 exactly</td><td>off-diagonal = 0 exactly</td><td class="match">exact</td></tr>
+        <tr><td>Orthogonality, q=5, q=7</td><td>diagonal = φ(q) = q−1 exactly</td><td>off-diagonal = 0 exactly</td><td class="match">exact</td></tr>
       </tbody>
     </table>
     <div id="liveOrthoWrap" style="margin-top:14px;"></div>
@@ -543,7 +542,7 @@ function renderOrthogonality(){
     html += '</tr>';
   }
   html += '</tbody></table>';
-  wrap.innerHTML = '<div class="card-title" style="margin-bottom:8px;">Live Orthogonality Check for q='+Q+' (∑ χ_k(r)·χ_l(r)‾, expect (q−1)='+(Q-1)+' on the diagonal, 0 off it)</div>' + html;
+  wrap.innerHTML = '<div class="card-title" style="margin-bottom:8px;">Live Orthogonality Check for q='+Q+' (∑ χ_k(r)·χ_l(r)‾, expect φ(q)='+phi+' on the diagonal, 0 off it)</div>' + html;
 }
 
 // ══════════════════════════ Calculator ══════════════════════════

@@ -66,8 +66,7 @@ blockquote cite{display:block;font-style:normal;font-family:var(--mono);font-siz
    ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
    ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
    ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
-   ['page7.html','P7','Gap-Class Decomposition of ζ(2) — Page 7','#a855f7'],
-   ['page8.html','2025','Möbius Shell Sieve — Page 8 (2025)','#00d9ff'],
+   ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
    ['page9.html','P9','Multi-Block Coprime Density — Page 9','#ff8c42'],
    ['page10.html','P10','k-Block Coprime Density — Page 10','#ff2fd0'],
    ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
@@ -99,10 +98,12 @@ function openOpener(){
 <h1>Strip Correlations</h1>
 <p class="lede">
 Page 2 reads the lattice as diagonal strips $|M-r|=g$, each with coprime density exactly
-$\varphi(g)/g$ — and notes that the strips are <b>not independent</b>, because they share prime
-factors. This page makes that dependence exact, visible, and measurable. The identities here are
-elementary (CRT / inclusion–exclusion); the point is watching independence break, and seeing that
-the same mechanism is what shapes $C(n)$'s Euler product on Page&nbsp;1.
+$\varphi(g)/g$, and shows that averaging the strip densities recovers $D(n)$ exactly — an average
+needs no independence. Independence is needed for <b>joint</b> events, and there the strips genuinely
+fail to be independent, because they share prime factors. This page makes that dependence exact,
+visible, and measurable. The identities here are elementary (CRT / inclusion–exclusion); the point
+is watching independence break, and seeing that the same mechanism is what shapes $C(n)$'s Euler
+product on Page&nbsp;1.
 </p>
 
 <h2>01 · The exact correlation factor</h2>
@@ -121,7 +122,7 @@ the same mechanism is what shapes $C(n)$'s Euler product on Page&nbsp;1.
   <p style="text-align:center;">$$\rho(g_1,g_2)\;=\;\frac{J(g_1,g_2)}{\frac{\varphi(g_1)}{g_1}\frac{\varphi(g_2)}{g_2}}
   \;=\;\prod_{p\,\mid\,\gcd(g_1,g_2)}\frac{p}{p-1}\;\;\ge\;1.$$</p>
   <p>
-  So the correlation is <b>always non-negative</b>, depends only on $\gcd(g_1,g_2)$, and equals $1$
+  So the correlation is <b>never negative</b> — $\rho \ge 1$ always — depends only on $\gcd(g_1,g_2)$, and equals $1$
   exactly when the strips are coprime to each other. Two strips sharing a factor of 2 are already
   $2\times$ more correlated than independence predicts; sharing $2\cdot3$ makes it $3\times$.
   At $g_1=g_2=g$ the factor is $g/\varphi(g)$ — the strip is perfectly correlated with itself, as it must be.
@@ -240,8 +241,9 @@ the same mechanism is what shapes $C(n)$'s Euler product on Page&nbsp;1.
   The identities on this page — $\gcd(r,r{+}g)=\gcd(r,g)$, the joint density over
   $p \mid g_1g_2$, and the correlation factor $\rho=\prod_{p\mid\gcd} p/(p{-}1)$ — are elementary and
   classical in method (periodicity and CRT). No novelty is claimed for them. What this page contributes
-  is the reading: the diagonal-strip decomposition of Pages 1–2 fails to be independent in an exactly
-  computable way, that failure is gcd-structured, and the $\min(n{+}1,p)$ kernel of $C(n)$ is the same
+  is the reading: the strips of Pages 1–2 fail to be independent in an exactly computable way (their
+  mean still recovers $D(n)$ — dependence costs nothing there — but every joint event across strips
+  feels it), that failure is gcd-structured, and the $\min(n{+}1,p)$ kernel of $C(n)$ is the same
   phenomenon seen prime-by-prime. Measured columns are finite-$G$ counts; the |Δ| shown is the
   finite-size error, empirically $O(1/G)$, consistent with Page 1's reports.
   </p>

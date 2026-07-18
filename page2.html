@@ -339,8 +339,7 @@ canvas { display: block; width: 100%; height: 100%; }
 <a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
 <a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
 <a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
-<a href="page7.html" target="_blank" title="Gap-Class Decomposition of ζ(2) — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
-<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">2025</a>
+<a href="page7.html" target="_blank" title="Farey & Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
 <a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
 <a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
 <a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
@@ -692,10 +691,15 @@ canvas { display: block; width: 100%; height: 100%; }
         <div class="kv-item"><span class="kv-k">n→∞</span><span class="kv-v" style="color:var(--violet)">C(∞)=0</span></div>
       </div>
       <p style="color:var(--cream3);font-size:0.82rem;margin-top:8px;">
-        This per-strip formula describes how each diagonal behaves individually. The global C(n) is
-        not exactly a weighted average of these per-strip densities, since that would require the
-        strips to be independent — they aren't, as they share prime factors. The diagonal decomposition
-        is a visualization and a close approximation rather than an exact identity once n&gt;0.
+        This per-strip formula describes each diagonal individually — and the decomposition is exact:
+        averaging it over g recovers D(n) = C(n)/ζ(2) in the limit, for every n. No independence between
+        strips is needed, because an average is not a joint event. The one-line proof works prime by prime:
+        among the residues of g mod p, a fraction 1−min(n+1,p)/p avoid the block entirely (local factor 1),
+        and the rest carry the factor 1−1/p, so the mean local factor is
+        (1−ν<sub>p</sub>/p) + (ν<sub>p</sub>/p)(1−1/p) = 1−ν<sub>p</sub>/p² with ν<sub>p</sub> = min(n+1,p) —
+        exactly D(n)'s Euler factor. At n=1 this is the classical mean value of φ(g)φ(g+1)/(g(g+1)) = ∏<sub>p</sub>(1−2/p²).
+        Where the strips' shared prime factors do matter is in joint events across strips — that
+        dependence is exactly computable, and Page 5 is devoted to it.
       </p>
     </div>
 
@@ -940,7 +944,7 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="card">
       <div class="card-title">Visible Lattice Points — The Classical Geometric Identity</div>
       <div class="formula-block teal">$$\frac{1}{G^2}\#\{(r,M): \gcd(r,M)=1\} = \frac{6}{\pi^2} + O\!\left(\frac{\log G}{G}\right)$$</div>
-      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">Attribution: Cesàro 1881, Sylvester 1883, Dirichlet 1849, Mertens 1874. RH refinement: Bureaux–Enriquez 2016 (arXiv:1612.03700).</p>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">Attribution: Cesàro 1881, Sylvester 1883, Dirichlet 1849, Mertens 1874. RH refinement: Bureaux–Enriquez 2016 (arXiv:1612.03700), who prove an RH equivalence for the coprimality probability in a smoothed (geometric-weight) model rather than for the sharp box count.</p>
       <table class="cmp-table">
         <tr><th>Setting</th><th>Density</th><th>Notes</th></tr>
         <tr><td>2D coprime pairs</td><td>6/π² ≈ 0.6079</td><td>Mertens 1874</td></tr>
@@ -949,14 +953,14 @@ canvas { display: block; width: 100%; height: 100%; }
         <tr><td>Strip g=|M−r|</td><td>φ(g)/g</td><td>Exact when (G−g)≡0 mod g</td></tr>
         <tr><td>Diagonal r=M</td><td>1/G → 0</td><td>gcd(r,r)=r&gt;1</td></tr>
         <tr><td>Convergence rate</td><td>O(log G/G)</td><td>Mertens error</td></tr>
-        <tr><td>Under RH</td><td>O(G^{−1+ε})</td><td>Bureaux–Enriquez 2016</td></tr>
+        <tr><td>Under RH (smoothed model)</td><td>O(G^{−1+ε})</td><td>Bureaux–Enriquez 2016</td></tr>
       </table>
-      <p style="color:var(--cream3);font-size:0.8rem;margin-top:8px;font-family:var(--mono)">Under RH the error exponent is O(G^{−1+ε}); the tighter O(G^{−3/2+ε}) bound seen elsewhere is not supported by current literature.</p>
+      <p style="color:var(--cream3);font-size:0.8rem;margin-top:8px;font-family:var(--mono)">Under RH the Bureaux–Enriquez equivalence sharpens the error, but in a smoothed (geometric-weight) model, not for the sharp box count; the O(G^{−3/2+ε}) bound sometimes quoted for the box count is not supported by current literature.</p>
     </div>
 
     <div class="card">
       <div class="card-title">Invisible Forests — Dense Non-Coprime Patches</div>
-      <p style="color:var(--cream2);font-size:0.85rem">Herzog–Stewart 1971: for any n×m, there exists a block of entirely non-coprime cells. These appear as large dark rectangular patches at high G. First 2×2 invisible forest: (2,2),(2,4),(4,2),(4,4). Connected to CRT and consecutive composites.</p>
+      <p style="color:var(--cream2);font-size:0.85rem">Herzog–Stewart 1971: for any n×m, there exists a block of entirely non-coprime cells. These appear as large dark rectangular patches at high G. The smallest 2×2 block of adjacent invisible points has corner (20,14): the four cells (20,14), (21,14), (20,15), (21,15) all have gcd &gt; 1. Connected to CRT and consecutive composites.</p>
     </div>
 
     <div class="card">

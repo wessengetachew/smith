@@ -171,7 +171,6 @@ select.wgselect:focus{border-color:var(--violet);}
 <a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
 <a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
 <a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
-<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
 <a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
 <a href="page10.html" title="k-Block Coprime Density — Page 10 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff2fd022;border:1px solid #ff2fd0;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P10</a>
 <a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
@@ -291,6 +290,7 @@ select.wgselect:focus{border-color:var(--violet);}
         <div class="viewtoggle">
           <button id="viewBtnGrid" class="active" onclick="setLatticeView('grid')">Grid</button>
           <button id="viewBtnRing" onclick="setLatticeView('ring')">Ring</button>
+          <button id="viewBtnRing3D" onclick="setLatticeView('ring3d')">3D Ring</button>
         </div>
       </div>
       <div class="ctrl-block" style="flex:0;min-width:auto;">
@@ -306,13 +306,32 @@ select.wgselect:focus{border-color:var(--violet);}
         <input type="range" id="filtMinSl" min="0" max="8" value="0" oninput="onFilterChange()">
       </div>
     </div>
+    <div class="ctrl-row" id="ring3dCtrls" style="display:none;">
+      <div class="ctrl-block">
+        <div class="ctrl-label">Layers — n₁ depth (block-1 shift) <span class="val" id="r3dLayersVal">6</span></div>
+        <input type="range" id="r3dLayersSl" min="2" max="12" value="6" oninput="onRing3DChange()">
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">Points / ring <span class="val" id="r3dPtsVal">90</span></div>
+        <input type="range" id="r3dPtsSl" min="24" max="200" value="90" oninput="onRing3DChange()">
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;">Rotation</div>
+        <button class="step-btn" id="r3dAutoBtn" onclick="toggleRing3DAuto()" style="width:auto;padding:0 12px;height:30px;">▶ Auto</button>
+      </div>
+    </div>
     <canvas id="latticeCv" class="plot" style="height:420px;image-rendering:pixelated;"></canvas>
     <div class="legend" id="latticeLegend"></div>
+    <div class="result-grid" id="ring3dReadout" style="display:none;">
+      <div class="result-box"><div class="rlabel">Azimuth / Elevation (rad)</div><div class="rval" id="r3dAzEl">—</div></div>
+      <div class="result-box"><div class="rlabel">Layers × rings × points</div><div class="rval" id="r3dCount">—</div></div>
+    </div>
     <div class="result-grid">
       <div class="result-box"><div class="rlabel">Finite fraction surviving all k (G×G count)</div><div class="rval" id="rFiniteFrac">—</div></div>
       <div class="result-box rho"><div class="rlabel">Asymptotic D(n₁,…,n_k) = C(n₁,…,n_k)/ζ(2)</div><div class="rval" id="rAsympRef">—</div></div>
     </div>
     <div class="card-note" id="latticeNote">n capped inside this canvas for render speed — the asymptotic value above uses the true, uncapped n values.</div>
+    <div class="card-note" id="ring3dNote" style="display:none;">Each disk is a full Ring slice at a fixed n₁ (block-1 shift depth) — stacked along the vertical axis like sheets of a covering surface, with a slight angular twist per layer. 4 concentric rings sample M₁ at 38%/58%/78%/98% of G; angle = r. Drag the canvas to orbit, or press Auto.</div>
   </div>
 
   <!-- GROWTH PLOT -->
@@ -619,6 +638,13 @@ function setLatticeView(v){
   _wg10_view = v;
   document.getElementById('viewBtnGrid').classList.toggle('active', v==='grid');
   document.getElementById('viewBtnRing').classList.toggle('active', v==='ring');
+  document.getElementById('viewBtnRing3D').classList.toggle('active', v==='ring3d');
+  document.getElementById('ring3dCtrls').style.display   = v==='ring3d' ? 'flex' : 'none';
+  document.getElementById('ring3dReadout').style.display = v==='ring3d' ? 'grid' : 'none';
+  document.getElementById('ring3dNote').style.display    = v==='ring3d' ? 'block' : 'none';
+  document.getElementById('latticeNote').style.display   = v==='ring3d' ? 'none' : 'block';
+  const cv = document.getElementById('latticeCv');
+  if(cv) cv.style.cursor = v==='ring3d' ? 'grab' : 'default';
   renderLattice();
 }
 function buildMAnchors(){
@@ -762,6 +788,19 @@ function renderLattice(){
         ctx.fillRect(px, py, Math.max(1,cellW-.4), Math.max(1,cellH-.4));
       }
     }
+  } else if(_wg10_view === 'ring3d'){
+    // allCount / rFiniteFrac still reflects the true full G×G survival count
+    // at the current n1..nk (same statistic as Grid/Ring), even though the
+    // 3D render itself only samples a subset of points for speed.
+    for(let r=1; r<=G; r++){
+      const fixedCount = fixedOkArr[r];
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        if(fixedCount + (ok1?1:0) === K) allCount++;
+      }
+    }
+    renderRing3D(ctx, cssW, cssH, G, mode, filtMin, fixedOkArr);
   } else {
     const cx = cssW/2, cy = cssH/2;
     const R = Math.min(cssW,cssH)*0.47;
@@ -784,6 +823,122 @@ function renderLattice(){
     }
   }
   document.getElementById('rFiniteFrac').textContent = fmt(allCount/(G*G));
+}
+
+// ── 3D Ring — stacks the flat Ring view into layers along a vertical axis,
+// one disk per n1 depth (0..layers-1), each disk sampling 4 concentric M1
+// radii × `pts` angular r-positions. A slight per-layer angular twist gives
+// the helicoid/covering-surface look; drag or Auto-rotate to orbit. ──
+let _r3dAz = 0.55, _r3dEl = 0.45, _r3dAuto = false, _r3dAutoId = null;
+let _r3dDragging = false, _r3dLastX = 0, _r3dLastY = 0;
+const _R3D_RING_FRACS = [0.38, 0.58, 0.78, 0.98];
+const _R3D_LAYER_COLORS = ['#e05060','#ff8c42','#f2c14e','#7ec87a','#3dc8b8','#4a9eff','#9b7fe8','#ff2fd0','#00d9ff','#c8a84a','#a855f7','#e05060'];
+function renderRing3D(ctx, cssW, cssH, G, mode, filtMin, fixedOkArr){
+  const layers = +document.getElementById('r3dLayersSl').value;
+  const pts = +document.getElementById('r3dPtsSl').value;
+  document.getElementById('r3dLayersVal').textContent = layers;
+  document.getElementById('r3dPtsVal').textContent = pts;
+  document.getElementById('r3dAzEl').textContent = _r3dAz.toFixed(2)+' / '+_r3dEl.toFixed(2);
+  document.getElementById('r3dCount').textContent = layers+' × '+_R3D_RING_FRACS.length+' × '+pts+' = '+(layers*_R3D_RING_FRACS.length*pts).toLocaleString();
+
+  const cx = cssW/2, cy = cssH*0.54;
+  const R = Math.min(cssW,cssH)*0.34;
+  const spacing = Math.min(cssW,cssH)*0.11;
+  const az=_r3dAz, el=_r3dEl;
+  const cosA=Math.cos(az), sinA=Math.sin(az), cosE=Math.cos(el), sinE=Math.sin(el);
+  function proj(x,y,z){
+    const x1 = x*cosA - z*sinA, z1 = x*sinA + z*cosA;
+    const y1 = y*cosE - z1*sinE, z2 = y*sinE + z1*cosE;
+    const persp = 420/(420+z2);
+    return {sx: cx+x1*persp, sy: cy-y1*persp, z: z2, persp: persp};
+  }
+
+  const items = [];
+  const spineTop = proj(0, (layers-1)/2*spacing + spacing*0.7, 0);
+  const spineBot = proj(0, -((layers-1)/2*spacing + spacing*0.7), 0);
+  items.push({type:'spine', a:spineTop, b:spineBot, z:(spineTop.z+spineBot.z)/2});
+
+  for(let L=0; L<layers; L++){
+    const n1L = L; // this layer's block-1 shift depth
+    const y3 = (L-(layers-1)/2)*spacing;
+    const twist = L*0.14;
+    const col = _R3D_LAYER_COLORS[L%_R3D_LAYER_COLORS.length];
+    // layer outline (outermost ring) — helps the eye read each disk
+    const N=48; let prevEdge=null;
+    for(let i=0;i<=N;i++){
+      const th=2*Math.PI*i/N + twist;
+      const x3=R*Math.cos(th), z3=R*Math.sin(th);
+      const p=proj(x3,y3,z3);
+      if(prevEdge) items.push({type:'edge', a:prevEdge, b:p, z:(prevEdge.z+p.z)/2, color:col});
+      prevEdge=p;
+    }
+    for(let ri=0; ri<_R3D_RING_FRACS.length; ri++){
+      const M1 = Math.max(1, Math.round(_R3D_RING_FRACS[ri]*G));
+      const rad = _R3D_RING_FRACS[ri]*R;
+      for(let i=0;i<pts;i++){
+        const r = 1 + Math.round(i*(G-1)/Math.max(1,pts-1));
+        if(r<1||r>=Math.max(2,G+1)) continue;
+        let ok1=true;
+        for(let j=0;j<=n1L;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        const total = fixedOkArr[r] + (ok1?1:0);
+        if(total < filtMin) continue;
+        const theta = 2*Math.PI*(r-1)/G + twist;
+        const x3 = rad*Math.cos(theta), z3 = rad*Math.sin(theta);
+        const p = proj(x3, y3, z3);
+        items.push({type:'pt', p:p, z:p.z, color: mode==='count' ? countColor(total, mode, r) : col});
+      }
+    }
+  }
+
+  items.sort(function(a,b){ return a.z-b.z; });
+  ctx.save();
+  for(let i=0;i<items.length;i++){
+    const it = items[i];
+    if(it.type==='spine'){
+      ctx.strokeStyle='rgba(200,168,74,.55)'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(it.a.sx,it.a.sy); ctx.lineTo(it.b.sx,it.b.sy); ctx.stroke();
+    } else if(it.type==='edge'){
+      ctx.strokeStyle=it.color+'35'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(it.a.sx,it.a.sy); ctx.lineTo(it.b.sx,it.b.sy); ctx.stroke();
+    } else {
+      const rad = Math.max(1, 2.3*it.p.persp);
+      ctx.fillStyle = it.color;
+      ctx.beginPath(); ctx.arc(it.p.sx,it.p.sy,rad,0,6.2832); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function onRing3DChange(){ renderLattice(); }
+function toggleRing3DAuto(){
+  _r3dAuto = !_r3dAuto;
+  const btn = document.getElementById('r3dAutoBtn');
+  if(_r3dAuto){
+    btn.textContent='■ Stop'; btn.style.color='rgba(224,80,96,.9)'; btn.style.borderColor='rgba(224,80,96,.5)';
+    _r3dAutoId = setInterval(function(){ _r3dAz += 0.012; renderLattice(); }, 40);
+  } else {
+    btn.textContent='▶ Auto'; btn.style.color=''; btn.style.borderColor='';
+    if(_r3dAutoId){ clearInterval(_r3dAutoId); _r3dAutoId=null; }
+  }
+}
+function _r3dEventXY(e){ const p=e.touches?e.touches[0]:e; return {x:p.clientX,y:p.clientY}; }
+function _r3dPointerDown(e){
+  if(_wg10_view!=='ring3d') return;
+  _r3dDragging=true; const p=_r3dEventXY(e); _r3dLastX=p.x; _r3dLastY=p.y;
+  const cv=document.getElementById('latticeCv'); if(cv) cv.style.cursor='grabbing';
+}
+function _r3dPointerMove(e){
+  if(!_r3dDragging||_wg10_view!=='ring3d') return;
+  const p=_r3dEventXY(e);
+  const dx=p.x-_r3dLastX, dy=p.y-_r3dLastY;
+  _r3dLastX=p.x; _r3dLastY=p.y;
+  _r3dAz += dx*0.008;
+  _r3dEl = Math.max(-1.4, Math.min(1.4, _r3dEl + dy*0.008));
+  renderLattice();
+  if(e.cancelable) e.preventDefault();
+}
+function _r3dPointerUp(){
+  _r3dDragging=false;
+  const cv=document.getElementById('latticeCv'); if(cv) cv.style.cursor=(_wg10_view==='ring3d'?'grab':'default');
 }
 
 // ── Play button: animates n\u2081, driving the whole page ──
@@ -879,6 +1034,15 @@ window.addEventListener('load', function(){
   buildMAnchors();
   renderLattice();
   renderGrowth();
+  const cv3d = document.getElementById('latticeCv');
+  if(cv3d){
+    cv3d.addEventListener('mousedown', _r3dPointerDown);
+    window.addEventListener('mousemove', _r3dPointerMove);
+    window.addEventListener('mouseup', _r3dPointerUp);
+    cv3d.addEventListener('touchstart', _r3dPointerDown, {passive:true});
+    cv3d.addEventListener('touchmove', _r3dPointerMove, {passive:false});
+    cv3d.addEventListener('touchend', _r3dPointerUp);
+  }
 });
 window.addEventListener('resize', function(){
   if(PRIMES_FULL.length){ renderGrowth(); renderLattice(); }
