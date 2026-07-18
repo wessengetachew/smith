@@ -4883,6 +4883,7 @@ function heroToggleTopBars(){
    ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
    ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
    ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
+   ['page8.html','P8','The Prime Spiral — Page 8','#ff6b9d'],
    ['page9.html','P9','Multi-Block Coprime Density — Page 9','#ff8c42'],
    ['page10.html','P10','k-Block Coprime Density — Page 10','#ff2fd0'],
    ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
@@ -4944,6 +4945,11 @@ function heroToggleTopBars(){
     cp+='</div>';
   });
   cp+='</div>';
+  cp+='<div style="margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.13);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+  cp+='<span style="font-size:9px;color:rgba(255,255,255,.55);">Enjoying this project? Help fund new equipment to keep expanding it:</span>';
+  cp+='<a href="https://www.paypal.com/donate?business=getachewwessen%40gmail.com&currency_code=USD" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;height:24px;background:linear-gradient(135deg,#0070ba,#003087);color:#fff;border-radius:4px;text-decoration:none;font-size:9px;font-weight:600;letter-spacing:.04em;">PayPal</a>';
+  cp+='<button onclick="wgShowBtcDonate()" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;height:24px;background:linear-gradient(135deg,#f7931a,#e08916);color:#fff;border-radius:4px;border:none;cursor:pointer;font-size:9px;font-weight:600;letter-spacing:.04em;">₿ BTC</button>';
+  cp+='</div>';
   var pageInfo=[
    ['Page 1 — C(n): Block-Coprime Density','Six interactive lattice views of the C(n) block-coprime density function: Grid, Ring, Lift, Farey, Gauss, and Smith.','Most interesting: the Smith Chart hero view, which renders C(n) through the Cayley map — a conformal-geometry reuse of a tool built for transmission-line engineering.'],
    ['Page 2 — Gap Diagonal Identity','Explores the diagonal gap identity that underlies the lattice structure C(n) is built on.','Most interesting: watching how gaps between block-coprime residues line up diagonally as n grows.'],
@@ -4952,6 +4958,7 @@ function heroToggleTopBars(){
    ['Page 5 — Strip Correlations: Where Independence Breaks','Derives the exact correlation factor between residue strips and explains why C(n) needs min(n+1, p).','Most interesting: the live two-strip comparison showing exactly where the independence assumption used elsewhere on the site stops holding.'],
    ['Page 6 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
    ['Page 7 — Farey & Unit Circle','Farey modular residue rings on concentric circles: ten representations of the unit circle, cyclotomic presets, Ford circles, and the Franel\u2013Landau discrepancy connection to RH.','Most interesting: the spectral-correlation panel comparing Farey gap statistics against GUE, Poisson, and the actual Riemann zeros.'],
+   ['Page 8 — The Prime Spiral','Isolates the "Lift Dynamics" spiral overlay from the hero Ring/Lift view: fix one prime p, mark where it lands on every ring modulus M from p+1 up to G, and watch the sequence of markers read as a spiral arm.','Most interesting: the live spiral demo lets you drive G and the chosen prime directly, with an explicit aside on why this is unrelated to the Ulam spiral despite the name.'],
    ['Page 9 — C(n\u2081,n\u2082): Multi-Block Coprime Density','Extends C(n) to two independent blocks with lengths n\u2081+1 and n\u2082+1, anchored at independent random M\u2081, M\u2082.','Most interesting: the correlation ratio \u03c1 = C(n\u2081,n\u2082)/[C(n\u2081)\u00b7C(n\u2082)] — a live readout of exactly how much the shared residue r couples the two blocks together.'],
    ['Page 10 — C(n\u2081,\u2026,n_k): k-Block Coprime Density','The full k-fold generalization — any number of independent blocks, each with its own depth n\u1d62, unified in one Euler product.','Most interesting: the 3D Ring view, which stacks the flat Ring picture into layers by block-1 depth n\u2081, giving the survival pattern a genuine helicoid shape you can drag to orbit.'],
    ['Page 11 — The Prime Filter','A sieve-construction view showing how successive prime moduli filter down the surviving residues, building intuition for why the Euler product converges the way it does.','Most interesting: watching the live filter count shrink prime by prime toward the asymptotic density.'],
@@ -22936,6 +22943,28 @@ document.addEventListener('DOMContentLoaded',function(){
   if(typeof heroGapSyncButtons==='function')heroGapSyncButtons();
   if(typeof wRedrawCanvas==='function')wRedrawCanvas();
 });
+</script>
+<!-- Bitcoin donation modal -->
+<div id="wg-btc-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:10001;justify-content:center;align-items:center;">
+  <div style="background:#0a0a16;border-radius:12px;padding:1.8rem;max-width:420px;text-align:center;border:1px solid #f7931a;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:'JetBrains Mono',monospace;">
+    <h3 style="color:#f7931a;margin-bottom:.8rem;font-size:1.1rem;">₿ Bitcoin Donation</h3>
+    <p style="color:rgba(255,255,255,.6);margin-bottom:1rem;font-size:.8rem;">Every bit helps fund new equipment to keep this project growing.</p>
+    <div style="background:rgba(255,255,255,.05);padding:.8rem;border-radius:8px;font-size:.8rem;word-break:break-all;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.13);margin-bottom:1rem;">bc1qtsuj9x372slcgead3tlnrpw0r6tu7y7y0xwuk4</div>
+    <div style="display:flex;gap:.5rem;justify-content:center;">
+      <button onclick="wgCopyBtcAddress()" style="padding:8px 16px;background:#f7931a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.8rem;">Copy Address</button>
+      <button onclick="document.getElementById('wg-btc-modal').style.display='none'" style="padding:8px 16px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;cursor:pointer;font-size:.8rem;">Close</button>
+    </div>
+  </div>
+</div>
+<script>
+function wgShowBtcDonate(){ document.getElementById('wg-btc-modal').style.display='flex'; }
+function wgCopyBtcAddress(){
+  var addr='bc1qtsuj9x372slcgead3tlnrpw0r6tu7y7y0xwuk4';
+  navigator.clipboard.writeText(addr).then(function(){ alert('Bitcoin address copied to clipboard!'); }).catch(function(){
+    var ta=document.createElement('textarea'); ta.value=addr; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); alert('Bitcoin address copied!');
+  });
+}
 </script>
 </body>
 </html>

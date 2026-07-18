@@ -116,6 +116,27 @@ h1.hero-title { font-family: var(--disp); font-size: clamp(1.4rem, 4vw, 2.2rem);
 .hero-formula { font-size: 1.1rem; margin: 16px 0; color: var(--gold); }
 .hero-live { font-family: var(--mono); font-size: 11px; color: var(--cream3); letter-spacing: .08em; margin-top: 14px; }
 .hero-live span { color: var(--teal); }
+.hero-lemma {
+  max-width: 620px; margin: 18px auto 0; padding: 14px 18px; text-align: left;
+  background: rgba(155,127,232,.07); border-left: 2px solid var(--violet); border-radius: 0 3px 3px 0;
+  font-size: 0.86rem; color: var(--cream2);
+}
+.hero-lemma b { color: var(--violet); font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+.hero-work-hdr {
+  max-width: 620px; margin: 8px auto 0; font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--cream3); cursor: pointer; user-select: none;
+  display: flex; justify-content: space-between; align-items: center; padding: 8px 18px;
+  border: 1px solid var(--edge2); border-radius: 3px; transition: color .15s;
+}
+.hero-work-hdr:hover { color: var(--teal); }
+.hero-work-hdr .arrow { transition: transform .25s; }
+.hero-work-hdr.open { color: var(--teal); border-color: rgba(61,200,184,.4); }
+.hero-work-hdr.open .arrow { transform: rotate(90deg); }
+.hero-work-body {
+  display: none; max-width: 620px; margin: 0 auto; padding: 14px 18px; text-align: left;
+  background: var(--bg1); border: 1px solid var(--edge); border-top: none; font-size: 0.84rem; color: var(--cream2);
+}
+.hero-work-body.open { display: block; }
 
 /* === TAB BAR === */
 #tab-bar {
@@ -340,6 +361,7 @@ canvas { display: block; width: 100%; height: 100%; }
 <a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
 <a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
 <a href="page7.html" target="_blank" title="Farey & Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
+<a href="page8.html" target="_blank" title="The Prime Spiral — Page 8" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff6b9d59;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff6b9d14';this.style.borderColor='#ff6b9d'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff6b9d59'">P8</a>
 <a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
 <a href="page10.html" target="_blank" title="k-Block Coprime Density — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
 <a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
@@ -420,6 +442,28 @@ canvas { display: block; width: 100%; height: 100%; }
   <div class="hero-live">
     diagonal &nbsp;<span id="hero-g-lbl">g = —</span>&nbsp;&nbsp;
     density &nbsp;<span id="hero-density-lbl">—</span>&nbsp;=&nbsp;<span id="hero-phi-lbl">drag g slider ↓</span>
+  </div>
+
+  <div class="hero-lemma">
+    <b>Lemma</b><br>
+    $D(n)$ is <em>exactly</em> the triangle-weighted mean of $\prod_{p \mid g(g+1)\cdots(g+n)}\!\left(1-\frac{1}{p}\right)$
+    over the gap $g$ — no independence between strips required, for every $n$.
+  </div>
+  <div class="hero-work-hdr" id="hero-work-hdr" onclick="toggleHeroWork()">
+    <span>Show work</span><span class="arrow">▶</span>
+  </div>
+  <div class="hero-work-body" id="hero-work-body">
+    An average is not a joint event, so it needs no independence assumption — only a count. Fix a prime $p$.
+    Among the $p$ residue classes of $g \bmod p$, exactly $\nu_p=\min(n{+}1,p)$ make $p$ divide one of
+    $g,g{+}1,\ldots,g{+}n$; the rest ($p-\nu_p$ of them) are untouched by $p$ at this block. So the mean local
+    factor over $g$ is
+    $$\left(1-\frac{\nu_p}{p}\right)\cdot 1 \;+\; \frac{\nu_p}{p}\cdot\left(1-\frac1p\right) \;=\; 1-\frac{\nu_p}{p^2},$$
+    which is exactly $D(n)$'s Euler factor at $p$. Multiplying over all $p$ gives the mean of the strip
+    densities equal to $D(n)$ on the nose — an identity, not an approximation. At $n{=}1$ this reduces to the
+    classical mean value $\overline{\varphi(g)\varphi(g{+}1)/(g(g{+}1))}=\prod_p(1-2/p^2)$ (Feller–Tornier).
+    Shared prime factors between <em>different</em> strips do matter — but only for joint events, which is
+    what <a href="page5.html" style="color:var(--teal)">Page 5</a> computes exactly via
+    $\rho(g_1,g_2)=\prod_{p\mid\gcd(g_1,g_2)} p/(p-1)$.
   </div>
 </div>
 
@@ -2432,6 +2476,13 @@ function toggleFieldTheorySection() {
 function toggleStep(id) {
   const el=document.getElementById(id);
   el.classList.toggle('open');
+}
+function toggleHeroWork() {
+  const hdr=document.getElementById('hero-work-hdr');
+  const body=document.getElementById('hero-work-body');
+  const isOpen=body.classList.toggle('open');
+  hdr.classList.toggle('open',isOpen);
+  if(isOpen&&window.MathJax) MathJax.typesetPromise([body]);
 }
 
 // ============================
