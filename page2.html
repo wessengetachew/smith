@@ -446,17 +446,15 @@ canvas { display: block; width: 100%; height: 100%; }
 
   <div class="hero-lemma">
     <b>Lemma</b><br>
-    $D(n)$ is <em>exactly</em> the triangle-weighted mean of $\prod_{p \mid g(g+1)\cdots(g+n)}\!\left(1-\frac{1}{p}\right)$
-    over the gap $g$ — no independence between strips required, for every $n$.
+    $D(n)$ is the triangle-weighted mean of $\prod_{p \mid g(g+1)\cdots(g+n)}\!\left(1-\frac{1}{p}\right)$
+    over the gap $g$, for every $n$ — proved below.
   </div>
   <div class="hero-work-hdr" id="hero-work-hdr" onclick="toggleHeroWork()">
     <span>Show work</span><span class="arrow">▶</span>
   </div>
   <div class="hero-work-body" id="hero-work-body">
-    One line per prime: among the residues of $g \bmod p$, exactly $\nu_p=\min(n{+}1,p)$ put $p$ inside the
-    block $g,\ldots,g{+}n$, so the mean local factor is $1-\nu_p/p^2$ — $D(n)$'s Euler factor, exactly.
-    An average needs no independence assumption; only the primes' contributions do, and those are exact via CRT.
-    Full derivation, the $n{=}1$ Feller–Tornier check, and the handoff to strip dependence (Page 5) are worked
+    A one-line prime-by-prime argument gives this identity directly — full derivation, the $n{=}1$ check
+    against the classical Feller–Tornier constant, and the handoff to strip dependence (Page 5) are worked
     out in <a href="#" onclick="toggleTheorySection();document.getElementById('theory-hdr').scrollIntoView({behavior:'smooth',block:'start'});return false;" style="color:var(--teal)">Extension to Block-Coprimality ↓</a>.
   </div>
 </div>
@@ -729,15 +727,15 @@ canvas { display: block; width: 100%; height: 100%; }
         <div class="kv-item"><span class="kv-k">n→∞</span><span class="kv-v" style="color:var(--violet)">C(∞)=0</span></div>
       </div>
       <p style="color:var(--cream3);font-size:0.82rem;margin-top:8px;">
-        This per-strip formula describes each diagonal individually — and the decomposition is exact:
-        averaging it over g recovers D(n) = C(n)/ζ(2) in the limit, for every n. No independence between
-        strips is needed, because an average is not a joint event. The one-line proof works prime by prime:
-        among the residues of g mod p, a fraction 1−min(n+1,p)/p avoid the block entirely (local factor 1),
-        and the rest carry the factor 1−1/p, so the mean local factor is
+        This per-strip formula describes each diagonal individually, and averaging it over g recovers
+        D(n) = C(n)/ζ(2) in the limit, for every n — an identity, since an average is a weighted sum
+        rather than a joint event, so no independence between strips is needed. The proof works prime by
+        prime: among the residues of g mod p, a fraction 1−min(n+1,p)/p avoid the block entirely (local
+        factor 1), and the rest carry the factor 1−1/p, so the mean local factor is
         (1−ν<sub>p</sub>/p) + (ν<sub>p</sub>/p)(1−1/p) = 1−ν<sub>p</sub>/p² with ν<sub>p</sub> = min(n+1,p) —
-        exactly D(n)'s Euler factor. At n=1 this is the classical mean value of φ(g)φ(g+1)/(g(g+1)) = ∏<sub>p</sub>(1−2/p²).
-        Where the strips' shared prime factors do matter is in joint events across strips — that
-        dependence is exactly computable, and Page 5 is devoted to it.
+        D(n)'s Euler factor. At n=1 this reduces to the classical mean value of φ(g)φ(g+1)/(g(g+1)) = ∏<sub>p</sub>(1−2/p²).
+        Shared prime factors between different strips do matter for joint events, though — that dependence
+        is computable in closed form, and Page 5 works it out.
       </p>
     </div>
 
