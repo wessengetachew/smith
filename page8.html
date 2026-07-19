@@ -190,8 +190,9 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
         <div class="ctrl-label">G — rings shown <span class="val" id="sp-gval">42</span></div>
         <div class="stepctrl">
           <button class="step-btn" onclick="spStepG(-1)" title="G − 1">−</button>
-          <input type="range" id="sp-gsl" min="8" max="90" value="42" oninput="onSpGChange()">
+          <input type="range" id="sp-gsl" min="8" max="400" value="42" oninput="onSpGChange()">
           <button class="step-btn" onclick="spStepG(1)" title="G + 1">+</button>
+          <input type="number" id="sp-gnum" min="8" max="400" value="42" style="width:56px;background:var(--bg2);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:11px;padding:3px 4px;text-align:center;" oninput="onSpGNumChange()">
         </div>
       </div>
       <div class="ctrl-block" style="flex:0;min-width:auto;">
@@ -210,12 +211,24 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
         <div class="ctrl-label" style="justify-content:flex-start;">Play</div>
         <button class="wgbtn" id="sp-playbtn" onclick="spTogglePlay()">▶ Sweep p</button>
       </div>
+      <div class="ctrl-block" style="flex:0;min-width:140px;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">View</div>
+        <select id="sp-view" onchange="onSpViewChange()" style="width:100%;background:var(--bg2);border:1px solid var(--edge2);color:var(--pink);font-family:var(--mono);font-size:10px;padding:5px 6px;">
+          <option value="ring">Ring</option>
+          <option value="lift">Lift</option>
+          <option value="grid">Grid</option>
+          <option value="farey">Farey</option>
+          <option value="gauss">Gauss</option>
+          <option value="smith">Smith</option>
+        </select>
+      </div>
     </div>
     <div class="togglegrid">
       <label><input type="checkbox" id="sp-mirror" checked onchange="drawSpiral()"> Mirror σ(r)=M−r</label>
       <label><input type="checkbox" id="sp-allp" onchange="drawSpiral()"> Overlay all primes</label>
       <label><input type="checkbox" id="sp-dropout" checked onchange="drawSpiral()"> Dropout ring (M=p)</label>
       <label><input type="checkbox" id="sp-base" checked onchange="drawSpiral()"> Base lattice (dim)</label>
+      <label><input type="checkbox" id="sp-labels" onchange="drawSpiral()"> Point labels (r)</label>
     </div>
     <canvas id="spiralCv" class="plot" style="height:440px;"></canvas>
     <div class="legend">
@@ -358,6 +371,20 @@ function spStepG(d){
 function onSpGChange(){
   const G = +document.getElementById('sp-gsl').value;
   document.getElementById('sp-gval').textContent = G;
+  document.getElementById('sp-gnum').value = G;
+  drawSpiral();
+}
+function onSpGNumChange(){
+  const num = document.getElementById('sp-gnum');
+  const sl = document.getElementById('sp-gsl');
+  let v = Math.max(+sl.min, Math.min(+sl.max, +num.value||42));
+  sl.value = v; num.value = v;
+  document.getElementById('sp-gval').textContent = v;
+  drawSpiral();
+}
+let _spView = 'ring';
+function onSpViewChange(){
+  _spView = document.getElementById('sp-view').value;
   drawSpiral();
 }
 function spStepP(dir){
@@ -392,10 +419,90 @@ function spTogglePlay(){
   }, 260);
 }
 
-function ringXY(cx,cy,maxR,G,r,M){
-  const R = maxR*(M-1)/Math.max(1,G-1);
-  const th = 2*Math.PI*r/M;
-  return [cx+R*Math.cos(th), cy-R*Math.sin(th)];
+// viewXY: maps a (r,M) residue point to one or more screen [x,y] positions,
+// depending on the chosen hero view. Ring/Lift share the same polar geometry
+// used throughout the site (this page's own construction IS that geometry).
+// Grid, Farey and Smith reuse the exact coordinate formulas from the hero's
+// own _drawHeroGrid / _drawHeroFarey / _conformalSmithXY. Gauss returns 4
+// points (one per quadrant) to match the hero's 4-fold mirrored layout.
+function viewXY(r, M, G, cx, cy, maxR, mode){
+  switch(mode){
+    case 'lift':
+    case 'ring': {
+      const R = maxR*(M-1)/Math.max(1,G-1);
+      const th = 2*Math.PI*r/M;
+      return [[cx+R*Math.cos(th), cy-R*Math.sin(th)]];
+    }
+    case 'smith': {
+      const ringR = M/Math.max(1,G);
+      const th = 2*Math.PI*r/M;
+      const zr = ringR*Math.cos(th), zi = ringR*Math.sin(th);
+      const denom = Math.max(1e-10, (zr+1)*(zr+1)+zi*zi);
+      const gr = ((zr-1)*(zr+1)+zi*zi)/denom;
+      const gi = (2*zi)/denom;
+      return [[cx+gr*maxR, cy-gi*maxR]];
+    }
+    case 'grid': {
+      const cw = (2*maxR)/Math.max(1,G);
+      return [[cx-maxR+(M-0.5)*cw, cy-maxR+(r-0.5)*cw]];
+    }
+    case 'farey': {
+      const rawY = Math.log(2/M)/Math.log(2/Math.max(2,G));
+      const logY = Math.max(0,rawY);
+      const y = cy + (logY*1.8-0.9)*maxR;
+      const fx = (r/M)*2-1;
+      return [[cx+fx*maxR, y]];
+    }
+    case 'gauss': {
+      const cw = maxR/Math.max(1,G);
+      const bx=(r-1+0.5)*cw, by=(M-1+0.5)*cw;
+      const pts=[];
+      for(let q=0;q<4;q++){
+        const ang=q*Math.PI/2;
+        const rx=bx*Math.cos(ang)-by*Math.sin(ang);
+        const ry=bx*Math.sin(ang)+by*Math.cos(ang);
+        pts.push([cx+rx, cy+ry]);
+      }
+      return pts;
+    }
+  }
+  return [[cx,cy]];
+}
+
+// dropoutLocus: the M=p boundary, drawn in whatever shape it takes under the
+// current view (circle for Ring/Lift, sampled curve for Smith, a line for
+// Grid/Farey). Gauss has no clean single locus under 4-fold mirroring, so
+// it's skipped there.
+function drawDropoutLocus(ctx, p, G, cx, cy, maxR, mode){
+  ctx.save();
+  ctx.setLineDash([3,3]);
+  ctx.strokeStyle = 'rgba(230,56,72,.6)';
+  ctx.lineWidth = 1.1;
+  if(mode==='ring'||mode==='lift'){
+    const R = maxR*(p-1)/Math.max(1,G-1);
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
+  } else if(mode==='smith'){
+    const ringR = p/Math.max(1,G);
+    ctx.beginPath();
+    for(let i=0;i<=64;i++){
+      const th = 2*Math.PI*i/64;
+      const zr = ringR*Math.cos(th), zi = ringR*Math.sin(th);
+      const denom = Math.max(1e-10, (zr+1)*(zr+1)+zi*zi);
+      const gr = ((zr-1)*(zr+1)+zi*zi)/denom, gi = (2*zi)/denom;
+      const x = cx+gr*maxR, y = cy-gi*maxR;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  } else if(mode==='grid'){
+    const cw = (2*maxR)/Math.max(1,G);
+    const x = cx-maxR+(p-0.5)*cw;
+    ctx.beginPath(); ctx.moveTo(x,cy-maxR); ctx.lineTo(x,cy+maxR); ctx.stroke();
+  } else if(mode==='farey'){
+    const rawY = Math.log(2/p)/Math.log(2/Math.max(2,G));
+    const y = cy + (Math.max(0,rawY)*1.8-0.9)*maxR;
+    ctx.beginPath(); ctx.moveTo(cx-maxR,y); ctx.lineTo(cx+maxR,y); ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function drawSpiral(){
@@ -415,11 +522,13 @@ function drawSpiral(){
 
   const cx = cssW/2, cy = cssH/2;
   const maxR = Math.min(cssW,cssH)*0.46;
+  const mode = _spView;
   const dir = _spDir;
   const mirrorOn = document.getElementById('sp-mirror').checked;
   const allPOn = document.getElementById('sp-allp').checked;
   const dropOn = document.getElementById('sp-dropout').checked;
   const baseOn = document.getElementById('sp-base').checked;
+  const labelsOn = document.getElementById('sp-labels').checked;
 
   function reduced(prime, M){
     if(dir==='down'){
@@ -435,9 +544,10 @@ function drawSpiral(){
     for(let M=3;M<=G;M++){
       for(let r=1;r<M;r++){
         if(gcd(r,M)!==1) continue;
-        const [x,y] = ringXY(cx,cy,maxR,G,r,M);
-        ctx.fillStyle = 'rgba(232,227,219,.12)';
-        ctx.beginPath(); ctx.arc(x,y,1.0,0,6.2832); ctx.fill();
+        viewXY(r,M,G,cx,cy,maxR,mode).forEach(function(pt){
+          ctx.fillStyle = 'rgba(232,227,219,.12)';
+          ctx.beginPath(); ctx.arc(pt[0],pt[1],1.0,0,6.2832); ctx.fill();
+        });
       }
     }
     ctx.restore();
@@ -453,70 +563,90 @@ function drawSpiral(){
       for(let M=ap+1; M<=G; M++){
         const r = reduced(ap,M);
         if(r<1||r>=M) continue;
-        const [x,y] = ringXY(cx,cy,maxR,G,r,M);
-        ctx.fillStyle = 'rgba(230,56,72,.25)';
-        ctx.beginPath(); ctx.arc(x,y,1.3,0,6.2832); ctx.fill();
+        viewXY(r,M,G,cx,cy,maxR,mode).forEach(function(pt){
+          ctx.fillStyle = 'rgba(230,56,72,.25)';
+          ctx.beginPath(); ctx.arc(pt[0],pt[1],1.3,0,6.2832); ctx.fill();
+        });
       }
     }
     ctx.restore();
   }
 
-  // Dropout ring — dashed circle at M = p
-  if(dropOn && p>=2 && p<=G){
-    const R = maxR*(p-1)/Math.max(1,G-1);
-    ctx.save();
-    ctx.setLineDash([3,3]);
-    ctx.strokeStyle = 'rgba(230,56,72,.6)';
-    ctx.lineWidth = 1.1;
-    ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
-    ctx.restore();
-  }
+  // Dropout locus — the M = p boundary in whatever shape the current view gives it
+  if(dropOn && p>=2 && p<=G) drawDropoutLocus(ctx, p, G, cx, cy, maxR, mode);
 
-  // Main spiral trace
-  const pts = [];
+  // Main spiral trace — one connected path per quadrant (Gauss has 4; everything else has 1)
+  const rmSeq = [];
   for(let M=p+1; M<=G; M++){
     const r = reduced(p,M);
     if(r<1||r>=M) continue;
-    pts.push(ringXY(cx,cy,maxR,G,r,M));
+    rmSeq.push([r,M]);
   }
-  ctx.save();
-  ctx.strokeStyle = 'rgba(230,56,72,.4)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
-  ctx.stroke();
-  ctx.restore();
-  pts.forEach(function(pt){
-    ctx.fillStyle = 'rgba(230,56,72,.95)';
-    ctx.beginPath(); ctx.arc(pt[0],pt[1],2.6,0,6.2832); ctx.fill();
+  const nQuad = mode==='gauss' ? 4 : 1;
+  const series = Array.from({length:nQuad}, function(){ return []; });
+  rmSeq.forEach(function(rm){
+    viewXY(rm[0],rm[1],G,cx,cy,maxR,mode).forEach(function(pt,qi){ series[qi].push(pt); });
+  });
+  const showLabels = labelsOn && rmSeq.length<=120;
+  series.forEach(function(pts){
+    ctx.save();
+    ctx.strokeStyle = 'rgba(230,56,72,.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
+    ctx.stroke();
+    ctx.restore();
+    pts.forEach(function(pt,i){
+      ctx.fillStyle = 'rgba(230,56,72,.95)';
+      ctx.beginPath(); ctx.arc(pt[0],pt[1],2.6,0,6.2832); ctx.fill();
+      if(showLabels){
+        ctx.font = "8px 'JetBrains Mono',monospace";
+        ctx.fillStyle = 'rgba(232,227,219,.7)';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText(String(rmSeq[i][0]), pt[0], pt[1]-4);
+      }
+    });
   });
 
   // Mirror conjugate σ(r) = M − r
   if(mirrorOn){
-    const mpts = [];
+    const mSeq = [];
     for(let M=p+1; M<=G; M++){
       const r = reduced(p,M);
       const rm = M - r;
       if(rm<1||rm>=M) continue;
-      mpts.push(ringXY(cx,cy,maxR,G,rm,M));
+      mSeq.push([rm,M]);
     }
-    ctx.save();
-    ctx.strokeStyle = 'rgba(155,127,232,.32)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    mpts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
-    ctx.stroke();
-    ctx.restore();
-    mpts.forEach(function(pt){
-      ctx.fillStyle = 'rgba(155,127,232,.85)';
-      ctx.beginPath(); ctx.arc(pt[0],pt[1],2.3,0,6.2832); ctx.fill();
+    const mSeries = Array.from({length:nQuad}, function(){ return []; });
+    mSeq.forEach(function(rm){
+      viewXY(rm[0],rm[1],G,cx,cy,maxR,mode).forEach(function(pt,qi){ mSeries[qi].push(pt); });
+    });
+    mSeries.forEach(function(pts){
+      ctx.save();
+      ctx.strokeStyle = 'rgba(155,127,232,.32)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
+      ctx.stroke();
+      ctx.restore();
+      pts.forEach(function(pt,i){
+        ctx.fillStyle = 'rgba(155,127,232,.85)';
+        ctx.beginPath(); ctx.arc(pt[0],pt[1],2.3,0,6.2832); ctx.fill();
+        if(showLabels){
+          ctx.font = "8px 'JetBrains Mono',monospace";
+          ctx.fillStyle = 'rgba(200,190,230,.65)';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          ctx.fillText(String(mSeq[i][0]), pt[0], pt[1]+4);
+        }
+      });
     });
   }
 
   document.getElementById('sp-r1').textContent = 'p = '+p+' ('+(dir==='up'?'r ≡ +p':'r ≡ −p')+' mod M)';
-  document.getElementById('sp-r2').textContent = pts.length+' points, rings '+(p+1)+'…'+G;
+  document.getElementById('sp-r2').textContent = rmSeq.length+' points, rings '+(p+1)+'…'+G;
   document.getElementById('sp-r3').textContent = (p<=G) ? ('M = '+p+' — gcd(p,p) = p, excluded') : '— (p > G, not shown)';
 }
+
 
 window.addEventListener('load', function(){ drawSpiral(); });
 window.addEventListener('resize', function(){ drawSpiral(); });

@@ -453,17 +453,11 @@ canvas { display: block; width: 100%; height: 100%; }
     <span>Show work</span><span class="arrow">▶</span>
   </div>
   <div class="hero-work-body" id="hero-work-body">
-    An average is not a joint event, so it needs no independence assumption — only a count. Fix a prime $p$.
-    Among the $p$ residue classes of $g \bmod p$, exactly $\nu_p=\min(n{+}1,p)$ make $p$ divide one of
-    $g,g{+}1,\ldots,g{+}n$; the rest ($p-\nu_p$ of them) are untouched by $p$ at this block. So the mean local
-    factor over $g$ is
-    $$\left(1-\frac{\nu_p}{p}\right)\cdot 1 \;+\; \frac{\nu_p}{p}\cdot\left(1-\frac1p\right) \;=\; 1-\frac{\nu_p}{p^2},$$
-    which is exactly $D(n)$'s Euler factor at $p$. Multiplying over all $p$ gives the mean of the strip
-    densities equal to $D(n)$ on the nose — an identity, not an approximation. At $n{=}1$ this reduces to the
-    classical mean value $\overline{\varphi(g)\varphi(g{+}1)/(g(g{+}1))}=\prod_p(1-2/p^2)$ (Feller–Tornier).
-    Shared prime factors between <em>different</em> strips do matter — but only for joint events, which is
-    what <a href="page5.html" style="color:var(--teal)">Page 5</a> computes exactly via
-    $\rho(g_1,g_2)=\prod_{p\mid\gcd(g_1,g_2)} p/(p-1)$.
+    One line per prime: among the residues of $g \bmod p$, exactly $\nu_p=\min(n{+}1,p)$ put $p$ inside the
+    block $g,\ldots,g{+}n$, so the mean local factor is $1-\nu_p/p^2$ — $D(n)$'s Euler factor, exactly.
+    An average needs no independence assumption; only the primes' contributions do, and those are exact via CRT.
+    Full derivation, the $n{=}1$ Feller–Tornier check, and the handoff to strip dependence (Page 5) are worked
+    out in <a href="#" onclick="toggleTheorySection();document.getElementById('theory-hdr').scrollIntoView({behavior:'smooth',block:'start'});return false;" style="color:var(--teal)">Extension to Block-Coprimality ↓</a>.
   </div>
 </div>
 
