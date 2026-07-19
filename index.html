@@ -1258,6 +1258,7 @@ function heroToggleTopBars(){
 
       <!-- Grid-only: plot the full G×G square or just the r<M triangle
            (bottom-left → top-right diagonal), mirroring the hero grid's toggle -->
+      <span id="wfs-anchor-ringlift" style="display:none;"></span>
       <div id="w-ringlift-ctrl" style="display:none;margin-top:6px;">
       <details id="w-ringlift-dd" style="background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.25);">
         <summary style="cursor:pointer;padding:6px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(61,200,184,.08);">
@@ -1413,14 +1414,14 @@ function heroToggleTopBars(){
           style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ G</button>
         <button onclick="wGStepPrime(-1)" title="Jump G to the previous prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">◂ prime</button>
-        <input type="range" id="ws-g-sl" min="0" max="100" step="1" value="45"
+        <input type="range" id="ws-g-sl" min="0" max="100" step="1" value="62"
           style="flex:1;accent-color:rgba(200,168,74,.8);" oninput="wGMarkUserTouched();wSetG(_sliderToG(+this.value))">
         <button onclick="wGStepPrime(1)" title="Jump G to the next prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">prime ▸</button>
-        <input type="number" id="ws-g-num" min="1" max="2048" value="31"
+        <input type="number" id="ws-g-num" min="1" max="2048" value="109"
           style="width:46px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;text-align:center;padding:2px 3px;outline:none;"
           oninput="wGMarkUserTouched();wSetG(+this.value)">
-        <span id="ws-g-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);white-space:nowrap;">G=31  (grid p²=961)</span>
+        <span id="ws-g-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);white-space:nowrap;">G=109  (grid p²=11881)</span>
       </div>
 
       <!-- p² jumps + global 90°-step rotation — mirrors the hero's p²−/p²+
@@ -1625,8 +1626,8 @@ function heroToggleTopBars(){
             <option value="phi_M">φ(M)</option>
             <option value="mobius_M">μ(M)</option>
             <option value="gap">gap |M-r|</option>
-            <option value="r_val" selected>r only</option>
-            <option value="M_val">M only</option>
+            <option value="r_val">r only</option>
+            <option value="M_val" selected>M only</option>
           </select>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Side:</span>
           <select id="wsec-label-side" onchange="wRedrawCanvas()" title="Where labels sit relative to each point — alternating spreads dense runs apart"
@@ -2256,7 +2257,7 @@ function heroToggleTopBars(){
     // otherwise be unreachable). Moved, not cloned — single source of truth.
     var btnRow=document.getElementById('wfs-btn-row');
     // Formula + view-select rows go ABOVE the spin/flip/zoom button row
-    var topRows=[['welcome-cn-block','wfs-anchor-formula'],['ws-mode-row','wfs-anchor-mode'],['wm-finite-panel','wfs-anchor-finite'],['ws-view-row','wfs-anchor-view'],['w-adv-section','wfs-anchor-adv'],['ws-sector-ctrl','wfs-anchor-sector'],['ws-gaps-dd','wfs-anchor-gaps'],['hero-working-dd','wfs-anchor-working'],['ws-smith-ctrl','wfs-anchor-smithctrl'],['ws-perring-dd','wfs-anchor-perring']];
+    var topRows=[['welcome-cn-block','wfs-anchor-formula'],['ws-mode-row','wfs-anchor-mode'],['wm-finite-panel','wfs-anchor-finite'],['ws-view-row','wfs-anchor-view'],['w-ringlift-ctrl','wfs-anchor-ringlift'],['w-adv-section','wfs-anchor-adv'],['ws-sector-ctrl','wfs-anchor-sector'],['ws-gaps-dd','wfs-anchor-gaps'],['hero-working-dd','wfs-anchor-working'],['ws-smith-ctrl','wfs-anchor-smithctrl'],['ws-perring-dd','wfs-anchor-perring']];
     topRows.forEach(function(pair){
       var row=document.getElementById(pair[0]);
       var anchor=document.getElementById(pair[1]);
@@ -3180,7 +3181,7 @@ function heroToggleTopBars(){
     }
   }
 
-  var _wG=31; // opener lattice size — now slider-controlled (was hardcoded)
+  var _wG=109; // opener lattice size — now slider-controlled (was hardcoded)
   // Compact gcd / lift / lift÷gcd readout on the FORMULA summary line —
   // same counts as the hero panel (_cnExportCounts), sized to fit one row.
   // Early-capable counts: the deferred script's _cnExportCounts takes seconds
@@ -5454,11 +5455,11 @@ function heroToggleTopBars(){
   <button id="hero-n-play" onclick="heroNPlay()"
     style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.3);color:rgba(61,200,184,.85);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.06em;"
     title="Animate n from 0 → current N → 0 (ping-pong)">▶ N</button>
-  <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);white-space:nowrap;">G=<span id="hero-g-val">31</span></span>
-  <input type="range" id="hero-g-sl" min="2" max="512" value="31" step="1"
+  <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);white-space:nowrap;">G=<span id="hero-g-val">2</span></span>
+  <input type="range" id="hero-g-sl" min="2" max="512" value="2" step="1"
     style="width:90px;accent-color:rgba(200,168,74,.8);"
     oninput="heroLatticeSetG(+this.value)">
-  <input type="number" id="hero-g-num" min="2" max="2048" value="31"
+  <input type="number" id="hero-g-num" min="2" max="2048" value="2"
     style="width:44px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:9px;padding:2px 4px;outline:none;text-align:center;"
     oninput="heroLatticeSetG(Math.max(2,Math.min(2048,+this.value||31)))">
   <!-- p² navigation -->
@@ -5646,8 +5647,8 @@ function heroToggleTopBars(){
         <option value="phi_M">φ(M)</option>
         <option value="mobius_M">μ(M)</option>
         <option value="gap">gap |M-r|</option>
-        <option value="r_val" selected>r only</option>
-        <option value="M_val">M only</option>
+        <option value="r_val">r only</option>
+        <option value="M_val" selected>M only</option>
       </select>
       <span class="cv-lbl">Side:</span>
       <select id="hero-sec-label-side" onchange="void 0" title="Where sector labels sit relative to each point — alternating spreads dense runs apart"
@@ -14101,7 +14102,7 @@ ro.observe(document.getElementById('cv-ring-wrap'));
 //  Gold = block-coprime, Teal = coprime-only, Dark = neither
 //  Controls: size slider, color-by-r, gap highlight
 // ══════════════════════════════════════════════════════════
-let _heroG=31;
+let _heroG=2;
 let _heroRotSteps=0; // 0=0° 1=90°CW 2=180° 3=270°CW — defaults to 0° now, all views start unrotated
 let _heroViewMode='smith'; // 'grid' | 'ring' | 'farey' | 'lift' | 'gauss' | 'smith'
 let _heroColorR=false;
