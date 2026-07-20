@@ -1696,7 +1696,7 @@ function heroToggleTopBars(){
       <span id="wfs-anchor-gaps" style="display:none;"></span>
       <span id="wfs-anchor-working" style="display:none;"></span>
       <span id="w-working-slot" style="display:block;"></span>
-      <details id="ws-gaps-dd" style="margin-top:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);">
+      <details id="ws-gaps-dd" ontoggle="if(this.open&&typeof wRefreshRList==='function')wRefreshRList()" style="margin-top:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);">
         <summary style="cursor:pointer;padding:7px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
           <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#a8a294;">▸</span>
           <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#a8a294;letter-spacing:.06em;">ACTIVE GAPS</span>
@@ -1751,6 +1751,23 @@ function heroToggleTopBars(){
           oninput="wSetLineThick(+this.value)"
           title="Line thickness of the residue-chord overlay (comet-tail + chord)">
         <span id="w-line-thick-lbl" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(120,180,240,.85);min-width:22px;">1.0×</span>
+        </div>
+
+        <!-- Residue Points — page7-style "Residue Path Details" dropdown:
+             click one or more R's to highlight just those paths live. -->
+        <div style="margin:0 9px 9px;padding:9px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:2px;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;font-weight:600;">Residue Points</span>
+            <input id="w-r-jump-input" type="text" placeholder="R or R1,R2…"
+              style="width:90px;background:rgba(255,255,255,.05);border:1px solid rgba(74,144,217,.5);color:#ffd700;font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 5px;outline:none;"
+              onkeydown="if(event.key==='Enter')wJumpToR()">
+            <button onclick="wJumpToR()" style="background:none;border:1px solid rgba(74,144,217,.6);color:rgba(120,180,240,.9);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">Go</button>
+            <button onclick="wSelectAllR()" style="background:none;border:1px solid rgba(126,200,122,.5);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">Select All</button>
+            <button onclick="wClearSelectedR()" style="background:none;border:1px solid rgba(255,255,255,.18);color:#cfc9bc;font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 8px;cursor:pointer;">Clear</button>
+          </div>
+          <div id="w-r-list" style="display:flex;gap:4px;flex-wrap:wrap;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#6a6560;">no residues yet — pick an active gap above</span>
+          </div>
         </div>
 
         <!-- Dynamic Gap Generation — ported from the old project. These build
@@ -2810,6 +2827,9 @@ function heroToggleTopBars(){
   var _wOverlayPairs=[];
   var _wOverlayCacheKey='';
   var _wGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
+  // Active Gap tab — individually selected residues (opener twin of the
+  // hero's _heroSelectedR). Empty = show every residue from active pairs.
+  var _wSelectedR=new Set();
   window.wToggleResidueOverlay=function(){
     _wResidueOverlayOn=!_wResidueOverlayOn;
     var btn=document.getElementById('w-residue-overlay-btn');
@@ -2819,6 +2839,65 @@ function heroToggleTopBars(){
       btn.style.color=_wResidueOverlayOn?'rgba(120,180,240,.95)':'#a8a294';
     }
     _wOverlayCacheKey='';
+    if(typeof wRefreshRList==='function')wRefreshRList();
+    wRedrawCanvas();
+  };
+  function _wMarkResidueOverlayOn(){
+    _wResidueOverlayOn=true;
+    var btn=document.getElementById('w-residue-overlay-btn');
+    if(btn){
+      btn.style.background='rgba(74,144,217,.18)';
+      btn.style.borderColor='rgba(74,144,217,.75)';
+      btn.style.color='rgba(120,180,240,.95)';
+    }
+  }
+  window.wRefreshRList=function(){
+    var box=document.getElementById('w-r-list');
+    if(!box)return;
+    var pairs=_wEnsureOverlayPairs();
+    var rSeen={},rArr=[];
+    pairs.forEach(function(p){
+      if(!rSeen[p.r1]){rSeen[p.r1]=1;rArr.push(p.r1);}
+      if(!rSeen[p.r2]){rSeen[p.r2]=1;rArr.push(p.r2);}
+    });
+    rArr.sort(function(a,b){return a-b;});
+    if(!rArr.length){
+      box.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:7.5px;color:#6a6560;">no residues yet — pick an active gap above</span>';
+      return;
+    }
+    box.innerHTML=rArr.map(function(r){
+      var on=_wSelectedR.has(r);
+      return '<button onclick="wToggleR('+r+')" style="background:'+(on?'rgba(255,224,51,.22)':'none')+';border:1px solid '+(on?'#ffe033':'rgba(255,255,255,.18)')+';color:'+(on?'#ffe033':'#a8a294')+';font-family:\'JetBrains Mono\',monospace;font-size:7.5px;padding:2px 6px;cursor:pointer;">'+r+'</button>';
+    }).join('');
+  };
+  window.wToggleR=function(r){
+    r=+r;
+    if(_wSelectedR.has(r))_wSelectedR.delete(r); else _wSelectedR.add(r);
+    _wMarkResidueOverlayOn();
+    wRefreshRList();
+    wRedrawCanvas();
+  };
+  window.wJumpToR=function(){
+    var inp=document.getElementById('w-r-jump-input');
+    var raw=(inp?inp.value:'').trim();
+    if(!raw){ _wSelectedR.clear(); }
+    else{
+      raw.split(',').forEach(function(s){var v=parseInt(s.trim(),10); if(!isNaN(v))_wSelectedR.add(v);});
+      _wMarkResidueOverlayOn();
+    }
+    wRefreshRList();
+    wRedrawCanvas();
+  };
+  window.wSelectAllR=function(){
+    var pairs=_wEnsureOverlayPairs();
+    pairs.forEach(function(p){_wSelectedR.add(p.r1);_wSelectedR.add(p.r2);});
+    _wMarkResidueOverlayOn();
+    wRefreshRList();
+    wRedrawCanvas();
+  };
+  window.wClearSelectedR=function(){
+    _wSelectedR.clear();
+    wRefreshRList();
     wRedrawCanvas();
   };
   function _wEnsureOverlayPairs(){
@@ -2841,16 +2920,19 @@ function heroToggleTopBars(){
   function _drawWResidueChords(ctx,W,H,mMax,ptXY){
     if(!_wResidueOverlayOn)return;
     var pairs=_wEnsureOverlayPairs().slice(0,200);
+    var hasRSel=_wSelectedR.size>0;
+    if(hasRSel) pairs=pairs.filter(function(pr){return _wSelectedR.has(pr.r1)||_wSelectedR.has(pr.r2);});
     if(!pairs.length)return;
     var overlayAlpha=0.8;
     ctx.save();
     var rList=[],rSeen={};
     pairs.forEach(function(pr){
-      if(!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
-      if(!rSeen[pr.r2]){rSeen[pr.r2]=pr.gap;rList.push(pr.r2);}
+      if((!hasRSel||_wSelectedR.has(pr.r1))&&!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
+      if((!hasRSel||_wSelectedR.has(pr.r2))&&!rSeen[pr.r2]){rSeen[pr.r2]=pr.gap;rList.push(pr.r2);}
     });
     rList.forEach(function(r){
-      var col=_wGapColorFor(rSeen[r]);
+      var isSel=hasRSel&&_wSelectedR.has(r);
+      var col=isSel?'#ffe033':_wGapColorFor(rSeen[r]);
       for(var mk=mMax-1;mk>=1;mk--){
         var A=ptXY(r,mk), B=ptXY(r,mk+1);
         if(!A||!B)continue;
@@ -2858,14 +2940,14 @@ function heroToggleTopBars(){
         ctx.beginPath();
         ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]);
         ctx.strokeStyle=col;
-        ctx.lineWidth=Math.max(0.8,W*0.003*t)*_wLineThickMul;
-        ctx.globalAlpha=(0.25+0.55*t)*overlayAlpha;
+        ctx.lineWidth=Math.max(0.8,W*0.003*t)*_wLineThickMul*(isSel?1.8:1);
+        ctx.globalAlpha=(isSel?0.95:(0.25+0.55*t))*overlayAlpha;
         ctx.stroke();
       }
       var o=ptXY(r,mMax);
       if(o){
         ctx.beginPath();
-        ctx.arc(o[0],o[1],Math.max(3,W*0.007),0,2*Math.PI);
+        ctx.arc(o[0],o[1],Math.max(3,W*0.007)*(isSel?1.5:1),0,2*Math.PI);
         ctx.fillStyle=col; ctx.globalAlpha=0.95;
         ctx.fill();
       }
@@ -2979,6 +3061,7 @@ function heroToggleTopBars(){
   };
   window.wClearAllGaps=function(){
     _wActiveGaps.clear();
+    _wSelectedR.clear();
     if(_wGapLockHalf){
       _wGapLockHalf=false;
       var lb=document.getElementById('w-gap-lock-half');
@@ -3001,6 +3084,8 @@ function heroToggleTopBars(){
     }
     var sl=document.getElementById('w-gap-sl');
     if(sl)sl.value=(_wActiveGaps.size===1)?_wActiveGaps.values().next().value:0;
+    _wOverlayCacheKey='';
+    if(typeof wRefreshRList==='function')wRefreshRList();
   }
   // Gap slider — mirrors the hero's: sets exactly one active gap (0 = off).
   // Max always tracks the opener grid size G (updated in wSetG + lazily here).
@@ -5721,7 +5806,7 @@ function heroToggleTopBars(){
      (Ring, Grid, Farey, Lift, Gauss, Smith) — same idea as the opener's own
      Active Gaps tab, given its own collapsible section here instead of being
      buried inline in Lattice Controls. ══ -->
-<details id="hero-gaps-dd" style="background:rgba(7,7,26,.97);border:1px solid rgba(200,168,74,.28);border-top:none;font-family:var(--mono);">
+<details id="hero-gaps-dd" ontoggle="if(this.open&&typeof heroRefreshRList==='function')heroRefreshRList()" style="background:rgba(7,7,26,.97);border:1px solid rgba(200,168,74,.28);border-top:none;font-family:var(--mono);">
   <summary style="cursor:pointer;padding:8px 14px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:rgba(200,168,74,.9);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
     <span style="display:inline-block;transition:transform .15s;">▸</span>
     Active Gaps
@@ -5783,6 +5868,23 @@ function heroToggleTopBars(){
       oninput="heroSetLineThick(+this.value)"
       title="Line thickness of the residue-chord overlay (comet-tail + chord)">
     <span id="hero-line-thick-lbl" style="font-family:var(--mono);font-size:7.5px;color:rgba(120,180,240,.85);min-width:22px;">1.0×</span>
+  </div>
+  <!-- Residue Points — the page7-style "Residue Path Details" dropdown:
+       click one or more R's to highlight just those paths (comet-tail
+       descent lines) live on the canvas, on top of the Active Gap above. -->
+  <div style="margin:0 14px 10px;padding:9px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:2px;">
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+      <span style="font-family:var(--mono);font-size:8px;color:#a8a294;font-weight:600;">Residue Points</span>
+      <input id="hero-r-jump-input" type="text" placeholder="R or R1,R2…"
+        style="width:90px;background:rgba(255,255,255,.05);border:1px solid rgba(74,144,217,.5);color:#ffd700;font-family:var(--mono);font-size:8px;padding:3px 5px;outline:none;"
+        onkeydown="if(event.key==='Enter')heroJumpToR()">
+      <button onclick="heroJumpToR()" style="background:none;border:1px solid rgba(74,144,217,.6);color:rgba(120,180,240,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">Go</button>
+      <button onclick="heroSelectAllR()" style="background:none;border:1px solid rgba(126,200,122,.5);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">Select All</button>
+      <button onclick="heroClearSelectedR()" style="background:none;border:1px solid var(--edge2);color:var(--cream3);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;">Clear</button>
+    </div>
+    <div id="hero-r-list" style="display:flex;gap:4px;flex-wrap:wrap;">
+      <span style="font-family:var(--mono);font-size:7.5px;color:#6a6560;">no residues yet — pick an active gap above</span>
+    </div>
   </div>
   <!-- Dynamic Gap Generation — same control-builders as the opener: these
        CREATE new toggle buttons (off by default); they don't switch gaps on. -->
@@ -14303,6 +14405,10 @@ let _heroResidueOverlayOn=false; // off by default
 let _heroOverlayPairs=[];
 let _heroOverlayCacheKey='';
 const _heroGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
+// Active Gap tab — individually selected residues (from the R dropdown/list).
+// Empty set = every residue from the active gap pairs is shown (old behavior);
+// non-empty = only the clicked R's paths are drawn, brightened, page7-style.
+let _heroSelectedR=new Set();
 
 function heroToggleResidueOverlay(){
   _heroResidueOverlayOn=!_heroResidueOverlayOn;
@@ -14313,6 +14419,61 @@ function heroToggleResidueOverlay(){
     btn.style.color=_heroResidueOverlayOn?'rgba(120,180,240,.95)':'#a8a294';
   }
   _heroOverlayCacheKey=''; // force rebuild
+  heroRefreshRList();
+}
+function _heroMarkResidueOverlayOn(){
+  _heroResidueOverlayOn=true;
+  const btn=document.getElementById('hero-residue-overlay-btn');
+  if(btn){
+    btn.style.background='rgba(74,144,217,.18)';
+    btn.style.borderColor='rgba(74,144,217,.75)';
+    btn.style.color='rgba(120,180,240,.95)';
+  }
+}
+// Rebuilds the clickable R-value list in the Active Gap dropdown from
+// whichever residues the current active gap(s) actually produce. Call after
+// any change to _heroActiveGaps, _heroG, or the overlay toggle itself.
+function heroRefreshRList(){
+  const box=document.getElementById('hero-r-list');
+  if(!box)return;
+  const pairs=_heroEnsureOverlayPairs();
+  const rSeen={},rArr=[];
+  pairs.forEach(p=>{if(!rSeen[p.r1]){rSeen[p.r1]=1;rArr.push(p.r1);}if(!rSeen[p.r2]){rSeen[p.r2]=1;rArr.push(p.r2);}});
+  rArr.sort((a,b)=>a-b);
+  if(!rArr.length){
+    box.innerHTML='<span style="font-family:var(--mono);font-size:7.5px;color:#6a6560;">no residues yet — pick an active gap above</span>';
+    return;
+  }
+  box.innerHTML=rArr.map(r=>{
+    const on=_heroSelectedR.has(r);
+    return '<button onclick="heroToggleR('+r+')" style="background:'+(on?'rgba(255,224,51,.22)':'none')+';border:1px solid '+(on?'#ffe033':'rgba(255,255,255,.18)')+';color:'+(on?'#ffe033':'#a8a294')+';font-family:var(--mono);font-size:7.5px;padding:2px 6px;cursor:pointer;">'+r+'</button>';
+  }).join('');
+}
+function heroToggleR(r){
+  r=+r;
+  if(_heroSelectedR.has(r))_heroSelectedR.delete(r); else _heroSelectedR.add(r);
+  _heroMarkResidueOverlayOn();
+  heroRefreshRList();
+}
+function heroJumpToR(){
+  const inp=document.getElementById('hero-r-jump-input');
+  const raw=(inp?inp.value:'').trim();
+  if(!raw){ _heroSelectedR.clear(); }
+  else{
+    raw.split(',').forEach(s=>{const v=parseInt(s.trim(),10); if(!isNaN(v))_heroSelectedR.add(v);});
+    _heroMarkResidueOverlayOn();
+  }
+  heroRefreshRList();
+}
+function heroSelectAllR(){
+  const pairs=_heroEnsureOverlayPairs();
+  pairs.forEach(p=>{_heroSelectedR.add(p.r1);_heroSelectedR.add(p.r2);});
+  _heroMarkResidueOverlayOn();
+  heroRefreshRList();
+}
+function heroClearSelectedR(){
+  _heroSelectedR.clear();
+  heroRefreshRList();
 }
 
 // Exact-gap prime sieve → residue pairs mod modN. Identical logic to
@@ -14367,20 +14528,25 @@ function _heroEnsureOverlayPairs(){
 // the view uses is still active, so the chords inherit it automatically.
 function _drawHeroResidueChords(ctx,W,H,mMax,ptXY){
   if(!_heroResidueOverlayOn)return;
-  const pairs=_heroEnsureOverlayPairs().slice(0,200); // MAX_DISPLAY, matches gap-zeta2
+  let pairs=_heroEnsureOverlayPairs().slice(0,200); // MAX_DISPLAY, matches gap-zeta2
+  const hasRSel=_heroSelectedR.size>0;
+  if(hasRSel) pairs=pairs.filter(pr=>_heroSelectedR.has(pr.r1)||_heroSelectedR.has(pr.r2));
   if(!pairs.length)return;
   const overlayAlpha=0.8;
 
   ctx.save();
 
-  // ── comet-tail descent lines, one per unique residue ──
+  // ── comet-tail descent lines, one per unique residue — when the R
+  // dropdown has an explicit selection, only those R's paths are drawn
+  // (and drawn brighter/thicker, page7-style highlight). ──
   const rList=[],rSeen={};
   pairs.forEach(pr=>{
-    if(!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
-    if(!rSeen[pr.r2]){rSeen[pr.r2]=pr.gap;rList.push(pr.r2);}
+    if((!hasRSel||_heroSelectedR.has(pr.r1))&&!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
+    if((!hasRSel||_heroSelectedR.has(pr.r2))&&!rSeen[pr.r2]){rSeen[pr.r2]=pr.gap;rList.push(pr.r2);}
   });
   rList.forEach(r=>{
-    const col=_gapColor(rSeen[r]);
+    const isSel=hasRSel&&_heroSelectedR.has(r);
+    const col=isSel?'#ffe033':_gapColor(rSeen[r]);
     for(let mk=mMax-1;mk>=1;mk--){
       const A=ptXY(r,mk), B=ptXY(r,mk+1);
       if(!A||!B)continue;
@@ -14388,14 +14554,14 @@ function _drawHeroResidueChords(ctx,W,H,mMax,ptXY){
       ctx.beginPath();
       ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]);
       ctx.strokeStyle=col;
-      ctx.lineWidth=Math.max(0.8,W*0.003*t)*_heroLineThickMul;
-      ctx.globalAlpha=(0.25+0.55*t)*overlayAlpha;
+      ctx.lineWidth=Math.max(0.8,W*0.003*t)*_heroLineThickMul*(isSel?1.8:1);
+      ctx.globalAlpha=(isSel?0.95:(0.25+0.55*t))*overlayAlpha;
       ctx.stroke();
     }
     const o=ptXY(r,mMax);
     if(o){
       ctx.beginPath();
-      ctx.arc(o[0],o[1],Math.max(3,W*0.007),0,2*Math.PI);
+      ctx.arc(o[0],o[1],Math.max(3,W*0.007)*(isSel?1.5:1),0,2*Math.PI);
       ctx.fillStyle=col; ctx.globalAlpha=0.95;
       ctx.fill();
     }
@@ -17218,9 +17384,12 @@ function heroGapSyncButtons(){
   }
   const sl=document.getElementById('hero-gap-sl');
   if(sl) sl.value = _heroActiveGaps.size===1 ? [..._heroActiveGaps][0] : 0;
+  _heroOverlayCacheKey='';
+  if(typeof heroRefreshRList==='function')heroRefreshRList();
 }
 function heroGapClear(){
   _heroActiveGaps.clear();
+  _heroSelectedR.clear();
   _heroGapSpotlight=null;_heroOverlayCacheKey='';
   if(_heroGapLockHalf){
     _heroGapLockHalf=false;
