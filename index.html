@@ -1336,6 +1336,10 @@ function heroToggleTopBars(){
           <option value="ring_hash">By Ring/Modulus (M hue, ignores r)</option>
           <option value="phi_position" selected>φ(M) Mathematical Progression</option>
           <option value="phi_spectrum">φ(M)/M Spectral Distribution</option>
+          <option value="phi_value">φ(M) Magnitude Hue</option>
+          <option value="gcd_status">gcd(r,M) = 1 vs ≠ 1 (binary)</option>
+          <option value="gcd_value">By gcd(r,M) Value</option>
+          <option value="fraction_ab">By r/M Position (a/b, Farey ratio)</option>
         </select>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#6a6560;">all 5 views</span>
       </div>
@@ -3149,7 +3153,10 @@ function heroToggleTopBars(){
     wRedrawCanvas();
   };
   function _wModColor(r,M,ok,pureCop){
-    if(pureCop===false) return 'rgba(224,80,96,.78)'; // χ(r)=0 — clearly red, not the old near-invisible dim hue
+    // gcd_status / gcd_value color non-coprime (gcd≠1) points deliberately —
+    // every other mode keeps the flat "χ(r)=0" red so that behaviour is unchanged.
+    var _selfHandlesGcd=(_wColorMode==='gcd_status'||_wColorMode==='gcd_value');
+    if(pureCop===false&&!_selfHandlesGcd) return 'rgba(224,80,96,.78)'; // χ(r)=0 — clearly red, not the old near-invisible dim hue
     switch(_wColorMode){
       case 'residue_value':{ // same r → same hue, ignores ring (old project's "By Residue Value")
         var h1=(r*37)%360;
@@ -3171,6 +3178,28 @@ function heroToggleTopBars(){
         var h4=(density*240+r*15)%360;
         var sat=60+density*30;
         return ok?('hsla('+(h4|0)+','+(sat|0)+'%,65%,.92)'):('hsla('+(h4|0)+','+((sat*0.5)|0)+'%,30%,.4)');
+      }
+      case 'phi_value':{ // hue driven directly by φ(M)'s own magnitude, not its position/density
+        var pv=phi(M);
+        var h5=(pv*11+M*3)%360;
+        var sat5=55+Math.min(35,pv);
+        return ok?('hsla('+(h5|0)+','+(sat5|0)+'%,64%,.92)'):('hsla('+(h5|0)+','+((sat5*0.5)|0)+'%,30%,.4)');
+      }
+      case 'gcd_status':{ // pure binary: coprime (teal) vs not coprime (coral) — independent of block-depth survival
+        if(!pureCop) return 'hsla(6,72%,55%,.72)';
+        return ok?'hsla(174,72%,58%,.92)':'hsla(174,42%,32%,.4)';
+      }
+      case 'gcd_value':{ // hue scaled by the actual gcd(r,M) magnitude, so different common factors read as different colors
+        var gv=gcd(r,M);
+        var h6=(gv*47)%360;
+        if(gv===1) return ok?('hsla('+h6+',75%,62%,.9)'):('hsla('+h6+',45%,30%,.4)');
+        var sat6=Math.max(25,60-gv*3);
+        return 'hsla('+h6+','+(sat6|0)+'%,42%,.75)';
+      }
+      case 'fraction_ab':{ // hue by the reduced fraction r/M's position on (0,1) — the sector "a/b" ratio
+        var frac=r/Math.max(1,M);
+        var h7=(frac*300)%360;
+        return ok?('hsla('+(h7|0)+',78%,60%,.92)'):('hsla('+(h7|0)+',45%,30%,.4)');
       }
       default:{
         var dist=Math.min(r,M-r);
@@ -4618,7 +4647,7 @@ function heroToggleTopBars(){
     var Cn=(_wMode==='finite'?_wCnFin(n,_wPrimeK):_wCn(n)).toFixed(6);
     var viewLabel={smith:'Smith Chart',ring:'Ring',grid:'Grid',farey:'Farey',gauss:'Gaussian Integers'}[_wView]||_wView;
     var modeLabel=(_wMode==='finite')?('Finite p≤'+(_wPrimes[_wPrimeK-1]||'?')):'Asymptotic';
-    var colorLabel={'default':'Distance hue',residue_value:'By residue value',ring_hash:'By ring/modulus',phi_position:'φ(M) progression',phi_spectrum:'φ(M)/M spectrum'}[_wColorMode]||_wColorMode;
+    var colorLabel={'default':'Distance hue',residue_value:'By residue value',ring_hash:'By ring/modulus',phi_position:'φ(M) progression',phi_spectrum:'φ(M)/M spectrum',phi_value:'φ(M) magnitude',gcd_status:'gcd=1 vs gcd≠1',gcd_value:'By gcd value',fraction_ab:'By r/M (a/b)'}[_wColorMode]||_wColorMode;
     var charLabel=_wCharFilter==='both'?'χ≠0 & χ=0':(_wCharFilter==='support'?'χ≠0 only':'χ=0 only');
     var ringLabel=_wActiveRings&&_wActiveRings.size?(_wActiveRings.size+' custom rings'):'all rings 1–'+G;
 
