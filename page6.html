@@ -1002,7 +1002,75 @@ function openOpener(){
                 <button onclick="screenshotMainCanvas()" class="secondary" style="padding:8px 12px;">Screenshot</button>
             </div>
         </div>
-        
+
+        <!-- ══ C(n) — LIVE VALUE & SURVIVAL RATIOS — sectorMin/sectorMax here play the
+             role of the opener's G: each sector n IS a ring at modulus m=n, so the
+             range below is exactly the same (r,M) lattice the opener's ring view uses. ══ -->
+        <div id="cn-ratio-panel" style="background:#0f172a;border-radius:8px;padding:12px 16px;margin-bottom:15px;border:1px solid #334155;border-left:4px solid #c8a84a;">
+            <div onclick="cnTogglePanel()" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;">
+                <span id="cnChevron" style="display:inline-block;transition:transform .15s;color:#c8a84a;font-size:11px;">&#9662;</span>
+                <strong style="color:#c8a84a;font-size:12px;letter-spacing:0.03em;">C(n) — live value &amp; survival ratios</strong>
+                <span style="color:#334155;">|</span>
+                <span style="font-size:11px;color:#94a3b8;">depth n:</span>
+                <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:3px;">
+                    <button onclick="cnDepthStep(-1)" title="n − 1" style="background:#1e293b;border:1px solid #475569;color:#22c55e;font-size:11px;width:20px;height:22px;cursor:pointer;padding:0;line-height:1;border-radius:3px;">&minus;</button>
+                    <input type="number" id="cnDepthN" min="0" max="60" value="1" style="width:40px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;padding:2px 4px;text-align:center;" onchange="if(window.cnUpdatePanel)cnUpdatePanel();if(window.cnSpiralSyncLock)cnSpiralSyncLock();if(window.state&&(state.cnCanvasOn||(state.liftSpiralOn&&state.liftSpiralLock))&&window.drawMainRing)drawMainRing();">
+                    <button onclick="cnDepthStep(1)" title="n + 1" style="background:#1e293b;border:1px solid #475569;color:#22c55e;font-size:11px;width:20px;height:22px;cursor:pointer;padding:0;line-height:1;border-radius:3px;">+</button>
+                    <button id="cnPlayBtn" onclick="cnPlayToggle()" title="Animate n from 0 → current n → 0" style="background:rgba(200,168,74,0.12);border:1px solid #c8a84a;color:#c8a84a;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;margin-left:3px;">&#9654;</button>
+                </span>
+                <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
+                <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;">
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#94a3b8;font-size:10.5px;cursor:pointer;" title="Wire depth n to the ring canvas: points that fail gcd(r,m+j)=1 for j=0..n get dimmed or removed as n rises"><input type="checkbox" id="cnCanvasOnChk" onchange="cnSetCanvasOn(this.checked)"> Canvas</label>
+                    <select id="cnCanvasModeSel" onchange="cnSetCanvasMode(this.value)" style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:10px;padding:2px 4px;">
+                        <option value="dim">Dim</option>
+                        <option value="remove">Remove</option>
+                    </select>
+                    <input type="range" id="cnCanvasDimSl" min="0" max="80" step="5" value="12" style="width:50px;" oninput="cnSetCanvasDimAmt(this.value)" title="Brightness of non-surviving points in Dim mode">
+                    <span id="cnCanvasDimLbl" style="color:#64748b;font-size:10px;min-width:26px;">12%</span>
+                </span>
+                <span id="cnRangeNote" style="font-size:10.5px;color:#64748b;margin-left:auto;"></span>
+            </div>
+            <details id="cnLiftDynDD" open style="margin-top:6px;background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.25);border-radius:4px;">
+                <summary onclick="event.stopPropagation()" style="cursor:pointer;padding:5px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.08);border-radius:4px 4px 0 0;">
+                    <span class="cn-ld-chev" style="display:inline-block;transition:transform .15s;font-size:9px;color:#c8a84a;">&#9656;</span>
+                    <span style="color:#c8a84a;letter-spacing:.08em;text-transform:uppercase;font-size:10px;">Lift dynamics — prime spiral</span>
+                </summary>
+                <style>#cnLiftDynDD[open]>summary>span.cn-ld-chev{transform:rotate(90deg);}</style>
+                <div onclick="event.stopPropagation()" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;font-family:inherit;">
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#c8a84a;font-size:10.5px;cursor:pointer;" title="Plot r = p (mod m) on every ring m>p — since p/m shrinks as m grows, this traces a spiral arm inward"><input type="checkbox" id="cnSpOnChk" checked onchange="cnSpiralSetOn(this.checked)"> Show spiral</label>
+                    <button onclick="cnSpiralStep(-1)" title="Previous prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-size:10.5px;padding:1px 7px;cursor:pointer;border-radius:3px;">&#9664;</button>
+                    <span id="cnSpPLbl" style="color:#c8a84a;font-size:10.5px;min-width:32px;text-align:center;">p=2</span>
+                    <button onclick="cnSpiralStep(1)" title="Next prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-size:10.5px;padding:1px 7px;cursor:pointer;border-radius:3px;">&#9654;</button>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#9b7fe8;font-size:10.5px;cursor:pointer;" title="Mirror σ(r)=m−r"><input type="checkbox" id="cnSpMirrorChk" checked onchange="cnSpiralSetMirror(this.checked)"> Mirror</label>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10.5px;cursor:pointer;" title="Lock the spiral prime to depth n — p becomes the n-th prime, so stepping C(n) also steps the spiral"><input type="checkbox" id="cnSpLockChk" checked onchange="cnSpiralSetLock(this.checked)"> &#128279; Lock to n</label>
+                </div>
+            </details>
+            <div id="cnBody">
+                <div style="font-size:11px;color:#94a3b8;margin:10px 0 8px;">
+                    C(<span id="cnFormulaN">1</span>) = ζ(2)·∏<sub>p</sub>(1 − min(n+1,p)/p²) =
+                    <span id="cnLiveValue" style="color:#c8a84a;font-size:13px;font-weight:600;">—</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;font-size:11px;">
+                    <div>
+                        <div style="color:#94a3b8;">gcd(r,m)=1 — population</div>
+                        <div id="cnPopLine" style="color:#3b82f6;font-size:14px;font-weight:600;">—</div>
+                        <div id="cnPopNote" style="color:#64748b;font-size:10px;"></div>
+                    </div>
+                    <div>
+                        <div id="cnLiftTitle" style="color:#94a3b8;">lift: gcd(r,m)=gcd(r,m+1)=1</div>
+                        <div id="cnLiftLine" style="color:#22c55e;font-size:14px;font-weight:600;">—</div>
+                        <div id="cnLiftNote" style="color:#64748b;font-size:10px;"></div>
+                    </div>
+                    <div>
+                        <div style="color:#94a3b8;">lift / gcd</div>
+                        <div id="cnCondLine" style="color:#c8a84a;font-size:14px;font-weight:600;">—</div>
+                        <div id="cnCondNote" style="color:#64748b;font-size:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /C(n) PANEL -->
+
         <!-- Advanced Controls (collapsed by default) -->
         <div id="advancedControlsPanel" style="display:none;margin-bottom:15px;">
             <div class="panel" style="background:#0f172a;border:1px solid #334155;">
@@ -4253,7 +4321,12 @@ const state = {
     boundedN: 2000,
     useBoundedPC: true,
     // Highlight specific sector when showing all (dim others)
-    highlightSectorOnly: null
+    highlightSectorOnly: null,
+    // C(n) depth-lift canvas dynamic: as depth n climbs, points failing
+    // gcd(r,m+j)=1 for j=0..n get dimmed or removed from the ring canvas.
+    cnCanvasOn: false, cnCanvasMode: 'dim', cnCanvasDimAmt: 0.12,
+    // Prime spiral overlay, lockable to C(n) depth n (p = n-th prime).
+    liftSpiralOn: false, liftSpiralP: 2, liftSpiralMirror: true, liftSpiralLock: false
 };
 
 // Tree view state for Stern-Brocot visualization
@@ -5647,9 +5720,11 @@ function generateScreenshotWithSelection(tabName) {
     
     const formulaPanelHeight = 220;
     const solverHeight = solverCurrentMatch && tabName === 'mainview' ? 90 : 0;
+    const cnOn = !!(state.cnCanvasOn || state.liftSpiralOn);
+    const cnPanelHeight = cnOn ? 100 : 0;
     
     const totalWidth = 1000;
-    const totalHeight = titleHeight + statsHeight + canvasSectionHeight + solverHeight + tableHeight + formulaPanelHeight + padding * 2;
+    const totalHeight = titleHeight + statsHeight + canvasSectionHeight + solverHeight + tableHeight + formulaPanelHeight + cnPanelHeight + padding * 2;
     
     const composite = document.createElement('canvas');
     composite.width = totalWidth * 2;
@@ -6004,7 +6079,7 @@ function generateScreenshotWithSelection(tabName) {
     }
     
     // Bottom formula panel
-    currentY = totalHeight - formulaPanelHeight - padding;
+    currentY = totalHeight - cnPanelHeight - formulaPanelHeight - padding;
     
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(padding, currentY, totalWidth - padding * 2, formulaPanelHeight);
@@ -6085,6 +6160,42 @@ function generateScreenshotWithSelection(tabName) {
     ctx.fillStyle = '#22c55e';
     ctx.font = '10px monospace';
     ctx.fillText('N = ' + state.nMax.toLocaleString() + ', S = [' + state.sectorMin + ',' + state.sectorMax + ']', constBoxX + 10, currentY + 115);
+    
+    // C(n) — live value & survival ratios (only when the Canvas lock or the
+    // prime spiral is actually engaged, so plain exports stay unchanged)
+    if (cnOn) {
+        const cnY = currentY + formulaPanelHeight + 10;
+        const getTxt = id => document.getElementById(id)?.textContent || '—';
+        const cnN = document.getElementById('cnDepthN')?.value || '';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(padding, cnY, totalWidth - padding * 2, cnPanelHeight - 15);
+        ctx.strokeStyle = '#c8a84a';
+        ctx.strokeRect(padding, cnY, totalWidth - padding * 2, cnPanelHeight - 15);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#c8a84a';
+        ctx.font = 'bold 13px system-ui';
+        let cnHeader = 'C(n) — Live Value & Survival Ratios';
+        if (state.liftSpiralOn) cnHeader += '   ·   spiral p=' + state.liftSpiralP + (state.liftSpiralLock ? ' (locked to n)' : '');
+        ctx.fillText(cnHeader, padding + 15, cnY + 20);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px monospace';
+        ctx.fillText('C(' + cnN + ') = ζ(2)·Πp(1 − min(n+1,p)/p²) = ' + getTxt('cnLiveValue'), padding + 15, cnY + 38);
+        const cnCols = [
+            ['gcd(r,M)=1 — population', getTxt('cnPopLine'), getTxt('cnPopNote'), '#4a90d9'],
+            [getTxt('cnLiftTitle'), getTxt('cnLiftLine'), getTxt('cnLiftNote'), '#4ecdc4'],
+            ['lift / gcd', getTxt('cnCondLine'), getTxt('cnCondNote'), '#c8a84a']
+        ];
+        const cnColW = (totalWidth - padding * 2 - 30) / 3;
+        cnCols.forEach((c, i) => {
+            const cx = padding + 15 + i * cnColW;
+            ctx.fillStyle = '#94a3b8'; ctx.font = '9px system-ui';
+            ctx.fillText(c[0], cx, cnY + 55);
+            ctx.fillStyle = c[3]; ctx.font = 'bold 12px monospace';
+            ctx.fillText(c[1], cx, cnY + 71);
+            ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui';
+            ctx.fillText(c[2], cx, cnY + 84);
+        });
+    }
     
     // Footer
     ctx.fillStyle = '#475569';
@@ -8559,13 +8670,17 @@ function playSectorDetailFractions(type, direction) {
     fracs = [...fracs].sort((a, b) => direction === 'forward' ? a.r/a.m - b.r/b.m : b.r/b.m - a.r/a.m);
     
     // Play all fractions (no limit)
-    playbackState.queue = fracs.map(f => ({ r: f.r, m: f.m }));
+    let queue = fracs.map(f => ({ r: f.r, m: f.m }));
+    const cnFilteredDetail = cnAudioSurvivorFilter(queue, typeLabel + ' from sector ' + n);
+    if (cnFilteredDetail === null) return;
+    queue = cnFilteredDetail;
+    playbackState.queue = queue;
     playbackState.direction = direction;
     playbackState.mode = 'sector-detail';
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
     
-    showPlaybackStatus(`Playing ${typeLabel} from sector ${n} (${fracs.length} fractions)`);
+    showPlaybackStatus(`Playing ${typeLabel} from sector ${n} (${queue.length} fractions)`);
     startPlaybackLoop();
 }
 
@@ -8609,7 +8724,20 @@ function exportSectorCSV(n) {
     csv += 'PP (both prime),' + ppCount + '\n';
     csv += 'PC (prime num comp denom),' + pcCount + '\n';
     csv += 'CP (comp num prime denom),' + cpCount + '\n';
-    csv += 'CC (both composite),' + ccCount + '\n\n';
+    csv += 'CC (both composite),' + ccCount + '\n';
+    if (state.cnCanvasOn || state.liftSpiralOn) {
+        const getTxt = id => document.getElementById(id)?.textContent || '';
+        csv += '\n';
+        csv += 'C(n) depth,' + (document.getElementById('cnDepthN')?.value || '') + '\n';
+        csv += 'C(n) formula,C(n) = zeta(2)*Prod_p(1 - min(n+1,p)/p^2) = ' + getTxt('cnLiveValue') + '\n';
+        csv += 'gcd(r,M)=1 population,' + getTxt('cnPopLine') + '\n';
+        csv += getTxt('cnLiftTitle') + ',' + getTxt('cnLiftLine') + '\n';
+        csv += 'lift / gcd,' + getTxt('cnCondLine') + '\n';
+        if (state.liftSpiralOn) csv += 'prime spiral p,' + state.liftSpiralP + (state.liftSpiralLock ? ' (locked to n)' : '') + '\n';
+        csv += '\n';
+    } else {
+        csv += '\n';
+    }
     csv += 'Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Denom Type,Num Type,Category,Frequency (Hz)\n';
     
     res.sort((a, b) => a.r/a.m - b.r/b.m).forEach(f => {
@@ -10073,6 +10201,14 @@ function drawMainRing() {
         // Dim outside sector (or highlight specific sector when showAll)
         let alpha = 1;
         if ((dimOutside || sectorColorMode === 'dim') && !showAll && !inSector) alpha = 0.2;
+        // C(n) depth-lift canvas dynamic: fade/remove points failing gcd(r,m+j)=1, j=0..n
+        if (state.cnCanvasOn && typeof cnLiftSurvives === 'function') {
+            const cnN = cnGetDepthN();
+            if (!cnLiftSurvives(r, m, cnN)) {
+                if (state.cnCanvasMode === 'remove') return;
+                alpha = Math.min(alpha, state.cnCanvasDimAmt);
+            }
+        }
         // When showAll is true but we have a highlighted sector, dim others
         if (showAll && state.highlightSectorOnly !== null && s !== state.highlightSectorOnly) alpha = 0.5;
         
@@ -10099,6 +10235,56 @@ function drawMainRing() {
             }
         }
     });
+    
+    // ── PRIME SPIRAL overlay (lockable to C(n) depth n) ──────────────────
+    // Plots r = p (mod m) on every ring m>p — since p/m shrinks as m grows,
+    // this traces a spiral arm inward toward the center.
+    if (state.liftSpiralOn) {
+        const _spP = state.liftSpiralP;
+        const _spStartM = state.startM || 2;
+        function _spXY(r, m) {
+            let ang = (r / m) * 2 * Math.PI;
+            if (rotationOn) {
+                const ringRotation = rotationCumulative ? rotationAmt * m : rotationAmt;
+                ang += ringRotation + globalPhase;
+            }
+            let radNorm;
+            if (ringSpacing === 1) radNorm = m / state.nMax;
+            else { radNorm = invertOrder ? (1 - (m - _spStartM) / (state.nMax - _spStartM)) : ((m - _spStartM) / (state.nMax - _spStartM)); radNorm = Math.pow(radNorm, 1 / ringSpacing); }
+            const rad = Math.max(radNorm, 0.05) * maxR;
+            return { x: cx + rad * Math.cos(ang), y: cy - rad * Math.sin(ang) };
+        }
+        const _spDotR = Math.max(1.6, finalPointSize * 1.3);
+        ctx.beginPath();
+        let _spFirst = true;
+        for (let m = _spP + 1; m <= state.nMax; m++) {
+            const p = _spXY(_spP % m, m);
+            if (_spFirst) { ctx.moveTo(p.x, p.y); _spFirst = false; } else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = 'rgba(200,168,74,.35)'; ctx.lineWidth = 1; ctx.stroke();
+        for (let m = _spP + 1; m <= state.nMax; m++) {
+            const r = _spP % m;
+            const p = _spXY(r, m);
+            ctx.beginPath(); ctx.arc(p.x, p.y, _spDotR, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(200,168,74,.9)'; ctx.fill();
+            if (state.liftSpiralMirror) {
+                const rM = (m - r) % m;
+                const pM = _spXY(rM, m);
+                ctx.beginPath(); ctx.arc(pM.x, pM.y, _spDotR * 0.85, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(155,127,232,.85)'; ctx.fill();
+            }
+        }
+        if (_spP <= state.nMax) {
+            let radNorm;
+            if (ringSpacing === 1) radNorm = _spP / state.nMax;
+            else { radNorm = invertOrder ? (1 - (_spP - _spStartM) / (state.nMax - _spStartM)) : ((_spP - _spStartM) / (state.nMax - _spStartM)); radNorm = Math.pow(radNorm, 1 / ringSpacing); }
+            const dRad = Math.max(radNorm, 0.05) * maxR;
+            ctx.save(); ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = 'rgba(230,56,72,.6)'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.arc(cx, cy, dRad, 0, 2 * Math.PI); ctx.stroke();
+            ctx.restore();
+        }
+    }
     
     // Draw tracker connections
     if (trackerOn && trackerConnect && trackerPoints.length > 1) {
@@ -20181,6 +20367,22 @@ let playbackState = {
 };
 
 // Play entire sector forward or backward
+// Shared C(n) lock filter for audio playback: when the "Canvas" lock is on,
+// drop any (r,m) pair that doesn't survive gcd(r,m+j)=1 for j=0..n, so
+// eliminated points are skipped rather than sounded. Returns the original
+// list unchanged if the lock is off. Set `statusPrefix` to show a message
+// (and abort playback) when nothing survives.
+function cnAudioSurvivorFilter(list, statusPrefix) {
+    if (!state.cnCanvasOn || typeof cnLiftSurvives !== 'function') return list;
+    const cnN = (typeof cnGetDepthN === 'function') ? cnGetDepthN() : 0;
+    const survivors = list.filter(f => cnLiftSurvives(f.r, f.m, cnN));
+    if (survivors.length === 0 && statusPrefix) {
+        showPlaybackStatus(statusPrefix + ' — no surviving C(n) points at depth ' + cnN);
+        return null;
+    }
+    return survivors;
+}
+
 function playSectorAudio(sectorNum, direction = 'forward') {
     const residues = state.residuesBySector[sectorNum] || [];
     if (residues.length === 0) {
@@ -20210,6 +20412,13 @@ function playSectorAudio(sectorNum, direction = 'forward') {
         playList = sorted.slice(start, Math.min(end, sorted.length));
     }
     
+    // Respect the C(n) "Canvas" lock: only play points that actually
+    // survive gcd(r,m+j)=1 for j=0..n — skip eliminated points instead
+    // of sounding them.
+    const cnFiltered = cnAudioSurvivorFilter(playList, 'Sector ' + sectorNum);
+    if (cnFiltered === null) return;
+    playList = cnFiltered;
+
     if (direction === 'backward') playList = [...playList].reverse();
     
     // Play selected fractions
@@ -20326,6 +20535,9 @@ function playFareySequence(direction = 'forward') {
     stopAllPlayback();
     
     let fractions = state.farey.slice(0, 50).map(f => ({ r: f.r, m: f.m }));
+    const cnFilteredFarey = cnAudioSurvivorFilter(fractions, 'Farey sequence');
+    if (cnFilteredFarey === null) return;
+    fractions = cnFilteredFarey;
     if (direction === 'backward') fractions.reverse();
     
     playbackState.queue = fractions;
@@ -24083,6 +24295,204 @@ function updateModLabelInputs() {
     if (listInputs) listInputs.style.display = mode === 'list' ? 'block' : 'none';
 }
 
+</script>
+<script>
+// ══ C(n) — LIVE VALUE & SURVIVAL RATIOS ══════════════════════════════════
+// Port of the opener's C(n)/survival-ratio panel. This page's sectors ARE
+// rings at modulus m=sector — sectorMin/sectorMax is exactly the opener's
+// G range, so the same (r,M) lattice counts apply directly: gcd(r,m)=1 is
+// the population, the n-step lift requires gcd(r,m+j)=1 for j=0..n, and
+// lift/gcd is the conditional survival ratio that converges to C(n).
+(function(){
+  var ZETA2 = Math.PI*Math.PI/6;
+  var _PZ2 = 0.4522474200410654985; // P(2) = Σ p^-2
+  function sieve(lim){var c=new Uint8Array(lim+1),ps=[];for(var i=2;i<=lim;i++){if(!c[i]){ps.push(i);for(var j=i*i;j<=lim;j+=i)c[j]=1;}}return ps;}
+  var CN_PRIMES = sieve(200000); // lighter cutoff than the opener's 1.5M — ~9-10dp accurate with the tail correction below
+  var _tailSum=0; for(var _i=0;_i<CN_PRIMES.length;_i++){var _p=CN_PRIMES[_i];_tailSum+=1/(_p*_p);}
+  var _TAIL2 = _PZ2 - _tailSum;
+  var _cnCache = {0:1};
+  function getCn(n){
+    if(n in _cnCache) return _cnCache[n];
+    var ld=0;
+    for(var i=0;i<CN_PRIMES.length;i++){var p=CN_PRIMES[i],m=Math.min(n+1,p);ld+=Math.log(1-m/(p*p));}
+    ld += -(n+1)*_TAIL2;
+    return (_cnCache[n]=ZETA2*Math.exp(ld));
+  }
+  function gcdCN(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+  // Counts over rings m=sMin..sMax, r=0..m-1 (triangle population, r=0 ring included).
+  var _memo={};
+  function cnCounts(sMin,sMax,n){
+    var key=sMin+'|'+sMax+'|'+n, hit=_memo[key]; if(hit) return hit;
+    var total=0,gcd1=0,lift=0;
+    for(var m=Math.max(1,sMin);m<=sMax;m++){
+      for(var r=0;r<m;r++){
+        total++;
+        if(gcdCN(r,m)!==1) continue;
+        gcd1++;
+        var ok=true;
+        for(var j=1;j<=n;j++){ var mj=m+j; if(mj>sMax){ok=false;break;} if(gcdCN(r,mj)!==1){ok=false;break;} }
+        if(ok) lift++;
+      }
+    }
+    var res={total:total,gcd1:gcd1,lift:lift};
+    var keys=Object.keys(_memo); if(keys.length>64) delete _memo[keys[0]];
+    _memo[key]=res;
+    return res;
+  }
+  function pct(a,b){return b?((a/b*100).toFixed(2)):'0.00';}
+  function setTxt(id,val){var e=document.getElementById(id); if(e)e.textContent=val;}
+  function cnUpdatePanel(){
+    if(!document.getElementById('cn-ratio-panel')) return;
+    var sMinEl=document.getElementById('sectorMin');
+    var sMaxEl=document.getElementById('sectorMax');
+    var nEl=document.getElementById('cnDepthN');
+    var sMin=Math.max(1,parseInt(sMinEl&&sMinEl.value,10)||1);
+    var sMax=Math.max(sMin,parseInt(sMaxEl&&sMaxEl.value,10)||275);
+    // Full sector range can be large (default 1-275, ~38k lattice points) — cap the
+    // live count to a reasonable window so this stays instant on every redraw;
+    // note the cap in the range label rather than silently truncating.
+    var CAP=400, sMaxUsed=Math.min(sMax, sMin+CAP);
+    var n=Math.max(0,parseInt(nEl&&nEl.value,10)||1);
+    var c=cnCounts(sMin,sMaxUsed,n);
+    var Cn=getCn(n), Dn=Cn/ZETA2;
+    setTxt('cnFormulaN', n);
+    setTxt('cnLiveValue', Cn.toFixed(9));
+    setTxt('cnPopLine', c.gcd1+'/'+c.total+'  ('+pct(c.gcd1,c.total)+'%)');
+    setTxt('cnLiftLine', c.lift+'/'+c.total+'  ('+pct(c.lift,c.total)+'%)');
+    setTxt('cnCondLine', c.lift+'/'+c.gcd1+'  ('+pct(c.lift,c.gcd1)+'%)');
+    setTxt('cnPopNote', '→ 1/ζ(2) ≈ '+(1/ZETA2).toFixed(5)+' as range→∞');
+    setTxt('cnLiftNote', '→ D('+n+')=C('+n+')/ζ(2) ≈ '+Dn.toFixed(5)+' as range→∞');
+    setTxt('cnCondNote', '→ C('+n+') ≈ '+Cn.toFixed(5)+' as range→∞');
+    setTxt('cnLiftTitle', n===0 ? 'lift: gcd(r,m)=1 (n=0 — no extra constraint, equals population)' : n===1 ? 'lift: gcd(r,m)=gcd(r,m+1)=1' : ('lift: gcd(r,m+j)=1 for j=0..'+n));
+    setTxt('cnRangeNote', sMaxUsed<sMax
+      ? ('m='+sMin+'…'+sMaxUsed+' shown (capped from '+sMax+') · finite-range counts')
+      : ('m='+sMin+'…'+sMaxUsed+' shown · finite-range counts'));
+  }
+  window.cnUpdatePanel = cnUpdatePanel;
+  // ── Prime helpers for the spiral ──────────────────────────────────────
+  var _spPrimeCache=[2];
+  function _spIsPrime(k){ if(k<2) return false; for(var i=2;i*i<=k;i++){ if(k%i===0) return false; } return true; }
+  function _spNextPrime(k){ var c=k+1; while(!_spIsPrime(c)) c++; return c; }
+  function _spNthPrime(n){
+    n=Math.max(1,n|0);
+    while(_spPrimeCache.length<n){ _spPrimeCache.push(_spNextPrime(_spPrimeCache[_spPrimeCache.length-1])); }
+    return _spPrimeCache[n-1];
+  }
+  function _cnSpiralLbl(){ var lbl=document.getElementById('cnSpPLbl'); if(lbl) lbl.textContent='p='+state.liftSpiralP; }
+  function _cnSpiralSyncLock(){
+    if(!state.liftSpiralLock) return;
+    var n=cnGetDepthN();
+    state.liftSpiralP=_spNthPrime(Math.max(1,n));
+    _cnSpiralLbl();
+  }
+  window.cnSpiralSyncLock=_cnSpiralSyncLock;
+  window.cnSpiralSetOn=function(v){ state.liftSpiralOn=!!v; if(typeof drawMainRing==='function') drawMainRing(); };
+  window.cnSpiralSetMirror=function(v){ state.liftSpiralMirror=!!v; if(typeof drawMainRing==='function') drawMainRing(); };
+  window.cnSpiralSetLock=function(v){
+    state.liftSpiralLock=!!v;
+    if(v) _cnSpiralSyncLock();
+    if(typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSpiralStep=function(dir){
+    if(state.liftSpiralLock) return; // locked: p follows depth n, not manual stepping
+    var cur=state.liftSpiralP;
+    if(dir>0){ var c=cur+1; while(!_spIsPrime(c)) c++; state.liftSpiralP=c; }
+    else{ var c2=cur-1; while(c2>=2 && !_spIsPrime(c2)) c2--; state.liftSpiralP=c2>=2?c2:2; }
+    _cnSpiralLbl();
+    if(typeof drawMainRing==='function') drawMainRing();
+  };
+  // ── Canvas link: depth n filters/dims the ring canvas's gcd-surviving points ──
+  window.cnGetDepthN=function(){
+    var nEl=document.getElementById('cnDepthN');
+    return Math.max(0,parseInt(nEl&&nEl.value,10)||0);
+  };
+  window.cnLiftSurvives=function(r,m,n){
+    if(gcdCN(r,m)!==1) return false;
+    for(var j=1;j<=n;j++){ if(gcdCN(r,m+j)!==1) return false; }
+    return true;
+  };
+  window.cnSetCanvasOn=function(v){
+    state.cnCanvasOn=!!v;
+    if(typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSetCanvasMode=function(v){
+    state.cnCanvasMode=(v==='remove')?'remove':'dim';
+    if(state.cnCanvasOn && typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSetCanvasDimAmt=function(v){
+    state.cnCanvasDimAmt=Math.max(0,Math.min(1,(+v||0)/100));
+    var lbl=document.getElementById('cnCanvasDimLbl'); if(lbl) lbl.textContent=Math.round(state.cnCanvasDimAmt*100)+'%';
+    if(state.cnCanvasOn && typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnDepthStep=function(d){
+    var nEl=document.getElementById('cnDepthN'); if(!nEl) return;
+    var v=Math.max(0,Math.min(60,(parseInt(nEl.value,10)||0)+d));
+    nEl.value=v; cnUpdatePanel();
+    _cnSpiralSyncLock();
+    if((state.cnCanvasOn || (state.liftSpiralOn && state.liftSpiralLock)) && typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnTogglePanel=function(){
+    var body=document.getElementById('cnBody'), chev=document.getElementById('cnChevron');
+    if(!body) return;
+    var hidden = body.style.display==='none';
+    body.style.display = hidden ? '' : 'none';
+    if(chev) chev.style.transform = hidden ? '' : 'rotate(-90deg)';
+  };
+  // ── ▶ n animation: 0 → target n → 0 ping-pong, mirrors the opener's ▶ N ──
+  var _cnPlayId=null, _cnPlayDir=1, _cnPlayTarget=1;
+  window.cnPlayToggle=function(){
+    var nEl=document.getElementById('cnDepthN');
+    var btn=document.getElementById('cnPlayBtn');
+    if(_cnPlayId){
+      clearInterval(_cnPlayId); _cnPlayId=null;
+      if(nEl) nEl.value=_cnPlayTarget;
+      cnUpdatePanel();
+      if(btn){btn.innerHTML='&#9654;';btn.style.color='#c8a84a';btn.style.background='rgba(200,168,74,0.12)';}
+      return;
+    }
+    _cnPlayTarget = Math.max(1, parseInt(nEl&&nEl.value,10)||1);
+    var cur=0; _cnPlayDir=1;
+    if(btn){btn.innerHTML='&#9632;';btn.style.color='#ef4444';btn.style.background='rgba(239,68,68,0.15)';}
+    _cnPlayId=setInterval(function(){
+      cur+=_cnPlayDir;
+      if(cur>=_cnPlayTarget){cur=_cnPlayTarget;_cnPlayDir=-1;}
+      else if(cur<=0){cur=0;_cnPlayDir=1;}
+      if(nEl) nEl.value=cur;
+      cnUpdatePanel();
+      _cnSpiralSyncLock();
+      if((state.cnCanvasOn || (state.liftSpiralOn && state.liftSpiralLock)) && typeof drawMainRing==='function') drawMainRing();
+    },180);
+  };
+  // Piggyback on the page's own redraw/compute so the panel always tracks
+  // whatever sector range and ring are currently on screen.
+  var _prevDrawMainRing = window.drawMainRing;
+  window.drawMainRing = function(){
+    var r = (typeof _prevDrawMainRing==='function') ? _prevDrawMainRing.apply(this, arguments) : undefined;
+    try{ cnUpdatePanel(); }catch(e){}
+    return r;
+  };
+  var _prevComputeAll = window.computeAll;
+  window.computeAll = function(){
+    var r = (typeof _prevComputeAll==='function') ? _prevComputeAll.apply(this, arguments) : undefined;
+    try{ cnUpdatePanel(); }catch(e){}
+    return r;
+  };
+  setTimeout(cnUpdatePanel, 400);
+  // Defaults: spiral on, locked to C(n) depth, looping via the n-play animation
+  // (locked mode makes p = the n-th prime, so animating n also animates the spiral).
+  setTimeout(function(){
+    try{
+      state.liftSpiralOn = true;
+      state.liftSpiralLock = true;
+      var nEl=document.getElementById('cnDepthN');
+      if(nEl && (parseInt(nEl.value,10)||0)<10) nEl.value=10;
+      cnUpdatePanel();
+      _cnSpiralSyncLock();
+      if(typeof drawMainRing==='function') drawMainRing();
+      if(!_cnPlayId) cnPlayToggle();
+    }catch(e){}
+  }, 600);
+})();
 </script>
 </body>
 </html>

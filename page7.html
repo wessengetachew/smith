@@ -2531,6 +2531,73 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
                 <button id="f-adv-btn" onclick="toggleFareyPanel()" title="Open combined canvas with full controls" style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--parchment-dark);color:var(--gold);border:1px solid var(--gold);padding:3px 10px;cursor:pointer;">&#9660; Advanced</button>
               </div><!-- /control row -->
 
+              <!-- ══ C(n) — LIVE VALUE & SURVIVAL RATIOS (mirrors the opener's panel, driven
+                   by this page's own MOD N start/end range) ══ -->
+              <div id="cn-ratio-panel" style="margin:4px 0 10px;padding:10px 14px;background:rgba(196,155,56,0.05);border:1px solid rgba(196,155,56,0.3);border-radius:4px;font-family:'Cinzel',serif;">
+                <div onclick="cnTogglePanel()" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer;">
+                  <span id="cn-chevron" style="display:inline-block;transition:transform .15s;font-size:0.55rem;color:var(--gold);">&#9662;</span>
+                  <span style="font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);">C(n) &mdash; live value &amp; survival ratios</span>
+                  <span style="color:rgba(160,120,48,0.5);">|</span>
+                  <span style="font-size:0.56rem;color:#9a8060;">depth n</span>
+                  <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:2px;">
+                    <button onclick="cnDepthStep(-1)" title="n − 1" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:#4ecdc4;font-family:inherit;font-size:0.55rem;width:18px;height:19px;cursor:pointer;padding:0;line-height:1;">&minus;</button>
+                    <input id="cn-depth-num" type="number" min="0" max="60" value="1" title="Block length n+1: gcd(r,M+j)=1 required for j=0..n" style="width:32px;background:var(--parchment-deep);color:var(--ink);border:1px solid var(--border);padding:2px 2px;font-family:'Cinzel',serif;font-size:0.58rem;text-align:center;" oninput="cnDepthChange(this.value)">
+                    <button onclick="cnDepthStep(1)" title="n + 1" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:#4ecdc4;font-family:inherit;font-size:0.55rem;width:18px;height:19px;cursor:pointer;padding:0;line-height:1;">+</button>
+                    <button id="cn-play-btn" onclick="cnPlayToggle()" title="Animate n from 0 → current n → 0" style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:var(--gold);font-family:inherit;font-size:0.52rem;padding:2px 7px;cursor:pointer;margin-left:2px;">&#9654;</button>
+                  </span>
+                  <span style="width:1px;height:14px;background:var(--border);display:inline-block;"></span>
+                  <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;">
+                    <label style="display:inline-flex;align-items:center;gap:3px;color:#9a8060;font-size:0.55rem;cursor:pointer;" title="Wire depth n to the canvas: points that fail gcd(r,m+j)=1 for j=0..n get dimmed or removed as n rises"><input type="checkbox" id="cn-canvas-chk" onchange="cnSetCanvasOn(this.checked)"> Canvas</label>
+                    <select id="cn-canvas-mode" onchange="cnSetCanvasMode(this.value)" style="background:var(--parchment-deep);border:1px solid var(--border);color:var(--ink);font-family:inherit;font-size:0.5rem;padding:1px 3px;">
+                      <option value="dim">Dim</option>
+                      <option value="remove">Remove</option>
+                    </select>
+                    <input type="range" id="cn-canvas-dim-sl" min="0" max="80" step="5" value="12" style="width:44px;" oninput="cnSetCanvasDimAmt(this.value)" title="Brightness of non-surviving points in Dim mode">
+                    <span id="cn-canvas-dim-lbl" style="color:#9a8060;font-size:0.5rem;min-width:22px;">12%</span>
+                  </span>
+                  <span id="cn-range-note" style="font-size:0.52rem;color:rgba(160,120,48,0.6);margin-left:auto;"></span>
+                </div>
+                <details id="cn-liftdyn-dd" open style="margin-top:6px;background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.25);">
+                  <summary onclick="event.stopPropagation()" style="cursor:pointer;padding:5px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.08);">
+                    <span class="cn-ld-chev" style="display:inline-block;transition:transform .15s;font-size:0.5rem;color:var(--gold);">&#9656;</span>
+                    <span style="color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-size:0.5rem;">Lift dynamics — prime spiral</span>
+                  </summary>
+                  <style>#cn-liftdyn-dd[open]>summary>span.cn-ld-chev{transform:rotate(90deg);}</style>
+                  <div onclick="event.stopPropagation()" style="display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:7px 9px;font-family:'Cinzel',serif;">
+                    <label style="display:inline-flex;align-items:center;gap:3px;color:var(--gold);font-size:0.55rem;cursor:pointer;" title="Plot r = p (mod m) on every ring m>p — since p/m shrinks as m grows, this traces a spiral arm inward"><input type="checkbox" id="cn-sp-on" checked onchange="cnSpiralSetOn(this.checked)"> Show spiral</label>
+                    <button onclick="cnSpiralStep(-1)" title="Previous prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:var(--gold);font-family:inherit;font-size:0.55rem;padding:1px 6px;cursor:pointer;">&#9664;</button>
+                    <span id="cn-sp-p-lbl" style="color:var(--gold);font-size:0.55rem;min-width:32px;text-align:center;">p=2</span>
+                    <button onclick="cnSpiralStep(1)" title="Next prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:var(--gold);font-family:inherit;font-size:0.55rem;padding:1px 6px;cursor:pointer;">&#9654;</button>
+                    <label style="display:inline-flex;align-items:center;gap:3px;color:#9a8faf;font-size:0.55rem;cursor:pointer;" title="Mirror σ(r)=m−r"><input type="checkbox" id="cn-sp-mirror" checked onchange="cnSpiralSetMirror(this.checked)"> Mirror</label>
+                    <label style="display:inline-flex;align-items:center;gap:3px;color:#c47a7a;font-size:0.55rem;cursor:pointer;" title="Lock the spiral prime to depth n — p becomes the n-th prime, so stepping C(n) also steps the spiral"><input type="checkbox" id="cn-sp-lock" checked onchange="cnSpiralSetLock(this.checked)"> &#128279; Lock to n</label>
+                  </div>
+                </details>
+                <div id="cn-body">
+                  <div style="font-size:0.56rem;color:#9a8060;margin:8px 0;">
+                    C(<span id="cn-formula-n">1</span>) = &zeta;(2)&middot;&Pi;<sub>p</sub>(1 &minus; min(n+1,p)/p&sup2;) =
+                    <span id="cn-live-value" style="color:var(--gold);font-size:0.72rem;">&mdash;</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;font-size:0.56rem;">
+                    <div>
+                      <div style="color:#9a8060;">gcd(r,M)=1 &mdash; population</div>
+                      <div id="cn-pop-line" style="color:#4a90d9;font-size:0.68rem;">&mdash;</div>
+                      <div id="cn-pop-note" style="color:rgba(160,120,48,0.6);"></div>
+                    </div>
+                    <div>
+                      <div id="cn-lift-title" style="color:#9a8060;">lift: gcd(r,M)=gcd(r,M+1)=1</div>
+                      <div id="cn-lift-line" style="color:#4ecdc4;font-size:0.68rem;">&mdash;</div>
+                      <div id="cn-lift-note" style="color:rgba(160,120,48,0.6);"></div>
+                    </div>
+                    <div>
+                      <div style="color:#9a8060;">lift / gcd</div>
+                      <div id="cn-cond-line" style="color:var(--gold);font-size:0.68rem;">&mdash;</div>
+                      <div id="cn-cond-note" style="color:rgba(160,120,48,0.6);"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /C(n) PANEL -->
+
               <!-- ══ GAP ZETA DETAIL PANEL ══ -->
               <div id="gap-zeta-panel" style="display:none;margin:4px 0 6px;padding:8px 12px;background:rgba(74,144,217,0.06);border:1px solid rgba(74,144,217,0.22);border-radius:4px;font-family:'Cinzel',serif;font-size:0.52rem;color:#e8d9b0;">
                 <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:5px;">
@@ -3935,6 +4002,32 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
 (function(){
   // ── helpers ──────────────────────────────────────────────────────────────
   function gcd(a,b){while(b){var t=b;b=a%b;a=t;}return a;}
+  // C(n) depth-lift canvas dynamic: as depth n climbs, points failing
+  // gcd(r,m+j)=1 for j=0..n get dimmed or removed from the combined canvas.
+  window._cnCanvas = window._cnCanvas || {on:false, mode:'dim', dimAmt:0.12};
+  window._cnGetDepthN = function(){
+    var nEl=document.getElementById('cn-depth-num');
+    return Math.max(0,parseInt(nEl&&nEl.value,10)||0);
+  };
+  window._cnSurvives = function(r,m,n){
+    if(gcd(r,m)!==1) return false;
+    for(var j=1;j<=n;j++){ if(gcd(r,m+j)!==1) return false; }
+    return true;
+  };
+  // Prime spiral: for fixed prime p, plots r = p (mod m) on every ring m>p —
+  // since p/m shrinks toward 0 as m grows, this traces a spiral arm inward.
+  // Lock ties p to the C(n) depth n (p = the n-th prime) so stepping depth
+  // also steps which prime's spiral is shown.
+  window._liftSpiral = window._liftSpiral || {on:false, p:2, mirror:true, lock:false};
+  var _spPrimeCache=[2];
+  function _spIsPrime(k){ if(k<2) return false; for(var i=2;i*i<=k;i++){ if(k%i===0) return false; } return true; }
+  function _spNextPrime(k){ var c=k+1; while(!_spIsPrime(c)) c++; return c; }
+  function _spPrevPrime(k){ var c=k-1; while(c>=2 && !_spIsPrime(c)) c--; return c>=2?c:2; }
+  window._spNthPrime = function(n){
+    n=Math.max(1,n|0);
+    while(_spPrimeCache.length<n){ _spPrimeCache.push(_spNextPrime(_spPrimeCache[_spPrimeCache.length-1])); }
+    return _spPrimeCache[n-1];
+  };
 
   var _angles = {coprime:90, noncoprime:90};
   var _lastHighlit = -1;
@@ -4772,7 +4865,16 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
   window.fareyExportCSV = function() {
     var modN = parseInt(document.getElementById('f-mod-num').value) || 49;
     var fracs = buildFractions(modN);
-    var rows = ['r,m,gcd,fraction,angle_deg,type'];
+    var rows = [];
+    var cnInfo = (typeof _cnExportInfo === 'function') ? _cnExportInfo() : null;
+    if (cnInfo) {
+      rows.push('# ' + cnInfo.formula);
+      rows.push('# ' + cnInfo.popTitle + ': ' + cnInfo.popLine + '  ' + cnInfo.popNote);
+      rows.push('# ' + cnInfo.liftTitle + ': ' + cnInfo.liftLine + '  ' + cnInfo.liftNote);
+      rows.push('# ' + cnInfo.condTitle + ': ' + cnInfo.condLine + '  ' + cnInfo.condNote);
+      if (cnInfo.spiralOn) rows.push('# prime spiral: p=' + cnInfo.spiralP + (cnInfo.spiralLock ? ' (locked to n)' : ''));
+    }
+    rows.push('r,m,gcd,fraction,angle_deg,type');
     function gcdLocal(a,b){while(b){var t=b;b=a%b;a=t;}return a;}
     fracs.cop.concat(fracs.ncp).sort(function(a,b){return a.m-b.m||a.r-b.r;}).forEach(function(p){
       var g = gcdLocal(p.r, p.m);
@@ -6285,16 +6387,19 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
 
       if (_noLabels && !_activeTooltipPt) {
         // ── Fast batch: group by color + tower status ──────────────────────
+        var _cnOn2=window._cnCanvas.on, _cnN2=_cnOn2?window._cnGetDepthN():0;
         var _cbatch = {};
         pts.forEach(function(p){
+          if(_cnOn2 && window._cnCanvas.mode==='remove' && !window._cnSurvives(p.r,p.m,_cnN2)) return;
           var xy=ptXY(p.r,p.m); if(!xy) return;
           var onTower = _isOnLiftTower(p.m);
           var szScale = onTower ? _liftHlSc2 : 1;
           var dotR=(1-p.m/modN*0.1)*(W/400)*_ptScale*szScale;
           if(dotR<=0) return;
           var dotColor=getPointColor(p,_which,modN,color);
-          var bkey=dotColor+'|'+(onTower?'hl':'bg');
-          if(!_cbatch[bkey]) _cbatch[bkey]={col:dotColor,alpha:onTower?1:_liftBgOp2,pts:[]};
+          var _cnDim2=_cnOn2 && !window._cnSurvives(p.r,p.m,_cnN2);
+          var bkey=dotColor+'|'+(onTower?'hl':'bg')+(_cnDim2?'|cndim':'');
+          if(!_cbatch[bkey]) _cbatch[bkey]={col:dotColor,alpha:_cnDim2?window._cnCanvas.dimAmt:(onTower?1:_liftBgOp2),pts:[]};
           _cbatch[bkey].pts.push({x:xy.x,y:xy.y,r:dotR});
           var _ptKey=p.r+'/'+p.m;
           if(!_lastCombinedPtsSeen[_ptKey]){
@@ -6313,7 +6418,9 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
       } else {
         // ── Per-point draw (labels or active tooltip) ─────────────────────
         var _wcLblCount2=0;
+        var _cnOn3=window._cnCanvas.on, _cnN3=_cnOn3?window._cnGetDepthN():0;
         pts.forEach(function(p){
+          if(_cnOn3 && window._cnCanvas.mode==='remove' && !window._cnSurvives(p.r,p.m,_cnN3)) return;
           var xy=ptXY(p.r,p.m); if(!xy) return;
           var onTower = _isOnLiftTower(p.m);
           var szScale = onTower ? _liftHlSc2 : 1;
@@ -6327,7 +6434,8 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
             _lastCombinedPtsSeen[_ptKey]=true;
             _lastCombinedPts.push({px:xy.x,py:xy.y,r:p.r,m:p.m,gcd1:gcd(p.r,p.m)===1});
           }
-          ctx.globalAlpha = onTower ? 1 : _liftBgOp2;
+          var _cnDim3=_cnOn3 && !window._cnSurvives(p.r,p.m,_cnN3);
+          ctx.globalAlpha = _cnDim3 ? window._cnCanvas.dimAmt : (onTower ? 1 : _liftBgOp2);
           var dotColor=isActive?'#f0d060':getPointColor(p,_which,modN,color);
           var _lblLimit2=window._wcLabelLimit||99999;
           var showLabel=_wcLblCount2<_lblLimit2 && (
@@ -6369,6 +6477,41 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
     if (!_unfold || _unfoldView !== 'rect') {
       ctx.beginPath(); ctx.arc(cx,cy,3*(W/400),0,2*Math.PI);
       ctx.fillStyle='#8a8a6a'; ctx.fill();
+    }
+
+    // ── PRIME SPIRAL overlay (lockable to C(n) depth n) ──────────────────
+    if (window._liftSpiral && window._liftSpiral.on && !_unfold) {
+      var _spP = window._liftSpiral.p;
+      var _spMirror = window._liftSpiral.mirror;
+      var _spDotR = Math.max(1.6, (W/400)*1.6);
+      ctx.beginPath();
+      var _spFirst = true;
+      for (var _sm = _spP + 1; _sm <= modN; _sm++) {
+        var _sr = _spP % _sm;
+        var _sxy = ptXY(_sr, _sm); if(!_sxy) continue;
+        if (_spFirst) { ctx.moveTo(_sxy.x, _sxy.y); _spFirst = false; } else ctx.lineTo(_sxy.x, _sxy.y);
+      }
+      ctx.strokeStyle = 'rgba(200,168,74,.35)'; ctx.lineWidth = 1; ctx.stroke();
+      for (var _sm2 = _spP + 1; _sm2 <= modN; _sm2++) {
+        var _sr2 = _spP % _sm2;
+        var _sxy2 = ptXY(_sr2, _sm2); if(!_sxy2) continue;
+        ctx.beginPath(); ctx.arc(_sxy2.x, _sxy2.y, _spDotR, 0, 2*Math.PI);
+        ctx.fillStyle = 'rgba(200,168,74,.9)'; ctx.fill();
+        if (_spMirror) {
+          var _srM = (_sm2 - _sr2) % _sm2;
+          var _sxyM = ptXY(_srM, _sm2); if(!_sxyM) continue;
+          ctx.beginPath(); ctx.arc(_sxyM.x, _sxyM.y, _spDotR*0.85, 0, 2*Math.PI);
+          ctx.fillStyle = 'rgba(155,127,232,.85)'; ctx.fill();
+        }
+      }
+      // Highlight the spiral prime's own dropout ring (m = p — where it exits (ℤ/mℤ)*)
+      if (_spP <= modN) {
+        var _dRad = radius(_spP);
+        ctx.save(); ctx.setLineDash([4,4]);
+        ctx.strokeStyle = 'rgba(230,56,72,.6)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(cx, cy, _dRad, 0, 2*Math.PI); ctx.stroke();
+        ctx.restore();
+      }
     }
 
     // ── Riemann zeros overlay ──────────────────────────────────────────────
@@ -7209,6 +7352,68 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
     document.body.removeChild(a);
   }
 
+  // ── C(n) export block — shared by all PNG exports below ─────────────────
+  // Reads the already-computed C(n) panel text straight off the DOM (no
+  // re-derivation) so exports always match what's on screen. Returns null
+  // when neither the Canvas lock nor the prime spiral is on, so exports
+  // stay unchanged unless the person has actually engaged the feature.
+  function _cnExportInfo(){
+    var on = (window._cnCanvas && window._cnCanvas.on) || (window._liftSpiral && window._liftSpiral.on);
+    if(!on) return null;
+    var nEl = document.getElementById('cn-depth-num');
+    var n = nEl ? nEl.value : '';
+    var get = function(id){ var e=document.getElementById(id); return e ? e.textContent : ''; };
+    return {
+      n: n,
+      formula: 'C('+n+') = \u03b6(2)\u00b7\u03a0p(1 \u2212 min(n+1,p)/p\u00b2) = ' + get('cn-live-value'),
+      popTitle: 'gcd(r,M)=1 \u2014 population', popLine: get('cn-pop-line'), popNote: get('cn-pop-note'),
+      liftTitle: get('cn-lift-title'), liftLine: get('cn-lift-line'), liftNote: get('cn-lift-note'),
+      condTitle: 'lift / gcd', condLine: get('cn-cond-line'), condNote: get('cn-cond-note'),
+      canvasOn: !!(window._cnCanvas && window._cnCanvas.on),
+      canvasMode: (window._cnCanvas ? window._cnCanvas.mode : null),
+      spiralOn: !!(window._liftSpiral && window._liftSpiral.on),
+      spiralP: (window._liftSpiral ? window._liftSpiral.p : null),
+      spiralLock: !!(window._liftSpiral && window._liftSpiral.lock)
+    };
+  }
+  function _cnExportBlockHeight(fScale){
+    fScale = fScale || 1;
+    return Math.round(20*fScale) + Math.round(12*fScale)*2 + Math.round(13*fScale)*3 + Math.round(4*fScale);
+  }
+  function _drawCnExportBlock(ctx, x, y, w, fScale, info){
+    fScale = fScale || 1;
+    var pad = Math.round(12*fScale), titleH = Math.round(20*fScale), lh = Math.round(13*fScale);
+    var h = _cnExportBlockHeight(fScale);
+    ctx.fillStyle = 'rgba(196,155,56,0.06)'; ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle = 'rgba(196,155,56,0.35)'; ctx.lineWidth = Math.max(0.5,0.8*fScale);
+    ctx.strokeRect(x,y,w,h);
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    ctx.font = 'bold '+Math.round(11*fScale)+'px "Cinzel",Georgia,serif';
+    ctx.fillStyle = '#c49b38';
+    var headerTxt = 'C(n) \u2014 LIVE VALUE & SURVIVAL RATIOS';
+    if(info.spiralOn) headerTxt += '   \u00b7   spiral p='+info.spiralP+(info.spiralLock?' (locked to n)':'');
+    ctx.fillText(headerTxt, x+pad, y+pad+Math.round(9*fScale));
+    ctx.font = Math.round(9*fScale)+'px "Cinzel",Georgia,serif';
+    ctx.fillStyle = '#9a8060';
+    var ty = y+titleH+pad;
+    ctx.fillText(info.formula, x+pad, ty); ty += lh + Math.round(4*fScale);
+    var colW = (w - pad*2)/3;
+    [
+      {title:info.popTitle,  line:info.popLine,  note:info.popNote,  color:'#4a90d9'},
+      {title:info.liftTitle, line:info.liftLine, note:info.liftNote, color:'#4ecdc4'},
+      {title:info.condTitle, line:info.condLine, note:info.condNote, color:'#c49b38'}
+    ].forEach(function(c,i){
+      var cx = x+pad+i*colW, cty = ty;
+      ctx.fillStyle='#9a8060'; ctx.font=Math.round(8*fScale)+'px "Cinzel",Georgia,serif';
+      ctx.fillText(c.title, cx, cty); cty+=lh;
+      ctx.fillStyle=c.color; ctx.font='bold '+Math.round(10*fScale)+'px "Cinzel",Georgia,serif';
+      ctx.fillText(c.line, cx, cty); cty+=lh;
+      ctx.fillStyle='rgba(160,120,48,0.75)'; ctx.font=Math.round(7*fScale)+'px "Cinzel",Georgia,serif';
+      ctx.fillText(c.note, cx, cty);
+    });
+    return h;
+  }
+
   window.fareyComposite = function(){
     var modN  = parseInt(document.getElementById('f-mod-num').value)||49;
     var col1  = document.getElementById('f-col1').value;
@@ -7240,6 +7445,11 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
     if (_combinedMode !== 'both') subtitle += '  ·  mode=' + _combinedMode;
     if (window._advSplitOn) subtitle += '  ·  SPLIT';
 
+    // ── C(n) info block (only when the Canvas lock or prime spiral is on) ──
+    var cnInfo = _cnExportInfo();
+    var CN_GAP = 14;
+    var CN_H = cnInfo ? (_cnExportBlockHeight(1) + CN_GAP) : 0;
+
     // ── Build canvas ───────────────────────────────────────────────────────
     var diagW, diagH, off, ctx, W, H;
 
@@ -7251,7 +7461,7 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
 
       var GAP = 12;
       W = PAD + SZ + GAP + SZ + DETAIL_PAD + DETAIL_W + PAD;
-      H = TITLE_H + SZ + FOOT + PAD;
+      H = TITLE_H + SZ + FOOT + PAD + CN_H;
       off = document.createElement('canvas'); off.width=W; off.height=H;
       ctx = off.getContext('2d');
       ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
@@ -7277,12 +7487,13 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
       // Footer
       ctx.font='9px Cinzel,serif'; ctx.fillStyle='#9a8060'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('mod 1…'+modN+'  ·  gcd=1 | gcd>1 split', W/2, TITLE_H+SZ+FOOT/2+4);
+      if (cnInfo) _drawCnExportBlock(ctx, PAD, TITLE_H+SZ+FOOT, W-2*PAD, 1, cnInfo);
 
     } else {
       // Single canvas
       diagW = live.width; diagH = live.height;
       W = PAD + diagW + DETAIL_PAD + DETAIL_W + PAD;
-      H = TITLE_H + diagH + FOOT + PAD;
+      H = TITLE_H + diagH + FOOT + PAD + CN_H;
       off = document.createElement('canvas'); off.width=W; off.height=H;
       ctx = off.getContext('2d');
       ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
@@ -7292,6 +7503,7 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
       ctx.font='9px Cinzel,serif'; ctx.fillStyle='#9a8060'; ctx.textAlign='center'; ctx.textBaseline='middle';
       var modeLabel = _combinedMode==='coprime'?'gcd=1 only':_combinedMode==='noncoprime'?'gcd>1 only':'combined';
       ctx.fillText('mod 1…'+modN+'  ·  '+modeLabel, PAD+diagW/2, TITLE_H+diagH+FOOT/2+4);
+      if (cnInfo) _drawCnExportBlock(ctx, PAD, TITLE_H+diagH+FOOT, W-2*PAD, 1, cnInfo);
     }
 
     // ── Title block (top of every export) ─────────────────────────────────
@@ -7321,7 +7533,19 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
     var modN = parseInt(document.getElementById('f-mod-num').value)||49;
     var live = document.getElementById('fc-combined');
     if (!live) return;
-    _dl(live, 'farey_unfold_mod'+modN+'.png');
+    var cnInfo = _cnExportInfo();
+    if (!cnInfo) { _dl(live, 'farey_unfold_mod'+modN+'.png'); return; }
+    // Wrap the live unfold canvas with a C(n) strip underneath so the
+    // current depth/spiral state travels with the exported image.
+    var PAD = 16, GAP = 10;
+    var CN_H = _cnExportBlockHeight(1);
+    var W = live.width, H = live.height + GAP + CN_H + PAD;
+    var off = document.createElement('canvas'); off.width = W; off.height = H;
+    var ctx = off.getContext('2d');
+    ctx.fillStyle = '#0e0b05'; ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(live, 0, 0);
+    _drawCnExportBlock(ctx, PAD, live.height + GAP, W - PAD*2, 1, cnInfo);
+    _dl(off, 'farey_unfold_mod'+modN+'.png');
   };
 
   // ── Triangle export ────────────────────────────────────────────────────────
@@ -7386,7 +7610,10 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
     var diagY    = OUTER + 28;           // diagrams top
     var barY     = diagY + S + BAR_TOP;  // bar sits just below the top diagrams
     var combY    = barY + BAR_H + BAR_GAP;
-    var totalH   = combY + S + OUTER;
+    var cnInfo   = _cnExportInfo();
+    var CN_GAP   = Math.round(16*fScale);
+    var CN_H     = cnInfo ? (_cnExportBlockHeight(fScale) + CN_GAP) : 0;
+    var totalH   = combY + S + OUTER + CN_H;
 
     var STATS_H  = S;    // side panels fill full height of combined canvas
 
@@ -7624,6 +7851,8 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
         ctx.fillStyle=i<3?ptC:'#e8d9b0'; ctx.fillText(''+item[1],ix,fy+24);
       });
     }
+
+    if (cnInfo) _drawCnExportBlock(ctx, leftPanX, combY+S+CN_GAP, rightPanX+SIDE_W-leftPanX, fScale, cnInfo);
 
     var _triname='farey_mod'+modN+'_layout'+(pt?'_r'+pt.r+'m'+pt.m:'')+'.png';
     _dl(off, _triname);
@@ -14253,5 +14482,190 @@ function openOpener(){
 }
 </script>
 <script>function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}</script>
+<script>
+// ══ C(n) — LIVE VALUE & SURVIVAL RATIOS ══════════════════════════════════
+// Self-contained port of the opener's C(n)/survival-ratio panel, wired to
+// this page's own MOD N start/end range (f-mod-start-num / f-mod-num)
+// instead of the opener's G. Same math: C(n)=ζ(2)·∏_p(1−min(n+1,p)/p²),
+// counts are gcd(r,M)=1 (population), the n-step lift gcd(r,M+j)=1 for
+// j=0..n (lift), and lift/gcd (the conditional survival → C(n)).
+(function(){
+  var ZETA2 = Math.PI*Math.PI/6;
+  var _PZ2 = 0.4522474200410654985; // P(2) = Σ p^-2
+  function sieve(lim){var c=new Uint8Array(lim+1),ps=[];for(var i=2;i<=lim;i++){if(!c[i]){ps.push(i);for(var j=i*i;j<=lim;j+=i)c[j]=1;}}return ps;}
+  var CN_PRIMES = sieve(200000); // lighter cutoff than the opener's 1.5M — still ~9-10dp accurate with the tail correction below
+  var _tailSum=0; for(var _i=0;_i<CN_PRIMES.length;_i++){var _p=CN_PRIMES[_i];_tailSum+=1/(_p*_p);}
+  var _TAIL2 = _PZ2 - _tailSum;
+  var _cnCache = {0:1};
+  function getCn(n){
+    if(n in _cnCache) return _cnCache[n];
+    var ld=0;
+    for(var i=0;i<CN_PRIMES.length;i++){var p=CN_PRIMES[i],m=Math.min(n+1,p);ld+=Math.log(1-m/(p*p));}
+    ld += -(n+1)*_TAIL2;
+    return (_cnCache[n]=ZETA2*Math.exp(ld));
+  }
+  function gcdCN(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+  // Counts over rings M=mStart..mEnd, r=0..M-1 (triangle population, r=0 ring included).
+  var _memo={};
+  function cnCounts(mStart,mEnd,n){
+    var key=mStart+'|'+mEnd+'|'+n, hit=_memo[key]; if(hit) return hit;
+    var total=0,gcd1=0,lift=0;
+    for(var M=Math.max(1,mStart);M<=mEnd;M++){
+      for(var r=0;r<M;r++){
+        total++;
+        if(gcdCN(r,M)!==1) continue;
+        gcd1++;
+        var ok=true;
+        for(var j=1;j<=n;j++){ var Mj=M+j; if(Mj>mEnd){ok=false;break;} if(gcdCN(r,Mj)!==1){ok=false;break;} }
+        if(ok) lift++;
+      }
+    }
+    var res={total:total,gcd1:gcd1,lift:lift};
+    var keys=Object.keys(_memo); if(keys.length>64) delete _memo[keys[0]];
+    _memo[key]=res;
+    return res;
+  }
+  function pct(a,b){return b?((a/b*100).toFixed(2)):'0.00';}
+  function setTxt(id,val){var e=document.getElementById(id); if(e)e.textContent=val;}
+  function updateCnPanel(){
+    if(!document.getElementById('cn-ratio-panel')) return;
+    var startEl=document.getElementById('f-mod-start-num');
+    var endEl=document.getElementById('f-mod-num');
+    var nEl=document.getElementById('cn-depth-num');
+    var mStart=Math.max(1,parseInt(startEl&&startEl.value,10)||1);
+    var mEnd=Math.max(mStart,parseInt(endEl&&endEl.value,10)||128);
+    var n=Math.max(0,parseInt(nEl&&nEl.value,10)||1);
+    var c=cnCounts(mStart,mEnd,n);
+    var Cn=getCn(n), Dn=Cn/ZETA2;
+    setTxt('cn-formula-n', n);
+    setTxt('cn-live-value', Cn.toFixed(9));
+    setTxt('cn-pop-line', c.gcd1+'/'+c.total+'  ('+pct(c.gcd1,c.total)+'%)');
+    setTxt('cn-lift-line', c.lift+'/'+c.total+'  ('+pct(c.lift,c.total)+'%)');
+    setTxt('cn-cond-line', c.lift+'/'+c.gcd1+'  ('+pct(c.lift,c.gcd1)+'%)');
+    setTxt('cn-pop-note', '\u2192 1/\u03b6(2) \u2248 '+(1/ZETA2).toFixed(5)+' as range\u2192\u221e');
+    setTxt('cn-lift-note', '\u2192 D('+n+')=C('+n+')/\u03b6(2) \u2248 '+Dn.toFixed(5)+' as range\u2192\u221e');
+    setTxt('cn-cond-note', '\u2192 C('+n+') \u2248 '+Cn.toFixed(5)+' as range\u2192\u221e');
+    setTxt('cn-lift-title', n===0 ? 'lift: gcd(r,M)=1 (n=0 \u2014 no extra constraint, equals population)' : n===1 ? 'lift: gcd(r,M)=gcd(r,M+1)=1' : ('lift: gcd(r,M+j)=1 for j=0..'+n));
+    setTxt('cn-range-note', 'M='+mStart+'\u2026'+mEnd+' shown \u00b7 finite-range counts, not the M\u2192\u221e limit');
+  }
+  function _cnRedrawCanvas(){
+    var wantsCanvas = (window._cnCanvas && window._cnCanvas.on) || (window._liftSpiral && window._liftSpiral.on);
+    if(!wantsCanvas) return;
+    // C(n) canvas linking + the prime spiral only render on the Advanced
+    // (combined) canvas — auto-open Advanced so they're actually visible
+    // instead of silently drawing to a hidden canvas.
+    var advPanel = document.getElementById('farey-panel');
+    var isAdvOpen = advPanel && advPanel.classList.contains('open');
+    if(!isAdvOpen){
+      if(typeof toggleFareyPanel==='function'){
+        toggleFareyPanel();
+        setTimeout(_cnRedrawCanvas, 80);
+      }
+      return;
+    }
+    if(typeof drawCombined==='function'){
+      try{ drawCombined(); }catch(e){}
+    }
+  }
+  window.cnDepthChange=function(v){ updateCnPanel(); _cnSpiralSyncLock(); _cnRedrawCanvas(); };
+  window.cnDepthStep=function(d){
+    var nEl=document.getElementById('cn-depth-num'); if(!nEl) return;
+    var v=Math.max(0,Math.min(60,(parseInt(nEl.value,10)||0)+d));
+    nEl.value=v; updateCnPanel(); _cnSpiralSyncLock(); _cnRedrawCanvas();
+  };
+  window.cnSetCanvasOn=function(v){
+    window._cnCanvas.on=!!v; _cnRedrawCanvas();
+  };
+  window.cnSetCanvasMode=function(v){
+    window._cnCanvas.mode=(v==='remove')?'remove':'dim'; _cnRedrawCanvas();
+  };
+  window.cnSetCanvasDimAmt=function(v){
+    window._cnCanvas.dimAmt=Math.max(0,Math.min(1,(+v||0)/100));
+    var lbl=document.getElementById('cn-canvas-dim-lbl'); if(lbl) lbl.textContent=Math.round(window._cnCanvas.dimAmt*100)+'%';
+    _cnRedrawCanvas();
+  };
+  // ── Prime spiral controls ──────────────────────────────────────────────
+  function _cnSpiralLbl(){
+    var lbl=document.getElementById('cn-sp-p-lbl'); if(lbl) lbl.textContent='p='+window._liftSpiral.p;
+  }
+  function _cnSpiralSyncLock(){
+    if(!window._liftSpiral.lock) return;
+    var nEl=document.getElementById('cn-depth-num');
+    var n=Math.max(0,parseInt(nEl&&nEl.value,10)||0);
+    window._liftSpiral.p = window._spNthPrime(Math.max(1,n));
+    _cnSpiralLbl();
+  }
+  window.cnSpiralSetOn=function(v){ window._liftSpiral.on=!!v; _cnRedrawCanvas(); };
+  window.cnSpiralSetMirror=function(v){ window._liftSpiral.mirror=!!v; _cnRedrawCanvas(); };
+  window.cnSpiralSetLock=function(v){
+    window._liftSpiral.lock=!!v;
+    if(v){ _cnSpiralSyncLock(); }
+    _cnRedrawCanvas();
+  };
+  window.cnSpiralStep=function(dir){
+    if(window._liftSpiral.lock) return; // locked: p follows depth n, not manual stepping
+    var cur=window._liftSpiral.p;
+    var next = dir>0 ? (function(){var c=cur+1; while(!_spIsPrimeGlobal(c)) c++; return c;})()
+                      : (function(){var c=cur-1; while(c>=2 && !_spIsPrimeGlobal(c)) c--; return c>=2?c:2;})();
+    window._liftSpiral.p = next; _cnSpiralLbl(); _cnRedrawCanvas();
+  };
+  function _spIsPrimeGlobal(k){ if(k<2) return false; for(var i=2;i*i<=k;i++){ if(k%i===0) return false; } return true; }
+  window.cnTogglePanel=function(){
+    var body=document.getElementById('cn-body'), chev=document.getElementById('cn-chevron');
+    if(!body) return;
+    var hidden = body.style.display==='none';
+    body.style.display = hidden ? '' : 'none';
+    if(chev) chev.style.transform = hidden ? '' : 'rotate(-90deg)';
+  };
+  // ── ▶ n animation: 0 → target n → 0 ping-pong, mirrors the opener's ▶ N ──
+  var _cnPlayId=null, _cnPlayDir=1, _cnPlayTarget=1;
+  window.cnPlayToggle=function(){
+    var nEl=document.getElementById('cn-depth-num');
+    var btn=document.getElementById('cn-play-btn');
+    if(_cnPlayId){
+      clearInterval(_cnPlayId); _cnPlayId=null;
+      if(nEl) nEl.value=_cnPlayTarget;
+      updateCnPanel();
+      if(btn){btn.innerHTML='&#9654;';btn.style.color='var(--gold)';btn.style.background='rgba(200,168,74,.1)';}
+      return;
+    }
+    _cnPlayTarget = Math.max(1, parseInt(nEl&&nEl.value,10)||1);
+    var cur=0; _cnPlayDir=1;
+    if(btn){btn.innerHTML='&#9632;';btn.style.color='#c94040';btn.style.background='rgba(201,64,64,.12);';}
+    _cnPlayId=setInterval(function(){
+      cur+=_cnPlayDir;
+      if(cur>=_cnPlayTarget){cur=_cnPlayTarget;_cnPlayDir=-1;}
+      else if(cur<=0){cur=0;_cnPlayDir=1;}
+      if(nEl) nEl.value=cur;
+      updateCnPanel();
+      _cnSpiralSyncLock();
+      _cnRedrawCanvas();
+    },180);
+  };
+  // Piggyback on the page's own redraw so the panel always tracks the mod
+  // range/rotation state currently on screen — wrap whatever fareyRedraw
+  // is by the time this script runs (last script on the page).
+  var _prevFareyRedraw = window.fareyRedraw;
+  window.fareyRedraw = function(){
+    if(typeof _prevFareyRedraw==='function') _prevFareyRedraw.apply(this, arguments);
+    try{ updateCnPanel(); }catch(e){}
+  };
+  setTimeout(updateCnPanel, 400);
+  // Defaults: spiral on, locked to C(n) depth, looping via the n-play animation
+  // (locked mode makes p = the n-th prime, so animating n also animates the spiral).
+  setTimeout(function(){
+    try{
+      window._liftSpiral.on = true;
+      window._liftSpiral.lock = true;
+      var nEl=document.getElementById('cn-depth-num');
+      if(nEl && (parseInt(nEl.value,10)||0)<10) nEl.value=10;
+      updateCnPanel();
+      _cnSpiralSyncLock();
+      _cnRedrawCanvas();
+      if(!_cnPlayId) cnPlayToggle();
+    }catch(e){}
+  }, 600);
+})();
+</script>
 </body>
 </html>
