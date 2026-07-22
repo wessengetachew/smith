@@ -2485,6 +2485,7 @@ function heroToggleTopBars(){
   window.wRenderCn=function(){
     var sl=document.getElementById('welcome-n-slider');
     _wN=sl?+sl.value:0;
+    if(typeof _liftPSyncReconcile==='function')_liftPSyncReconcile(); // saturation lock tracks the opener's n
     // Mirror onto the shared global n so the "Show Working" table — a single
     // element physically moved in and out of this modal — always reflects
     // whatever n the opener's own slider is showing, the same way wSetMode/
@@ -4902,6 +4903,28 @@ function heroToggleTopBars(){
     // Smith zoom-out level — only meaningful in Smith, harmless otherwise
     if(heroView==='smith'&&typeof _heroSmithSetZoomOut==='function') _heroSmithSetZoomOut(_wSmithZoomOut||8);
 
+    // Smith dynamics — Flip / rotation α / spin — carried over so the hero's
+    // Smith chart lands EXACTLY as the opener showed it. (Previously only the
+    // zoom-out level transferred: the Flip state was silently dropped, so a
+    // mirrored opener arrived unmirrored in the hero.)
+    if(heroView==='smith'){
+      if(typeof _heroSmithFlipScale!=='undefined'){
+        var _fT=(typeof _wsFlipSign!=='undefined')?_wsFlipSign:(((typeof _wsFlipScale!=='undefined'?_wsFlipScale:1)<0)?-1:1);
+        _heroSmithFlipScale=_fT;        // settle instantly on the opener's TARGET side (handles a send mid-flip-animation)
+        _heroSmithFlipSign=_fT;         // hero's next Flip press toggles away from the transferred side
+        _heroSmithFlipping=false;       // don't re-animate an already-settled flip
+        _heroSmithUserTouchedSpin=true; // suppress the delayed one-shot auto-flip from undoing the transfer
+      }
+      if(typeof _heroSmithSetAlphaDeg==='function'&&typeof _wsTheta!=='undefined')
+        _heroSmithSetAlphaDeg(((_wsTheta%360)+360)%360);   // rotation α slider position carries over
+      if(typeof _heroSmithSetSpeed==='function'&&typeof _wsSpeed!=='undefined')
+        _heroSmithSetSpeed(_wsSpeed);                       // both sides are deg/sec — direct copy
+      if(typeof _heroSmithSpinning!=='undefined'&&typeof _heroSmithToggleSpin==='function'){
+        var _wantSpin=!!(typeof _wsSpinning!=='undefined'&&_wsSpinning);
+        if(_heroSmithSpinning!==_wantSpin)_heroSmithToggleSpin(); // align spin running-state (align, don't toggle)
+      }
+    }
+
     if(typeof _heroColorModeLocal!=='undefined') _heroColorModeLocal=heroColorVal;
     var heroSel=document.getElementById('hero-color-mode');
     if(heroSel) heroSel.value=heroColorVal;
@@ -6277,6 +6300,7 @@ function heroToggleTopBars(){
     </label>
     <button class="lift-n-play-btn" onclick="liftNPlay()" title="Animate the ±n path offset" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ n</button>
     <button class="lift-p-play-btn" onclick="liftPPlay()" title="Animate the spiral prime" style="background:rgba(200,168,74,.08);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ p</button>
+    <label style="display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:7.5px;color:rgba(200,168,74,.85);cursor:pointer;white-space:nowrap;letter-spacing:.04em;" title="Lock the spiral prime to C(n): stepping and ▶ p skip primes already saturated at the live depth (p ≤ n+1) — the opener's n while the opener is open, the hero's n (▶ N animation or the main slider) otherwise"><input type="checkbox" class="lift-psync-chk" checked onchange="liftTogglePSync(this.checked)" style="accent-color:rgba(200,168,74,.8);">Sync w/ C(n)</label>
     <button class="lift-m-play-btn" onclick="liftMPlay()" title="Animate the ring count M" style="background:rgba(126,200,122,.08);border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:7.5px;padding:3px 8px;cursor:pointer;letter-spacing:.05em;">▶ M</button>
     <span style="font-size:8px;color:var(--cream3);">Speed</span>
     <input type="range" class="lift-anim-speed-sl" min="20" max="500" step="10" value="140" style="width:60px;accent-color:rgba(155,127,232,.7);" oninput="liftSetAnimSpeed(this.value)">
@@ -13476,6 +13500,7 @@ function drawGridLabels(ctx, W, H){
 
 function setN(n){
   N=Math.max(0,Math.floor(+n)||0);
+  if(typeof _liftPSyncReconcile==='function')_liftPSyncReconcile(); // saturation lock tracks the slider
   // Persist n in URL without reloading
   try{
     const url=new URL(window.location.href);
@@ -15110,6 +15135,9 @@ function heroNPlay(){
   const btn=document.getElementById('hero-n-play');
   if(_heroNPlayId){
     clearInterval(_heroNPlayId);_heroNPlayId=null;
+    window._heroNPlayCur=null;  // clear the animation override so nothing reads a stale animated n
+    if(typeof _updateHeroFormula==='function')_updateHeroFormula(N,getCn(N)); // snap the equation panel back to the real n (canvas already falls back via the _hnPlaying guard)
+    if(typeof _liftPSyncReconcile==='function')_liftPSyncReconcile();          // saturation lock re-resolves against the real n
     if(btn){btn.textContent='▶ N';btn.style.color='rgba(61,200,184,.85)';btn.style.background='rgba(61,200,184,.08)';}
     return;
   }
@@ -15124,6 +15152,7 @@ function heroNPlay(){
     // Update hero display without changing global N — use local nAnim override
     // We store it for the animate loop to pick up
     window._heroNPlayCur=curN;
+    if(typeof _liftPSyncReconcile==='function')_liftPSyncReconcile(); // saturation lock follows the animated n
     // Keep the equation panel in sync with the animation
     _updateHeroFormula(curN, getCn(curN));
   },(typeof _liftAnimSpeed!=='undefined')?_liftAnimSpeed:180);
@@ -15256,11 +15285,16 @@ function _liftCurrentG(){
 }
 function liftCycleSpiralP(dir){
   const G=_liftCurrentG();
-  let cur=liftSpiralPFor(G), idx=PRIMES.indexOf(cur);
-  if(idx<0)idx=0;
-  idx=Math.max(0,idx+dir);
-  while(idx>0&&PRIMES[idx]>G)idx--;
-  _liftSpiralP=PRIMES[Math.min(idx,PRIMES.length-1)];
+  const cur=liftSpiralPFor(G);
+  let idx=PRIMES.indexOf(cur); if(idx<0)idx=0;
+  let target=idx;
+  for(let j=idx+dir;j>=0&&j<PRIMES.length;j+=dir){
+    const q=PRIMES[j];
+    if(dir>0&&q>G)break;                          // top of range — stay (▶ p's bounce reverses here)
+    if(_liftPSyncCn&&_liftPrimeSyncSkip(q))continue; // locked out: saturated at the live n (and finite set, opener)
+    target=j;break;
+  }
+  _liftSpiralP=PRIMES[target];
   document.querySelectorAll('.lift-spiralp-lbl').forEach(l=>l.textContent='p='+_liftSpiralP);
   _liftRedraw();
 }
@@ -15323,26 +15357,56 @@ function liftToggleAllPrimes(v){_liftAllPrimesOn=!!v;document.querySelectorAll('
 // this half is vacuously true there) AND (2) saturated by the current lift
 // depth n, i.e. p ≤ n+1 — the same min(n+1,p)=p case the C(n) formula uses,
 // since any n+1 consecutive integers already contain a multiple of such a
-// prime. Both conditions must hold (opener's own state, since the toggle
-// lives only in the opener panel), so the animation adapts to whichever of
-// finite-mode truncation or lift depth is currently active.
+// prime. The governing n is resolved per surface (_liftSyncEffectiveN):
+// opener's _wN while the opener is on screen, the hero's ▶ N animation or
+// main slider otherwise — so the lock works identically in opener AND hero,
+// for manual ◀ ▶ stepping as well as ▶ p play.
 let _liftPSyncCn=true; // defaults on — pairs naturally with ▶ p also auto-starting on load
 function liftTogglePSync(v){
   _liftPSyncCn=!!v;
   document.querySelectorAll('.lift-psync-chk').forEach(c=>c.checked=_liftPSyncCn);
 }
+function _liftOpenerVisible(){
+  var m=document.getElementById('welcome-modal');
+  return !!(m&&m.style.display!=='none');
+}
+// The n that currently governs C(n): the opener's _wN while the opener is on
+// screen; otherwise the hero's — _heroNPlayCur while ▶ N is animating, else
+// the page's global N. This is what makes the lock work on BOTH surfaces.
+function _liftSyncEffectiveN(){
+  if(_liftOpenerVisible()&&typeof window._wGetN==='function')return window._wGetN()||0;
+  if(typeof _heroNPlayId!=='undefined'&&_heroNPlayId&&typeof window._heroNPlayCur==='number')return window._heroNPlayCur;
+  return (typeof N!=='undefined')?(N||0):0;
+}
 function _liftPrimeSyncSkip(p){
   if(!_liftPSyncCn)return false;
-  var n=(typeof window._wGetN==='function')?(window._wGetN()||0):0;
+  var n=_liftSyncEffectiveN();
   var nDepthDone=p<=(n+1);
-  var mode=(typeof window._wGetMode==='function')?window._wGetMode():'asymptotic';
   var finiteDone=true;
-  if(mode==='finite'){
-    var k=(typeof window._wGetPrimeK==='function')?(window._wGetPrimeK()||1):1;
-    var idx=PRIMES.indexOf(p);
-    finiteDone=(idx>=0&&idx<k);
+  if(_liftOpenerVisible()){ // finite p₁..p_k truncation is opener-only state
+    var mode=(typeof window._wGetMode==='function')?window._wGetMode():'asymptotic';
+    if(mode==='finite'){
+      var k=(typeof window._wGetPrimeK==='function')?(window._wGetPrimeK()||1):1;
+      var idx=PRIMES.indexOf(p);
+      finiteDone=(idx>=0&&idx<k);
+    }
   }
   return nDepthDone&&finiteDone;
+}
+// If the governing n just saturated the current spiral prime, advance it to
+// the first still-live prime ≤ G (mirrors the saturation lock on Page 8).
+function _liftPSyncReconcile(){
+  if(!_liftPSyncCn)return;
+  var G=_liftCurrentG();
+  if(!_liftPrimeSyncSkip(liftSpiralPFor(G)))return;
+  for(var i=0;i<PRIMES.length;i++){
+    var q=PRIMES[i]; if(q>G)break;
+    if(!_liftPrimeSyncSkip(q)){
+      _liftSpiralP=q;
+      document.querySelectorAll('.lift-spiralp-lbl').forEach(function(l){l.textContent='p='+q;});
+      break;
+    }
+  }
 }
 function liftToggleAllN(v){_liftAllNOn=!!v;document.querySelectorAll('.lift-alln-chk').forEach(c=>c.checked=_liftAllNOn);_liftRedraw();}
 
@@ -15375,10 +15439,19 @@ function liftToggleLock(v){
 function _liftCascadeIfLocked(skip){
   if(!_liftPlayLocked||_liftLockDispatching)return;
   _liftLockDispatching=true;
-  if(skip!=='n')liftNPlay();
-  if(skip!=='p')liftPPlay();
-  if(skip!=='m')liftMPlay();
-  if(typeof heroGapPlayToggle==='function')heroGapPlayToggle();
+  // Mirror the initiator's RESULTING state onto the others — align, don't toggle.
+  // The old version blind-toggled every loop, which inverted any loop already in
+  // the opposite state (press ▶ n while ▶ p was running → p STOPPED), and always
+  // flipped the Gaps player, which had no skip slot at all.
+  var starting=true;
+  if(skip==='n')starting=!_liftNPlayId;
+  else if(skip==='p')starting=!_liftPPlayId;
+  else if(skip==='m')starting=!_liftMPlayId;
+  function _align(running,fn){ if(starting!==!!running)fn(); }
+  if(skip!=='n')_align(_liftNPlayId,liftNPlay);
+  if(skip!=='p')_align(_liftPPlayId,liftPPlay);
+  if(skip!=='m')_align(_liftMPlayId,liftMPlay);
+  if(typeof heroGapPlayToggle==='function'&&typeof _heroGapPlayId2!=='undefined')_align(_heroGapPlayId2,heroGapPlayToggle);
   _liftLockDispatching=false;
 }
 
@@ -15430,19 +15503,14 @@ function liftPPlay(){
     const before=liftSpiralPFor(G);
     liftCycleSpiralP(_liftPPlayDir);
     if(liftSpiralPFor(G)===before){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
-    // Sync w/ C(n): keep stepping past primes already accounted for by the
-    // active finite prime set AND the current lift depth n, so only primes
-    // still "live" at this n/k get airtime. Guarded so a fully-saturated
-    // range can't spin forever — it just settles on whatever it reaches.
-    if(_liftPSyncCn){
-      let guard=0;
-      while(_liftPrimeSyncSkip(liftSpiralPFor(G))&&guard<PRIMES.length){
-        const beforeS=liftSpiralPFor(G);
-        liftCycleSpiralP(_liftPPlayDir);
-        if(liftSpiralPFor(G)===beforeS){ _liftPPlayDir*=-1; liftCycleSpiralP(_liftPPlayDir); }
-        guard++;
-      }
-    }
+    // Sync w/ C(n) now lives INSIDE liftCycleSpiralP — it skips locked-out
+    // primes with bounce, so the probe-loop that used to sit here is gone.
+    // That loop was bounded by PRIMES.length (114,155 with the 1.5M sieve)
+    // and every probe forced a full _liftRedraw: in finite mode, when the
+    // depth n plus the p₁..p_k set locked out EVERY prime ≤ G, a single tick
+    // attempted ~228k redraws and froze both opener and hero. A fully
+    // locked-out range now just settles where it is — two cheap scans per
+    // tick, page stays responsive — and wakes the moment any prime goes live.
   },_liftAnimSpeed);
 }
 
