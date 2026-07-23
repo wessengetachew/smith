@@ -472,6 +472,63 @@
             margin-top: 15px;
         }
     </style>
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE FIT — stop control rows running past the right edge.
+   Everything is scoped to <=1100px, so the desktop layout is untouched.
+   Inline style="display:flex" rows had no flex-wrap, so on a narrow screen
+   they extended off-canvas instead of breaking onto a second line; the
+   attribute selectors below reach those inline rows (hence !important).
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px){
+  html, body { max-width:100% !important; overflow-x:hidden !important; }
+  .container { max-width:100% !important; padding:10px 8px !important; }
+
+  /* Inline flex rows may wrap and may not exceed their parent */
+  [style*="display:flex"], [style*="display: flex"],
+  [style*="display:inline-flex"], [style*="display: inline-flex"]{
+    flex-wrap:wrap !important;
+    max-width:100% !important;
+  }
+  /* Same for the class-based rows */
+  .harmonic-toolbar-header, .harmonic-quick-display, .control-row,
+  .control-group, .tabs, .subtabs, .nav-links, .mode-selector,
+  .color-legend, .keyboard-row, .harmonic-card-row{
+    flex-wrap:wrap !important;
+    max-width:100% !important;
+  }
+  .harmonic-toolbar, .panel, .card, .modal-content{ max-width:100% !important; }
+
+  /* "margin-left:auto" spacers shove the trailing item past the edge on a
+     narrow screen — let it fall onto the next line instead. */
+  [style*="margin-left:auto"], [style*="margin-left: auto"]{ margin-left:0 !important; }
+
+  /* Media + wide content stay inside. Canvas click handlers already rescale
+     via canvas.width/rect.width, so shrinking the display size is safe. */
+  img, svg, video{ max-width:100% !important; height:auto !important; }
+  /* height:auto would flatten the little fixed-height inline canvases, so
+     those only get the width clamp. */
+  canvas:not(.arnold-canvas-sm):not(.spectrum-canvas-sm){
+    max-width:100% !important; height:auto !important;
+  }
+  .arnold-canvas-sm, .spectrum-canvas-sm{ max-width:100% !important; }
+  table{ max-width:100% !important; display:block; overflow-x:auto; }
+  pre, code{ white-space:pre-wrap !important; word-break:break-word !important; }
+
+  /* Inputs that carry a fixed px width in an inline style */
+  input, select, textarea{ max-width:100% !important; }
+
+  /* Grids collapse rather than overflow */
+  .grid-2, .grid-3, .grid-4{ grid-template-columns:1fr !important; }
+  .detail-grid, .stat-grid{ grid-template-columns:repeat(auto-fit,minmax(120px,1fr)) !important; }
+}
+@media (max-width: 640px){
+  .container{ padding:8px 6px !important; }
+  body{ font-size:13px; }
+  /* Keep button rows compact so a row of 4-6 buttons still fits one line */
+  .control-row button, .control-group button{ padding:4px 8px !important; font-size:10px !important; }
+}
+</style>
 </head>
 <body>
 <!-- ── PAGE NAV (same bar as index.html / page2-5, page7) ── -->
@@ -514,7 +571,6 @@ function openOpener(){
 
 <div class="nav-links">
     <span class="nav-links-label">Projects:</span>
-    <a href="https://wessengetachew.github.io/2025/" target="_blank">2025</a>
     <a href="https://wessengetachew.github.io/Transform/" target="_blank">Transform</a>
     <a href="https://wessengetachew.github.io/finite/" target="_blank">Finite</a>
     <a href="https://wessengetachew.github.io/Primes/" target="_blank">Primes</a>
@@ -764,6 +820,7 @@ function openOpener(){
                 <input type="number" id="sectorMax" value="275" min="1" onchange="computeAll()">
             </div>
             <button onclick="computeAll()">Compute</button>
+            <button id="ringBuildPlayBtn" onclick="playMainRingBuildUp()" title="Animate drawing the ring from m=1 up to N" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:8px 14px;cursor:pointer;">▶ Play</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
             <button class="secondary" onclick="exportAllWithCharts()" title="Export CSV + 4K charts">Export All + 4K</button>
             <label class="audio-toggle-label" title="Enable to play audio when clicking points">
@@ -772,24 +829,30 @@ function openOpener(){
             </label>
         </div>
         
-        <!-- Sector Bound Controls -->
-        <div class="control-row" style="background:#0f172a;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #334155;">
-            <label style="color:#94a3b8;font-size:11px;margin-right:8px;">Sector Bound:</label>
-            <label style="font-size:11px;"><input type="checkbox" id="useSectorBound" checked onchange="updateSectorBound()"> Auto-bound</label>
-            <label style="margin-left:12px;font-size:11px;">Constant:</label>
-            <select id="sectorBoundPreset" onchange="applySectorBoundPreset()" style="font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
-                <option value="sqrt3pi" selected>√3/π ≈ 0.5513</option>
-                <option value="sqrt6pi">√6/π ≈ 0.7797</option>
-                <option value="1pi">1/π ≈ 0.3183</option>
-                <option value="2pi">2/π ≈ 0.6366</option>
-                <option value="sqrt2pi">√2/π ≈ 0.4502</option>
-                <option value="1">1.0000</option>
-                <option value="custom">Custom...</option>
-            </select>
-            <label style="margin-left:8px;font-size:11px;">or enter:</label>
-            <input type="text" id="customSectorBound" value="sqrt(3)/pi" placeholder="e.g. sqrt(6)/pi" style="width:100px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-family:monospace;" onchange="applyCustomSectorBound()">
-            <span id="sectorBoundValue" style="color:#22c55e;font-size:11px;font-family:monospace;margin-left:8px;">= 0.5513</span>
-            <span id="sectorBoundResult" style="color:#f59e0b;font-size:11px;margin-left:8px;">→ Max sector: 275</span>
+        <!-- Sector Bound Controls (collapsible) -->
+        <div style="margin-top:8px;">
+            <div class="control-row" onclick="toggleSectorBoundPanel()" style="cursor:pointer;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;user-select:none;">
+                <span id="sectorBoundChevron" style="display:inline-block;color:#94a3b8;font-size:10px;margin-right:6px;transition:transform 0.15s;">▶</span>
+                <label style="color:#94a3b8;font-size:11px;margin-right:8px;cursor:pointer;">Sector Bound</label>
+                <span id="sectorBoundSummary" style="color:#f59e0b;font-size:11px;">√3/π ≈ 0.5513 → Max sector: 275</span>
+            </div>
+            <div id="sectorBoundPanel" class="control-row" style="display:none;background:#0f172a;padding:8px 12px;border-radius:0 0 6px 6px;border:1px solid #334155;border-top:none;">
+                <label style="font-size:11px;"><input type="checkbox" id="useSectorBound" checked onchange="updateSectorBound()"> Auto-bound</label>
+                <label style="margin-left:12px;font-size:11px;">Constant:</label>
+                <select id="sectorBoundPreset" onchange="applySectorBoundPreset()" style="font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
+                    <option value="sqrt3pi" selected>√3/π ≈ 0.5513</option>
+                    <option value="sqrt6pi">√6/π ≈ 0.7797</option>
+                    <option value="1pi">1/π ≈ 0.3183</option>
+                    <option value="2pi">2/π ≈ 0.6366</option>
+                    <option value="sqrt2pi">√2/π ≈ 0.4502</option>
+                    <option value="1">1.0000</option>
+                    <option value="custom">Custom...</option>
+                </select>
+                <label style="margin-left:8px;font-size:11px;">or enter:</label>
+                <input type="text" id="customSectorBound" value="sqrt(3)/pi" placeholder="e.g. sqrt(6)/pi" style="width:100px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-family:monospace;" onchange="applyCustomSectorBound()">
+                <span id="sectorBoundValue" style="color:#22c55e;font-size:11px;font-family:monospace;margin-left:8px;">= 0.5513</span>
+                <span id="sectorBoundResult" style="color:#f59e0b;font-size:11px;margin-left:8px;">→ Max sector: 275</span>
+            </div>
         </div>
         
         <!-- Bounded P/C Analysis for Large N -->
@@ -920,8 +983,12 @@ function openOpener(){
         <!-- Main Controls Row -->
         <div style="display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;">
             <div class="panel" style="flex:1;min-width:300px;padding:12px;">
-                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount()">
+                <div onclick="toggleRingControlsPanel()" style="cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none;">
+                    <span id="ringControlsChevron" style="display:inline-block;color:#94a3b8;font-size:10px;transition:transform 0.15s;">▶</span>
+                    <span style="font-size:12px;color:#94a3b8;font-weight:600;">Ring Display Controls</span>
+                </div>
+                <div id="ringControlsPanel" style="display:none;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount();if(window.cnUpdatePanel)cnUpdatePanel();">
                         <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
                     </select></label>
                     <label style="font-size:12px;">Color: <select id="colorMode" onchange="drawMainRing()" style="padding:4px;">
@@ -1008,47 +1075,87 @@ function openOpener(){
              range below is exactly the same (r,M) lattice the opener's ring view uses. ══ -->
         <div id="cn-ratio-panel" style="background:#0f172a;border-radius:8px;padding:12px 16px;margin-bottom:15px;border:1px solid #334155;border-left:4px solid #c8a84a;">
             <div onclick="cnTogglePanel()" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;">
-                <span id="cnChevron" style="display:inline-block;transition:transform .15s;color:#c8a84a;font-size:11px;">&#9662;</span>
+                <span id="cnChevron" style="display:inline-block;transition:transform .15s;color:#c8a84a;font-size:11px;transform:rotate(-90deg);">&#9662;</span>
                 <strong style="color:#c8a84a;font-size:12px;letter-spacing:0.03em;">C(n) — live value &amp; survival ratios</strong>
                 <span style="color:#334155;">|</span>
                 <span style="font-size:11px;color:#94a3b8;">depth n:</span>
                 <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:3px;">
                     <button onclick="cnDepthStep(-1)" title="n − 1" style="background:#1e293b;border:1px solid #475569;color:#22c55e;font-size:11px;width:20px;height:22px;cursor:pointer;padding:0;line-height:1;border-radius:3px;">&minus;</button>
-                    <input type="number" id="cnDepthN" min="0" max="60" value="1" style="width:40px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;padding:2px 4px;text-align:center;" onchange="if(window.cnUpdatePanel)cnUpdatePanel();if(window.cnSpiralSyncLock)cnSpiralSyncLock();if(window.state&&(state.cnCanvasOn||(state.liftSpiralOn&&state.liftSpiralLock))&&window.drawMainRing)drawMainRing();">
+                    <input type="number" id="cnDepthN" min="0" max="60" value="0" style="width:40px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;padding:2px 4px;text-align:center;" oninput="if(window.cnDepthRetarget)cnDepthRetarget();if(window.cnSetLockSetRefresh)cnSetLockSetRefresh();if(window.cnUpdatePanel)cnUpdatePanel();if(window.cnSpiralSyncLock)cnSpiralSyncLock();if(window.state&&(state.cnCanvasOn||(state.liftSpiralOn&&state.liftSpiralLock))&&window.drawMainRing)drawMainRing();">
                     <button onclick="cnDepthStep(1)" title="n + 1" style="background:#1e293b;border:1px solid #475569;color:#22c55e;font-size:11px;width:20px;height:22px;cursor:pointer;padding:0;line-height:1;border-radius:3px;">+</button>
-                    <button id="cnPlayBtn" onclick="cnPlayToggle()" title="Animate n from 0 → current n → 0" style="background:rgba(200,168,74,0.12);border:1px solid #c8a84a;color:#c8a84a;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;margin-left:3px;">&#9654;</button>
+                    <button id="cnPlayBtn" onclick="cnDepthPlayToggle()" title="Animate C(n) DEPTH only: n ramps 0 → (the number in the box). Independent of the prime-spiral ▶ in Lift dynamics — both can run at once." style="background:rgba(200,168,74,0.12);border:1px solid #c8a84a;color:#c8a84a;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;margin-left:3px;">&#9654;</button>
+                    <select id="cnPlaySpeedSel" onchange="if(window.cnSetDepthSpeed)cnSetDepthSpeed(this.value)" title="C(n) depth play speed" style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#94a3b8;font-size:9.5px;padding:2px 3px;margin-left:2px;">
+                        <option value="400">slow</option>
+                        <option value="180" selected>normal</option>
+                        <option value="80">fast</option>
+                        <option value="30">fastest</option>
+                    </select>
+                    <select id="cnPlayLoopSel" onchange="if(window.cnSetDepthLoop)cnSetDepthLoop(this.value)" title="Hold: ramp 0→n once and STAY at n (saturated — a locked spiral stays at the n-th prime). Loop: ping-pong 0→n→0 forever." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#94a3b8;font-size:9.5px;padding:2px 3px;margin-left:2px;">
+                        <option value="hold" selected>hold</option>
+                        <option value="loop">loop</option>
+                    </select>
                 </span>
                 <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
                 <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;">
-                    <label style="display:inline-flex;align-items:center;gap:4px;color:#94a3b8;font-size:10.5px;cursor:pointer;" title="Wire depth n to the ring canvas: points that fail gcd(r,m+j)=1 for j=0..n get dimmed or removed as n rises"><input type="checkbox" id="cnCanvasOnChk" onchange="cnSetCanvasOn(this.checked)"> Canvas</label>
+                    <span style="font-size:10.5px;color:#94a3b8;">Scope:</span>
+                    <select id="cnScopeSel" onchange="if(window.cnUpdatePanel)cnUpdatePanel();" title="This Sector: population/lift computed only for the currently-selected Sector above. All Sectors: full m-range below." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:10px;padding:2px 4px;">
+                        <option value="sector" selected>This sector</option>
+                        <option value="all">All sectors (m-range)</option>
+                    </select>
+                </span>
+                <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
+                <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;">
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#94a3b8;font-size:10.5px;cursor:pointer;" title="Wire depth n to the ring canvas: points that fail gcd(r,m+j)=1 for j=0..n get dimmed or removed as n rises"><input type="checkbox" id="cnCanvasOnChk" checked onchange="cnSetCanvasOn(this.checked)"> Canvas</label>
                     <select id="cnCanvasModeSel" onchange="cnSetCanvasMode(this.value)" style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:10px;padding:2px 4px;">
                         <option value="dim">Dim</option>
                         <option value="remove">Remove</option>
                     </select>
                     <input type="range" id="cnCanvasDimSl" min="0" max="80" step="5" value="12" style="width:50px;" oninput="cnSetCanvasDimAmt(this.value)" title="Brightness of non-surviving points in Dim mode">
                     <span id="cnCanvasDimLbl" style="color:#64748b;font-size:10px;min-width:26px;">12%</span>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10px;cursor:pointer;" title="Also dim/remove gcd(r,m)&gt;1 points. Off by default — they fail the lift trivially, so including them turns the C(n) link into a plain coprime filter."><input type="checkbox" id="cnCanvasNCChk" onchange="cnSetCanvasInclNC(this.checked)"> gcd&gt;1 too</label>
                 </span>
                 <span id="cnRangeNote" style="font-size:10.5px;color:#64748b;margin-left:auto;"></span>
             </div>
-            <details id="cnLiftDynDD" open style="margin-top:6px;background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.25);border-radius:4px;">
+            <details id="cnLiftDynDD" style="margin-top:6px;background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.25);border-radius:4px;">
                 <summary onclick="event.stopPropagation()" style="cursor:pointer;padding:5px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.08);border-radius:4px 4px 0 0;">
                     <span class="cn-ld-chev" style="display:inline-block;transition:transform .15s;font-size:9px;color:#c8a84a;">&#9656;</span>
                     <span style="color:#c8a84a;letter-spacing:.08em;text-transform:uppercase;font-size:10px;">Lift dynamics — prime spiral</span>
                 </summary>
                 <style>#cnLiftDynDD[open]>summary>span.cn-ld-chev{transform:rotate(90deg);}</style>
                 <div onclick="event.stopPropagation()" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;font-family:inherit;">
-                    <label style="display:inline-flex;align-items:center;gap:4px;color:#c8a84a;font-size:10.5px;cursor:pointer;" title="Plot r = p (mod m) on every ring m>p — since p/m shrinks as m grows, this traces a spiral arm inward"><input type="checkbox" id="cnSpOnChk" checked onchange="cnSpiralSetOn(this.checked)"> Show spiral</label>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#c8a84a;font-size:10.5px;cursor:pointer;" title="Plot r = p (mod m) on every ring m>p — since p/m shrinks as m grows, this traces a spiral arm inward"><input type="checkbox" id="cnSpOnChk" onchange="cnSpiralSetOn(this.checked)"> Show spiral</label>
                     <button onclick="cnSpiralStep(-1)" title="Previous prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-size:10.5px;padding:1px 7px;cursor:pointer;border-radius:3px;">&#9664;</button>
                     <span id="cnSpPLbl" style="color:#c8a84a;font-size:10.5px;min-width:32px;text-align:center;">p=2</span>
                     <button onclick="cnSpiralStep(1)" title="Next prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-size:10.5px;padding:1px 7px;cursor:pointer;border-radius:3px;">&#9654;</button>
+                    <button onclick="cnSpiralReset()" title="Reset spiral prime back to p=2" style="background:none;border:1px solid rgba(200,168,74,.4);color:#c8a84a;font-size:10.5px;padding:1px 7px;cursor:pointer;border-radius:3px;">&#8635; Reset</button>
+                    <button id="cnSpiralPlayBtn" onclick="cnSpiralPlayToggle()" title="Animate the PRIME SPIRAL only: p walks every prime in the current N range and loops. Independent of the C(n) depth ▶ above — both can run at once. Disabled while &quot;Lock to n&quot; is on, because then p is a function of n." style="background:rgba(200,168,74,0.12);border:1px solid #c8a84a;color:#c8a84a;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;margin-left:3px;">&#9654;</button>
+                    <select id="cnSpiralSpeedSel" onchange="if(window.cnSetSpiralSpeed)cnSetSpiralSpeed(this.value)" title="Prime-spiral play speed" style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#94a3b8;font-size:9.5px;padding:2px 3px;">
+                        <option value="400">slow</option>
+                        <option value="180" selected>normal</option>
+                        <option value="80">fast</option>
+                        <option value="30">fastest</option>
+                    </select>
                     <label style="display:inline-flex;align-items:center;gap:4px;color:#9b7fe8;font-size:10.5px;cursor:pointer;" title="Mirror σ(r)=m−r"><input type="checkbox" id="cnSpMirrorChk" checked onchange="cnSpiralSetMirror(this.checked)"> Mirror</label>
-                    <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10.5px;cursor:pointer;" title="Lock the spiral prime to depth n — p becomes the n-th prime, so stepping C(n) also steps the spiral"><input type="checkbox" id="cnSpLockChk" checked onchange="cnSpiralSetLock(this.checked)"> &#128279; Lock to n</label>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10.5px;cursor:pointer;" title="Lock the spiral prime to depth n — p becomes the n-th prime, so stepping C(n) also steps the spiral. Also switches ▶ Play to animate C(n) depth instead of the spiral."><input type="checkbox" id="cnSpLockChk" onchange="cnSpiralSetLock(this.checked)"> &#128279; Lock to n</label>
+                    <span id="cnSpLockSetWrap" style="display:none;align-items:center;gap:3px;">
+                      <span style="color:#e05060;font-size:10px;">sweep</span>
+                      <select id="cnSpLockSetSel" onchange="if(window.cnSetLockSet)cnSetLockSet(this.value)" title="Which primes the spiral sweeps while locked to n. first n: p₁…pₙ (the n-th prime is where the old lock parked). p ≤ n+1: the primes whose local factor has saturated to 1−1/p at this depth. all: every prime in the N range." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#94a3b8;font-size:9.5px;padding:2px 3px;">
+                        <option value="firstn" selected>first n</option>
+                        <option value="block">p ≤ n+1</option>
+                        <option value="all">all ≤ N</option>
+                      </select>
+                    </span>
                 </div>
             </details>
-            <div id="cnBody">
+            <div id="cnBody" style="display:none;">
                 <div style="font-size:11px;color:#94a3b8;margin:10px 0 8px;">
-                    C(<span id="cnFormulaN">1</span>) = ζ(2)·∏<sub>p</sub>(1 − min(n+1,p)/p²) =
+                    C(<span id="cnFormulaN">0</span>) = ζ(2)·∏<sub>p</sub>(1 − min(<span id="cnFormulaNp1">1</span>,p)/p²) =
                     <span id="cnLiveValue" style="color:#c8a84a;font-size:13px;font-weight:600;">—</span>
+                    <span id="cnLiveNote" style="color:#64748b;font-size:10px;margin-left:6px;"></span>
+                    <div style="margin-top:4px;">
+                      D(<span id="cnFormulaN2">0</span>) = C(n)/ζ(2) = ∏<sub>p</sub>(1 − min(n+1,p)/p²) =
+                      <span id="cnLiveD" style="color:#22c55e;font-size:12px;font-weight:600;">—</span>
+                    </div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;font-size:11px;">
                     <div>
@@ -1429,6 +1536,7 @@ function openOpener(){
                     <button onclick="resetRingZoom()" class="secondary" style="padding:4px 10px;font-size:11px;">Reset</button>
                     <button onclick="zoomRing(1)" class="secondary" style="padding:4px 8px;font-size:10px;" title="2x zoom">2x</button>
                     <button onclick="zoomRing(3)" class="secondary" style="padding:4px 8px;font-size:10px;" title="4x zoom">4x</button>
+                    <button id="pinCanvasBtn" onclick="toggleCanvasPin()" style="padding:4px 10px;font-size:11px;font-weight:600;background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;cursor:pointer;" title="Lock the canvas at the top of the screen so you can scroll to reach every control below it">📌 Pin Canvas</button>
                 </div>
             </div>
             
@@ -4254,22 +4362,6 @@ function openOpener(){
                     </div>
                 </div>
                 
-                <!-- 2025 Tool -->
-                <div style="background:linear-gradient(135deg,#134e4a,#115e59);padding:20px;border-radius:12px;border:2px solid#14b8a6;">
-                    <h3 style="color:#ccfbf1;margin:0 0 10px 0;">Möbius Shell Sieve Platform</h3>
-                    <a href="https://wessengetachew.github.io/2025/" target="_blank" style="color:#fbbf24;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/2025 →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Massive 40+ canvas research platform. Primitive lattices, Möbius functions, coprime density shells, musical Stern-Brocot tree, and comprehensive number theory suite.</p>
-                    <div style="background:rgba(20,184,166,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#5eead4;font-size:0.85em;">40+ Visualizations:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Goldbach, Twin Primes, Sophie Germain</li>
-                            <li>Ulam/Sacks spirals, Zeta functions</li>
-                            <li>Continued fractions, Ford circles</li>
-                            <li>Dedekind sums, Ramanujan sums</li>
-                        </ul>
-                    </div>
-                </div>
-                
             </div>
             
             <div style="margin-top:30px;padding:20px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;text-align:center;border:2px solid #6366f1;">
@@ -4324,9 +4416,11 @@ const state = {
     highlightSectorOnly: null,
     // C(n) depth-lift canvas dynamic: as depth n climbs, points failing
     // gcd(r,m+j)=1 for j=0..n get dimmed or removed from the ring canvas.
-    cnCanvasOn: false, cnCanvasMode: 'dim', cnCanvasDimAmt: 0.12,
+    cnCanvasOn: true, cnCanvasMode: 'dim', cnCanvasDimAmt: 0.12, cnCanvasInclNC: false,
     // Prime spiral overlay, lockable to C(n) depth n (p = n-th prime).
-    liftSpiralOn: false, liftSpiralP: 2, liftSpiralMirror: true, liftSpiralLock: false
+    liftSpiralOn: false, liftSpiralP: 2, liftSpiralMirror: true, liftSpiralLock: false,
+    // Main ring build-up playback: when set, drawMainRing only shows points with m <= this value.
+    ringBuildMaxM: null, ringBuildPlaying: false, ringBuildAnimId: null
 };
 
 // Tree view state for Stern-Brocot visualization
@@ -5892,40 +5986,41 @@ function generateScreenshotWithSelection(tabName) {
         });
     }
     
-    // Solver section (if active on main tab)
-    if (solverCurrentMatch && tabName === 'mainview') {
-        ctx.fillStyle = '#064e3b';
-        ctx.fillRect(padding, currentY + 10, totalWidth - padding * 2, 70);
-        ctx.strokeStyle = '#10b981';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(padding, currentY + 10, totalWidth - padding * 2, 70);
-        
-        ctx.fillStyle = '#6ee7b7';
-        ctx.font = 'bold 11px system-ui';
+    // C(n) — live value & survival ratios (now shown above the Target Ratio Solver,
+    // right after the stats row; only when the Canvas lock or prime spiral is engaged)
+    if (cnOn) {
+        const cnY = currentY + 10;
+        const getTxt = id => document.getElementById(id)?.textContent || '—';
+        const cnN = document.getElementById('cnDepthN')?.value || '';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(padding, cnY, totalWidth - padding * 2, cnPanelHeight - 15);
+        ctx.strokeStyle = '#c8a84a';
+        ctx.strokeRect(padding, cnY, totalWidth - padding * 2, cnPanelHeight - 15);
         ctx.textAlign = 'left';
-        ctx.fillText('TARGET RATIO SOLVER', padding + 15, currentY + 30);
-        
-        ctx.fillStyle = '#f0fdf4';
-        ctx.font = 'bold 24px monospace';
-        ctx.fillText(solverCurrentMatch.r + '/' + solverCurrentMatch.m, padding + 15, currentY + 60);
-        
-        ctx.font = '12px monospace';
-        ctx.fillStyle = '#a7f3d0';
-        ctx.fillText('= ' + solverCurrentMatch.value.toFixed(8), padding + 120, currentY + 60);
-        
-        ctx.fillStyle = '#fbbf24';
-        ctx.fillText('Error: ' + solverCurrentMatch.error.toExponential(2), padding + 280, currentY + 60);
-        
-        ctx.fillStyle = '#a78bfa';
-        ctx.fillText('Sector: S' + solverCurrentMatch.sector, padding + 420, currentY + 60);
-        
+        ctx.fillStyle = '#c8a84a';
+        ctx.font = 'bold 13px system-ui';
+        let cnHeader = 'C(n) — Live Value & Survival Ratios';
+        if (state.liftSpiralOn) cnHeader += '   ·   spiral p=' + state.liftSpiralP + (state.liftSpiralLock ? ' (locked to n)' : '');
+        ctx.fillText(cnHeader, padding + 15, cnY + 20);
         ctx.fillStyle = '#94a3b8';
-        ctx.fillText('CF: [' + solverCurrentMatch.cf.join('; ') + ']', padding + 520, currentY + 60);
-        
-        ctx.fillStyle = '#f472b6';
-        ctx.fillText('Gear: ' + solverCurrentMatch.m + ':' + solverCurrentMatch.r, padding + 750, currentY + 60);
-        
-        currentY += 90;
+        ctx.font = '11px monospace';
+        ctx.fillText('C(' + cnN + ') = ζ(2)·Πp(1 − min(n+1,p)/p²) = ' + getTxt('cnLiveValue'), padding + 15, cnY + 38);
+        const cnCols = [
+            ['gcd(r,M)=1 — population', getTxt('cnPopLine'), getTxt('cnPopNote'), '#4a90d9'],
+            [getTxt('cnLiftTitle'), getTxt('cnLiftLine'), getTxt('cnLiftNote'), '#4ecdc4'],
+            ['lift / gcd', getTxt('cnCondLine'), getTxt('cnCondNote'), '#c8a84a']
+        ];
+        const cnColW = (totalWidth - padding * 2 - 30) / 3;
+        cnCols.forEach((c, i) => {
+            const cx = padding + 15 + i * cnColW;
+            ctx.fillStyle = '#94a3b8'; ctx.font = '9px system-ui';
+            ctx.fillText(c[0], cx, cnY + 55);
+            ctx.fillStyle = c[3]; ctx.font = 'bold 12px monospace';
+            ctx.fillText(c[1], cx, cnY + 71);
+            ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui';
+            ctx.fillText(c[2], cx, cnY + 84);
+        });
+        currentY += cnPanelHeight;
     }
     
     // Canvases - dynamic layout based on selection
@@ -6079,7 +6174,7 @@ function generateScreenshotWithSelection(tabName) {
     }
     
     // Bottom formula panel
-    currentY = totalHeight - cnPanelHeight - formulaPanelHeight - padding;
+    currentY = totalHeight - solverHeight - formulaPanelHeight - padding;
     
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(padding, currentY, totalWidth - padding * 2, formulaPanelHeight);
@@ -6161,40 +6256,39 @@ function generateScreenshotWithSelection(tabName) {
     ctx.font = '10px monospace';
     ctx.fillText('N = ' + state.nMax.toLocaleString() + ', S = [' + state.sectorMin + ',' + state.sectorMax + ']', constBoxX + 10, currentY + 115);
     
-    // C(n) — live value & survival ratios (only when the Canvas lock or the
-    // prime spiral is actually engaged, so plain exports stay unchanged)
-    if (cnOn) {
-        const cnY = currentY + formulaPanelHeight + 10;
-        const getTxt = id => document.getElementById(id)?.textContent || '—';
-        const cnN = document.getElementById('cnDepthN')?.value || '';
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(padding, cnY, totalWidth - padding * 2, cnPanelHeight - 15);
-        ctx.strokeStyle = '#c8a84a';
-        ctx.strokeRect(padding, cnY, totalWidth - padding * 2, cnPanelHeight - 15);
+    // Target Ratio Solver (now shown at the bottom, below the formula panel)
+    if (solverCurrentMatch && tabName === 'mainview') {
+        const solverY = currentY + formulaPanelHeight + 10;
+        ctx.fillStyle = '#064e3b';
+        ctx.fillRect(padding, solverY, totalWidth - padding * 2, 70);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(padding, solverY, totalWidth - padding * 2, 70);
+        
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = 'bold 11px system-ui';
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#c8a84a';
-        ctx.font = 'bold 13px system-ui';
-        let cnHeader = 'C(n) — Live Value & Survival Ratios';
-        if (state.liftSpiralOn) cnHeader += '   ·   spiral p=' + state.liftSpiralP + (state.liftSpiralLock ? ' (locked to n)' : '');
-        ctx.fillText(cnHeader, padding + 15, cnY + 20);
+        ctx.fillText('TARGET RATIO SOLVER', padding + 15, solverY + 20);
+        
+        ctx.fillStyle = '#f0fdf4';
+        ctx.font = 'bold 24px monospace';
+        ctx.fillText(solverCurrentMatch.r + '/' + solverCurrentMatch.m, padding + 15, solverY + 50);
+        
+        ctx.font = '12px monospace';
+        ctx.fillStyle = '#a7f3d0';
+        ctx.fillText('= ' + solverCurrentMatch.value.toFixed(8), padding + 120, solverY + 50);
+        
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('Error: ' + solverCurrentMatch.error.toExponential(2), padding + 280, solverY + 50);
+        
+        ctx.fillStyle = '#a78bfa';
+        ctx.fillText('Sector: S' + solverCurrentMatch.sector, padding + 420, solverY + 50);
+        
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '11px monospace';
-        ctx.fillText('C(' + cnN + ') = ζ(2)·Πp(1 − min(n+1,p)/p²) = ' + getTxt('cnLiveValue'), padding + 15, cnY + 38);
-        const cnCols = [
-            ['gcd(r,M)=1 — population', getTxt('cnPopLine'), getTxt('cnPopNote'), '#4a90d9'],
-            [getTxt('cnLiftTitle'), getTxt('cnLiftLine'), getTxt('cnLiftNote'), '#4ecdc4'],
-            ['lift / gcd', getTxt('cnCondLine'), getTxt('cnCondNote'), '#c8a84a']
-        ];
-        const cnColW = (totalWidth - padding * 2 - 30) / 3;
-        cnCols.forEach((c, i) => {
-            const cx = padding + 15 + i * cnColW;
-            ctx.fillStyle = '#94a3b8'; ctx.font = '9px system-ui';
-            ctx.fillText(c[0], cx, cnY + 55);
-            ctx.fillStyle = c[3]; ctx.font = 'bold 12px monospace';
-            ctx.fillText(c[1], cx, cnY + 71);
-            ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui';
-            ctx.fillText(c[2], cx, cnY + 84);
-        });
+        ctx.fillText('CF: [' + solverCurrentMatch.cf.join('; ') + ']', padding + 520, solverY + 50);
+        
+        ctx.fillStyle = '#f472b6';
+        ctx.fillText('Gear: ' + solverCurrentMatch.m + ':' + solverCurrentMatch.r, padding + 750, solverY + 50);
     }
     
     // Footer
@@ -6728,6 +6822,38 @@ function updateSectorBound() {
         document.getElementById('sectorMax').value = maxSector;
         document.getElementById('sectorBoundResult').textContent = `→ Max sector: ${maxSector}`;
     }
+    updateSectorBoundSummary();
+}
+
+// Keep the collapsed-header summary in sync with the panel's current values
+function updateSectorBoundSummary() {
+    const summary = document.getElementById('sectorBoundSummary');
+    if (!summary) return;
+    const valueText = document.getElementById('sectorBoundValue')?.textContent || '';
+    const resultText = document.getElementById('sectorBoundResult')?.textContent || '';
+    const preset = document.getElementById('sectorBoundPreset');
+    const presetLabel = preset ? preset.options[preset.selectedIndex]?.text || '' : '';
+    summary.textContent = `${presetLabel} ${valueText} ${resultText}`.trim();
+}
+
+// Expand/collapse the Sector Bound Controls panel
+function toggleSectorBoundPanel() {
+    const panel = document.getElementById('sectorBoundPanel');
+    const chevron = document.getElementById('sectorBoundChevron');
+    if (!panel) return;
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'flex';
+    if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
+// Expand/collapse the Ring Display Controls panel (Sector/Color/Size/Spacing/Canvas)
+function toggleRingControlsPanel() {
+    const panel = document.getElementById('ringControlsPanel');
+    const chevron = document.getElementById('ringControlsChevron');
+    if (!panel) return;
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'flex';
+    if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
 }
 
 function applySectorBoundPreset() {
@@ -7177,7 +7303,7 @@ function computeGaps() {
     state.gaps.sort((a,b) => b.gap - a.gap);
 }
 
-function cancelComputation() { state.computing = false; }
+function cancelComputation() { state.computing = false; if (state.ringBuildPlaying) stopMainRingBuildUp(); }
 
 // Fast update for formula-only mode - skip heavy computations
 function updateFormulaOnlyDisplays() {
@@ -8914,6 +9040,74 @@ function resetRingZoom() {
     updateRingTransform();
 }
 
+// --- Pin Canvas: lock the ring canvas at the top of the viewport so scrolling
+// reaches every control below it instead of the canvas overlapping them. ---
+function toggleCanvasPin() {
+    var wrap = document.getElementById('ringContainer');
+    var canvas = document.getElementById('mainRing');
+    var btn = document.getElementById('pinCanvasBtn');
+    if (!wrap || !canvas || !btn) return;
+
+    if (wrap.classList.contains('wg-pinned')) {
+        // --- Unpin: restore normal document flow ---
+        wrap.classList.remove('wg-pinned');
+        wrap.style.position = '';
+        wrap.style.top = '';
+        wrap.style.left = '';
+        wrap.style.transform = '';
+        wrap.style.zIndex = '';
+        wrap.style.boxShadow = '';
+        wrap.style.padding = '';
+        wrap.style.borderRadius = '';
+        wrap.style.maxWidth = '';
+        wrap.style.width = '';
+        canvas.style.maxHeight = '';
+        var spacer = document.getElementById('wgPinSpacer');
+        if (spacer) spacer.remove();
+        window.removeEventListener('resize', wgRepositionPinnedCanvas);
+        btn.textContent = '📌 Pin Canvas';
+        btn.style.background = '#1e293b';
+    } else {
+        // --- Pin: fix canvas below the sticky header bars, add a spacer so
+        // the rest of the page doesn't jump, and shrink the canvas so it
+        // leaves room to scroll to the controls beneath it. ---
+        var rect = wrap.getBoundingClientRect();
+        var spacer = document.createElement('div');
+        spacer.id = 'wgPinSpacer';
+        spacer.style.height = rect.height + 'px';
+        wrap.parentNode.insertBefore(spacer, wrap);
+
+        wrap.classList.add('wg-pinned');
+        wrap.style.position = 'fixed';
+        wrap.style.left = '50%';
+        wrap.style.transform = 'translateX(-50%)';
+        wrap.style.zIndex = '400';
+        wrap.style.boxShadow = '0 10px 30px rgba(0,0,0,0.7)';
+        wrap.style.padding = '6px';
+        wrap.style.borderRadius = '8px';
+        wrap.style.maxWidth = '96vw';
+        canvas.style.maxHeight = '38vh';
+        canvas.style.width = 'auto';
+
+        wgRepositionPinnedCanvas();
+        window.addEventListener('resize', wgRepositionPinnedCanvas);
+
+        btn.textContent = '📌 Unpin Canvas';
+        btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+    }
+}
+
+function wgRepositionPinnedCanvas() {
+    var wrap = document.getElementById('ringContainer');
+    if (!wrap || !wrap.classList.contains('wg-pinned')) return;
+    var navLinks = document.querySelector('.nav-links');
+    var pageNav = document.getElementById('wg-pagenav');
+    var topOffset = 0;
+    if (navLinks) topOffset = navLinks.getBoundingClientRect().bottom;
+    else if (pageNav) topOffset = pageNav.getBoundingClientRect().bottom;
+    wrap.style.top = Math.max(0, topOffset) + 'px';
+}
+
 function toggleCornerLegend() {
     const showLegend = document.getElementById('showCornerLegend')?.checked ?? true;
     const displays = [
@@ -9994,6 +10188,11 @@ function drawMainRing() {
         residues = [];
     }
     
+    // Build-up playback: only show points enumerated at m <= ringBuildMaxM so far
+    if (state.ringBuildMaxM !== null && state.ringBuildMaxM !== undefined) {
+        residues = residues.filter(r => r.m <= state.ringBuildMaxM);
+    }
+    
     // Adaptive point size calculation
     // Goal: Points visible but not overlapping excessively
     const numPoints = residues.length;
@@ -10202,9 +10401,12 @@ function drawMainRing() {
         let alpha = 1;
         if ((dimOutside || sectorColorMode === 'dim') && !showAll && !inSector) alpha = 0.2;
         // C(n) depth-lift canvas dynamic: fade/remove points failing gcd(r,m+j)=1, j=0..n
-        if (state.cnCanvasOn && typeof cnLiftSurvives === 'function') {
+        if (state.cnCanvasOn && typeof cnCanvasAffects === 'function') {
             const cnN = cnGetDepthN();
-            if (!cnLiftSurvives(r, m, cnN)) {
+            // gcd(r,m)>1 points are exempt unless "gcd>1 too" is ticked —
+            // they fail the lift trivially, so dimming them would turn the
+            // C(n) link into a plain coprime filter rather than a survival one.
+            if (cnCanvasAffects(r, m, cnN)) {
                 if (state.cnCanvasMode === 'remove') return;
                 alpha = Math.min(alpha, state.cnCanvasDimAmt);
             }
@@ -10836,6 +11038,52 @@ function drawMainRing() {
     
     updateColorLegend(colorMode, showAll, sector);
     updateSectorStats(sector, residues);
+}
+
+// Animate the main ring being built up point-by-point as m goes from 1 -> N.
+// Toggling while playing stops the animation and reveals the full ring.
+function playMainRingBuildUp() {
+    if (state.ringBuildPlaying) { stopMainRingBuildUp(); return; }
+    (async () => {
+        if (state.computing) return;
+        if (!state.allResidues || state.allResidues.length === 0) {
+            await computeAll();
+        }
+        if (!state.allResidues || state.allResidues.length === 0) return; // e.g. Formula mode has no enumerated residues
+        const startM = Math.max(2, state.nMin);
+        const endM = state.nMax;
+        if (endM <= startM) return;
+        
+        state.ringBuildPlaying = true;
+        const btn = document.getElementById('ringBuildPlayBtn');
+        if (btn) { btn.textContent = '■ Stop'; btn.title = 'Stop build-up animation'; }
+        
+        const durationMs = Math.min(9000, Math.max(2000, (endM - startM) * 6));
+        const startTime = performance.now();
+        state.ringBuildMaxM = startM;
+        
+        function step(now) {
+            if (!state.ringBuildPlaying) return;
+            const t = Math.min(1, (now - startTime) / durationMs);
+            state.ringBuildMaxM = Math.round(startM + t * (endM - startM));
+            drawMainRing();
+            if (t < 1) {
+                state.ringBuildAnimId = requestAnimationFrame(step);
+            } else {
+                stopMainRingBuildUp();
+            }
+        }
+        state.ringBuildAnimId = requestAnimationFrame(step);
+    })();
+}
+
+function stopMainRingBuildUp() {
+    state.ringBuildPlaying = false;
+    if (state.ringBuildAnimId) { cancelAnimationFrame(state.ringBuildAnimId); state.ringBuildAnimId = null; }
+    state.ringBuildMaxM = null;
+    const btn = document.getElementById('ringBuildPlayBtn');
+    if (btn) { btn.textContent = '▶ Play'; btn.title = 'Animate drawing the ring from m=1 up to N'; }
+    drawMainRing();
 }
 
 function updateTrackerInfo(trackerPoints, enabled) {
@@ -24320,9 +24568,11 @@ function updateModLabelInputs() {
   }
   function gcdCN(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
   // Counts over rings m=sMin..sMax, r=0..m-1 (triangle population, r=0 ring included).
+  // This is the "All sectors" scope — sectorMin/sectorMax here are just an
+  // m-range boundary (as noted above), not the value-based Sector concept.
   var _memo={};
-  function cnCounts(sMin,sMax,n){
-    var key=sMin+'|'+sMax+'|'+n, hit=_memo[key]; if(hit) return hit;
+  function cnCountsRange(sMin,sMax,n){
+    var key='r|'+sMin+'|'+sMax+'|'+n, hit=_memo[key]; if(hit) return hit;
     var total=0,gcd1=0,lift=0;
     for(var m=Math.max(1,sMin);m<=sMax;m++){
       for(var r=0;r<m;r++){
@@ -24339,24 +24589,107 @@ function updateModLabelInputs() {
     _memo[key]=res;
     return res;
   }
+  // "This sector" scope — the real value-based Sector S_k = (1/(k+1), 1/k],
+  // matching the "Sector:" dropdown used everywhere else on the page.
+  // gcd1 comes straight from state.residuesBySector (already coprime-filtered,
+  // so it's both cheaper and more accurate than re-deriving it). total counts
+  // every r/m pair (any gcd) whose value falls in the sector, m=1..nMax.
+  function cnCountsSector(sector,n){
+    var nMax = (window.state && state.nMax) || 500;
+    var res_ = (window.state && state.residuesBySector && state.residuesBySector[sector]) || [];
+    var haveRes = res_.length > 0;
+    // The 'R'/'E' flag is part of the cache key on purpose: without it, a
+    // lookup made before computeAll() had filled residuesBySector cached
+    // gcd1=0 permanently, and the panel then reported 0/total at every n.
+    var key='s|'+sector+'|'+nMax+'|'+n+'|'+(haveRes?'R':'E'), hit=_memo[key];
+    if(hit) return hit;
+
+    // Analytic population of the sector triangle: for each m, r ranges over
+    // (m/(sector+1), m/sector]. Independent of the page's enumeration.
+    var total=0;
+    for(var m=1;m<=nMax;m++){
+      var rMin=Math.floor(m/(sector+1))+1, rMax=Math.min(m-1,Math.floor(m/sector));
+      if(rMax>=rMin) total += (rMax-rMin+1);
+    }
+
+    var gcd1=0, lift=0, derived=false, capM=nMax;
+    if(haveRes){
+      gcd1 = res_.length;
+      for(var i=0;i<res_.length;i++){
+        var f=res_[i], ok=true;
+        for(var j=1;j<=n;j++){ if(gcdCN(f.r,f.m+j)!==1){ok=false;break;} }
+        if(ok) lift++;
+      }
+    } else {
+      // state.residuesBySector is empty — Compute hasn't been run yet, or the
+      // page is in a mode (e.g. 'formula') that takes the fast path and never
+      // enumerates. Walk the sector's own (r,m) triangle instead of reporting
+      // a false 0. This reproduces the analytic total exactly.
+      derived=true;
+      // The sector-2 triangle is ~nMax^2/12 pairs, so cap the walk to keep
+      // every redraw instant while a transport is animating; recompute the
+      // total over the same capped range so the ratios stay consistent.
+      capM = Math.min(nMax, 1500);
+      if(capM < nMax){
+        total = 0;
+        for(var mc=1;mc<=capM;mc++){
+          var cLo=Math.floor(mc/(sector+1))+1, cHi=Math.min(mc-1,Math.floor(mc/sector));
+          if(cHi>=cLo) total += (cHi-cLo+1);
+        }
+      }
+      for(var m2=1;m2<=capM;m2++){
+        var a2=Math.floor(m2/(sector+1))+1, b2=Math.min(m2-1,Math.floor(m2/sector));
+        for(var r2=a2;r2<=b2;r2++){
+          if(gcdCN(r2,m2)!==1) continue;
+          gcd1++;
+          var ok2=true;
+          for(var j2=1;j2<=n;j2++){ if(gcdCN(r2,m2+j2)!==1){ok2=false;break;} }
+          if(ok2) lift++;
+        }
+      }
+    }
+    var out={total:total,gcd1:gcd1,lift:lift,derived:derived,capM:capM};
+    var keys=Object.keys(_memo); if(keys.length>64) delete _memo[keys[0]];
+    _memo[key]=out;
+    return out;
+  }
   function pct(a,b){return b?((a/b*100).toFixed(2)):'0.00';}
   function setTxt(id,val){var e=document.getElementById(id); if(e)e.textContent=val;}
   function cnUpdatePanel(){
     if(!document.getElementById('cn-ratio-panel')) return;
-    var sMinEl=document.getElementById('sectorMin');
-    var sMaxEl=document.getElementById('sectorMax');
     var nEl=document.getElementById('cnDepthN');
-    var sMin=Math.max(1,parseInt(sMinEl&&sMinEl.value,10)||1);
-    var sMax=Math.max(sMin,parseInt(sMaxEl&&sMaxEl.value,10)||275);
-    // Full sector range can be large (default 1-275, ~38k lattice points) — cap the
-    // live count to a reasonable window so this stays instant on every redraw;
-    // note the cap in the range label rather than silently truncating.
-    var CAP=400, sMaxUsed=Math.min(sMax, sMin+CAP);
-    var n=Math.max(0,parseInt(nEl&&nEl.value,10)||1);
-    var c=cnCounts(sMin,sMaxUsed,n);
+    var n=Math.max(0,parseInt(nEl&&nEl.value,10)||0);
+    var scopeEl=document.getElementById('cnScopeSel');
+    var scope=(scopeEl&&scopeEl.value)||'sector';
+    var c, rangeNote;
+    if(scope==='sector'){
+      var vsEl=document.getElementById('viewSector');
+      var sector=Math.max(1,parseInt(vsEl&&vsEl.value,10)||2);
+      c=cnCountsSector(sector,n);
+      rangeNote='Sector '+sector+' only \u00b7 m=1\u2026'+((window.state&&state.nMax)||500)+' \u00b7 finite-range counts'
+              + (c.derived ? ' \u00b7 derived directly (Compute not run)'
+                             + (c.capM<((window.state&&state.nMax)||500) ? ' \u00b7 capped at m='+c.capM : '') : '');
+    } else {
+      var sMinEl=document.getElementById('sectorMin');
+      var sMaxEl=document.getElementById('sectorMax');
+      var sMin=Math.max(1,parseInt(sMinEl&&sMinEl.value,10)||1);
+      var sMax=Math.max(sMin,parseInt(sMaxEl&&sMaxEl.value,10)||275);
+      // Full range can be large — cap the live count to a reasonable window so
+      // this stays instant on every redraw; note the cap rather than silently truncating.
+      var CAP=400, sMaxUsed=Math.min(sMax, sMin+CAP);
+      c=cnCountsRange(sMin,sMaxUsed,n);
+      rangeNote = 'All sectors \u00b7 m='+sMin+'\u2026'+sMaxUsed+(sMaxUsed<sMax?' (capped from '+sMax+')':'')+' shown \u00b7 finite-range counts';
+    }
     var Cn=getCn(n), Dn=Cn/ZETA2;
     setTxt('cnFormulaN', n);
-    setTxt('cnLiveValue', Cn.toFixed(9));
+    setTxt('cnFormulaNp1', n+1);
+    setTxt('cnFormulaN2', n);
+    // n=0 is the trivial block: min(1,p)=1 for every p, so the product is
+    // exactly prod_p(1-1/p^2)=1/zeta(2) and the zeta(2) cancels =>
+    // C(0)=1 exactly, D(0)=1/zeta(2)=6/pi^2. Never fall through to C(1) here.
+    setTxt('cnLiveValue', n===0 ? '1.000000000' : Cn.toFixed(9));
+    setTxt('cnLiveD', n===0 ? (1/ZETA2).toFixed(9) : Dn.toFixed(9));
+    setTxt('cnLiveNote', n===0 ? '\u2190 C(0)=1 exactly \u00b7 D(0)=1/\u03b6(2)=6/\u03c0\u00b2' : '');
     setTxt('cnPopLine', c.gcd1+'/'+c.total+'  ('+pct(c.gcd1,c.total)+'%)');
     setTxt('cnLiftLine', c.lift+'/'+c.total+'  ('+pct(c.lift,c.total)+'%)');
     setTxt('cnCondLine', c.lift+'/'+c.gcd1+'  ('+pct(c.lift,c.gcd1)+'%)');
@@ -24364,9 +24697,7 @@ function updateModLabelInputs() {
     setTxt('cnLiftNote', '→ D('+n+')=C('+n+')/ζ(2) ≈ '+Dn.toFixed(5)+' as range→∞');
     setTxt('cnCondNote', '→ C('+n+') ≈ '+Cn.toFixed(5)+' as range→∞');
     setTxt('cnLiftTitle', n===0 ? 'lift: gcd(r,m)=1 (n=0 — no extra constraint, equals population)' : n===1 ? 'lift: gcd(r,m)=gcd(r,m+1)=1' : ('lift: gcd(r,m+j)=1 for j=0..'+n));
-    setTxt('cnRangeNote', sMaxUsed<sMax
-      ? ('m='+sMin+'…'+sMaxUsed+' shown (capped from '+sMax+') · finite-range counts')
-      : ('m='+sMin+'…'+sMaxUsed+' shown · finite-range counts'));
+    setTxt('cnRangeNote', rangeNote);
   }
   window.cnUpdatePanel = cnUpdatePanel;
   // ── Prime helpers for the spiral ──────────────────────────────────────
@@ -24378,11 +24709,18 @@ function updateModLabelInputs() {
     while(_spPrimeCache.length<n){ _spPrimeCache.push(_spNextPrime(_spPrimeCache[_spPrimeCache.length-1])); }
     return _spPrimeCache[n-1];
   }
-  function _cnSpiralLbl(){ var lbl=document.getElementById('cnSpPLbl'); if(lbl) lbl.textContent='p='+state.liftSpiralP; }
+  function _cnSpiralLbl(){
+    var lbl=document.getElementById('cnSpPLbl'); if(!lbl) return;
+    var txt='p='+state.liftSpiralP;
+    if(state.liftSpiralLock){ try{ txt += ' \u00b7 '+_cnActivePrimes().length+' active'; }catch(e){} }
+    lbl.textContent=txt;
+  }
   function _cnSpiralSyncLock(){
     if(!state.liftSpiralLock) return;
-    var n=cnGetDepthN();
-    state.liftSpiralP=_spNthPrime(Math.max(1,n));
+    // While the spiral transport is sweeping, it owns p — don't yank it back.
+    if(window.cnSpiralIsPlaying && window.cnSpiralIsPlaying()){ _cnSpiralLbl(); return; }
+    var A=_cnActivePrimes();
+    state.liftSpiralP=A[A.length-1];
     _cnSpiralLbl();
   }
   window.cnSpiralSyncLock=_cnSpiralSyncLock;
@@ -24390,14 +24728,31 @@ function updateModLabelInputs() {
   window.cnSpiralSetMirror=function(v){ state.liftSpiralMirror=!!v; if(typeof drawMainRing==='function') drawMainRing(); };
   window.cnSpiralSetLock=function(v){
     state.liftSpiralLock=!!v;
+    // Locking narrows the sweep set to the primes active at depth n; it no
+    // longer stops the transport, so the spiral keeps looping through them.
+    if(window.cnSyncSpiralPlayEnabled) window.cnSyncSpiralPlayEnabled();
     if(v) _cnSpiralSyncLock();
+    _cnSpiralLbl();
     if(typeof drawMainRing==='function') drawMainRing();
   };
   window.cnSpiralStep=function(dir){
-    if(state.liftSpiralLock) return; // locked: p follows depth n, not manual stepping
+    if(state.liftSpiralLock){
+      // Locked: step within the active set rather than refusing outright.
+      var A=_cnActivePrimes(), i=A.indexOf(state.liftSpiralP);
+      if(i<0) i=A.length-1;
+      i=(i+(dir>0?1:-1)+A.length)%A.length;
+      state.liftSpiralP=A[i]; _cnSpiralLbl();
+      if(typeof drawMainRing==='function') drawMainRing();
+      return;
+    }
     var cur=state.liftSpiralP;
     if(dir>0){ var c=cur+1; while(!_spIsPrime(c)) c++; state.liftSpiralP=c; }
     else{ var c2=cur-1; while(c2>=2 && !_spIsPrime(c2)) c2--; state.liftSpiralP=c2>=2?c2:2; }
+    _cnSpiralLbl();
+    if(typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSpiralReset=function(){
+    state.liftSpiralP=2;
     _cnSpiralLbl();
     if(typeof drawMainRing==='function') drawMainRing();
   };
@@ -24411,12 +24766,22 @@ function updateModLabelInputs() {
     for(var j=1;j<=n;j++){ if(gcdCN(r,m+j)!==1) return false; }
     return true;
   };
+  // Which points the C(n) canvas link actually dims/removes — see the note
+  // at the draw site. gcd(r,m)>1 is exempt unless explicitly opted in.
+  window.cnCanvasAffects=function(r,m,n){
+    if(!state.cnCanvasInclNC && gcdCN(r,m)!==1) return false;
+    return !window.cnLiftSurvives(r,m,n);
+  };
   window.cnSetCanvasOn=function(v){
     state.cnCanvasOn=!!v;
     if(typeof drawMainRing==='function') drawMainRing();
   };
   window.cnSetCanvasMode=function(v){
     state.cnCanvasMode=(v==='remove')?'remove':'dim';
+    if(state.cnCanvasOn && typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSetCanvasInclNC=function(v){
+    state.cnCanvasInclNC=!!v;
     if(state.cnCanvasOn && typeof drawMainRing==='function') drawMainRing();
   };
   window.cnSetCanvasDimAmt=function(v){
@@ -24427,7 +24792,10 @@ function updateModLabelInputs() {
   window.cnDepthStep=function(d){
     var nEl=document.getElementById('cnDepthN'); if(!nEl) return;
     var v=Math.max(0,Math.min(60,(parseInt(nEl.value,10)||0)+d));
-    nEl.value=v; cnUpdatePanel();
+    nEl.value=v;
+    if(window.cnDepthRetarget) window.cnDepthRetarget();
+    _spSetKey='';
+    cnUpdatePanel();
     _cnSpiralSyncLock();
     if((state.cnCanvasOn || (state.liftSpiralOn && state.liftSpiralLock)) && typeof drawMainRing==='function') drawMainRing();
   };
@@ -24438,31 +24806,152 @@ function updateModLabelInputs() {
     body.style.display = hidden ? '' : 'none';
     if(chev) chev.style.transform = hidden ? '' : 'rotate(-90deg)';
   };
-  // ── ▶ n animation: 0 → target n → 0 ping-pong, mirrors the opener's ▶ N ──
-  var _cnPlayId=null, _cnPlayDir=1, _cnPlayTarget=1;
-  window.cnPlayToggle=function(){
-    var nEl=document.getElementById('cnDepthN');
-    var btn=document.getElementById('cnPlayBtn');
-    if(_cnPlayId){
-      clearInterval(_cnPlayId); _cnPlayId=null;
-      if(nEl) nEl.value=_cnPlayTarget;
-      cnUpdatePanel();
-      if(btn){btn.innerHTML='&#9654;';btn.style.color='#c8a84a';btn.style.background='rgba(200,168,74,0.12)';}
-      return;
-    }
-    _cnPlayTarget = Math.max(1, parseInt(nEl&&nEl.value,10)||1);
-    var cur=0; _cnPlayDir=1;
-    if(btn){btn.innerHTML='&#9632;';btn.style.color='#ef4444';btn.style.background='rgba(239,68,68,0.15)';}
-    _cnPlayId=setInterval(function(){
-      cur+=_cnPlayDir;
-      if(cur>=_cnPlayTarget){cur=_cnPlayTarget;_cnPlayDir=-1;}
-      else if(cur<=0){cur=0;_cnPlayDir=1;}
-      if(nEl) nEl.value=cur;
-      cnUpdatePanel();
-      _cnSpiralSyncLock();
-      if((state.cnCanvasOn || (state.liftSpiralOn && state.liftSpiralLock)) && typeof drawMainRing==='function') drawMainRing();
-    },180);
+  // ══ ▶ animation — TWO FULLY INDEPENDENT TRANSPORTS ═══════════════════
+  //  (a) DEPTH engine   — cnDepthPlayToggle()  drives C(n) depth n
+  //  (b) SPIRAL engine  — cnSpiralPlayToggle() drives the prime spiral p
+  // Separate timers, separate speeds, separate buttons. Both may run at
+  // the same time. "Lock to n" makes p = p_n a function of n, so while it
+  // is on the spiral engine is parked and the depth engine drives p.
+  var _cnDepthId=null, _cnDepthDir=1, _cnDepthTarget=1, _cnDepthCur=0,
+      _cnDepthSpeed=180, _cnDepthLoop='hold', _cnDepthWrote=-1;
+  var _cnSpiralId=null, _spPlayIdx=0, _cnSpiralSpeed=180;
+
+  function _spPrimesUpTo(max){
+    var out=[]; for(var k=2;k<=max;k++){ if(_spIsPrime(k)) out.push(k); }
+    return out.length ? out : [2];
+  }
+  // ── The ACTIVE PRIME SET the spiral is allowed to walk ────────────────
+  // Unlocked : every prime in the N range. Locked : tied to depth n, so the
+  // sweep tracks C(n) as n moves (see the sweep selector's tooltip).
+  var _spSetCache=null, _spSetKey='';
+  function _cnActivePrimes(){
+    var maxP=(window.state && state.nMax) || 500;
+    var locked=!!state.liftSpiralLock;
+    var n=(window.cnGetDepthN?cnGetDepthN():0);
+    var mode = locked ? (((document.getElementById('cnSpLockSetSel')||{}).value)||'firstn') : 'all';
+    var key=(locked?'L':'U')+'|'+mode+'|'+n+'|'+maxP;
+    if(key===_spSetKey && _spSetCache) return _spSetCache;
+    var out;
+    if(!locked || mode==='all'){ out=_spPrimesUpTo(maxP); }
+    else if(mode==='block'){ out=_spPrimesUpTo(Math.max(2,n+1)); }
+    else { out=[]; var k=2, want=Math.max(1,n); while(out.length<want){ if(_spIsPrime(k)) out.push(k); k++; } }
+    if(!out.length) out=[2];
+    _spSetKey=key; _spSetCache=out;
+    return out;
+  }
+  window.cnSetLockSetRefresh=function(){ _spSetKey=''; };
+  window.cnSetLockSet=function(){
+    _spSetKey='';
+    _cnSpiralSyncLock(); _cnSpiralLbl();
+    if(typeof drawMainRing==='function') drawMainRing();
   };
+  function _cnBtnState(id,on){
+    var b=document.getElementById(id); if(!b) return;
+    b.innerHTML = on ? '&#9632;' : '&#9654;';
+    b.style.color = on ? '#ef4444' : '#c8a84a';
+    b.style.background = on ? 'rgba(239,68,68,0.15)' : 'rgba(200,168,74,0.12)';
+  }
+  function _cnRedraw(){
+    if((state.cnCanvasOn || (state.liftSpiralOn && state.liftSpiralLock)) &&
+       typeof drawMainRing==='function') drawMainRing();
+  }
+
+  // ── (a) DEPTH ────────────────────────────────────────────────────────
+  window.cnSetDepthSpeed=function(v){
+    _cnDepthSpeed=Math.max(20,parseInt(v,10)||180);
+    if(_cnDepthId){ _cnDepthStop(false); _cnDepthStart(); }
+  };
+  window.cnSetDepthLoop=function(v){ _cnDepthLoop=(v==='loop')?'loop':'hold'; };
+  function _cnDepthStop(restore){
+    if(_cnDepthId){ clearInterval(_cnDepthId); _cnDepthId=null; }
+    if(restore){
+      var nEl=document.getElementById('cnDepthN');
+      if(nEl){ nEl.value=_cnDepthTarget; cnUpdatePanel(); _cnSpiralSyncLock(); _cnRedraw(); }
+    }
+    _cnBtnState('cnPlayBtn',false);
+  }
+  function _cnDepthStart(){
+    var nEl=document.getElementById('cnDepthN'); if(!nEl) return;
+    _cnDepthTarget=Math.max(1,Math.min(60,parseInt(nEl.value,10)||1));
+    _cnDepthCur=0; _cnDepthDir=1;
+    _cnBtnState('cnPlayBtn',true);
+    _cnDepthId=setInterval(function(){
+      _cnDepthCur+=_cnDepthDir;
+      var finished=false;
+      if(_cnDepthCur>=_cnDepthTarget){
+        _cnDepthCur=_cnDepthTarget;
+        // HOLD: saturate at the target and STAY there. This is the fix for
+        // "lock keeps going back to 2" — the depth no longer walks back to
+        // n=0, so a locked spiral stays parked at p = p_target.
+        if(_cnDepthLoop==='loop') _cnDepthDir=-1; else finished=true;
+      } else if(_cnDepthCur<=0){ _cnDepthCur=0; _cnDepthDir=1; }
+      nEl.value=_cnDepthCur; _cnDepthWrote=_cnDepthCur;
+      cnUpdatePanel(); _cnSpiralSyncLock(); _cnRedraw();
+      if(finished) _cnDepthStop(false);
+    },_cnDepthSpeed);
+  }
+  window.cnDepthPlayToggle=function(){
+    if(_cnDepthId) _cnDepthStop(true); else _cnDepthStart();
+  };
+  window.cnDepthIsPlaying=function(){ return !!_cnDepthId; };
+  // Retarget mid-flight: editing the depth box while the depth transport is
+  // running moves the top of the ramp instead of being overwritten.
+  window.cnDepthRetarget=function(){
+    if(!_cnDepthId) return;
+    var nEl=document.getElementById('cnDepthN'); if(!nEl) return;
+    var v=parseInt(nEl.value,10);
+    if(isNaN(v) || v===_cnDepthWrote) return;
+    _cnDepthTarget=Math.max(1,Math.min(60,v));
+    if(_cnDepthCur>_cnDepthTarget){ _cnDepthCur=_cnDepthTarget; _cnDepthDir=-1; }
+  };
+
+  // ── (b) SPIRAL ───────────────────────────────────────────────────────
+  window.cnSetSpiralSpeed=function(v){
+    _cnSpiralSpeed=Math.max(20,parseInt(v,10)||180);
+    if(_cnSpiralId){ _cnSpiralStop(); _cnSpiralStart(); }
+  };
+  function _cnSpiralStop(){
+    if(_cnSpiralId){ clearInterval(_cnSpiralId); _cnSpiralId=null; }
+    _cnBtnState('cnSpiralPlayBtn',false);
+  }
+  function _cnSpiralStart(){
+    if(!state.liftSpiralOn){
+      state.liftSpiralOn=true;
+      var c=document.getElementById('cnSpOnChk'); if(c) c.checked=true;
+    }
+    var primes=_cnActivePrimes();
+    _spPlayIdx=Math.max(0,primes.indexOf(state.liftSpiralP));
+    _cnBtnState('cnSpiralPlayBtn',true);
+    _cnSpiralId=setInterval(function(){
+      // Re-read the set every tick so a moving n reshapes the sweep live.
+      var A=_cnActivePrimes();
+      if(A!==primes){
+        primes=A;
+        var keep=primes.indexOf(state.liftSpiralP);
+        _spPlayIdx = keep>=0 ? keep : 0;
+      }
+      _spPlayIdx=(_spPlayIdx+1)%primes.length;   // loop after the last prime
+      state.liftSpiralP=primes[_spPlayIdx];
+      _cnSpiralLbl();
+      if(typeof drawMainRing==='function') drawMainRing();
+    },_cnSpiralSpeed);
+  }
+  window.cnSpiralPlayToggle=function(){
+    if(_cnSpiralId) _cnSpiralStop(); else _cnSpiralStart();
+  };
+  window.cnSpiralPlayStopExt=function(){ _cnSpiralStop(); };
+  window.cnSpiralIsPlaying=function(){ return !!_cnSpiralId; };
+  // Grey the spiral transport out while the lock owns p.
+  // The spiral transport stays LIVE while locked — locking narrows the set
+  // it sweeps rather than freezing it on one prime.
+  window.cnSyncSpiralPlayEnabled=function(){
+    var wrap=document.getElementById('cnSpLockSetWrap');
+    if(wrap) wrap.style.display = state.liftSpiralLock ? 'inline-flex' : 'none';
+    _spSetKey='';
+  };
+  // Back-compat alias for anything still calling the old single toggle.
+  window.cnPlayToggle=function(){ window.cnDepthPlayToggle(); };
+  window.cnSetPlaySpeed=function(v){ window.cnSetDepthSpeed(v); };
   // Piggyback on the page's own redraw/compute so the panel always tracks
   // whatever sector range and ring are currently on screen.
   var _prevDrawMainRing = window.drawMainRing;
@@ -24478,20 +24967,6 @@ function updateModLabelInputs() {
     return r;
   };
   setTimeout(cnUpdatePanel, 400);
-  // Defaults: spiral on, locked to C(n) depth, looping via the n-play animation
-  // (locked mode makes p = the n-th prime, so animating n also animates the spiral).
-  setTimeout(function(){
-    try{
-      state.liftSpiralOn = true;
-      state.liftSpiralLock = true;
-      var nEl=document.getElementById('cnDepthN');
-      if(nEl && (parseInt(nEl.value,10)||0)<10) nEl.value=10;
-      cnUpdatePanel();
-      _cnSpiralSyncLock();
-      if(typeof drawMainRing==='function') drawMainRing();
-      if(!_cnPlayId) cnPlayToggle();
-    }catch(e){}
-  }, 600);
 })();
 </script>
 </body>
