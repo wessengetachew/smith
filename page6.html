@@ -864,6 +864,13 @@ function openOpener(){
             <span style="color:#64748b;font-size:10px;margin-left:8px;">(exact data computed up to this N for P/C ratios)</span>
             <button onclick="showConvergenceAnalysis()" class="secondary" style="margin-left:12px;font-size:10px;padding:4px 8px;">Convergence Analysis</button>
         </div>
+
+        <!-- Exact Category Counts (fast r-block algorithm) for Formula Mode -->
+        <div class="control-row" style="background:#0f2418;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #16a34a;">
+            <label style="color:#86efac;font-size:11px;font-weight:bold;margin-right:8px;">Exact Categories (Formula Mode):</label>
+            <label style="font-size:11px;"><input type="checkbox" id="computeExactCategories" checked> Compute exact P(m)/C(m)/PP/PC/CP/CC for every sector</label>
+            <span style="color:#64748b;font-size:10px;margin-left:8px;" title="Groups by r; each r contributes a block of phi(r) coprime m's, with primes counted via a cumulative pi(x) array. O(N log S) total, not O(N^2) -- exact, not a bounded estimate.">(fast r-block method -- exact, no brute force, O(N log S))</span>
+        </div>
         
         <!-- Global Display Format Controls -->
         <div class="control-row" style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:10px 15px;border-radius:6px;margin-top:10px;">
@@ -1245,6 +1252,18 @@ function openOpener(){
                     <!-- Sector Analysis -->
                     <div style="padding:12px;background:rgba(150,100,255,0.05);border-radius:6px;border:1px solid rgba(150,100,255,0.2);">
                         <strong style="color:#9664ff;font-size:11px;display:block;margin-bottom:10px;">Sector Analysis</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;padding:6px;background:rgba(245,158,11,0.07);border-radius:4px;border:1px solid rgba(245,158,11,0.25);">
+                            <label style="font-size:11px;color:#f59e0b;font-weight:600;">Sector Fill:</label>
+                            <select id="sectorFillMode" onchange="drawMainRing()" title="Draws each sector as its analytic wedge — no points needed, so it works identically in Exact, Hybrid and Formula mode at any N." style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="off">Off</option>
+                                <option value="wedge">Wedges (analytic)</option>
+                                <option value="lift">Wedges x C(n) lift</option>
+                            </select>
+                            <label style="font-size:11px;">Opacity <input type="range" id="sectorFillAlpha" min="5" max="100" value="45" style="width:70px;vertical-align:middle;" oninput="var l=document.getElementById('sectorFillAlphaLbl');if(l)l.textContent=this.value+'%';drawMainRing();"></label>
+                            <span id="sectorFillAlphaLbl" style="font-size:10px;color:#94a3b8;">45%</span>
+                            <label style="font-size:11px;"><input type="checkbox" id="sectorFillUnderPoints" checked onchange="drawMainRing()"> Under points</label>
+                            <div id="sectorFillNote" style="font-size:10px;color:#64748b;flex-basis:100%;"></div>
+                        </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Bounds</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median</label>
@@ -1886,6 +1905,7 @@ function openOpener(){
                     <canvas id="mainErrorChart"></canvas>
                     <div id="errorChartFractionDisplay" style="position:absolute;bottom:10px;left:10px;font-size:18px;font-weight:bold;color:#fbbf24;text-shadow:2px 2px 4px rgba(0,0,0,0.8);display:none;z-index:100;"></div>
                 </div>
+                <div id="nStarNote" style="font-size:10px;color:#94a3b8;font-family:monospace;margin-top:6px;line-height:1.5;"></div>
             </div>
         </div>
         
@@ -1937,7 +1957,27 @@ function openOpener(){
                     <span style="color:#e2e8f0;">P(r) = PP + PC</span>
                 </div>
             </div>
-            <div class="table-scroll"><table id="mainTable"><thead><tr id="mainTableHeader"><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th><th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th><th title="P/C = P(m)/C(m) ratio">P/C</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-scroll">
+                <div id="mainTablePager" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#94a3b8;">
+                    <button class="secondary" onclick="gotoTablePage(-1)" style="padding:3px 10px;">‹ Prev</button>
+                    <span id="mainTablePageInfo">Page 1 / 1</span>
+                    <button class="secondary" onclick="gotoTablePage(1)" style="padding:3px 10px;">Next ›</button>
+                    <span style="margin-left:10px;">Jump to sector:</span>
+                    <input type="number" id="tableJumpSector" min="1" style="width:80px;padding:3px 6px;background:#0f172a;border:1px solid #475569;border-radius:3px;color:#e2e8f0;" onkeydown="if(event.key==='Enter')jumpToSectorInTable()">
+                    <button class="secondary" onclick="jumpToSectorInTable()" style="padding:3px 10px;">Go</button>
+                    <span style="margin-left:10px;">Rows:</span>
+                    <select id="tableRowsPerPage" onchange="state.tablePage=0;updateMainTable();" title="How many sectors to render per page. 'All' drops pagination and scrolls the whole range." style="padding:3px 6px;background:#0f172a;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;">
+                        <option value="100">100</option>
+                        <option value="200" selected>200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="all">All (scroll)</option>
+                    </select>
+                    <button class="secondary" onclick="openSectorInspector(null)" style="padding:3px 10px;" title="Open the row inspector: per-sector detail plus a scrollable list of every sector">&#9707; Inspector</button>
+                    <span id="tableRowsNote" style="color:#64748b;"></span>
+                </div>
+                <table id="mainTable"><thead><tr id="mainTableHeader"><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th><th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th><th title="P/C = P(m)/C(m) ratio">P/C</th></tr></thead><tbody></tbody></table>
+            </div>
             
             <!-- Sector Detail Panel -->
             <div id="sectorDetailPanel" style="display:none;margin-top:15px;background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
@@ -4408,6 +4448,7 @@ const state = {
     sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
     computing: false, charts: {}, ringPoints: [], animationId: null,
     sectorBoundConstant: Math.sqrt(3) / Math.PI, // Default √3/π
+    tablePage: 0, // current page of the Sector Data table (0-indexed)
     // Bounded window data for P/C analysis in large N mode
     boundedResiduesBySector: {},
     boundedN: 2000,
@@ -5528,8 +5569,12 @@ function screenshotMainCanvas() {
     catY += 18;
     
     const exactTotal = ppCount + pcCount + cpCount + ccCount;
-    const primeTotal = ppCount + pcCount;
-    const compTotal = cpCount + ccCount;
+    // Numerator split (first letter of the category): r prime = PP,PC
+    const primeNumTotal  = ppCount + pcCount;   // P(r)
+    const compNumTotal   = cpCount + ccCount;   // C(r)
+    // Denominator split (second letter): m prime = PP,CP
+    const primeDenTotal  = ppCount + cpCount;   // P(m)
+    const compDenTotal   = pcCount + ccCount;   // C(m)
     
     ctx.fillStyle = '#cbd5e1';
     ctx.font = `${generalFontSize - 1}px monospace`;
@@ -5540,28 +5585,26 @@ function screenshotMainCanvas() {
     ctx.textAlign = 'left';
     catY += 16;
     
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('P(r) = PP + CP', legendX + 35, catY);
-    catY += 16;
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('C(r) = PC + CC', legendX + 35, catY);
-    catY += 16;
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('P(m) = PP + PC', legendX + 35, catY);
-    ctx.fillStyle = '#f59e0b';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${primeTotal}`, legendX + legendWidth - 60, catY);
-    ctx.textAlign = 'left';
-    catY += 16;
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('C(m) = CP + CC', legendX + 35, catY);
-    ctx.fillStyle = '#6366f1';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${compTotal}`, legendX + legendWidth - 60, catY);
-    ctx.textAlign = 'left';
+    // Category letters are (numerator, denominator): PC = prime numerator,
+    // composite denominator. So the NUMERATOR split is by first letter and the
+    // DENOMINATOR split is by second letter. This block previously had r and m
+    // swapped in all four strings.
+    function idLine(txt, val, valColor){
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(txt, legendX + 35, catY);
+        if (val !== null) {
+            ctx.fillStyle = valColor;
+            ctx.textAlign = 'right';
+            ctx.fillText(`${val}`, legendX + legendWidth - 60, catY);
+            ctx.textAlign = 'left';
+        }
+        catY += 16;
+    }
+    idLine('P(r) = PP + PC', primeNumTotal, '#a5b4fc');   // prime numerators
+    idLine('C(r) = CP + CC', compNumTotal,  '#94a3b8');   // composite numerators
+    idLine('P(m) = PP + CP', primeDenTotal, '#f59e0b');   // prime denominators
+    idLine('C(m) = PC + CC', compDenTotal,  '#6366f1');   // composite denominators
+    catY -= 16;
     
     ly += 290;
     
@@ -5940,7 +5983,21 @@ function generateScreenshotWithSelection(tabName) {
     
     ctx.font = '12px system-ui';
     ctx.fillStyle = '#a5b4fc';
-    ctx.fillText('N = ' + state.nMax + ' | Sectors ' + state.sectorMin + '-' + state.sectorMax + ' | ' + new Date().toLocaleString(), padding, currentY + 55);
+    // Label with the run that produced the numbers being screenshotted, not the
+    // current inputs -- see stampComputed().
+    const _lc = state.lastComputed || null;
+    const _lcN = _lc ? _lc.nMax : state.nMax;
+    const _lcSmin = _lc ? _lc.sectorMin : state.sectorMin;
+    const _lcSmax = _lc ? _lc.sectorMax : state.sectorMax;
+    const _stale = !_lc || _lc.nMax !== state.nMax || _lc.sectorMax !== state.sectorMax;
+    ctx.fillText('N = ' + _lcN + ' | Sectors ' + _lcSmin + '-' + _lcSmax + ' | ' + new Date().toLocaleString(), padding, currentY + 55);
+    if (_stale) {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 13px system-ui';
+        ctx.fillText('\u26a0 Figures are from the last COMPLETED run (N = ' + _lcN
+            + '). Inputs now say N = ' + state.nMax + ' \u2014 that run did not finish. Recompute before publishing.',
+            padding, currentY + 75);
+    }
     
     // Formula badge
     ctx.fillStyle = 'rgba(99, 102, 241, 0.3)';
@@ -6254,7 +6311,8 @@ function generateScreenshotWithSelection(tabName) {
     ctx.fillText('Current Bounds:', constBoxX + 10, currentY + 100);
     ctx.fillStyle = '#22c55e';
     ctx.font = '10px monospace';
-    ctx.fillText('N = ' + state.nMax.toLocaleString() + ', S = [' + state.sectorMin + ',' + state.sectorMax + ']', constBoxX + 10, currentY + 115);
+    const _b = state.lastComputed || state;
+    ctx.fillText('N = ' + _b.nMax.toLocaleString() + ', S = [' + _b.sectorMin + ',' + _b.sectorMax + ']', constBoxX + 10, currentY + 115);
     
     // Target Ratio Solver (now shown at the bottom, below the formula panel)
     if (solverCurrentMatch && tabName === 'mainview') {
@@ -6956,15 +7014,45 @@ async function computeAll() {
         if(state.nMax < 2) state.nMax = 2;
         if(state.nMin < 1) state.nMin = 1;
         if(state.nMin > state.nMax) state.nMin = 1;
+
+        // --- Memory pre-flight ---------------------------------------------
+        // There is no hard cap on N anywhere in this page; the wall is
+        // state.sectors, one object per sector at ~224 bytes measured. With the
+        // sqrt(3)/pi sector bound, sectorMax ~ 0.5513*N, so N=1e6 costs ~121 MB
+        // and N=1e7 costs ~1.2 GB (plus ~124 MB of sieve arrays). Past the hard
+        // limit the tab dies mid-run, which used to leave the old numbers on
+        // screen with the new N in state -- so refuse up front and say why.
+        const sectorCount = Math.max(0, state.sectorMax - state.sectorMin + 1);
+        const estMB = Math.round(sectorCount * 224 / 1048576) + Math.round(state.nMax * 13 / 1048576);
+        const SECTOR_HARD = 2000000, SECTOR_WARN = 600000;
+        if (sectorCount > SECTOR_HARD) {
+            const suggestN = Math.floor(SECTOR_HARD / (Math.sqrt(3)/Math.PI));
+            document.getElementById('statusArea').innerHTML =
+                '<span class="info-badge" style="background:#ef4444;">Too large: ' + sectorCount.toLocaleString()
+                + ' sectors would need roughly ' + (estMB/1024).toFixed(1) + ' GB. '
+                + 'Lower N to about ' + suggestN.toLocaleString() + ', or set Sectors max to '
+                + SECTOR_HARD.toLocaleString() + ' or less and recompute.</span>';
+            document.getElementById('progressBar').style.display = 'none';
+            state.computing = false;
+            return;
+        }
+        if (sectorCount > SECTOR_WARN) {
+            document.getElementById('statusArea').innerHTML =
+                '<span class="info-badge" style="background:#f59e0b;">Large run: ' + sectorCount.toLocaleString()
+                + ' sectors, roughly ' + estMB.toLocaleString() + ' MB. This may be slow on mobile.</span>';
+        }
         
         // Get bounded P/C settings
         state.useBoundedPC = document.getElementById('computeBoundedPC')?.checked ?? false;
         state.boundedN = +(document.getElementById('boundedWindowN')?.value || 2000);
+        // Get exact fast-category settings (r-block algorithm, formula mode only)
+        state.useExactCategories = document.getElementById('computeExactCategories')?.checked ?? false;
         
         document.getElementById('progressBar').style.display = 'block';
         document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing...</span>';
         
         state.sectors = []; state.residuesBySector = {}; state.allResidues = []; state.gaps = []; state.farey = [];
+        state.tablePage = 0;
         state.boundedResiduesBySector = {};
         
         const N = state.nMax;
@@ -6976,7 +7064,7 @@ async function computeAll() {
             document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing bounded P/C window...</span>';
             await computeBoundedWindow();
         }
-        computeFormulaOnly();
+        await computeFormulaOnly();
         updateFormulaOnlyDisplays();
         document.getElementById('progressBar').style.display = 'none';
         document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done (Formula' + (state.useBoundedPC ? ' + Bounded P/C' : '') + ')</span>';
@@ -6994,7 +7082,7 @@ async function computeAll() {
             await computeBoundedWindow();
         }
         // Then compute formula
-        computeFormulaOnly();
+        await computeFormulaOnly();
         document.getElementById('statusArea').innerHTML = '<span class="info-badge" style="background:#f59e0b;">N > 3000 - using formula' + (state.useBoundedPC ? ' + bounded P/C' : '') + '</span>';
     }
     
@@ -7083,8 +7171,142 @@ async function computeExact(N) {
     }
 }
 
-function computeFormulaOnly() {
-    for(let n=state.sectorMin; n<=state.sectorMax; n++) {
+// width(n) = 1/(n(n+1)) telescopes: sum_{n=a}^{b} width(n) = 1/a - 1/(b+1).
+// That closed form gives the exact fraction of the predicted "mass" (and,
+// since formula(n,N) is just a constant times width(n), the exact fraction
+// of the predicted total) covered by any prefix of sectors — no brute-force
+// summation needed. It's also the rational check the sector-count % misses:
+// sector 1 alone is width 1/(1·2)=1/2, i.e. half of the *entire* infinite
+// tail's mass, so by the time a few thousand sectors are done (a tiny
+// fraction of sectorMax at N=1e6) the covered mass is already >99.99%.
+function massFractionCovered(sectorMin, sectorMax, throughN) {
+    const a = sectorMin, b = sectorMax, k = throughN;
+    const rangeMass = 1/a - 1/(b+1);
+    if (rangeMass <= 0) return 1;
+    const doneMass = 1/a - 1/(k+1);
+    return doneMass / rangeMass;
+}
+
+// ══ EXACT FAST PER-SECTOR CATEGORY COUNTS (r-block decomposition) ═══════
+// For sector n, group Farey pairs (r,m) by r. For each r, valid m's form a
+// block of consecutive integers [n*r, (n+1)*r - 1] intersected with [1,N].
+// Any FULL block of r consecutive integers contains exactly phi(r) values
+// coprime to r (classical fact), and since m > r throughout that block
+// (except the n=1 boundary, handled below), every prime m in the block is
+// automatically coprime to r -- so primes-in-block is just a cumulative
+// pi(x) lookup, no gcd check needed. This turns an O(N^2) brute force into
+// O(N log S) total (S = number of sectors), verified exact against brute
+// force for n=1..300 at N=5,000 (all match).
+let _fastArraysCache = null, _fastArraysN = -1;
+
+function buildFastCategoryArrays(N) {
+    if (_fastArraysCache && _fastArraysN === N) return _fastArraysCache;
+    const isP = new Uint8Array(N + 1);
+    isP.fill(1); isP[0] = 0; if (N >= 1) isP[1] = 0;
+    for (let i = 2; i * i <= N; i++) {
+        if (isP[i]) for (let j = i * i; j <= N; j += i) isP[j] = 0;
+    }
+    const piCum = new Int32Array(N + 1);
+    let c = 0;
+    for (let i = 0; i <= N; i++) { if (i >= 2 && isP[i]) c++; piCum[i] = c; }
+    const spf = new Int32Array(N + 1);
+    for (let i = 2; i <= N; i++) {
+        if (spf[i] === 0) for (let j = i; j <= N; j += i) if (spf[j] === 0) spf[j] = i;
+    }
+    const phiArr = new Int32Array(N + 1);
+    for (let i = 0; i <= N; i++) phiArr[i] = i;
+    for (let i = 2; i <= N; i++) {
+        if (phiArr[i] === i) for (let j = i; j <= N; j += i) phiArr[j] -= Math.floor(phiArr[j] / i);
+    }
+    _fastArraysCache = { isP, piCum, spf, phi: phiArr };
+    _fastArraysN = N;
+    return _fastArraysCache;
+}
+
+function _distinctPrimeFactors(r, spf) {
+    const primes = [];
+    let x = r;
+    while (x > 1) {
+        const p = spf[x];
+        primes.push(p);
+        while (x % p === 0) x /= p;
+    }
+    return primes;
+}
+
+// Count of integers in [lo,hi] coprime to r via Mobius inclusion-exclusion
+// over r's squarefree divisors. Only called for the single truncated block
+// per sector where N cuts the block short of a full phi(r) block.
+function _coprimeCountInRange(r, lo, hi, spf) {
+    if (hi < lo) return 0;
+    if (r === 1) return hi - lo + 1;
+    const primes = _distinctPrimeFactors(r, spf);
+    const k = primes.length;
+    let total = 0;
+    for (let mask = 0; mask < (1 << k); mask++) {
+        let d = 1, bits = 0;
+        for (let b = 0; b < k; b++) if (mask & (1 << b)) { d *= primes[b]; bits++; }
+        const mu = (bits % 2 === 0) ? 1 : -1;
+        total += mu * (Math.floor(hi / d) - Math.floor((lo - 1) / d));
+    }
+    return total;
+}
+
+function computeFastSectorCategories(n, N, arrays) {
+    const { isP, piCum, phi, spf } = arrays;
+    const R = Math.floor(N / n);
+    let PP = 0, PC = 0, CP = 0, CC = 0;
+    for (let r = 1; r <= R; r++) {
+        const lo = n * r;
+        const hiFull = (n + 1) * r - 1;
+        const hi = Math.min(hiFull, N);
+        if (lo > N) break;
+        let primesInBlock = piCum[hi] - (lo - 1 >= 0 ? piCum[lo - 1] : 0);
+        let totalCoprime;
+        if (hiFull <= N) {
+            totalCoprime = phi[r];
+        } else {
+            totalCoprime = _coprimeCountInRange(r, lo, hi, spf);
+        }
+        // n===1 boundary: block touches m=r itself, which is always invalid
+        // (Farey pairs require r<m). Remove that single spurious point.
+        if (n === 1) {
+            if (r === 1) totalCoprime -= 1;
+            if (isP[r]) primesInBlock -= 1;
+        }
+        const compInBlock = totalCoprime - primesInBlock;
+        if (isP[r]) { PP += primesInBlock; PC += compInBlock; }
+        else { CP += primesInBlock; CC += compInBlock; }
+    }
+    return { PP, PC, CP, CC };
+}
+
+async function computeFormulaOnly() {
+    const sMin = state.sectorMin, sMax = state.sectorMax;
+    const totalSectors = sMax - sMin + 1;
+    const CHUNK = 20000; // sectors processed per UI tick — tune down if a tick still feels laggy
+    const t0 = performance.now();
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const statusArea = document.getElementById('statusArea');
+    if (progressBar) progressBar.style.display = 'block';
+
+    // Exact fast category counts (r-block algorithm) — replaces the need for
+    // brute force or a bounded-window estimate. O(N log S) total; see
+    // computeFastSectorCategories above.
+    const useExactCats = !!state.useExactCategories;
+    let fastArrays = null;
+    if (useExactCats) {
+        if (statusArea) statusArea.innerHTML = '<span class="info-badge">Building sieve/phi/pi arrays for N=' + state.nMax.toLocaleString() + '...</span>';
+        await new Promise(r => setTimeout(r, 0));
+        fastArrays = buildFastCategoryArrays(state.nMax);
+    }
+
+    for (let n = sMin; n <= sMax; n++) {
+        let exactCats = null;
+        if (useExactCats) {
+            exactCats = computeFastSectorCategories(n, state.nMax, fastArrays);
+        }
         // Get bounded P/C data if available
         const boundedRes = state.boundedResiduesBySector[n] || [];
         const boundedPrimeCount = boundedRes.filter(x => x.isPrime).length;  // Prime denom
@@ -7098,16 +7320,31 @@ function computeFormulaOnly() {
         const boundedCP = boundedRes.filter(x => x.category === 'CP').length;
         const boundedCC = boundedRes.filter(x => x.category === 'CC').length;
         
+        const pred = formula(n, state.nMax);
+        let exactVal = null, errorVal = null, relErrorVal = null;
+        let primeCountVal = null, primeNumCountVal = null;
+        let ppVal = null, pcVal = null, cpVal = null, ccVal = null;
+        if (exactCats) {
+            const { PP, PC, CP, CC } = exactCats;
+            exactVal = PP + PC + CP + CC;          // real exact total, not brute-forced
+            errorVal = exactVal - pred;
+            relErrorVal = exactVal > 0 ? (errorVal / exactVal) * 100 : 0;
+            primeCountVal = PP + CP;                // P(m): prime denominators
+            primeNumCountVal = PP + PC;             // P(r): prime numerators
+            ppVal = PP; pcVal = PC; cpVal = CP; ccVal = CC;
+        }
         state.sectors.push({
             n, 
-            exact: null, 
-            predicted: formula(n, state.nMax), 
-            error: null, 
-            relError: null, 
+            exact: exactVal, 
+            predicted: pred, 
+            error: errorVal, 
+            relError: relErrorVal, 
             width: 1/(n*(n+1)), 
-            primeCount: null,
-            primeNumCount: null,
-            ppCount: null, pcCount: null, cpCount: null, ccCount: null,
+            primeCount: primeCountVal,
+            primeNumCount: primeNumCountVal,
+            ppCount: ppVal, pcCount: pcVal, cpCount: cpVal, ccCount: ccVal,
+            // exact fast composite/prime-denom breakdown for direct display
+            exactCompositeCount: exactCats ? (exactCats.PC + exactCats.CC) : null,
             // Bounded window data
             boundedPrimeCount: boundedRes.length > 0 ? boundedPrimeCount : null,
             boundedPrimeNumCount: boundedRes.length > 0 ? boundedPrimeNumCount : null,
@@ -7124,6 +7361,22 @@ function computeFormulaOnly() {
             boundedCP: boundedRes.length > 0 ? boundedCP : null,
             boundedCC: boundedRes.length > 0 ? boundedCC : null
         });
+
+        if ((n - sMin) % CHUNK === CHUNK - 1 || n === sMax) {
+            const sectorsDone = n - sMin + 1;
+            const sectorPct = (sectorsDone / totalSectors) * 100;
+            const massPct = massFractionCovered(sMin, sMax, n) * 100;
+            const elapsedS = (performance.now() - t0) / 1000;
+            if (progressFill) progressFill.style.width = sectorPct.toFixed(1) + '%';
+            if (statusArea) {
+                statusArea.innerHTML = '<span class="info-badge">Formula: sector ' + sectorsDone.toLocaleString() + '/' + totalSectors.toLocaleString()
+                    + ' (' + sectorPct.toFixed(2) + '% of sectors) · '
+                    + massPct.toFixed(4) + '% of predicted mass covered · '
+                    + elapsedS.toFixed(2) + 's</span>';
+            }
+            if (n !== sMax) await new Promise(r => setTimeout(r, 0));
+            if (!state.computing) return; // allow cancel mid-run
+        }
     }
 }
 
@@ -7310,6 +7563,7 @@ function updateFormulaOnlyDisplays() {
     updateMainStats();
     updateMainChartsFormulaOnly();
     updateMainTable();
+    stampComputed();
     // Skip: drawMainRing, drawSectorTree, drawTheoryViz, updateGapAnalysis, 
     // computeFranel, computeDedekind, updateCFDisplay, computePSL, 
     // computeEulerProduct, updateModularAnalysis, draw3D, drawHyperbolic, 
@@ -7317,25 +7571,47 @@ function updateFormulaOnlyDisplays() {
     // These require actual residue data which formula mode doesn't compute
 }
 
+// Predicted(n) = 3N^2/(pi^2 n(n+1)) is a smooth, monotonic curve — sampling it
+// at a bounded number of points looks identical on screen to plotting every
+// single sector, but avoids handing Chart.js hundreds of thousands of points.
+// This ONLY thins the visual curve; it never touches state.sectors, the
+// table, CSV export, or any bounded/exact measurement.
+function downsamplePredictedCurve(sectors, maxPoints) {
+    if (sectors.length <= maxPoints) return sectors.map(s => ({x: s.n, y: s.predicted}));
+    const step = sectors.length / maxPoints;
+    const out = [];
+    for (let i = 0; i < maxPoints; i++) {
+        const s = sectors[Math.min(sectors.length - 1, Math.floor(i * step))];
+        out.push({x: s.n, y: s.predicted});
+    }
+    const last = sectors[sectors.length - 1];
+    if (out[out.length - 1].x !== last.n) out.push({x: last.n, y: last.predicted});
+    return out;
+}
+
 function updateMainChartsFormulaOnly() {
-    const labels = state.sectors.map(s=>s.n);
-    const hasBoundedData = state.sectors.some(s => s.boundedExact !== null);
+    const MAX_PREDICTED_POINTS = 3000;
+    const boundedSectors = state.sectors.filter(s => s.boundedExact !== null);
+    const hasBoundedData = boundedSectors.length > 0;
     
     if(state.charts.mainCount) state.charts.mainCount.destroy();
     
     const datasets = [{
         label:'Predicted (Formula N=' + state.nMax + ')',
-        data:state.sectors.map(s=>s.predicted),
+        data: downsamplePredictedCurve(state.sectors, MAX_PREDICTED_POINTS),
         borderColor:'#22c55e',
         backgroundColor:'rgba(34,197,94,0.1)',
-        fill:true
+        fill:true,
+        pointRadius: 0
     }];
     
-    // Add bounded data if available
+    // Bounded Exact/Predicted are real measurements, never downsampled — built
+    // only from the (naturally small, bounded-by-boundedN) sectors that have
+    // actual bounded-window data, however large sectorMax is.
     if (hasBoundedData) {
         datasets.unshift({
             label: 'Bounded Exact (N≤' + state.boundedN + ')',
-            data: state.sectors.map(s => s.boundedExact),
+            data: boundedSectors.map(s => ({x: s.n, y: s.boundedExact})),
             borderColor: '#6366f1',
             backgroundColor: 'rgba(99,102,241,0.1)',
             fill: false,
@@ -7343,7 +7619,7 @@ function updateMainChartsFormulaOnly() {
         });
         datasets.push({
             label: 'Bounded Predicted (N=' + state.boundedN + ')',
-            data: state.sectors.map(s => s.boundedPredicted),
+            data: boundedSectors.map(s => ({x: s.n, y: s.boundedPredicted})),
             borderColor: '#f59e0b',
             backgroundColor: 'transparent',
             fill: false,
@@ -7353,27 +7629,31 @@ function updateMainChartsFormulaOnly() {
     
     state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{
         type:'line',
-        data:{
-            labels,
-            datasets
-        },
+        data:{ datasets },
         options:{
             responsive:true,
+            parsing: false,
             plugins:{
                 legend:{labels:{color:'#94a3b8'}},
                 title:{display:true, text: hasBoundedData ? 'Formula + Bounded Window Data' : 'Formula Predictions Only (No Exact Data)', color: hasBoundedData ? '#22c55e' : '#f59e0b'}
             },
             scales:{
-                x:{ticks:{color:'#94a3b8'}},
+                x:{type:'linear', ticks:{color:'#94a3b8'}, title:{display:true, text:'Sector n', color:'#64748b'}},
                 y:{ticks:{color:'#94a3b8'}}
             }
         }
     });
     
-    // Show bounded error chart if available
+    // Show bounded error chart if available. NOTE: this one intentionally keeps
+    // a full state.sectors-length array (not downsampled/filtered) because
+    // errorChartSelection/updateErrorChartHighlight/playErrorChartBar elsewhere
+    // index directly into state.sectors — changing that shape would break bar
+    // click-to-select and range playback. autoSkip+maxTicksLimit below keep the
+    // rendered tick labels bounded regardless of sectorMax.
     if(state.charts.mainError) state.charts.mainError.destroy();
     
     if (hasBoundedData) {
+        const labels = state.sectors.map(s => s.n);
         state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{
             type:'bar',
             data:{
@@ -7434,6 +7714,7 @@ let isInitializing = true;
 function updateAllDisplays() {
     updateViewSectorDropdown();
     updateMainStats(); updateMainCharts(); updateMainTable();
+    stampComputed();
     
     // Only draw ONE canvas at a time during initial load to prevent flickering
     if (isInitializing) {
@@ -8219,11 +8500,27 @@ function animateTheoryViz() {
     step();
 }
 
+// Records the run whose numbers are currently rendered in the DOM. The export
+// used to read live state.nMax/sectorMax for its title while screenshotting the
+// table and stat cards, so a run that changed N and then failed produced a PNG
+// labelled with the NEW N over the OLD numbers. The stamp is set here because
+// this is where the visible figures are written.
+function stampComputed() {
+    state.lastComputed = {
+        nMin: state.nMin, nMax: state.nMax,
+        sectorMin: state.sectorMin, sectorMax: state.sectorMax,
+        sectorCount: state.sectors.length, mode: state.mode, at: Date.now()
+    };
+}
+
 function updateMainStats() {
     const hasExact = state.sectors.some(s=>s.exact!==null);
     const total = hasExact ? state.sectors.reduce((s,x)=>s+(x.exact||0),0) : null;
     const totalPred = state.sectors.reduce((s,x)=>s+x.predicted,0);
-    const primeCount = hasExact ? state.allResidues.filter(r => !r.isCusp && r.isPrime).length : null;
+    const primeCount = hasExact
+        ? (state.allResidues.length ? state.allResidues.filter(r => !r.isCusp && r.isPrime).length
+                                     : state.sectors.reduce((s,x)=>s+(x.primeCount||0),0))
+        : null;
     const primeRate = total && primeCount ? (primeCount / total * 100).toFixed(1) : '-';
     const error = total ? ((total - totalPred) / totalPred * 100).toFixed(2) : '-';
     const avgPerSector = total ? (total / state.sectors.length).toFixed(0) : '-';
@@ -8288,6 +8585,7 @@ function updateMainCharts() {
     if(hasExact) {
         state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{
             type:'bar',
+            plugins:[nStarMarkerPlugin],
             data:{
                 labels,
                 datasets:[{
@@ -8339,6 +8637,7 @@ function updateMainCharts() {
         
         // Store chart instance globally for flip navigation
         window.mainErrorChartInstance = state.charts.mainError;
+        updateNStarNote();
         
         // Find error flips for navigation
         findErrorFlips();
@@ -8384,11 +8683,48 @@ function updateMainTable() {
     let html = '';
     let optionsHtml = '<option value="">-- Select Sector --</option>';
     
+    // --- Pagination: never build DOM/HTML for more than one page of sectors.
+    // At small sectorMax (old default behavior) this still shows everything
+    // in a single page, so nothing changes for existing small-N sessions. ---
+    const totalSectors = state.sectors.length;
+    // 'All' renders every sector into one scrollable body. Each row is ~8-13
+    // cells, so a hard ceiling keeps the DOM from becoming unusable at the
+    // sector counts Formula mode reaches (N=1e6 gives 551,328 sectors).
+    const ALL_ROWS_CEILING = 10000;
+    const rppRaw = document.getElementById('tableRowsPerPage')?.value || '200';
+    const showAllRows = rppRaw === 'all';
+    const PAGE_SIZE = showAllRows ? Math.max(1, Math.min(totalSectors, ALL_ROWS_CEILING)) : (parseInt(rppRaw, 10) || 200);
+    const pageCount = Math.max(1, Math.ceil(totalSectors / PAGE_SIZE));
+    if (state.tablePage < 0) state.tablePage = 0;
+    if (state.tablePage > pageCount - 1) state.tablePage = pageCount - 1;
+    const pageStart = state.tablePage * PAGE_SIZE;
+    const pageEnd = Math.min(totalSectors, pageStart + PAGE_SIZE);
+    const pageSectors = state.sectors.slice(pageStart, pageEnd);
+    // Grow the scroll box when a big page is rendered so 'All' is actually scrollable.
+    const scrollBox = document.getElementById('mainTable')?.closest('.table-scroll');
+    if (scrollBox) scrollBox.style.maxHeight = (showAllRows || PAGE_SIZE > 200) ? '70vh' : '';
+    const rowsNote = document.getElementById('tableRowsNote');
+    if (rowsNote) {
+        rowsNote.textContent = (showAllRows && totalSectors > ALL_ROWS_CEILING)
+            ? '\u00b7 showing ' + ALL_ROWS_CEILING.toLocaleString() + ' rows/page (ceiling) \u2014 use Jump or the Inspector for the rest'
+            : '';
+    }
+    const pagerInfo = document.getElementById('mainTablePageInfo');
+    if (pagerInfo) {
+        pagerInfo.textContent = (pageCount === 1)
+            ? 'All ' + totalSectors.toLocaleString() + ' sectors'
+            : 'Page ' + (state.tablePage + 1) + ' / ' + pageCount
+              + ' (sectors ' + (totalSectors ? pageStart + 1 : 0) + '-' + pageEnd + ' of ' + totalSectors.toLocaleString() + ')';
+    }
+    // The "View Sector" dropdown is only practical up to a few hundred entries —
+    // beyond that, cap it and point people at the Jump-to-sector input instead.
+    const DROPDOWN_CAP = 500;
+    
     // Check if we're in formula/large N mode and have bounded data
     const usesBoundedData = state.nMax > 3000 || state.mode === 'formula';
     const hasBoundedData = Object.keys(state.boundedResiduesBySector).length > 0;
     
-    state.sectors.forEach((s, idx) => {
+    pageSectors.forEach((s, idx) => {
         // Use actual residues if available, otherwise use bounded data
         let res = state.residuesBySector[s.n] || [];
         let primeCount, compositeCount, primeNumCount, ppCount, pcCount, cpCount, ccCount;
@@ -8403,6 +8739,13 @@ function updateMainTable() {
             pcCount = s.pcCount || res.filter(r => r.category === 'PC').length;
             cpCount = s.cpCount || res.filter(r => r.category === 'CP').length;
             ccCount = s.ccCount || res.filter(r => r.category === 'CC').length;
+        } else if (s.ppCount !== null && s.ppCount !== undefined) {
+            // Exact fast r-block category counts (formula mode) — these are
+            // real exact values, not an approximation, so no '*' marker.
+            primeCount = s.primeCount;
+            compositeCount = s.exactCompositeCount;
+            primeNumCount = s.primeNumCount;
+            ppCount = s.ppCount; pcCount = s.pcCount; cpCount = s.cpCount; ccCount = s.ccCount;
         } else if (hasBoundedData && state.boundedResiduesBySector[s.n]) {
             // Use bounded window data
             res = state.boundedResiduesBySector[s.n];
@@ -8426,7 +8769,8 @@ function updateMainTable() {
         // Calculate P/C ratio (use bounded if available)
         let pcRatio = '-';
         let pcColor = '#94a3b8';
-        if (s.boundedPCRatio !== undefined && s.boundedPCRatio !== null) {
+        const hasExactFast = s.ppCount !== null && s.ppCount !== undefined;
+        if (!hasExactFast && s.boundedPCRatio !== undefined && s.boundedPCRatio !== null) {
             pcRatio = s.boundedPCRatio.toFixed(decimals);
             pcColor = s.boundedPCRatio > 1 ? '#f59e0b' : s.boundedPCRatio < 1 ? '#6366f1' : '#22c55e';
         } else if (compositeCount > 0) {
@@ -8466,7 +8810,7 @@ function updateMainTable() {
         const compositeDisplay = compositeCount > 0 ? compositeCount + dataSource : '-';
         const primeNumDisplay = primeNumCount > 0 ? primeNumCount + dataSource : '-';
         
-        html += '<tr data-sector="' + s.n + '" data-idx="' + idx + '" onclick="showSectorDataDetail(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
+        html += '<tr data-sector="' + s.n + '" data-idx="' + (pageStart + idx) + '" onclick="showSectorDataDetail(' + s.n + '); openSectorInspector(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
             '<td><strong>' + s.n + '</strong></td>' +
             '<td>(1/' + (s.n+1) + ', 1/' + s.n + ']</td>' +
             '<td>' + exactDisplay + '</td>' +
@@ -8486,9 +8830,20 @@ function updateMainTable() {
         }
         
         html += '</tr>';
-        
-        optionsHtml += '<option value="' + s.n + '">Sector ' + s.n + ' (' + (res.length || 'formula') + ' fractions)</option>';
     });
+    
+    // Dropdown built once from the first DROPDOWN_CAP sectors, independent of
+    // which table page is showing — this is only ever a "jump" convenience;
+    // for sectors beyond the cap, use the Jump-to-sector input instead.
+    const dropdownLimit = Math.min(DROPDOWN_CAP, totalSectors);
+    for (let i = 0; i < dropdownLimit; i++) {
+        const s = state.sectors[i];
+        const res = state.residuesBySector[s.n] || [];
+        optionsHtml += '<option value="' + s.n + '">Sector ' + s.n + ' (' + (res.length || 'formula') + ' fractions)</option>';
+    }
+    if (totalSectors > DROPDOWN_CAP) {
+        optionsHtml += '<option value="" disabled>… ' + (totalSectors - DROPDOWN_CAP).toLocaleString() + ' more — use Jump to sector above</option>';
+    }
     
     // Add footnote if using bounded data
     const colSpan = showCategories ? 13 : 8;
@@ -8498,6 +8853,30 @@ function updateMainTable() {
     
     tbody.innerHTML = html;
     if (sectorSelect) sectorSelect.innerHTML = optionsHtml;
+}
+
+// --- Sector Data table pagination helpers ---
+function gotoTablePage(delta) {
+    state.tablePage = (state.tablePage || 0) + delta;
+    updateMainTable();
+}
+
+function jumpToSectorInTable() {
+    const input = document.getElementById('tableJumpSector');
+    const n = parseInt(input && input.value, 10);
+    if (!n || !state.sectors.length) return;
+    // state.sectors is ordered/contiguous by n starting at sectorMin, so the
+    // page containing sector n can be computed directly without searching.
+    const idx = n - state.sectors[0].n;
+    if (idx < 0 || idx >= state.sectors.length) {
+        alert('Sector ' + n + ' is outside the current range (' + state.sectors[0].n + '-' + state.sectors[state.sectors.length - 1].n + ').');
+        return;
+    }
+    const rppRaw2 = document.getElementById('tableRowsPerPage')?.value || '200';
+    const PAGE_SIZE = (rppRaw2 === 'all') ? Math.max(1, Math.min(state.sectors.length, 10000)) : (parseInt(rppRaw2, 10) || 200);
+    state.tablePage = Math.floor(idx / PAGE_SIZE);
+    updateMainTable();
+    setTimeout(() => { if (typeof highlightTableRow === 'function') highlightTableRow(n); }, 0);
 }
 
 function openSectorModal(n) {
@@ -10076,6 +10455,148 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
 // Track highlighted point on ring (for click selection)
 let highlightedRingPoint = null;
 
+// ── Analytic sector fill ────────────────────────────────────────────────────
+// The ring maps a fraction straight to an angle: angle = (r/m)·2π. Sector
+// S_k = (1/(k+1), 1/k] is therefore EXACTLY the wedge between 2π/(k+1) and
+// 2π/k, with angular width 2π/(k(k+1)). That is a closed form — it needs no
+// enumerated points, so Formula mode can show the same sector partition Exact
+// mode shows, at N=500 or N=1,000,000 alike.
+//
+// Why a flat fill is the honest picture: ring m contributes φ(m) coprime points
+// spread over the full turn, so points per unit angle is the same in every
+// sector. Sectors differ in WIDTH, not in density. Zoomed out, the point cloud
+// converges to exactly these wedges — which is why the wedges lose nothing.
+function hexRGBA(hex, a){
+    var h=(hex||'#6366f1').replace('#','');
+    if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var n=parseInt(h,16);
+    return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+Math.max(0,Math.min(1,a)).toFixed(3)+')';
+}
+function drawSectorFill(ctx, cx, cy, maxR, mode) {
+    const alpha = (+(document.getElementById('sectorFillAlpha')?.value || 45)) / 100;
+    const kMin = Math.max(1, state.sectorMin || 1);
+    const kMax = Math.max(kMin, state.sectorMax || 275);
+
+    // Resolution limit. Wedge k spans 2π/(k(k+1)) rad, i.e. an arc of
+    // 2π·maxR/(k(k+1)) px at the rim. Below ~0.75px it cannot be drawn as a
+    // distinct wedge no matter what we do — that IS the zoom-out limit. Rather
+    // than pretending to draw 551,328 sectors, everything past the limit is
+    // merged into one band and labelled as such.
+    const MIN_PX = 0.75;
+    const kPix = Math.max(1, Math.floor((-1 + Math.sqrt(1 + 4*(2*Math.PI*maxR/MIN_PX)))/2));
+    const kDrawn = Math.min(kMax, kPix);
+
+    // Inner hole matches where the point cloud starts (ring m = nMin).
+    const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+    const nMaxV = state.nMax || 500, nMinV = state.nMin || 1;
+    let inner = (ringSpacing === 1) ? Math.max(0.05, nMinV / nMaxV) * maxR : 0.05 * maxR;
+    if (!isFinite(inner) || inner < 0) inner = 0;
+
+    // 'lift' shades every wedge by the depth-n survival ratio C(n), tying the
+    // picture to the C(n) panel: at n=0 the disc is full, and it fades as the
+    // block constraint gcd(r, m+j)=1 for j=0..n removes points.
+    const n = (window.cnGetDepthN ? window.cnGetDepthN() : 0);
+    const Cn = (mode === 'lift' && window.cnGetCn) ? window.cnGetCn(n) : 1;
+
+    function wedge(a1, a2, fill){
+        ctx.beginPath();
+        ctx.arc(cx, cy, maxR, -a2, -a1, false);
+        if (inner > 0.5) ctx.arc(cx, cy, inner, -a1, -a2, true);
+        else ctx.lineTo(cx, cy);
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+    }
+
+    for (let k = kMin; k <= kDrawn; k++) {
+        wedge((1/(k+1))*2*Math.PI, (1/k)*2*Math.PI, hexRGBA(getSectorColor(k), alpha*Cn));
+    }
+
+    // Merged sub-pixel tail: sectors kDrawn+1 .. kMax collapse into the single
+    // wedge (0, 2π/(kDrawn+1)] — geometrically exact, just unresolvable.
+    let tailNote = '';
+    if (kDrawn < kMax) {
+        wedge((1/(kMax+1))*2*Math.PI, (1/(kDrawn+1))*2*Math.PI, hexRGBA('#64748b', alpha*Cn*0.75));
+        tailNote = ' · sectors ' + (kDrawn+1) + '–' + kMax.toLocaleString() + ' merged (sub-pixel at this radius)';
+    }
+
+    const note = document.getElementById('sectorFillNote');
+    if (note) {
+        const frac = 1/(kMin*(kMin+1));
+        note.textContent = 'Wedge width = 2\u03c0/(k(k+1)) \u00b7 S' + kMin + ' holds '
+            + (frac*100).toFixed(2) + '% of the turn \u00b7 wedges ' + kMin + '\u2013' + kDrawn
+            + tailNote
+            + (mode === 'lift' ? ' \u00b7 shaded by C(' + n + ')=' + Cn.toFixed(6) : '')
+            + ' \u00b7 no points required';
+    }
+}
+
+// ── n*: the last sector at which a sign flip is possible ────────────────────
+// Every sector S_n = (1/(n+1), 1/n] with n <= N contains the fraction 1/n
+// itself (denominator n <= N), so exact(n) >= 1 for EVERY sector in range.
+// The prediction drops below 1 at
+//     C(n,N) = 3N^2/(pi^2 n(n+1)) < 1  <=>  n(n+1) > 3N^2/pi^2
+//     <=>  n > n* = (-1 + sqrt(1 + 12 N^2/pi^2))/2  =  N*sqrt(3)/pi - 1/2 + O(1/N)
+// Past n*, exact - pred >= 1 - pred > 0: the residual is pinned positive and
+// cannot cross zero again. So n* is a hard upper bound on the last sign flip,
+// and the relative error then climbs smoothly toward 1 - pred/exact.
+// This is exact arithmetic — it needs no enumeration, so it holds in Formula
+// mode at any N. sqrt(3)/pi is the same constant the Sector Bound preset uses.
+function nStarSector(N){ return (-1 + Math.sqrt(1 + 12*N*N/(Math.PI*Math.PI))) / 2; }
+
+const nStarMarkerPlugin = {
+    id: 'nStarMarker',
+    afterDatasetsDraw(chart){
+        try{
+            const N = state.nMax; if(!N) return;
+            const labels = chart.data.labels || []; if(labels.length < 2) return;
+            const nStar = nStarSector(N);
+            if(nStar < labels[0] || nStar > labels[labels.length-1]) return;
+            let best = 0, bd = Infinity;
+            for(let i=0;i<labels.length;i++){ const d=Math.abs(labels[i]-nStar); if(d<bd){bd=d;best=i;} }
+            const xs = chart.scales.x, ys = chart.scales.y;
+            const x = xs.getPixelForValue(best);
+            const ctx = chart.ctx;
+            ctx.save();
+            // shade the "no flips possible" region
+            ctx.fillStyle = 'rgba(34,197,94,0.07)';
+            ctx.fillRect(x, ys.top, xs.right - x, ys.bottom - ys.top);
+            ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1.5; ctx.setLineDash([6,4]);
+            ctx.beginPath(); ctx.moveTo(x, ys.top); ctx.lineTo(x, ys.bottom); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#22c55e'; ctx.font = '10px system-ui';
+            const lbl = 'n* = ' + nStar.toFixed(1) + '  (pred = 1)';
+            const tw = ctx.measureText(lbl).width;
+            ctx.fillText(lbl, Math.min(x + 5, xs.right - tw - 2), ys.top + 11);
+            ctx.fillStyle = 'rgba(34,197,94,0.75)';
+            ctx.fillText('no sign flips past here', Math.min(x + 5, xs.right - 120), ys.top + 24);
+            ctx.restore();
+        }catch(e){ /* marker is cosmetic — never break the chart */ }
+    }
+};
+
+// Report where the last flip actually landed versus the bound.
+function updateNStarNote(){
+    const el = document.getElementById('nStarNote'); if(!el) return;
+    const N = state.nMax;
+    if(!N || !state.sectors || !state.sectors.length){ el.textContent = ''; return; }
+    const nStar = nStarSector(N);
+    let last = null;
+    for(let i=1;i<state.sectors.length;i++){
+        const a = state.sectors[i], b = state.sectors[i-1];
+        if(a.exact === null || b.exact === null) continue;
+        if((a.exact - a.predicted) * (b.exact - b.predicted) < 0) last = a.n;
+    }
+    const inRange = nStar <= state.sectorMax;
+    el.innerHTML =
+        'n* = (\u22121 + \u221a(1 + 12N\u00b2/\u03c0\u00b2))/2 = <b style="color:#22c55e;">' + nStar.toFixed(2) + '</b>'
+      + ' &nbsp;\u00b7&nbsp; N\u00b7\u221a3/\u03c0 = ' + (N*Math.sqrt(3)/Math.PI).toFixed(2)
+      + (last !== null ? ' &nbsp;\u00b7&nbsp; last observed sign flip: <b style="color:#fbbf24;">n = ' + last + '</b>'
+                          + ' (' + (last/nStar).toFixed(4) + '\u00d7 n*)' : '')
+      + '<br>Every sector n \u2264 N contains 1/n, so exact \u2265 1; pred &lt; 1 past n*, hence exact \u2212 pred &gt; 0 and the residual cannot cross zero again.'
+      + (inRange ? '' : ' &nbsp;\u00b7&nbsp; <span style="color:#f59e0b;">n* is beyond the current sector range \u2014 raise Sectors max to see the crossing.</span>');
+}
+
 function drawMainRing() {
     const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
     const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, maxR=Math.min(W,H)/2-35;
@@ -10121,6 +10642,13 @@ function drawMainRing() {
     
     // Clear canvas with background color
     ctx.fillStyle = ringBgColor; ctx.fillRect(0,0,W,H);
+
+    // Analytic sector wedges. Drawn before the lines/points so it reads as a
+    // backdrop in Exact mode and as the whole picture in Formula mode.
+    const sectorFillMode = document.getElementById('sectorFillMode')?.value || 'off';
+    if (sectorFillMode !== 'off' && (document.getElementById('sectorFillUnderPoints')?.checked ?? true)) {
+        drawSectorFill(ctx, cx, cy, maxR, sectorFillMode);
+    }
     
     // Draw all 1/n sector lines if enabled
     if (showAllLines) {
@@ -13196,13 +13724,93 @@ function updateTreePathInfo(point) {
                 </div>
             </div>
         </div>
-        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #334155;">
-            <span style="color:#94a3b8; font-size:0.8em;">Sector:</span> <span style="color:#6366f1;">${point.sector}</span> 
-            <span style="margin-left:15px; color:#94a3b8; font-size:0.8em;">Modulus:</span> 
-            <span style="color:${point.isPrime ? '#f59e0b' : '#6366f1'};">${point.m} (${point.isPrime ? 'Prime' : 'Composite'})</span>
+        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #334155; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span><span style="color:#94a3b8; font-size:0.8em;">Sector:</span> <span style="color:#6366f1;">${point.sector}</span></span>
+            <span><span style="color:#94a3b8; font-size:0.8em;">Modulus:</span>
+            <span style="color:${point.isPrime ? '#f59e0b' : '#6366f1'};">${point.m} (${point.isPrime ? 'Prime' : 'Composite'})</span></span>
+            <button onclick="sendTreePointToRing()" title="Select this point on the main ring canvas and scroll to it" style="padding:6px 14px; font-size:12px; font-weight:600; background:linear-gradient(135deg,#f59e0b,#d97706); border:none; border-radius:5px; color:white; cursor:pointer;">&#10148; Send to Ring</button>
+            <span id="sendToRingStatus" style="font-size:11px; font-family:monospace; color:#64748b;"></span>
         </div>
     `;
 }
+
+// Send the selected Stern-Brocot node to the main ring: mark it, make sure the
+// sector holding it is the one being drawn, scroll the ring into view, and
+// pulse the marker so it is findable in a dense cloud.
+function sendTreePointToRing() {
+    const p = selectedTreePoint;
+    const status = document.getElementById('sendToRingStatus');
+    const say = (msg, color) => { if (status) { status.textContent = msg; status.style.color = color || '#64748b'; } };
+
+    if (!p) { say('No tree point selected.', '#f59e0b'); return; }
+    const r = p.r, m = p.m, sector = getSector(r, m);
+
+    // The ring can only mark points it has actually enumerated. Say which
+    // precondition failed rather than scrolling to a canvas with nothing on it.
+    if (m > state.nMax) {
+        say(`${r}/${m} needs N \u2265 ${m} (current N = ${state.nMax}). Raise N and recompute.`, '#ef4444');
+        return;
+    }
+    if (!state.ringPoints || state.ringPoints.length === 0) {
+        say('Ring has no enumerated points \u2014 Formula mode draws none. Use Exact/Hybrid with N \u2264 3000.', '#ef4444');
+        return;
+    }
+    // residuesBySector is only filled for sectors inside [sectorMin, sectorMax],
+    // so a node outside that window can never appear on the ring.
+    if (sector < state.sectorMin || sector > state.sectorMax) {
+        say(`${r}/${m} sits in sector ${sector}, outside the computed range [${state.sectorMin}, ${state.sectorMax}]. Widen Sectors and recompute.`, '#ef4444');
+        return;
+    }
+
+    // Make the containing sector the one on screen, unless all sectors are shown.
+    const showAll = document.getElementById('showAllSectors');
+    if (!(showAll && showAll.checked)) {
+        const vs = document.getElementById('viewSector');
+        if (vs) {
+            if (!Array.prototype.some.call(vs.options, o => +o.value === sector)) {
+                const opt = document.createElement('option');
+                opt.value = sector; opt.textContent = 'Sector ' + sector;
+                vs.appendChild(opt);
+            }
+            vs.value = String(sector);
+        }
+    }
+    state.highlightSectorOnly = null;
+    highlightedRingPoint = { r, m };
+    drawMainRing();
+
+    const hit = state.ringPoints.find(q => q.r === r && q.m === m);
+    const ring = document.getElementById('mainRing');
+    if (ring) ring.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    if (!hit) {
+        // In range and enumerated, but not currently drawn — almost always a
+        // point filter or a denominator filter excluding it.
+        say(`${r}/${m} is in range but filtered out of the current ring view (check Point Filter / min-max denominator).`, '#f59e0b');
+        return;
+    }
+
+    say(`${r}/${m} marked on the ring \u00b7 sector ${sector} \u00b7 angle ${(360*r/m).toFixed(3)}\u00b0`, '#22c55e');
+    if (document.getElementById('autoPlayOnClick')?.checked) {
+        try { playFraction(r, m, 0.35); } catch (e) {}
+    }
+
+    // Three-blink pulse so the white marker is locatable in a dense cloud.
+    // The token guards against an in-flight pulse clobbering a newer selection.
+    const token = ++_sendToRingToken;
+    let blinks = 0;
+    const id = setInterval(() => {
+        if (token !== _sendToRingToken) { clearInterval(id); return; }
+        highlightedRingPoint = (blinks % 2 === 0) ? null : { r, m };
+        drawMainRing();
+        if (++blinks >= 6) {
+            clearInterval(id);
+            highlightedRingPoint = { r, m };
+            drawMainRing();
+        }
+    }, 140);
+}
+let _sendToRingToken = 0;
 
 function clearTreePath() {
     selectedTreePoint = null;
@@ -20632,6 +21240,7 @@ function cnAudioSurvivorFilter(list, statusPrefix) {
 }
 
 function playSectorAudio(sectorNum, direction = 'forward') {
+    if (window.sectorInspectorSetPlaying) window.sectorInspectorSetPlaying(sectorNum);
     const residues = state.residuesBySector[sectorNum] || [];
     if (residues.length === 0) {
         showPlaybackStatus('No fractions in sector ' + sectorNum);
@@ -20951,6 +21560,7 @@ function startPlaybackLoop() {
 
 function stopAllPlayback() {
     playbackState.isPlaying = false;
+    if (window.sectorInspectorSetPlaying) window.sectorInspectorSetPlaying(null);
     if (playbackState.intervalId) {
         clearInterval(playbackState.intervalId);
         playbackState.intervalId = null;
@@ -22420,6 +23030,8 @@ function startAllSectorsPlaybackLoop() {
                 document.getElementById('viewSector').value = f.sector;
                 drawMainRing();
                 lastSector = f.sector;
+                // Keep the row inspector in step with what is sounding.
+                if (window.sectorInspectorSetPlaying) window.sectorInspectorSetPlaying(f.sector);
             }
             
             showPlaybackStatus(`S${f.sector}: ${f.r}/${f.m} ${f.isPrime ? '(P)' : ''} — ${playbackState.currentIndex + 1}/${playbackState.queue.length}`);
@@ -24226,22 +24838,84 @@ function executeSectorExport() {
         alert('No sector data in selected range');
         return;
     }
+    // A PNG table isn't a sensible format for thousands of rows — guard against
+    // an accidental multi-hundred-thousand-sector export (browsers also cap
+    // canvas dimensions/area around here). Point people at CSV instead.
+    if (sectors.length > 3000) {
+        alert('That range has ' + sectors.length.toLocaleString() + ' sectors — too many for a readable PNG table.\n\n'
+            + 'Use "Export All CSV" or "Export Sector CSV" for large ranges, or narrow the range (under 3,000 sectors) for a PNG.');
+        return;
+    }
     
-    // 4K canvas
-    const width = 3840;
     const rowsPerColumn = 25;
     const numColumns = Math.ceil(sectors.length / rowsPerColumn);
-    const columnWidth = includeCategories ? 900 : 700;
-    const tableWidth = numColumns * columnWidth;
     const chartHeight = includeChart ? 800 : 0;
     const statsHeight = includeStats ? 100 : 0;
     const tableHeight = Math.min(sectors.length, rowsPerColumn) * 32 + 60;
-    const height = Math.max(2160, chartHeight + statsHeight + tableHeight + 200);
     
     const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // --- Build row strings first, then measure them, so column widths are
+    // sized to what will actually be drawn (fixes overlap for large N where
+    // Exact/Pred/P(m)/etc routinely run to 7-8+ digits). ---
+    const baseHeaders = ['n', 'Interval', 'Exact', 'Pred', 'Err%'];
+    const categoryHeaders = ['P(m)', 'C(m)', 'PP', 'PC', 'CP', 'CC'];
+    const headers = includeCategories ? [...baseHeaders, ...categoryHeaders] : baseHeaders;
+    
+    const rows = sectors.map(s => {
+        const compositeCount = s.exactCompositeCount != null ? s.exactCompositeCount
+            : (s.exact != null && s.primeCount != null ? s.exact - s.primeCount : null);
+        const base = [
+            s.n.toString(),
+            `(1/${s.n+1},1/${s.n}]`,
+            s.exact !== null ? s.exact.toLocaleString() : '-',
+            s.predicted.toFixed(1),
+            (s.relError !== null ? s.relError.toFixed(2) + '%' : '-')
+        ];
+        if (!includeCategories) return base;
+        return [...base,
+            s.primeCount != null ? s.primeCount.toLocaleString() : '-',
+            compositeCount != null ? compositeCount.toLocaleString() : '-',
+            s.ppCount != null ? s.ppCount.toLocaleString() : '-',
+            s.pcCount != null ? s.pcCount.toLocaleString() : '-',
+            s.cpCount != null ? s.cpCount.toLocaleString() : '-',
+            s.ccCount != null ? s.ccCount.toLocaleString() : '-'
+        ];
+    });
+    
+    const headerFont = 'bold 24px monospace';
+    const cellFont = '20px monospace';
+    const colPadding = 40; // gap between one column's text and the next column's start
+    
+    // measureText() and the actual rasterized glyphs can disagree on mobile
+    // WebViews (the generic 'monospace' family sometimes resolves to a
+    // different substituted font for canvas measurement vs. paint,
+    // especially for bold text) — that mismatch is what produced the
+    // overlapping export. Since these fonts ARE monospace by declaration,
+    // fall back to a fixed per-character width estimate and take whichever
+    // is larger, so a measurement shortfall on any given device can't
+    // collapse columns into each other.
+    const HEADER_CHAR_W = 24 * 0.62;
+    const CELL_CHAR_W = 20 * 0.62;
+    
+    ctx.font = headerFont;
+    const colWidths = headers.map((h, i) => {
+        let w = Math.max(ctx.measureText(h).width, h.length * HEADER_CHAR_W);
+        ctx.font = cellFont;
+        for (const r of rows) w = Math.max(w, ctx.measureText(r[i]).width, r[i].length * CELL_CHAR_W);
+        ctx.font = headerFont;
+        return Math.ceil(w) + colPadding;
+    });
+    const columnWidth = colWidths.reduce((a, b) => a + b, 0) + 40; // + block gap
+    const tableWidth = numColumns * columnWidth;
+    
+    // Canvas grows to fit the table instead of clipping columns off the
+    // right edge — width no longer hardcoded to a fixed 4K value.
+    const width = Math.max(3840, tableWidth + 120);
+    const height = Math.max(2160, chartHeight + statsHeight + tableHeight + 200);
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext('2d');
     
     // Background
     ctx.fillStyle = '#0a0f1a';
@@ -24281,15 +24955,9 @@ function executeSectorExport() {
     // Table headers
     yOffset += 40;
     ctx.fillStyle = '#6366f1';
-    ctx.font = 'bold 24px monospace';
+    ctx.font = headerFont;
     ctx.textAlign = 'left';
     
-    const baseHeaders = ['n', 'Interval', 'Exact', 'Pred', 'Err%'];
-    const categoryHeaders = ['P(m)', 'C(m)', 'PP', 'PC', 'CP', 'CC'];
-    const headers = includeCategories ? [...baseHeaders, ...categoryHeaders] : baseHeaders;
-    const colWidths = includeCategories ? [60, 150, 100, 100, 100, 80, 80, 60, 60, 60, 60] : [60, 150, 100, 100, 100];
-    
-    // Draw headers for each column
     for (let col = 0; col < numColumns; col++) {
         let x = 60 + col * columnWidth;
         headers.forEach((h, i) => {
@@ -24299,41 +24967,30 @@ function executeSectorExport() {
     }
     
     // Table rows
-    ctx.font = '20px monospace';
+    ctx.font = cellFont;
     const rowHeight = 32;
+    const cellColors = includeCategories
+        ? ['#e2e8f0', '#e2e8f0', '#e2e8f0', '#e2e8f0', null, '#f59e0b', '#6366f1', '#22c55e', '#f59e0b', '#6366f1', '#94a3b8']
+        : ['#e2e8f0', '#e2e8f0', '#e2e8f0', '#e2e8f0', null];
     
-    sectors.forEach((s, i) => {
+    rows.forEach((cells, i) => {
         const col = Math.floor(i / rowsPerColumn);
         const row = i % rowsPerColumn;
         const baseX = 60 + col * columnWidth;
         const y = yOffset + 40 + row * rowHeight;
+        const s = sectors[i];
         
         let x = baseX;
-        
-        ctx.fillStyle = '#e2e8f0';
-        ctx.fillText(s.n.toString(), x, y); x += colWidths[0];
-        ctx.fillText(`(1/${s.n+1},1/${s.n}]`, x, y); x += colWidths[1];
-        ctx.fillText(s.exact !== null ? s.exact.toString() : '-', x, y); x += colWidths[2];
-        ctx.fillText(s.predicted.toFixed(1), x, y); x += colWidths[3];
-        
-        const errColor = Math.abs(s.relError) < 1 ? '#22c55e' : Math.abs(s.relError) < 5 ? '#f59e0b' : '#ef4444';
-        ctx.fillStyle = errColor;
-        ctx.fillText((s.relError !== null ? s.relError.toFixed(2) + '%' : '-'), x, y); x += colWidths[4];
-        
-        if (includeCategories) {
-            ctx.fillStyle = '#f59e0b';
-            ctx.fillText((s.primeCount || '-').toString(), x, y); x += colWidths[5];
-            ctx.fillStyle = '#6366f1';
-            ctx.fillText((s.compositeCount || '-').toString(), x, y); x += colWidths[6];
-            ctx.fillStyle = '#22c55e';
-            ctx.fillText((s.ppCount || '-').toString(), x, y); x += colWidths[7];
-            ctx.fillStyle = '#f59e0b';
-            ctx.fillText((s.pcCount || '-').toString(), x, y); x += colWidths[8];
-            ctx.fillStyle = '#6366f1';
-            ctx.fillText((s.cpCount || '-').toString(), x, y); x += colWidths[9];
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText((s.ccCount || '-').toString(), x, y);
-        }
+        cells.forEach((text, ci) => {
+            if (ci === 4) {
+                // Err% column is colored by magnitude
+                ctx.fillStyle = Math.abs(s.relError) < 1 ? '#22c55e' : Math.abs(s.relError) < 5 ? '#f59e0b' : '#ef4444';
+            } else {
+                ctx.fillStyle = cellColors[ci];
+            }
+            ctx.fillText(text, x, y);
+            x += colWidths[ci];
+        });
     });
     
     // Footer
@@ -24567,90 +25224,162 @@ function updateModLabelInputs() {
     return (_cnCache[n]=ZETA2*Math.exp(ld));
   }
   function gcdCN(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+
+  // ── Mode-independent exact counters ──────────────────────────────────
+  // The panel used to depend on state.residuesBySector, which only exists
+  // after computeExact() runs. In Formula mode (and Hybrid at N>3000) the
+  // page takes the fast path and never enumerates, so the panel fell back
+  // to a slow gcd-per-pair walk capped at m=1500. These counters replace
+  // that: a smallest-prime-factor sieve + per-ring strike-out gives the
+  // SAME counts as enumeration, in a fraction of the time, so the panel can
+  // run over the full m-range in every mode.
+  var _spf=null, _spfLim=0;
+  function _ensureSpf(lim){
+    lim=Math.max(lim|0,1024);
+    if(_spf && _spfLim>=lim) return;
+    lim=Math.max(lim, _spfLim*2);
+    var s=new Int32Array(lim+1);
+    for(var i=2;i<=lim;i++){
+      if(s[i]===0){ for(var j=i;j<=lim;j+=i){ if(s[j]===0) s[j]=i; } }
+    }
+    _spf=s; _spfLim=lim;
+  }
+  // Distinct prime factors of x appended to out[] (out.length reset by caller).
+  function _pfInto(x,out){ while(x>1){ var p=_spf[x]; out.push(p); do{ x=(x/p)|0; }while(x%p===0); } }
+
+  // Pair budget: the only cap in the panel. Measured cost is ~90M lattice
+  // points/sec, so 40M pairs is a worst case of roughly 0.4s and it only ever
+  // engages at N well past 20000. N=10000 at sector 2 is 8.3M pairs / ~76ms,
+  // i.e. the full range, uncapped, in every mode.
+  var CN_PAIR_BUDGET = 4e7;
+
+  // Read the range straight from the N boxes rather than from state.nMax.
+  // state.nMax is only written by computeAll(), so the panel used to sit on a
+  // stale 500 until Compute was re-run — which is exactly what made Formula
+  // mode at N=10000 look like it was still reporting the N=500 range.
+  function _cnNum(id, fallback){
+    var el=document.getElementById(id);
+    var v=el?parseInt(el.value,10):NaN;
+    return (isFinite(v)&&v>0)?v:fallback;
+  }
+  function cnRangeMax(){ return Math.max(2, _cnNum('nMax', (window.state&&state.nMax)||500)); }
+  function cnRangeMin(){ return Math.max(2, _cnNum('nMin', (window.state&&state.nMin)||1)); }
+  function _cnPlaying(){
+    return (window.cnDepthIsPlaying && window.cnDepthIsPlaying())
+        || (window.cnSpiralIsPlaying && window.cnSpiralIsPlaying());
+  }
+
+  // Exact sector counts over m = mMin..mMax, no enumeration required.
+  // Sector k is floor(m/r)=k, i.e. m/(k+1) < r <= m/k — the same convention
+  // as getSector(). For each ring we mark the r-window, strike multiples of
+  // the primes of m (=> gcd(r,m)=1 survivors), count, then keep striking the
+  // primes of m+1..m+n on the same window (=> the n-step lift survivors).
+  function cnSectorSieve(sector, n, mMin, mMax){
+    _ensureSpf(mMax+n+2);
+    var total=0, gcd1=0, lift=0;
+    var cap=Math.max(16, ((mMax/(sector*(sector+1)))|0)+8);
+    var mark=new Uint8Array(cap), pf=[];
+    for(var m=Math.max(2,mMin); m<=mMax; m++){
+      var lo=((m/(sector+1))|0)+1, hi=Math.min(m-1,(m/sector)|0);
+      if(hi<lo) continue;
+      var len=hi-lo+1;
+      total+=len;
+      if(mark.length<len) mark=new Uint8Array(len*2);
+      for(var t=0;t<len;t++) mark[t]=0;
+      pf.length=0; _pfInto(m,pf);
+      for(var a=0;a<pf.length;a++){
+        var p=pf[a], st=Math.ceil(lo/p)*p;
+        for(var q=st;q<=hi;q+=p) mark[q-lo]=1;
+      }
+      var g=0; for(var u=0;u<len;u++) if(!mark[u]) g++;
+      gcd1+=g;
+      if(n<=0){ lift+=g; continue; }
+      for(var j=1;j<=n;j++){
+        pf.length=0; _pfInto(m+j,pf);
+        for(var b=0;b<pf.length;b++){
+          var p2=pf[b], st2=Math.ceil(lo/p2)*p2;
+          for(var q2=st2;q2<=hi;q2+=p2) mark[q2-lo]=1;
+        }
+      }
+      var L=0; for(var v=0;v<len;v++) if(!mark[v]) L++;
+      lift+=L;
+    }
+    return {total:total,gcd1:gcd1,lift:lift};
+  }
+
+  // Same technique for the full-ring ("All sectors") scope: r = 0..m-1 over
+  // m = sMin..sMax, with the lift truncated at sMax exactly as before.
+  function cnRangeSieve(sMin,sMax,n){
+    _ensureSpf(sMax+n+2);
+    var total=0,gcd1=0,lift=0;
+    var mark=new Uint8Array(sMax+2), pf=[];
+    for(var m=Math.max(1,sMin); m<=sMax; m++){
+      var len=m;
+      total+=len;
+      for(var t=0;t<len;t++) mark[t]=0;
+      pf.length=0; if(m>1) _pfInto(m,pf);
+      for(var a=0;a<pf.length;a++){ var p=pf[a]; for(var q=0;q<len;q+=p) mark[q]=1; }
+      var g=0; for(var u=0;u<len;u++) if(!mark[u]) g++;
+      gcd1+=g;
+      if(n<=0){ lift+=g; continue; }
+      if(m+n>sMax) continue;            // block runs off the range: no lift
+      for(var j=1;j<=n;j++){
+        pf.length=0; _pfInto(m+j,pf);
+        for(var b=0;b<pf.length;b++){ var p2=pf[b]; for(var q2=0;q2<len;q2+=p2) mark[q2]=1; }
+      }
+      for(var v=0;v<len;v++) if(!mark[v]) lift++;
+    }
+    return {total:total,gcd1:gcd1,lift:lift};
+  }
   // Counts over rings m=sMin..sMax, r=0..m-1 (triangle population, r=0 ring included).
   // This is the "All sectors" scope — sectorMin/sectorMax here are just an
   // m-range boundary (as noted above), not the value-based Sector concept.
   var _memo={};
   function cnCountsRange(sMin,sMax,n){
     var key='r|'+sMin+'|'+sMax+'|'+n, hit=_memo[key]; if(hit) return hit;
-    var total=0,gcd1=0,lift=0;
-    for(var m=Math.max(1,sMin);m<=sMax;m++){
-      for(var r=0;r<m;r++){
-        total++;
-        if(gcdCN(r,m)!==1) continue;
-        gcd1++;
-        var ok=true;
-        for(var j=1;j<=n;j++){ var mj=m+j; if(mj>sMax){ok=false;break;} if(gcdCN(r,mj)!==1){ok=false;break;} }
-        if(ok) lift++;
-      }
-    }
-    var res={total:total,gcd1:gcd1,lift:lift};
-    var keys=Object.keys(_memo); if(keys.length>64) delete _memo[keys[0]];
+    var res=cnRangeSieve(sMin,sMax,n);
+    var keys=Object.keys(_memo); if(keys.length>256) delete _memo[keys[0]];
     _memo[key]=res;
     return res;
   }
-  // "This sector" scope — the real value-based Sector S_k = (1/(k+1), 1/k],
+  // "This sector" scope — the value-based Sector S_k = (1/(k+1), 1/k],
   // matching the "Sector:" dropdown used everywhere else on the page.
-  // gcd1 comes straight from state.residuesBySector (already coprime-filtered,
-  // so it's both cheaper and more accurate than re-deriving it). total counts
-  // every r/m pair (any gcd) whose value falls in the sector, m=1..nMax.
+  // ONE code path for every mode. It used to branch on state.residuesBySector,
+  // which is why the panel behaved differently in Exact vs Formula/Hybrid:
+  // Formula never enumerates, so the branch fell through to a slow capped
+  // walk. cnSectorSieve() produces the identical integer counts enumeration
+  // would give (verified against brute force), so the branch is gone and the
+  // reading no longer depends on the mode, on Compute having been run, or on
+  // the sector lying inside [sectorMin, sectorMax].
+  var _cnLast = null;
   function cnCountsSector(sector,n){
-    var nMax = (window.state && state.nMax) || 500;
-    var res_ = (window.state && state.residuesBySector && state.residuesBySector[sector]) || [];
-    var haveRes = res_.length > 0;
-    // The 'R'/'E' flag is part of the cache key on purpose: without it, a
-    // lookup made before computeAll() had filled residuesBySector cached
-    // gcd1=0 permanently, and the panel then reported 0/total at every n.
-    var key='s|'+sector+'|'+nMax+'|'+n+'|'+(haveRes?'R':'E'), hit=_memo[key];
-    if(hit) return hit;
+    var mMax = cnRangeMax(), mMin = cnRangeMin();
+    // The sector-k triangle holds about m^2 / (2k(k+1)) pairs. Only cap if
+    // that exceeds the budget; realistic N never does.
+    var est = (mMax*mMax)/(2*sector*(sector+1));
+    var capM = mMax;
+    if(est > CN_PAIR_BUDGET){
+      capM = Math.max(64, Math.floor(Math.sqrt(2*CN_PAIR_BUDGET*sector*(sector+1))));
+      est = CN_PAIR_BUDGET;
+    }
+    var key='s|'+sector+'|'+mMin+'|'+capM+'|'+n, hit=_memo[key];
+    if(hit){ _cnLast=hit; return hit; }
 
-    // Analytic population of the sector triangle: for each m, r ranges over
-    // (m/(sector+1), m/sector]. Independent of the page's enumeration.
-    var total=0;
-    for(var m=1;m<=nMax;m++){
-      var rMin=Math.floor(m/(sector+1))+1, rMax=Math.min(m-1,Math.floor(m/sector));
-      if(rMax>=rMin) total += (rMax-rMin+1);
+    // Only guard the case that would actually drop frames: a transport is
+    // running AND this (sector, n) has never been counted AND the count is big
+    // enough to be felt. Hold the previous reading and flag it rather than
+    // quietly counting over a different range; the settled value lands as soon
+    // as the transport stops.
+    if(_cnPlaying() && est > 4e6 && _cnLast){
+      return {total:_cnLast.total, gcd1:_cnLast.gcd1, lift:_cnLast.lift,
+              capM:_cnLast.capM, mMin:_cnLast.mMin, mMax:_cnLast.mMax, pending:true};
     }
 
-    var gcd1=0, lift=0, derived=false, capM=nMax;
-    if(haveRes){
-      gcd1 = res_.length;
-      for(var i=0;i<res_.length;i++){
-        var f=res_[i], ok=true;
-        for(var j=1;j<=n;j++){ if(gcdCN(f.r,f.m+j)!==1){ok=false;break;} }
-        if(ok) lift++;
-      }
-    } else {
-      // state.residuesBySector is empty — Compute hasn't been run yet, or the
-      // page is in a mode (e.g. 'formula') that takes the fast path and never
-      // enumerates. Walk the sector's own (r,m) triangle instead of reporting
-      // a false 0. This reproduces the analytic total exactly.
-      derived=true;
-      // The sector-2 triangle is ~nMax^2/12 pairs, so cap the walk to keep
-      // every redraw instant while a transport is animating; recompute the
-      // total over the same capped range so the ratios stay consistent.
-      capM = Math.min(nMax, 1500);
-      if(capM < nMax){
-        total = 0;
-        for(var mc=1;mc<=capM;mc++){
-          var cLo=Math.floor(mc/(sector+1))+1, cHi=Math.min(mc-1,Math.floor(mc/sector));
-          if(cHi>=cLo) total += (cHi-cLo+1);
-        }
-      }
-      for(var m2=1;m2<=capM;m2++){
-        var a2=Math.floor(m2/(sector+1))+1, b2=Math.min(m2-1,Math.floor(m2/sector));
-        for(var r2=a2;r2<=b2;r2++){
-          if(gcdCN(r2,m2)!==1) continue;
-          gcd1++;
-          var ok2=true;
-          for(var j2=1;j2<=n;j2++){ if(gcdCN(r2,m2+j2)!==1){ok2=false;break;} }
-          if(ok2) lift++;
-        }
-      }
-    }
-    var out={total:total,gcd1:gcd1,lift:lift,derived:derived,capM:capM};
-    var keys=Object.keys(_memo); if(keys.length>64) delete _memo[keys[0]];
-    _memo[key]=out;
+    var s = cnSectorSieve(sector, n, mMin, capM);
+    var out = {total:s.total, gcd1:s.gcd1, lift:s.lift,
+               capM:capM, mMin:mMin, mMax:mMax, pending:false};
+    var keys=Object.keys(_memo); if(keys.length>256) delete _memo[keys[0]];
+    _memo[key]=out; _cnLast=out;
     return out;
   }
   function pct(a,b){return b?((a/b*100).toFixed(2)):'0.00';}
@@ -24666,19 +25395,24 @@ function updateModLabelInputs() {
       var vsEl=document.getElementById('viewSector');
       var sector=Math.max(1,parseInt(vsEl&&vsEl.value,10)||2);
       c=cnCountsSector(sector,n);
-      rangeNote='Sector '+sector+' only \u00b7 m=1\u2026'+((window.state&&state.nMax)||500)+' \u00b7 finite-range counts'
-              + (c.derived ? ' \u00b7 derived directly (Compute not run)'
-                             + (c.capM<((window.state&&state.nMax)||500) ? ' \u00b7 capped at m='+c.capM : '') : '');
+      rangeNote='Sector '+sector+' \u00b7 m='+c.mMin+'\u2026'+c.capM+' \u00b7 exact lattice counts'
+              + (c.capM<c.mMax ? ' \u00b7 capped from m='+c.mMax+' for speed' : ' \u00b7 full range')
+              + (c.pending ? ' \u00b7 holding last value while animating' : '');
     } else {
       var sMinEl=document.getElementById('sectorMin');
       var sMaxEl=document.getElementById('sectorMax');
       var sMin=Math.max(1,parseInt(sMinEl&&sMinEl.value,10)||1);
       var sMax=Math.max(sMin,parseInt(sMaxEl&&sMaxEl.value,10)||275);
-      // Full range can be large — cap the live count to a reasonable window so
-      // this stays instant on every redraw; note the cap rather than silently truncating.
-      var CAP=400, sMaxUsed=Math.min(sMax, sMin+CAP);
+      // Ring scope holds ~ (sMax^2 - sMin^2)/2 pairs — same single budget.
+      // The old fixed CAP=400 was a limit of the gcd-per-pair walk, not of the
+      // data; the sieve clears several thousand rings well inside a frame.
+      var sMaxUsed=sMax;
+      if((sMax*sMax - sMin*sMin)/2 > CN_PAIR_BUDGET){
+        sMaxUsed=Math.max(sMin+1, Math.floor(Math.sqrt(2*CN_PAIR_BUDGET+sMin*sMin)));
+      }
       c=cnCountsRange(sMin,sMaxUsed,n);
-      rangeNote = 'All sectors \u00b7 m='+sMin+'\u2026'+sMaxUsed+(sMaxUsed<sMax?' (capped from '+sMax+')':'')+' shown \u00b7 finite-range counts';
+      rangeNote = 'All sectors \u00b7 m='+sMin+'\u2026'+sMaxUsed+' \u00b7 exact lattice counts'
+                + (sMaxUsed<sMax?' \u00b7 capped from '+sMax+' for speed':' \u00b7 full range');
     }
     var Cn=getCn(n), Dn=Cn/ZETA2;
     setTxt('cnFormulaN', n);
@@ -24700,6 +25434,7 @@ function updateModLabelInputs() {
     setTxt('cnRangeNote', rangeNote);
   }
   window.cnUpdatePanel = cnUpdatePanel;
+  window.cnGetCn = getCn;   // used by the ring's 'Wedges x C(n) lift' shading
   // ── Prime helpers for the spiral ──────────────────────────────────────
   var _spPrimeCache=[2];
   function _spIsPrime(k){ if(k<2) return false; for(var i=2;i*i<=k;i++){ if(k%i===0) return false; } return true; }
@@ -24866,9 +25601,13 @@ function updateModLabelInputs() {
     if(_cnDepthId){ clearInterval(_cnDepthId); _cnDepthId=null; }
     if(restore){
       var nEl=document.getElementById('cnDepthN');
-      if(nEl){ nEl.value=_cnDepthTarget; cnUpdatePanel(); _cnSpiralSyncLock(); _cnRedraw(); }
+      if(nEl){ nEl.value=_cnDepthTarget; _cnSpiralSyncLock(); _cnRedraw(); }
     }
     _cnBtnState('cnPlayBtn',false);
+    // The panel ran on the reduced live budget while playing. Now that the
+    // transport is idle, recompute at the full budget so the settled reading
+    // is the full-range one.
+    setTimeout(function(){ try{ cnUpdatePanel(); }catch(e){} }, 0);
   }
   function _cnDepthStart(){
     var nEl=document.getElementById('cnDepthN'); if(!nEl) return;
@@ -24963,10 +25702,216 @@ function updateModLabelInputs() {
   var _prevComputeAll = window.computeAll;
   window.computeAll = function(){
     var r = (typeof _prevComputeAll==='function') ? _prevComputeAll.apply(this, arguments) : undefined;
-    try{ cnUpdatePanel(); }catch(e){}
+    // computeAll is async: refreshing synchronously read the *old* state (and
+    // in Formula mode, an empty residuesBySector). Chain on the promise so the
+    // panel reflects the run that just finished, in every mode.
+    if(r && typeof r.then==='function'){ r.then(function(){ try{ cnUpdatePanel(); }catch(e){} }); }
+    else { try{ cnUpdatePanel(); }catch(e){} }
     return r;
   };
+  // Live-track the range boxes. These only had onchange="computeAll()", so in
+  // Formula mode the panel had no reason to refresh until a full recompute
+  // landed. Now typing a new N updates the C(n) counts immediately.
+  ['nMax','nMin','sectorMin','sectorMax'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('input', function(){ try{ cnUpdatePanel(); }catch(e){} });
+  });
   setTimeout(cnUpdatePanel, 400);
+})();
+</script>
+<script>
+// Sector Fill, "over points" pass. Installed as the outermost wrapper so it
+// paints after everything else when "Under points" is unchecked — useful in
+// Exact mode where you want the analytic partition as a translucent key laid
+// over the real cloud rather than behind it.
+(function(){
+  var _inner = window.drawMainRing;
+  window.drawMainRing = function(){
+    var r = (typeof _inner==='function') ? _inner.apply(this, arguments) : undefined;
+    try{
+      var mode = document.getElementById('sectorFillMode');
+      var under = document.getElementById('sectorFillUnderPoints');
+      if(mode && mode.value !== 'off' && under && !under.checked){
+        var c = document.getElementById('mainRing');
+        if(c){
+          var ctx=c.getContext('2d'), W=c.width, H=c.height;
+          drawSectorFill(ctx, W/2, H/2, Math.min(W,H)/2-35, mode.value);
+        }
+      }
+    }catch(e){ console.warn('sector fill overlay', e); }
+    return r;
+  };
+})();
+</script>
+<script>
+// ══ SECTOR ROW INSPECTOR ════════════════════════════════════════════════════
+// A modal that pairs a per-sector detail card with a scrollable list of EVERY
+// sector, so the 200-row page limit on the main table stops being a wall. The
+// list tracks playback: whichever sector is sounding gets highlighted and
+// scrolled into view, which is what makes it usable as a "watch it play"
+// readout rather than a static table.
+(function(){
+  var CEILING = 20000;       // list rows; beyond this, use the filter box
+  var _sel = null;           // sector currently shown in the detail card
+  var _playing = null;       // sector currently sounding
+  var _built = false;
+
+  function el(id){ return document.getElementById(id); }
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  function build(){
+    if(_built) return;
+    var d=document.createElement('div');
+    d.id='sectorInspector';
+    d.style.cssText='display:none;position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,0.82);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:16px;';
+    d.innerHTML =
+      '<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;max-width:1100px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);">'
+      + '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #334155;flex-wrap:wrap;">'
+      +   '<strong style="color:#a78bfa;font-size:14px;">Sector Row Inspector</strong>'
+      +   '<span id="siPlayFlag" style="font-size:11px;color:#22c55e;font-family:monospace;"></span>'
+      +   '<span style="flex:1;"></span>'
+      +   '<label style="font-size:11px;color:#94a3b8;"><input type="checkbox" id="siFollow" checked> Follow playback</label>'
+      +   '<input id="siFilter" placeholder="jump to sector n" style="width:130px;padding:4px 8px;background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;font-size:11px;">'
+      +   '<button onclick="closeSectorInspector()" style="background:#ef4444;border:none;border-radius:4px;color:#fff;padding:4px 12px;cursor:pointer;font-size:12px;">Close</button>'
+      + '</div>'
+      + '<div id="siDetail" style="padding:12px 16px;border-bottom:1px solid #334155;font-size:12px;color:#e2e8f0;"></div>'
+      + '<div id="siListWrap" style="overflow:auto;flex:1;padding:0 16px 16px;position:relative;">'
+      +   '<table id="siTable" style="width:100%;border-collapse:collapse;font-size:11px;"></table>'
+      + '</div>'
+      + '</div>';
+    document.body.appendChild(d);
+    d.addEventListener('click', function(e){ if(e.target===d) closeSectorInspector(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && d.style.display!=='none') closeSectorInspector(); });
+    el('siFilter').addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ var v=parseInt(this.value,10); if(isFinite(v)) select(v, true); }
+    });
+    // Delegated once — paint() replaces innerHTML, not the <table> itself, so
+    // binding here avoids stacking a new listener on every open.
+    el('siTable').addEventListener('click', function(e){
+      var tr=e.target.closest('tr[data-n]'); if(tr) select(+tr.getAttribute('data-n'), false);
+    });
+    _built=true;
+  }
+
+  function sectorRec(n){
+    for(var i=0;i<state.sectors.length;i++) if(state.sectors[i].n===n) return state.sectors[i];
+    return null;
+  }
+
+  function detailHTML(n){
+    var s=sectorRec(n);
+    if(!s) return '<span style="color:#f59e0b;">Sector '+esc(n)+' is outside the computed range.</span>';
+    var N=state.nMax||500;
+    var res=(state.residuesBySector[n]||[]);
+    var width=1/(n*(n+1));                       // |S_n| as a fraction of the unit interval
+    var nStar=(typeof nStarSector==='function')?nStarSector(N):null;
+    var Cn=(window.cnGetCn&&window.cnGetDepthN)?window.cnGetCn(window.cnGetDepthN()):null;
+    function cell(lbl,val,color){
+      return '<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px 10px;min-width:120px;">'
+           + '<div style="color:#64748b;font-size:9px;text-transform:uppercase;letter-spacing:.04em;">'+lbl+'</div>'
+           + '<div style="font-family:monospace;font-size:13px;font-weight:600;color:'+(color||'#e2e8f0')+';margin-top:2px;">'+val+'</div></div>';
+    }
+    var errTxt = (s.relError!==null&&s.relError!==undefined)? s.relError.toFixed(4)+'%' : '-';
+    var errCol = (s.relError===null||s.relError===undefined)?'#64748b':(Math.abs(s.relError)>10?'#f87171':'#4ade80');
+    var resid  = (s.exact!==null&&s.exact!==undefined&&s.predicted!=null)?(s.exact-s.predicted):null;
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;">'
+      + cell('Sector','S'+n,'#a78bfa')
+      + cell('Interval','(1/'+(n+1)+', 1/'+n+']')
+      + cell('Width 1/(n(n+1))',width.toExponential(4))
+      + cell('Share of turn',(width*100).toFixed(4)+'%')
+      + cell('Exact', s.exact!=null?s.exact.toLocaleString():'-','#93c5fd')
+      + cell('Predicted', s.predicted!=null?s.predicted.toFixed(4):'-')
+      + cell('Residual exact\u2212pred', resid!=null?resid.toFixed(4):'-', resid!=null?(resid>0?'#4ade80':'#f87171'):'#64748b')
+      + cell('Rel error', errTxt, errCol)
+      + cell('P(m) prime denom', s.primeCount!=null?s.primeCount.toLocaleString():'-','#f59e0b')
+      + cell('C(m) comp denom', (s.exactCompositeCount!=null?s.exactCompositeCount:(s.exact!=null&&s.primeCount!=null?s.exact-s.primeCount:null))?.toLocaleString?.() || '-','#818cf8')
+      + cell('Enumerated pts', res.length?res.length.toLocaleString():'\u2014 (formula)')
+      + (nStar!=null?cell('vs n*='+nStar.toFixed(1), n>nStar?'past \u2014 no flips':'before \u2014 flips possible', n>nStar?'#22c55e':'#fbbf24'):'')
+      + (Cn!=null?cell('C(n) at depth '+window.cnGetDepthN(), Cn.toFixed(6),'#c8a84a'):'')
+      + '</div>'
+      + '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">'
+      +   '<button onclick="showSectorDataDetail('+n+')" style="padding:4px 10px;font-size:11px;background:#334155;border:none;border-radius:4px;color:#e2e8f0;cursor:pointer;">Show on ring + detail panel</button>'
+      +   (res.length?'<button onclick="playSectorAudio('+n+')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:#fff;cursor:pointer;">\u25b6 Play this sector</button>':'')
+      + '</div>';
+  }
+
+  function listHTML(){
+    var rows=state.sectors, cap=Math.min(rows.length, CEILING);
+    var h='<thead><tr style="position:sticky;top:0;background:#1e293b;z-index:1;">'
+        + '<th style="text-align:left;padding:6px;color:#94a3b8;">n</th>'
+        + '<th style="text-align:left;padding:6px;color:#94a3b8;">Interval</th>'
+        + '<th style="text-align:right;padding:6px;color:#94a3b8;">Exact</th>'
+        + '<th style="text-align:right;padding:6px;color:#94a3b8;">Pred</th>'
+        + '<th style="text-align:right;padding:6px;color:#94a3b8;">Err%</th>'
+        + '<th style="text-align:right;padding:6px;color:#94a3b8;">P(m)</th>'
+        + '</tr></thead><tbody>';
+    for(var i=0;i<cap;i++){
+      var s=rows[i];
+      var err=(s.relError!=null)?s.relError.toFixed(3)+'%':'-';
+      var ec=(s.relError==null)?'#64748b':(Math.abs(s.relError)>10?'#f87171':'#4ade80');
+      h+='<tr id="siRow'+s.n+'" data-n="'+s.n+'" style="cursor:pointer;border-bottom:1px solid #1e293b;">'
+        +'<td style="padding:5px 6px;font-weight:600;">'+s.n+'</td>'
+        +'<td style="padding:5px 6px;color:#94a3b8;">(1/'+(s.n+1)+', 1/'+s.n+']</td>'
+        +'<td style="padding:5px 6px;text-align:right;font-family:monospace;">'+(s.exact!=null?s.exact.toLocaleString():'-')+'</td>'
+        +'<td style="padding:5px 6px;text-align:right;font-family:monospace;color:#94a3b8;">'+(s.predicted!=null?s.predicted.toFixed(2):'-')+'</td>'
+        +'<td style="padding:5px 6px;text-align:right;font-family:monospace;color:'+ec+';">'+err+'</td>'
+        +'<td style="padding:5px 6px;text-align:right;font-family:monospace;color:#f59e0b;">'+(s.primeCount!=null?s.primeCount.toLocaleString():'-')+'</td>'
+        +'</tr>';
+    }
+    h+='</tbody>';
+    if(rows.length>cap) h+='<tfoot><tr><td colspan="6" style="padding:8px;color:#f59e0b;font-size:10px;text-align:center;">'
+      +(rows.length-cap).toLocaleString()+' more sectors not listed \u2014 use the jump box above</td></tr></tfoot>';
+    return h;
+  }
+
+  function paint(){
+    var t=el('siTable'); if(!t) return;
+    t.innerHTML=listHTML();   // listener lives on the <table>, bound once in build()
+    mark();
+  }
+
+  function mark(){
+    var wrap=el('siListWrap'); if(!wrap) return;
+    var all=wrap.querySelectorAll('tr[data-n]');
+    for(var i=0;i<all.length;i++){
+      var n=+all[i].getAttribute('data-n');
+      all[i].style.background = (n===_playing) ? 'rgba(34,197,94,0.22)'
+                              : (n===_sel)     ? 'rgba(139,92,246,0.18)' : '';
+      all[i].style.boxShadow  = (n===_playing) ? 'inset 3px 0 0 #22c55e' : '';
+    }
+  }
+
+  function scrollTo(n){
+    var r=el('siRow'+n), wrap=el('siListWrap');
+    if(r&&wrap) wrap.scrollTop = r.offsetTop - wrap.clientHeight/2;
+  }
+
+  function select(n, doScroll){
+    _sel=n;
+    var d=el('siDetail'); if(d) d.innerHTML=detailHTML(n);
+    mark();
+    if(doScroll) scrollTo(n);
+  }
+
+  window.openSectorInspector=function(n){
+    if(!state.sectors || !state.sectors.length){ alert('Run Compute first — there are no sectors to inspect yet.'); return; }
+    build();
+    el('sectorInspector').style.display='flex';
+    paint();
+    select(n || (_sel!=null?_sel:state.sectors[0].n), true);
+  };
+  window.closeSectorInspector=function(){ var d=el('sectorInspector'); if(d) d.style.display='none'; };
+
+  // Called from the playback loop whenever the sounding sector changes.
+  window.sectorInspectorSetPlaying=function(n){
+    _playing=n;
+    var f=el('siPlayFlag'); if(f) f.textContent = (n!=null) ? ('\u266a playing S'+n) : '';
+    var d=el('sectorInspector');
+    if(!d || d.style.display==='none') return;
+    mark();
+    var follow=el('siFollow');
+    if(n!=null && follow && follow.checked){ scrollTo(n); select(n,false); }
+  };
 })();
 </script>
 </body>
