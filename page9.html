@@ -187,7 +187,7 @@ table.dt td.clickable:hover{background:rgba(200,168,74,.12);color:var(--gold);}
     Density of r surviving <em>two independent</em> blocks simultaneously — gcd(r, M₁+j)=1 for j=0,…,n₁ <em>and</em>
     gcd(r, M₂+j)=1 for j=0,…,n₂ — with M₁, M₂ independent random starting points. The k=1 case reduces
     exactly to C(n) from Page 1. This is the natural k-fold generalization of the block-coprime density,
-    and the correlation ratio ρ = C(n₁,n₂)/(C(n₁)·C(n₂)) measures exactly where the shared r breaks
+    and the correlation ratio ρ = D(n₁,n₂)/(D(n₁)·D(n₂)) measures exactly where the shared r breaks
     independence between the two blocks — the same question Page 5 asks for a single block.
   </div>
 </div>
@@ -225,7 +225,7 @@ table.dt td.clickable:hover{background:rgba(200,168,74,.12);color:var(--gold);}
       <div class="result-box"><div class="rlabel">C(n₁)</div><div class="rval" id="rC1">—</div></div>
       <div class="result-box"><div class="rlabel">C(n₂)</div><div class="rval" id="rC2">—</div></div>
       <div class="result-box"><div class="rlabel">C(n₁,n₂)</div><div class="rval" id="rC12">—</div></div>
-      <div class="result-box rho"><div class="rlabel">ρ = C(n₁,n₂) / [C(n₁)·C(n₂)]</div><div class="rval" id="rRho">—</div></div>
+      <div class="result-box rho"><div class="rlabel">ρ = D(n₁,n₂) / [D(n₁)·D(n₂)]</div><div class="rval" id="rRho">—</div></div>
     </div>
     <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 (~148,933 primes) — reliable to ~7–8 dp. The product cost doesn't depend on n₁/n₂ at all (always the same prime list), so the slider range is 0–2000, not an artificial cap.</div>
 
@@ -639,7 +639,9 @@ function onSlide(){
   const C1 = computeC([n1], PRIMES_FULL);
   const C2 = computeC([n2], PRIMES_FULL);
   const C12 = computeC([n1,n2], PRIMES_FULL);
-  const rho = C12/(C1*C2);
+  // rho is the density-level correlation D(n1,n2)/[D(n1)D(n2)]; the zeta(2)
+  // carried by each C cancels to a single factor, and equals prod_p rho_p.
+  const rho = ZETA2*C12/(C1*C2);
   document.getElementById('rC1').textContent = fmt(C1);
   document.getElementById('rC2').textContent = fmt(C2);
   document.getElementById('rC12').textContent = fmt(C12);
@@ -792,7 +794,7 @@ function computeHeatGrid(){
       const C1 = computeC([n1],PRIMES_FAST);
       const C2 = computeC([n2],PRIMES_FAST);
       const C12 = computeC([n1,n2],PRIMES_FAST);
-      const rho = C12/(C1*C2);
+      const rho = ZETA2*C12/(C1*C2);
       grid[a*N+b] = rho;
       gridMin = Math.min(gridMin, rho);
       gridMax = Math.max(gridMax, rho);

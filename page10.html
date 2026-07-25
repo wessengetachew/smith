@@ -197,7 +197,7 @@ select.wgselect:focus{border-color:var(--violet);}
     Page 9 built the k=2 case. The same derivation — independence of the M_i across blocks, CRT-independence
     across primes — carries through for <em>any</em> k with zero modification, and it's exact: verified below
     by direct combinatorial enumeration mod small primes, not just the asymptotic Euler product. The one new
-    phenomenon at k≥3 is that the correlation ratio ρ_k = C(n₁,…,n_k)/∏ᵢC(nᵢ) doesn't just exceed 1 — it grows
+    phenomenon at k≥3 is that the correlation ratio ρ_k = D(n₁,…,n_k)/∏ᵢD(nᵢ) doesn't just exceed 1 — it grows
     geometrically in k, for a clean structural reason (see the derivation card).
   </div>
 </div>
@@ -246,7 +246,7 @@ select.wgselect:focus{border-color:var(--violet);}
     <div class="result-grid">
       <div class="result-box"><div class="rlabel">C(n₁,…,n_k)</div><div class="rval" id="rCk">—</div></div>
       <div class="result-box"><div class="rlabel">∏ᵢ C(nᵢ)</div><div class="rval" id="rProd">—</div></div>
-      <div class="result-box rho"><div class="rlabel">ρ_k = C(n₁,…,n_k) / ∏ᵢC(nᵢ)</div><div class="rval" id="rRhoK">—</div></div>
+      <div class="result-box rho"><div class="rlabel">ρ_k = D(n₁,…,n_k) / ∏ᵢD(nᵢ)</div><div class="rval" id="rRhoK">—</div></div>
     </div>
     <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 — reliable to ~7–8 dp.</div>
 
@@ -364,7 +364,7 @@ select.wgselect:focus{border-color:var(--violet);}
       The naive independence model (∏C(nᵢ)) requires every one of the k blocks to individually survive — a
       probability that compounds down geometrically. The true event only requires that not all k blocks hit
       the same prime at once — a much weaker requirement that saturates near 1−1/p instead of vanishing.
-      Since this happens at essentially every prime simultaneously, the ratio ρ_k = C(n,…,n)/C(n)^k is a product
+      Since this happens at essentially every prime simultaneously, the ratio ρ_k = D(n,…,n)/D(n)^k is a product
       of per-prime terms that are each individually diverging, so ρ_k itself grows without bound as k→∞, for
       <em>any</em> fixed n ≥ 0.
     </div>
@@ -488,7 +488,9 @@ function recompute(){
   const Ck = computeC(ns, PRIMES_FULL);
   let prodC = 1;
   const Ci = ns.map(function(n){ const c = computeC([n],PRIMES_FULL); prodC*=c; return c; });
-  const rho = Ck/prodC;
+  // Density-level correlation D(n1..nk)/prod_i D(ni); each C carries one
+  // zeta(2), leaving zeta(2)^(k-1). Equals prod_p rho_p, and rho_1 = 1.
+  const rho = Math.pow(ZETA2, ns.length-1)*Ck/prodC;
   document.getElementById('rCk').textContent = fmt(Ck);
   document.getElementById('rProd').textContent = fmt(prodC);
   document.getElementById('rRhoK').textContent = rho>1e6 ? fmt(rho) : fmtF(rho);
@@ -973,7 +975,7 @@ function computeGrowthData(){
     for(let k=1;k<=KMAX;k++){
       const ns = new Array(k).fill(n);
       const Ck = computeC(ns,PRIMES_FULL);
-      vals.push(Ck/Math.pow(Cn,k));
+      vals.push(Math.pow(ZETA2,k-1)*Ck/Math.pow(Cn,k));
     }
     return {n:n, vals:vals};
   });
