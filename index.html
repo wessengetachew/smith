@@ -6172,7 +6172,7 @@ function heroToggleTopBars(){
   </div>
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
     <span style="color:rgba(61,200,184,.6);">Theory:</span>
-    Each ring M holds the φ(M) coprime residues r mod M placed at angle 2πr/M. As M grows the rings fill out — the limiting density is C(n). Prime rings (teal) show the cleanest structure.
+    Each ring M holds the φ(M) coprime residues r mod M placed at angle 2πr/M. As M grows the rings fill out — the limiting density is D(n) = C(n)/ζ(2). Prime rings (teal) show the cleanest structure.
   </div>
 </div>
 
@@ -6728,7 +6728,7 @@ function heroToggleTopBars(){
       <strong>Ring structure:</strong> Each ring M shows M residue classes r ∈ {1,…,M} at angles 2πr/M.
       <span style="color:var(--gold)">Gold dots</span> = block-coprime (gcd(r,M+j)=1 for all j=0…n).
       <span style="color:var(--teal)">Teal dots</span> = coprime to M only (gcd(r,M)=1 but fails later).
-      The density of gold dots across all rings converges to C(n).
+      The density of gold dots across all rings converges to D(n) = C(n)/ζ(2). The <em>conditional</em> density — gold among the coprime (gold+teal) dots — converges to C(n) = D(n)/D(0).
       <strong>Connection mode</strong> lets you trace structural patterns: <em>Same GCD</em> shows shared divisors across rings;
       <em>Gap-2</em> connects r to r+2 within each ring (twin prime analog);
       <em>Lift arcs</em> connect same fraction r/M across adjacent rings — the "lift survival" paths central to C(n).
@@ -7030,8 +7030,9 @@ function heroToggleTopBars(){
 
   <!-- Named constants table -->
   <div style="font-size:8px;color:var(--cream3);margin-bottom:10px;line-height:1.8;">
-    The Euler product structure of C(n) is the combinatorial bedrock of the Hardy–Littlewood prime k-tuple
-    conjectures. The following constants all live in the same family.
+    C(n) shares its exclusion count ν_p = min(n+1,p) with the Hardy–Littlewood local factors, but is a
+    distinct object in a different ambient dimension (see below). The constants collected here are the
+    natural points of comparison, not ingredients of C(n).
   </div>
   <div class="tscroll" style="max-height:none;border:none;">
     <table class="dt" id="hl-const-table">
@@ -7052,7 +7053,7 @@ function heroToggleTopBars(){
     $$f_p(n) = 1 - \frac{\min(n+1,p)}{p^2} \quad (\text{2D: counts pairs }(r,M)\in(\mathbb{Z}/p\mathbb{Z})^2)$$
     The HL singular series local factor for an admissible tuple $\mathcal{H}$ with $\nu_p=|\mathcal{H}\bmod p|$ is
     $$\frac{1-\nu_p/p}{(1-1/p)^k} \quad (\text{1D: counts residues in }\mathbb{Z}/p\mathbb{Z})$$
-    Both share the exclusion count $\nu_p = \min(n+1,p)$, but operate in different ambient dimensions. The
+    Both share the exclusion count $\nu_p = \min(n+1,p)$, but operate in different ambient dimensions — and the sharing is one-directional: the tuple {0,1,…,n} is <em>inadmissible</em> for n ≥ 1 (it covers every residue class mod p for p ≤ n+1), so the Hardy–Littlewood singular series attached to it vanishes identically. C(n) is non-zero precisely because the 2D local factor does not vanish where the 1D factor does. The
     <span style="color:var(--teal)">Block corr.</span> column shows the ratio $f_p(n)/(1-1/p)^{n+1}$ — always &gt; 1, diverging — 
     while the <span style="color:var(--lime)">C₂ local (1D)</span> column shows the actual twin prime factor $p(p-2)/(p-1)^2$, which is distinct.
   </div>
@@ -7362,13 +7363,15 @@ function mobius(n){if(n<=1)return n===1?1:0;let x=n,facs=0;for(const p of PRIMES
 // Higher-order terms ∑_{p>P}p⁻²ᵏ (k≥2) are negligible beyond 1.5M and are dropped.
 const _PZ2 = 0.4522474200410654985;                         // P(2) = ∑ₚ p⁻²
 const _TAIL2 = _PZ2 - (function(){ let s=0; for(const p of PRIMES) s+=1/(p*p); return s; })(); // ∑_{p>1500000} p⁻²
+const _PZ3 = 0.1747626392994435364;   // P(3) = ∑ₚ p⁻³
+const _TAIL3 = _PZ3 - (function(){ let s=0; for(const p of PRIMES) s+=1/(p*p*p); return s; })(); // ∑_{p>1500000} p⁻³
 function _cnTailLog(n){ return -(n+1)*_TAIL2; }
 
 const _cn={0:1}; // C(0) = 1 exactly by definition
 function getCn(n){
   if(n in _cn)return _cn[n];
   let ld=0;for(const p of PRIMES){const m=Math.min(n+1,p);ld+=Math.log(1-m/(p*p));}
-  ld+=_cnTailLog(n);                       // supply the p>200000 tail analytically
+  ld+=_cnTailLog(n);                       // supply the p>1500000 tail analytically
   return(_cn[n]=ZETA2*Math.exp(ld));
 }
 // Warm the C(n) cache WITHOUT blocking. The old version computed n=0..60
@@ -7638,6 +7641,10 @@ function computeC2(){
   if(_C2!==null)return _C2;
   let lg=0;
   for(const p of PRIMES){ if(p===2)continue; lg+=Math.log(p*(p-2)/((p-1)*(p-1))); }
+  // Analytic p>1.5M tail — the same treatment C(n) already gets. Without it C2
+  // is only good to ~2.9e-8 and 2*C2 prints a wrong 7th decimal (1.3203237 vs
+  // the correct 1.3203236). log(1-1/(p-1)^2) = -p^-2 - 2p^-3 + O(p^-4).
+  lg += -(_TAIL2 + 2*_TAIL3);
   return(_C2=Math.exp(lg));
 }
 computeC2();
@@ -8077,8 +8084,26 @@ function renderCanvas2DGrid(){
     // nb-rho removed from navbar
   }
 }
+// Exact enumeration when the lattice is small enough; Monte Carlo above that.
+// In the sampled regime the standard error is ~sqrt(d(1-d)/SAMPLES); do not
+// display more digits of this figure than that error supports.
+function estimateDensityExact(G,n){
+  let g=0;
+  for(let M=1;M<=G;M++)for(let r=1;r<=G;r++){
+    let ok=true;
+    for(let j=0;j<=n&&ok;j++)if(gcd(r,M+j)>1)ok=false;
+    if(ok)g++;
+  }
+  return g/(G*G);
+}
+function estimateDensityStdErr(G,n,d){
+  if(G*G<=250000)return 0;
+  const S=Math.min(20000, Math.max(10000, Math.round(400000/(G+1))));
+  return Math.sqrt(Math.max(d*(1-d),1e-9)/S);
+}
 function estimateDensity(G,n){
-  const SAMPLES=Math.min(1200, Math.max(400, Math.round(40000/(G+1))));
+  if(G*G<=250000)return estimateDensityExact(G,n);   // G ≤ 500: exact, no noise
+  const SAMPLES=Math.min(20000, Math.max(10000, Math.round(400000/(G+1))));
   let g=0;
   for(let i=0;i<SAMPLES;i++){
     const r=Math.floor(Math.random()*G)+1;
@@ -10255,7 +10280,7 @@ function _renderDD(rowN){
           ${n===1?`<div class="pd-note" style="margin-top:8px;">
             <strong>Relationship to Feller–Tornier (1933):</strong><br>
             D(1) = ∏<sub>p</sub>(1−2/p²) ≈ 0.3226 is the Feller–Tornier Euler product D<sub>FT</sub>.<br>
-            The classical constant C<sub>FT</sub> = ½(1 + D<sub>FT</sub>) ≈ <strong>0.6613</strong> counts integers whose squarefull part is a perfect square.<br>
+            The classical constant C<sub>FT</sub> = ½(1 + D<sub>FT</sub>) ≈ <strong>0.6613</strong> is the density of integers having an <em>even number of primes occurring to a power &gt; 1</em> (non-unitary prime divisors).<br>
             Our C(1) = ζ(2)·D<sub>FT</sub> ≈ <strong>0.5307</strong> is a different normalisation — the block-coprime density rescaled so C(0)=1.<br>
             Neither is "half" of the other; they share only the Euler product D<sub>FT</sub> as a common ingredient.
           </div>`:''}
@@ -11021,7 +11046,7 @@ function updateHLPanel(){
       {key:'C1',  sym:'C(1)≈0.5307', val:Cn1.toFixed(7),  formula:'ζ(2)·∏_p(1−2/p²)',         desc:'Feller–Tornier normalized; lift survival constant &nbsp;<a href="https://oeis.org/A065469" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065469 ↗</a>',              cls:''},
       {key:'D1',  sym:'D(1)≈0.3226', val:Dn1.toFixed(7),  formula:'∏_p(1−2/p²)',               desc:'Feller–Tornier Euler product D_FT &nbsp;<a href="https://oeis.org/A065474" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065474 ↗</a>',                              cls:'hl-sym-teal'},
       {key:'C2',  sym:'C₂≈0.6602',   val:C2.toFixed(7),   formula:'∏_{p≥3} p(p−2)/(p−1)²',    desc:'Twin prime constant — HL local factor at n=1, p≥3',              cls:'hl-sym-lime'},
-      {key:'twoC2',sym:'2C₂≈1.3203', val:(2*C2).toFixed(7),formula:'2·C₂',                    desc:'Goldbach background constant for generic even N',                cls:'hl-sym-violet'},
+      {key:'twoC2',sym:'2C₂≈1.3203', val:(2*C2).toFixed(7),formula:'2·C₂',                    desc:'Goldbach background constant — base case N = 2^k',                cls:'hl-sym-violet'},
       {key:'CFT', sym:'C_FT≈0.6613', val:((1+Dn1)/2).toFixed(7),formula:'½(1+D_FT)',           desc:'Classical Feller–Tornier constant (distinct from C(1)) &nbsp;<a href="https://oeis.org/A065493" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065493 ↗</a>',         cls:'hl-sym-coral'},
     ];
     tbody.innerHTML=rows.map(r=>`<tr class="${r.cls}" onclick="openHLInfo('${r.key}')" tabindex="0" role="button"
@@ -11551,7 +11576,7 @@ function getHLInfoHTML(key){
       color:'200,168,74',
       title:'Trivial Normalisation',
       formula:'C(0) = ζ(2) · D(0) = (π²/6) · (6/π²) = 1',
-      desc:`C(0) is the block-coprime density at block length 1 — just asking gcd(r,M)=1. D(0) = ∏_p(1−1/p²) = 6/π² is the classical coprime pair density, and multiplying by ζ(2) = π²/6 gives exactly 1. This is the normalisation choice that makes C(0)=1 the baseline.`,
+      desc:`C(0) is the block-coprime density at block length 1 — just asking gcd(r,M)=1. D(0) = ∏_p(1−1/p²) = 6/π² is the classical coprime pair density, and multiplying by ζ(2) = π²/6 gives exactly 1. Because D(0)=1/ζ(2), the normalisation is not arbitrary: C(n) = ζ(2)·D(n) = D(n)/D(0) for every n — the conditional probability that the whole block survives given gcd(r,M)=1. C(0)=1 is then a fact, not a choice.`,
       steps:[
         `<b>Step 1 — D(0):</b> local factor at each prime p is 1 − 1/p² (1 of p² pairs is forbidden: r≡0, M≡0 mod p).`,
         `<b>Step 2 — ζ(2):</b> Euler proved ∑1/n² = π²/6, and ∏_p(1−1/p²)⁻¹ = ζ(2) = π²/6 ≈ 1.6449341.`,
@@ -11566,7 +11591,7 @@ function getHLInfoHTML(key){
       color:'61,200,184',
       title:'Standard Coprime Pair Density',
       formula:'D(0) = ∏_p(1 − 1/p²) = 1/ζ(2) = 6/π²',
-      desc:`D(0) is the natural density of pairs (r,M) ∈ ℤ² with gcd(r,M)=1. At prime p, exactly 1 of p² pairs (r mod p, M mod p) has both r≡0 and M≡0 (mod p), so the local survival fraction is 1−1/p². The infinite product converges to 6/π² ≈ 0.6079 (Euler, 1737).`,
+      desc:`D(0) is the natural density of pairs (r,M) ∈ ℤ² with gcd(r,M)=1. At prime p, exactly 1 of p² pairs (r mod p, M mod p) has both r≡0 and M≡0 (mod p), so the local survival fraction is 1−1/p². The infinite product converges to 6/π² ≈ 0.6079. (The Euler product for ζ(2) is Euler, 1737; the coprime-pair <em>density</em> statement is classical — Dirichlet, 1849, with error term by Mertens, 1874.)`,
       steps:[
         `<b>Local factor at p:</b> 1 − 1/p² = (p²−1)/p². The forbidden pair is (r≡0, M≡0).`,
         `<b>Connection to ζ(2):</b> ∏_p(1−1/p²) = 1/ζ(2) since ζ(2) = ∏_p(1−1/p²)⁻¹.`,
@@ -11587,7 +11612,7 @@ function getHLInfoHTML(key){
         `<b>Saturated primes (p ≤ ${n+1}):</b> ${numSat(n)===0?'none yet':`p = ${PRIMES.filter(p=>p<=n+1).slice(0,8).join(', ')}${PRIMES.filter(p=>p<=n+1).length>8?', …':''}`}. At these primes min(n+1,p) = p, so the local factor = 1−1/p.`,
         `<b>Active primes (p > ${n+1}):</b> min(n+1,p) = ${n+1}, local factor = 1 − ${n+1}/p².`,
         `<b>D(${n}) = </b><span class="gold">${Dn.toFixed(7)}</span> &nbsp;·&nbsp; ζ(2) = π²/6 &nbsp;→&nbsp; <b>C(${n}) = </b><span class="gold">${Cn.toFixed(7)}</span>.`,
-        `<b>Asymptotics:</b> as n→∞, D(n)=C(n)/ζ(2) ∼ e<sup>−γ</sup>/ln(n+1) (Mertens' third theorem), hence C(n) ∼ ζ(2)·e<sup>−γ</sup>/ln(n+1) — not e<sup>−γ</sup>/ln(n+1) alone.`,
+        `<b>Asymptotics:</b> as n→∞, D(n)=C(n)/ζ(2) ∼ e<sup>−γ</sup>/ln(n+1) (Mertens' third theorem), hence C(n) ∼ ζ(2)·e<sup>−γ</sup>/ln(n+1) — not e<sup>−γ</sup>/ln(n+1) alone. <b>Convergence is very slow:</b> D(n)·ln(n+1)/e<sup>−γ</sup> is 0.690 at n=10, 0.823 at 10², 0.877 at 10³, 0.906 at 10⁴. The deficit is the unsaturated tail ∏<sub>p&gt;n+1</sub>(1−(n+1)/p²) ≈ exp(−1/ln(n+1)); folding it in gives D(n) ≈ e<sup>−γ</sup>·exp(−1/ln(n+1))/ln(n+1), accurate to ~1% rather than ~10%.`,
       ],
       tableFactory:()=>_hlPartialTable(p=>1-Math.min(n+1,p)/(p*p),2,16,true),
       tableTitle:`C(${n}) Euler product — partial products using current n`,
@@ -11632,14 +11657,14 @@ function getHLInfoHTML(key){
       color:'61,200,184',
       title:'Feller–Tornier Euler Product',
       formula:'D(1) = D_FT = ∏_p(1 − 2/p²)',
-      desc:`D(1) is the Feller–Tornier product — the probability that two integers are simultaneously coprime to two consecutive integers. It is also ∏_p((p²−2)/p²). Note p=2 contributes 1−2/4=1/2. This product converges absolutely since ∑2/p² < ∞.`,
+      desc:`D(1) is the Feller–Tornier Euler product — the density of pairs (r,M) for which the single integer r is coprime to <em>both</em> consecutive moduli M and M+1. It is also ∏_p((p²−2)/p²). Note p=2 contributes 1−2/4=1/2. This product converges absolutely since ∑2/p² < ∞.`,
       steps:[
         `<b>p=2:</b> 1 − 2/4 = <span class="teal">0.5000000</span>.`,
         `<b>p=3:</b> 1 − 2/9 ≈ <span class="teal">0.7777778</span>. Running: 0.5 × 0.7778 ≈ 0.3889.`,
         `<b>p=5:</b> 1 − 2/25 = <span class="teal">0.9200000</span>. Running ≈ 0.3578.`,
         `<b>Convergence:</b> product converges to D_FT ≈ <span class="gold">${Dn1.toFixed(7)}</span>.`,
         `<b>Relation to C₂:</b> D(1) uses factor (1−2/p²) while C₂ uses p(p−2)/(p−1)². Both "exclude 2 residues" but C₂ is 1D (prime counting) and D(1) is 2D (pair counting).`,
-        `<b>OEIS:</b> <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:inherit;opacity:.6;text-decoration:underline;">A065474 ↗</a> — decimal expansion of ∏_p(1−2/p²); also the density of squarefree n with n+1 squarefree (Tóth–Sándor 1989).`,
+        `<b>OEIS:</b> <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:inherit;opacity:.6;text-decoration:underline;">A065474 ↗</a> — decimal expansion of ∏_p(1−2/p²); also the density of squarefree n with n+1 squarefree (Carlitz 1932; error term Heath-Brown 1984). The same constant is the density of pairs with gcd(k(k+1),m)=1 (Tóth–Sándor 1989) — the closest published relative of the n=1 case here.`,
       ],
       tableFactory:()=>_hlPartialTable(p=>1-2/(p*p),2,16,false),
       tableTitle:'D(1) = ∏_p(1−2/p²) — partial products',
@@ -11668,7 +11693,7 @@ function getHLInfoHTML(key){
       color:'155,127,232',
       title:'Goldbach Background Constant',
       formula:'2C₂ · ∏_{p|N, p>2} (p−1)/(p−2) = S(N)',
-      desc:`2C₂ is the "background" singular series for Goldbach's conjecture. For a generic even N (not divisible by any odd prime), the Hardy–Littlewood prediction for the number of ways to write N=p+q (p≤q, both prime) uses S(N)=2C₂ as the base, with a correction factor for each odd prime dividing N.`,
+      desc:`2C₂ is the "background" singular series for Goldbach's conjecture. For an even N with no odd prime factor (i.e. N = 2^k) this is the whole singular series; every odd prime dividing N multiplies it by (p−1)/(p−2), so 2C₂ is the base case, not the typical value. The Hardy–Littlewood prediction for the number of ways to write N=p+q (p≤q, both prime) uses S(N)=2C₂ as the base, with a correction factor for each odd prime dividing N.`,
       steps:[
         `<b>Background:</b> For even N not divisible by any odd prime, S(N) = 2C₂ ≈ <span class="gold">${(2*C2).toFixed(6)}</span>.`,
         `<b>N-specific correction:</b> For each odd prime ℓ∣N, multiply by (ℓ−1)/(ℓ−2). Example: N=6 divisible by 3 → multiply by 2/1=2 → S(6)=2C₂·2≈${(4*C2).toFixed(4)}.`,
@@ -11685,7 +11710,7 @@ function getHLInfoHTML(key){
       formula:'C_FT = ½(1 + D_FT) = ½(1 + D(1))',
       desc:`The Feller–Tornier constant (1932) is the density of integers with an even number of distinct prime factors of multiplicity ≥ 2 (non-unitary prime divisors). It is NOT the same as C(1) (block-coprime density at n=1). The distinction: C_FT uses ½(1+∏_p(1−2/p²)) while C(1) = ζ(2)·∏_p(1−2/p²). The two constants share D(1) but combine it differently.`,
       steps:[
-        `<b>Feller–Tornier (1932):</b> density of integers with an even number of non-unitary prime divisors = ½(1 + D_FT) where D_FT = ∏<sub>p</sub>(1−2/p²). (Note: this is a half-sum of two products, not itself reducible to a single Euler product over a modified local factor.)`,
+        `<b>Feller–Tornier (1933):</b> density of integers with an even number of non-unitary prime divisors = ½(1 + D_FT) where D_FT = ∏<sub>p</sub>(1−2/p²). (Note: this is a half-sum of two products, not itself reducible to a single Euler product over a modified local factor.)`,
         `<b>D_FT = D(1) ≈ </b><span class="teal">${Dn1.toFixed(7)}</span>.`,
         `<b>C_FT = ½(1 + D(1)) = ½(1 + ${Dn1.toFixed(6)}) = </b><span class="gold">${((1+Dn1)/2).toFixed(7)}</span>.`,
         `<b>Compare:</b> C(1) = ζ(2)·D(1) = ${ZETA2.toFixed(5)}·${Dn1.toFixed(6)} ≈ <span class="gold">${Cn1.toFixed(7)}</span>. These are different constants using the same D(1).`,
@@ -12173,7 +12198,7 @@ function exportGridPNG(){
     'C(n) — Block-Coprime Grid  ·  G×G Lattice',
     `G = ${G}  ·  n = ${gridN}  ·  G² = ${(G*G).toLocaleString()} pts`);
   ty=H.drawFormula(ty,
-    `gcd(r,M)=1 for all j=0…${gridN}  ·  C(${gridN}) = ζ(2)·∏_p(1−min(n+1,p)/p²)  ·  density → 6/π² ≈ ${theoDens}`);
+    `gcd(r,M+j)=1 for all j=0…${gridN}  ·  C(${gridN}) = ζ(2)·∏_p(1−min(n+1,p)/p²)  ·  density → D(n) ≈ ${theoDens}`);
   ty=H.drawStatBoxes(ty,[
     {label:'Coprime  gcd=1', val:totalCop.toLocaleString(),          col:'rgba(61,200,184,.9)'},
     {label:'Non-coprime',    val:totalNon.toLocaleString(),           col:'rgba(224,80,96,.9)'},
@@ -12243,7 +12268,7 @@ function exportRingPNG(){
     'C(n) — Block-Coprime Rings  ·  Concentric Residue',
     `M = 2…${mMax}  ·  n = ${ringN}  ·  C(n) = ${Cn}`);
   ty=H.drawFormula(ty,
-    `Ring M: coprime residues r<M with gcd(r,M+j)=1 for j=0…${ringN}  ·  density → C(n) = ζ(2)·D(n)`,
+    `Ring M: coprime residues r<M with gcd(r,M+j)=1 for j=0…${ringN}  ·  density → D(n) = C(n)/ζ(2)   (conditional, gold|coprime → C(n))`,
     'rgba(200,168,74,.90)');
   ty=H.drawStatBoxes(ty,[
     {label:`Rings M=2…${mMax}`,val:`${mMax-1}`,                     col:'rgba(61,200,184,.9)'},
@@ -14126,13 +14151,13 @@ const STEPS=[
     $$D(n)=\\prod_p\\left(1-\\frac{\\min(n+1,p)}{p^2}\\right).$$
     The product converges absolutely for every $n\\ge 0$, and $D(0)=1/\\zeta(2)=6/\\pi^2$ recovers the standard coprime-pair density.</p>`},
   {t:'Verify Small Cases',b:`<p><strong>$n=0$:</strong> $\\min(1,p)=1$ always, so $D(0)=\\prod_p(1-1/p^2)=1/\\zeta(2)=6/\\pi^2\\approx0.6079$.<br>
-    <strong>$n=1$:</strong> $\\min(2,p)=2$ for all $p\\ge2$, giving $D(1)=\\prod_p\\bigl(1-2/p^2\\bigr)\\approx0.3226$. This is the <em>Feller–Tornier product</em>; the classical Feller–Tornier constant (Feller &amp; Tornier, 1932) is $C_{\\rm FT}=\\tfrac{1+D(1)}{2}\\approx0.6613$. The rescaled value $C(1)=\\zeta(2)\\cdot D(1)\\approx0.5307$ is the central constant in the lift survival analysis.</p>`},
+    <strong>$n=1$:</strong> $\\min(2,p)=2$ for all $p\\ge2$, giving $D(1)=\\prod_p\\bigl(1-2/p^2\\bigr)\\approx0.3226$. This is the <em>Feller–Tornier product</em>; the classical Feller–Tornier constant (Feller &amp; Tornier, Math. Ann. 107, 1933) is $C_{\\rm FT}=\\tfrac{1+D(1)}{2}\\approx0.6613$. The rescaled value $C(1)=\\zeta(2)\\cdot D(1)\\approx0.5307$ is the central constant in the lift survival analysis.</p>`},
   {t:'The C(n) Rescaling',b:`<p>Set $C(n)=\\zeta(2)\\cdot D(n)$. Then $C(0)=1$ (trivial normalisation) and
     $$C(n)=\\zeta(2)\\prod_p\\left(1-\\frac{\\min(n+1,p)}{p^2}\\right).$$
     Values: $C(1)\\approx0.5307$, $C(2)\\approx0.4128$, $C(3)\\approx0.3737$.</p>`},
   {t:'Saturation and Asymptotics',b:`<p>When $p\\le n+1$: factor $=1-1/p$ (saturated, covers all residues mod $p$). By Mertens' third theorem,
     $$D(n)\\sim\\frac{e^{-\\gamma}}{\\log(n+1)}\\to0\\quad(n\\to\\infty).$$
-    The decay is logarithmically slow.</p>`},
+    The decay is logarithmically slow — and so is the convergence. The unsaturated primes contribute a further factor exp(−1/log(n+1)), still only 0.90 at n=10⁴, so use D(n) ≈ e^{−γ}·e^{−1/log(n+1)}/log(n+1) for numerical comparison.</p>`},
   {t:'The Hardy–Littlewood Structural Parallel',b:`<p>The Hardy–Littlewood conjecture on prime $k$-tuples involves the <em>singular series</em>
     $$\\mathfrak{S}(\\mathcal{H})=\\prod_p \\frac{1-\\nu_p(\\mathcal{H})/p}{(1-1/p)^k}$$
     where $\\nu_p(\\mathcal{H})$ counts distinct residues of $\\mathcal{H}$ mod $p$ (denominator $p$, counting in $\\mathbb{Z}/p\\mathbb{Z}$).
