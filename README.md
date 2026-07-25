@@ -2,13 +2,7 @@
 
 **Live page 1 The Index.html:** https://wessengetachew.github.io/smith/
 
-# C(n) — Block-Coprime Density
-
 **An interactive exploration of an original analytic number theory construction, across 13 pages.**
-
-🔗 **Live site:** [link here]
-
----
 
 ## The question
 
