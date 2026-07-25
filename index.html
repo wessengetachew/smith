@@ -1232,8 +1232,8 @@ function heroToggleTopBars(){
       <div id="w-tour-panel" style="min-height:30px;"></div>
       <div id="ws-view-row" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="wv-btn" id="wvb-smith" onclick="wSetView('smith')"
-          title="Smith Chart — a conformal map borrowed from RF engineering, repurposed here purely as a lattice projection: Γ(z)=(z−1)/(z+1)"
-          style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Smith</button>
+          title="Cayley View — a conformal map (Γ(z)=(z−1)/(z+1)) borrowed from RF engineering, where the same construction is called a Smith chart; repurposed here purely as a lattice projection"
+          style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Cayley</button>
         <button class="wv-btn" id="wvb-ring" onclick="wSetView('ring')"
           style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Ring</button>
         <label style="display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(232,226,214,.75);cursor:pointer;white-space:nowrap;margin-right:6px;">
@@ -4731,7 +4731,7 @@ function heroToggleTopBars(){
 
     var G=_wG, n=_wN;
     var Cn=(_wMode==='finite'?_wCnFin(n,_wPrimeK):_wCn(n)).toFixed(6);
-    var viewLabel={smith:'Smith Chart',ring:'Ring',grid:'Grid',farey:'Farey',gauss:'Gaussian Integers'}[_wView]||_wView;
+    var viewLabel={smith:'Cayley View',ring:'Ring',grid:'Grid',farey:'Farey',gauss:'Gaussian Integers'}[_wView]||_wView;
     var modeLabel=(_wMode==='finite')?('Finite p≤'+(_wPrimes[_wPrimeK-1]||'?')):'Asymptotic';
     var colorLabel={'default':'Distance hue',residue_value:'By residue value',ring_hash:'By ring/modulus',phi_position:'φ(M) progression',phi_spectrum:'φ(M)/M spectrum',phi_value:'φ(M) magnitude',gcd_status:'gcd=1 vs gcd≠1',gcd_value:'By gcd value',fraction_ab:'By r/M (a/b)'}[_wColorMode]||_wColorMode;
     var charLabel=_wCharFilter==='both'?'χ≠0 & χ=0':(_wCharFilter==='support'?'χ≠0 only':'χ=0 only');
@@ -5022,8 +5022,8 @@ function heroToggleTopBars(){
    ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
    ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
    ['page8.html','P8','The Prime Spiral — Page 8','#ff6b9d'],
-   ['page9.html','P9','Multi-Block Coprime Density — Page 9','#ff8c42'],
-   ['page10.html','P10','k-Block Coprime Density — Page 10','#ff2fd0'],
+   ['page9.html','P9','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 9','#ff8c42'],
+   ['page10.html','P10','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 10','#ff2fd0'],
    ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
    ['page12.html','P12','Dirichlet Character-Twisted Density — Page 12','#d2691e'],
    ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
@@ -5089,7 +5089,7 @@ function heroToggleTopBars(){
   cp+='<button onclick="wgShowBtcDonate()" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;height:24px;background:linear-gradient(135deg,#f7931a,#e08916);color:#fff;border-radius:4px;border:none;cursor:pointer;font-size:9px;font-weight:600;letter-spacing:.04em;">₿ BTC</button>';
   cp+='</div>';
   var pageInfo=[
-   ['Page 1 — C(n): Block-Coprime Density','Six interactive lattice views of the C(n) block-coprime density function: Grid, Ring, Lift, Farey, Gauss, and Smith.','Most interesting: the Smith Chart hero view, which renders C(n) through the Cayley map — a conformal-geometry reuse of a tool built for transmission-line engineering.'],
+   ['Page 1 — C(n): Block-Coprime Density','Six interactive lattice views of the C(n) block-coprime density function: Grid, Ring, Lift, Farey, Gauss, and Cayley.','Most interesting: the Cayley View hero view, which renders C(n) through the conformal map Γ(z)=(z−1)/(z+1) — the same construction used in RF Smith charts, reused here purely for lattice geometry.'],
    ['Page 2 — Gap Diagonal Identity','Explores the diagonal gap identity that underlies the lattice structure C(n) is built on.','Most interesting: watching how gaps between block-coprime residues line up diagonally as n grows.'],
    ['Page 3 — Color & Label Modes: The Mathematics','A codex of 34 color/label modes, each pixel a function of (r, M, n), with MathJax swatches and deep-linkable state.','Most interesting: a sticky master control bar drives every canvas on the page simultaneously from one set of controls.'],
    ['Page 4 — How C(n) Works: Guided Walkthrough','Builds the C(n) formula piece by piece, ending in a full live working table with every prime shown, nothing left out.','Most interesting: the "see it happen" step where the abstract formula turns into a concrete per-prime computation you can watch.'],
@@ -5097,8 +5097,8 @@ function heroToggleTopBars(){
    ['Page 6 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
    ['Page 7 — Farey & Unit Circle','Farey modular residue rings on concentric circles: ten representations of the unit circle, cyclotomic presets, Ford circles, and the Franel\u2013Landau discrepancy connection to RH.','Most interesting: the spectral-correlation panel comparing Farey gap statistics against GUE, Poisson, and the actual Riemann zeros.'],
    ['Page 8 — The Prime Spiral','Isolates the "Lift Dynamics" spiral overlay from the hero Ring/Lift view: fix one prime p, mark where it lands on every ring modulus M from p+1 up to G, and watch the sequence of markers read as a spiral arm.','Most interesting: the live spiral demo lets you drive G and the chosen prime directly, with an explicit aside on why this is unrelated to the Ulam spiral despite the name.'],
-   ['Page 9 — C(n\u2081,n\u2082): Multi-Block Coprime Density','Extends C(n) to two independent blocks with lengths n\u2081+1 and n\u2082+1, anchored at independent random M\u2081, M\u2082.','Most interesting: the correlation ratio \u03c1 = C(n\u2081,n\u2082)/[C(n\u2081)\u00b7C(n\u2082)] — a live readout of exactly how much the shared residue r couples the two blocks together.'],
-   ['Page 10 — C(n\u2081,\u2026,n_k): k-Block Coprime Density','The full k-fold generalization — any number of independent blocks, each with its own depth n\u1d62, unified in one Euler product.','Most interesting: the 3D Ring view, which stacks the flat Ring picture into layers by block-1 depth n\u2081, giving the survival pattern a genuine helicoid shape you can drag to orbit.'],
+   ['Page 9 — C(n\u2081,n\u2082): Multi-Block Coprime Density — Prime Gaps','Extends C(n) to two independent blocks with lengths n\u2081+1 and n\u2082+1, anchored at independent random M\u2081, M\u2082.','Most interesting: lock M\u2082=M\u2081+g (gap mode, with twin/cousin/sexy presets) and set n\u2081=n\u2082=0 \u2014 the correlation ratio \u03c1 = C(n\u2081,n\u2082)/[C(n\u2081)\u00b7C(n\u2082)] becomes the exact finite picture behind prime gaps, with a closed-form f_p(g)=1\u2212\u03bd_p(g)/p\u00b2 matching the Hardy\u2013Littlewood \u03bd_p.'],
+   ['Page 10 — C(n\u2081,\u2026,n_k): k-Block Coprime Density — Prime Constellations','The full k-fold generalization — any number of independent blocks, each with its own depth n\u1d62, unified in one Euler product.','Most interesting: constellation mode locks M\u1d62=M\u2081+h\u1d62 to a k-tuple \u2130={0,h\u2082,\u2026,h_k} (presets for {0,2,6}, {0,4,6}, {0,2,6,8}) \u2014 at n\u1d62=0 this gives the exact k-tuple analogue of Page 9\u2019s gap correspondence, alongside the 3D Ring view stacking survival by block-1 depth n\u2081.'],
    ['Page 11 — The Prime Filter','A sieve-construction view showing how successive prime moduli filter down the surviving residues, building intuition for why the Euler product converges the way it does.','Most interesting: watching the live filter count shrink prime by prime toward the asymptotic density.'],
    ['Page 12 — Dirichlet Character-Twisted Density','Twists the block-coprime density by a Dirichlet character \u03c7 mod Q, connecting C(n) to L-functions and character orthogonality.','Most interesting: the L(s,\u03c7) Euler product explorer sitting right next to the character explorer, so you can watch the same \u03c7 drive both a residue-class picture and a classical L-function at once.'],
   ];
@@ -5150,7 +5150,7 @@ function heroToggleTopBars(){
           <div class="exp-sec">Opener</div>
           <button class="exp-opt" onclick="wExport4K();closeExpDD()">
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">4K</span>
-            <span><b>Opener View 4K</b><span class="exp-opt-sub">Current opener view · Smith / Ring / Grid / Farey / Gauss</span></span>
+            <span><b>Opener View 4K</b><span class="exp-opt-sub">Current opener view · Cayley / Ring / Grid / Farey / Gauss</span></span>
           </button>
           <div class="exp-sec">Hero Lattice — all 6 views</div>
           <button class="exp-opt" onclick="openEM()">
@@ -5159,7 +5159,7 @@ function heroToggleTopBars(){
           </button>
           <button class="exp-opt" onclick="exportHero4K();closeExpDD()">
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">4K</span>
-            <span><b>Hero View 4K</b><span class="exp-opt-sub">Current view (Grid/Ring/Farey/Lift/Gauss/Smith) · zoom &amp; selection</span></span>
+            <span><b>Hero View 4K</b><span class="exp-opt-sub">Current view (Grid/Ring/Farey/Lift/Gauss/Cayley) · zoom &amp; selection</span></span>
           </button>
           <button class="exp-opt" onclick="exportHeroRing8K();closeExpDD()">
             <span class="exp-opt-icon" style="font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;">8K</span>
@@ -5296,8 +5296,8 @@ function heroToggleTopBars(){
     style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:.45;">Lift</button>
   <button id="hero-view-gauss" onclick="heroSetView('gauss')" title="Gaussian integers a+bi, 4-quadrant mirrored lattice"
     style="background:none;border:1px solid rgba(242,168,74,.4);color:rgba(242,168,74,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:.45;">Gauss</button>
-  <button id="hero-view-smith" onclick="heroSetView('smith')" title="Smith Chart — a conformal map borrowed from RF engineering, repurposed here purely as a lattice projection: Γ(z)=(z−1)/(z+1), ring-polar (R=ring radius, θ=2πr/M)"
-    style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:1;">Smith</button>
+  <button id="hero-view-smith" onclick="heroSetView('smith')" title="Cayley View — a conformal map (Γ(z)=(z−1)/(z+1)) borrowed from RF engineering, where the same construction is called a Smith chart; repurposed here purely as a lattice projection, ring-polar (R=ring radius, θ=2πr/M)"
+    style="background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.9);font-family:var(--mono);font-size:8px;padding:2px 7px;cursor:pointer;opacity:1;">Cayley</button>
   <button id="hero-lift-mode" onclick="heroToggleLiftMode()" title="Lift dynamics MODE — lift lines r → r mod(M+1), prime spiral, mirror σ, ±n path — overlays whichever hero view is active (the dedicated Lift view chip stays as-is)"
     style="background:none;border:1px dashed rgba(61,200,184,.4);color:rgba(61,200,184,.55);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.06em;margin-left:10px;">⇑ Lift: off</button>
 </div>
@@ -6020,7 +6020,7 @@ function heroToggleTopBars(){
   <details id="hero-smith-ctrl-dd">
     <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 14px;border-bottom:1px solid rgba(126,200,122,.14);background:rgba(126,200,122,.05);user-select:none;">
       <span style="display:inline-block;transition:transform .15s;font-size:9px;color:rgba(126,200,122,.85);">▸</span>
-      <span style="font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(126,200,122,.9);flex:1;">Smith Chart — Ring-Polar Lattice through Γ(z)=(z−1)/(z+1)</span>
+      <span style="font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(126,200,122,.9);flex:1;">Cayley View — Ring-Polar Lattice through Γ(z)=(z−1)/(z+1)</span>
       <span style="font-size:8px;color:var(--cream3);">z=R·e^iθ, R=ring radius per M, θ=2πr/M+α — same angular layout as the Ring view, then Cayley-transformed</span>
     </summary>
     <style>#hero-smith-ctrl-dd[open]>summary>span:first-child{transform:rotate(90deg);}</style>
@@ -6096,7 +6096,7 @@ function heroToggleTopBars(){
 
   <div style="padding:5px 14px 7px;font-size:8px;color:var(--cream3);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);">
     <span style="color:rgba(126,200,122,.6);">Theory:</span>
-    Each residue (r,M) is first placed in polar form — radius R(M) growing with the ring index, angle θ=2πr/M+α matching the Ring view's own convention — then passed through the same Cayley map Γ(z)=(z−1)/(z+1) used by the Conformal view's "Smith Chart" map option. The teal circles are the actual images of each ring's |z|=R(M) locus; the violet rays are images of fixed angles, rotating live with α. This is a different construction from the Conformal dropdown, where (r,M) are read directly as Cartesian coordinates in the upper half-plane.
+    Each residue (r,M) is first placed in polar form — radius R(M) growing with the ring index, angle θ=2πr/M+α matching the Ring view's own convention — then passed through the same Cayley map Γ(z)=(z−1)/(z+1) used by the Conformal view's "Cayley View" map option (the construction a Smith chart also uses). The teal circles are the actual images of each ring's |z|=R(M) locus; the violet rays are images of fixed angles, rotating live with α. This is a different construction from the Conformal dropdown, where (r,M) are read directly as Cartesian coordinates in the upper half-plane.
   </div>
   </details>
 </div>
@@ -11043,7 +11043,7 @@ function updateHLPanel(){
       {key:'D0',  sym:'D(0)=6/π²',   val:(1/ZETA2).toFixed(7), formula:'∏_p(1−1/p²)',           desc:'Standard coprime pair density',                                 cls:''},
       {key:'Cn',  sym:`C(${n})`,      val:Cn.toFixed(7),   formula:'ζ(2)·D(n)',                 desc:`Block-coprime density, block ${n+1}; current n=${n}`,            cls:''},
       {key:'Dn',  sym:`D(${n})`,      val:Dn.toFixed(7),   formula:'∏_p(1−min(n+1,p)/p²)',      desc:'Raw density; D(n)/D(0) = C(n)',                                 cls:'hl-sym-teal'},
-      {key:'C1',  sym:'C(1)≈0.5307', val:Cn1.toFixed(7),  formula:'ζ(2)·∏_p(1−2/p²)',         desc:'Feller–Tornier normalized; lift survival constant &nbsp;<a href="https://oeis.org/A065469" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065469 ↗</a>',              cls:''},
+      {key:'C1',  sym:'C(1)≈0.5307', val:Cn1.toFixed(7),  formula:'ζ(2)·∏_p(1−2/p²)',         desc:'ζ(2)-rescaled Feller–Tornier product D_FT; lift survival constant — distinct from the classical constant C_FT below &nbsp;<a href="https://oeis.org/A065469" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065469 ↗</a>',              cls:''},
       {key:'D1',  sym:'D(1)≈0.3226', val:Dn1.toFixed(7),  formula:'∏_p(1−2/p²)',               desc:'Feller–Tornier Euler product D_FT &nbsp;<a href="https://oeis.org/A065474" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:inherit;opacity:.55;text-decoration:underline;">cf. OEIS A065474 ↗</a>',                              cls:'hl-sym-teal'},
       {key:'C2',  sym:'C₂≈0.6602',   val:C2.toFixed(7),   formula:'∏_{p≥3} p(p−2)/(p−1)²',    desc:'Twin prime constant — HL local factor at n=1, p≥3',              cls:'hl-sym-lime'},
       {key:'twoC2',sym:'2C₂≈1.3203', val:(2*C2).toFixed(7),formula:'2·C₂',                    desc:'Goldbach background constant — base case N = 2^k',                cls:'hl-sym-violet'},
@@ -15687,7 +15687,7 @@ function _updateHeroViewCaps(){
     ].map(({c,l})=>'<span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0;display:inline-block;"></span><span style="color:rgba(184,178,166,.7);">'+l+'</span></span>').join('');
   } else if(_heroViewMode==='smith'){
     top.style.display='block';
-    top.innerHTML='<span style="color:rgba(126,200,122,.9);font-weight:700;font-family:var(--mono);font-size:9px;">Smith Chart</span>'+
+    top.innerHTML='<span style="color:rgba(126,200,122,.9);font-weight:700;font-family:var(--mono);font-size:9px;">Cayley View</span>'+
       '<span style="color:rgba(106,101,96,.7);font-family:var(--mono);font-size:9px;">&nbsp;&nbsp;·&nbsp;&nbsp;Γ(z)=(z−1)/(z+1)&nbsp;&nbsp;·&nbsp;&nbsp;z=R·e^{iθ}, θ=2πr/M+α&nbsp;&nbsp;·&nbsp;&nbsp;G = '+(typeof _heroG!=='undefined'?_heroG:'?')+'&nbsp;&nbsp;·&nbsp;&nbsp;n = '+nAnim+'</span>';
     bot.style.cssText='display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:rgba(6,6,18,.96);border-top:1px solid rgba(255,255,255,.06);padding:5px 14px 4px;font-family:var(--mono);font-size:8px;';
     bot.innerHTML=[
