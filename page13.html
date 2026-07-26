@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Prime Spiral — Winding r ≡ ±p (mod M) · Wessen Getachew — Page 13</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { ready() { MathJax.startup.defaultReady(); } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #04040d;
+  --bg1:   #07071a;
+  --bg2:   #0c0c22;
+  --cream: #ddd8cc;
+  --cream2:#b8b2a6;
+  --cream3:#6a6560;
+  --gold:  #c8a84a;
+  --gold2: rgba(200,168,74,.12);
+  --teal:  #3dc8b8;
+  --coral: #e05060;
+  --violet:#9b7fe8;
+  --lime:  #7ec87a;
+  --magenta:#ff2fd0;
+  --amber: #ff8c42;
+  --sky:   #4a9eff;
+  --pink:  #ff6b9d;
+  --edge:  rgba(255,255,255,.07);
+  --edge2: rgba(255,255,255,.13);
+  --mono:  'JetBrains Mono', monospace;
+  --serif: 'Spectral', serif;
+  --disp:  'Cinzel', serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.95rem;line-height:1.75;}
+input[type="number"],input[type="range"],select,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+input[type="number"]{font-size:16px;}
+canvas{touch-action:none;}
+
+#decimalBar{
+  position:sticky;top:44px;z-index:500;
+  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
+  display:flex;align-items:center;gap:10px;padding:7px 20px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
+}
+#decimalBar input[type="range"]{width:140px;accent-color:var(--pink);}
+#decimalBar .val{color:var(--pink);font-weight:600;min-width:16px;text-align:center;}
+
+#content{max-width:1020px;margin:0 auto;padding:0 20px 100px;}
+#hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
+.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);margin-bottom:16px;}
+h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
+.hero-formula{font-size:1.0rem;margin:14px 0;color:var(--gold);overflow-x:auto;}
+.hero-sub{max-width:74ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
+.shift-banner{
+  max-width:74ch;margin:20px auto 0;padding:14px 18px;background:rgba(255,107,157,.07);
+  border-left:3px solid var(--pink);text-align:left;font-size:.82rem;color:var(--cream2);
+}
+.shift-banner b{color:var(--pink);}
+
+.card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--edge);}
+.card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
+
+.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
+.ctrl-block{flex:1;min-width:180px;}
+.ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
+.ctrl-label span.val{color:var(--teal);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--pink);height:3px;}
+
+.stepctrl{display:flex;align-items:center;gap:6px;}
+.stepctrl input[type="range"]{flex:1;}
+.step-btn{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;font-size:13px;font-family:var(--mono);transition:background .1s;}
+.step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+
+.togglegrid{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:14px;}
+.togglegrid label{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--cream2);cursor:pointer;}
+.togglegrid input[type="checkbox"]{accent-color:var(--coral);}
+
+button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
+button.wgbtn:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,107,157,.08);}
+button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px;}
+.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--pink);padding:12px 14px;}
+.result-box.violet{border-left-color:var(--violet);}
+.result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
+.result-box .rval{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--cream);word-break:break-all;}
+
+canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
+.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:50%;}
+
+.step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
+.step:last-child{border-bottom:none;}
+.step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.skybox{background:rgba(74,158,255,.06);border-left:3px solid var(--sky);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.pinkbox{background:rgba(255,107,157,.06);border-left:3px solid var(--pink);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+</style>
+</head>
+<body>
+
+<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
+<span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
+<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
+<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
+<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
+<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
+<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
+<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
+<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
+<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
+<a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
+<a href="page10.html" target="_blank" title="k-Block Coprime Density — Prime Constellations & k-Tuples — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
+<a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
+<a href="page12.html" target="_blank" title="Dirichlet Character-Twisted Density — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #d2691e59;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#d2691e14';this.style.borderColor='#d2691e'" onmouseout="this.style.background='transparent';this.style.borderColor='#d2691e59'">P12</a>
+<a href="page13.html" title="The Prime Spiral — Page 13 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff6b9d22;border:1px solid #ff6b9d;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P13</a>
+<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
+<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+</div>
+
+<div id="decimalBar">
+  <span>Decimal precision (whole page)</span>
+  <input type="range" id="decimalSl" min="2" max="15" value="6" oninput="setDecimals(+this.value)">
+  <span class="val" id="decimalVal">6</span>
+  <span style="color:var(--cream3);opacity:.6;">digits</span>
+</div>
+
+<div id="hero">
+  <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
+  <h1 class="hero-title">The Prime Spiral — Winding r ≡ ±p (mod M)</h1>
+  <div class="hero-formula">
+    $$r_M \;=\; p \bmod M, \qquad M = p{+}1,\, p{+}2,\, \dots,\, G$$
+  </div>
+  <div class="hero-sub">
+    Fix one prime <i>p</i>. On every ring of modulus <i>M</i>, mark the single residue where
+    <i>p</i> itself lands. As <i>M</i> climbs one step at a time, that one dot sweeps around each
+    ring at a different rate — the trail it leaves reads as a spiral arm winding outward through
+    the whole coprimality lattice. This page explains that overlay from the hero Ring/Lift view
+    (also seen driving the animated opener), lets you drive it directly, and shows exactly where
+    it re-enters the C(n) formula.
+  </div>
+  <div class="shift-banner">
+    <b>Not the Ulam spiral.</b> The famous Ulam spiral lays every integer 1, 2, 3, … onto a square
+    grid path and highlights which cells are prime. This spiral is a completely different
+    construction: it's a single fixed prime's residue traced across a stack of concentric
+    coprimality rings as the modulus grows. Same word, unrelated geometry — see the aside near
+    the bottom of this page.
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- WHAT IT IS -->
+  <div class="card">
+    <div class="card-title">What You're Actually Looking At</div>
+    <div class="hero-sub" style="max-width:none;">
+      Every ring of the hero visualization at modulus <i>M</i> holds the residues
+      $r \in \{1,\dots,M-1\}$ with $\gcd(r,M)=1$, arranged at angle $\theta = 2\pi r/M$ and radius
+      proportional to $M$ — this is exactly the Ring view used throughout the site. The spiral
+      overlay does one extra thing: for a chosen prime <i>p</i>, it computes
+      $r_M = p \bmod M$ for every ring $M$ from $p{+}1$ up to the largest ring $G$, and drops a
+      red marker there. Because $p \bmod M$ jumps around non-monotonically as $M$ increases, but
+      the ring radius grows steadily with $M$, the sequence of markers reads visually as a spiral
+      arm — not because anything is literally rotating, but because a fixed quantity ($p$) is
+      being viewed through an increasingly fine set of angular units ($1/M$ of a turn).
+    </div>
+    <div class="ibox">
+      This is the same "Lift Dynamics" spiral overlay that drives the hero page's animated
+      opener and the Ring/Lift view's ▶ p control — this page isolates just that one mechanic
+      so it can be explained on its own, with its own controls and its own derivation.
+    </div>
+  </div>
+
+  <!-- LIVE DEMO -->
+  <div class="card">
+    <div class="card-title">Live Spiral</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <div class="ctrl-label">G — rings shown <span class="val" id="sp-gval">42</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="spStepG(-1)" title="G − 1">−</button>
+          <input type="range" id="sp-gsl" min="8" max="90" value="42" oninput="onSpGChange()">
+          <button class="step-btn" onclick="spStepG(1)" title="G + 1">+</button>
+        </div>
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Spiral prime</div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="spStepP(-1)" title="Previous prime">◀</button>
+          <span id="sp-plabel" style="font-family:var(--mono);font-size:12px;color:var(--coral);min-width:44px;text-align:center;">p=2</span>
+          <button class="step-btn" onclick="spStepP(1)" title="Next prime">▶</button>
+        </div>
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Winding</div>
+        <button class="step-btn" id="sp-dirbtn" onclick="spCycleDir()" title="Toggle r ≡ +p (mod M) vs r ≡ −p (mod M)" style="width:auto;padding:0 12px;">▲ up</button>
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;">Play</div>
+        <button class="wgbtn" id="sp-playbtn" onclick="spTogglePlay()">▶ Sweep p</button>
+      </div>
+    </div>
+    <div class="togglegrid">
+      <label><input type="checkbox" id="sp-mirror" checked onchange="drawSpiral()"> Mirror σ(r)=M−r</label>
+      <label><input type="checkbox" id="sp-allp" onchange="drawSpiral()"> Overlay all primes</label>
+      <label><input type="checkbox" id="sp-dropout" checked onchange="drawSpiral()"> Dropout ring (M=p)</label>
+      <label><input type="checkbox" id="sp-base" checked onchange="drawSpiral()"> Base lattice (dim)</label>
+    </div>
+    <canvas id="spiralCv" class="plot" style="height:440px;"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:#e05060;"></span>r ≡ p (mod M) — the spiral</span>
+      <span><span class="sw" style="background:#9b7fe8;"></span>mirror σ(r) = M − r</span>
+      <span><span class="sw" style="background:rgba(230,56,72,.35);"></span>all-primes overlay (dim)</span>
+      <span><span class="sw" style="background:transparent;border:1px dashed #e05060;"></span>dropout ring M = p</span>
+    </div>
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">Current prime</div><div class="rval" id="sp-r1">—</div></div>
+      <div class="result-box violet"><div class="rlabel">Spiral points plotted</div><div class="rval" id="sp-r2">—</div></div>
+      <div class="result-box"><div class="rlabel">Dropout ring (M = p)</div><div class="rval" id="sp-r3">—</div></div>
+    </div>
+    <div class="card-note">Drag isn't needed here — the geometry is flat (2D rings), unlike Page 10's 3D Ring stack. Tap ◀ ▶ to change the spiral prime, or press Play to sweep through every prime ≤ G automatically.</div>
+  </div>
+
+  <!-- DERIVATION -->
+  <div class="card">
+    <div class="card-title">Where the Point Actually Lands</div>
+    <div class="step">
+      <div class="stepnum">1 — Fix p, sweep M</div>
+      For a chosen prime $p$ and each ring $M = p{+}1, \dots, G$, the marked residue is simply
+      $r_M = p \bmod M$. Since $p < M$ for every ring we draw, this is just $p$ itself whenever
+      $p < M \le$ (well inside range) — the interesting behavior only starts once $M$ has climbed
+      far enough that $p \bmod M$ genuinely wraps.
+    </div>
+    <div class="step">
+      <div class="stepnum">2 — Two winding directions</div>
+      Toggling ▲/▼ switches between $r_M = p \bmod M$ (the "up" branch) and its reflection
+      $r_M = (-p) \bmod M = (M - (p \bmod M)) \bmod M$ (the "down" branch, taken to be $M$ itself
+      when the reduction is $0$, so the marker never lands on the excluded residue $0$). The two
+      branches are mirror images of each other under $r \mapsto M-r$ — which is exactly the
+      conjugate/mirror overlay (σ) you can toggle independently.
+    </div>
+    <div class="step">
+      <div class="stepnum">3 — Why it looks like a spiral and not noise</div>
+      Radius grows linearly in $M$ (ring $M$ sits at radius $\propto M$), while angle is
+      $\theta_M = 2\pi r_M/M$. For $r_M = p \bmod M$, this angle doesn't grow monotonically —
+      but it does have long stretches where $p \bmod M \approx p$ (when $M$ is still much bigger
+      than $p$'s reductions), giving the smooth arcs you see between the sharper jumps. The
+      "jumps" happen exactly when $M$ passes a value at which $p \bmod M$ wraps around, i.e.
+      roughly every $M \approx p/k$ for integer $k$ — a genuinely number-theoretic cadence, not
+      an artifact of the drawing.
+    </div>
+    <div class="step">
+      <div class="stepnum">4 — The all-primes overlay is the same construction, superposed</div>
+      Turning on "Overlay all primes" simply repeats steps 1–3 for every prime $\le G$
+      simultaneously, dimmed so the selected spiral prime still reads clearly. It's a useful way
+      to see that no single prime's spiral is special — every prime traces one, and they all
+      obey the same $r_M = p \bmod M$ rule.
+    </div>
+  </div>
+
+  <!-- CONNECTION TO C(n) -->
+  <div class="card">
+    <div class="card-title">The Dropout Ring Is Not Decoration</div>
+    <div class="hero-sub" style="max-width:none;">
+      Turn on "Dropout ring" and look at what happens exactly at $M = p$: the ring itself is
+      drawn dashed, and the spiral marker is undefined there, because
+      $\gcd(p,p) = p \neq 1$ — the prime is never coprime to a modulus equal to itself. This
+      isn't a rendering edge case; it's the same saturation point that appears directly in the
+      C(n) formula's local factor:
+    </div>
+    <div class="hero-formula" style="margin:14px 0 8px;">
+      $$\rho_p(n) = 1 - \frac{\min(n{+}1,\,p)}{p^2}$$
+    </div>
+    <div class="pinkbox">
+      As the block depth $n$ grows, $\min(n{+}1,p)$ climbs linearly until it hits the ceiling $p$
+      — and it hits that ceiling <i>exactly</i> at $n = p-1$, i.e. once the block has grown wide
+      enough to guarantee it contains a full residue class mod $p$. That's the same $p$ that
+      exits its own multiplicative group at $M=p$ in this spiral: both are the moment a prime
+      stops being able to "dodge" the sieve and becomes fully accounted for. The dropout ring
+      you can see here is a geometric picture of the same saturation the tail-correction
+      analysis (see Page 5 / the derivation notes) bounds analytically via
+      $\sum_{p>y} 1/p^2 = O(1/(y\ln y))$.
+    </div>
+  </div>
+
+  <!-- ULAM ASIDE -->
+  <div class="card">
+    <div class="card-title">Aside — Why This Isn't the Ulam Spiral</div>
+    <div class="skybox">
+      Stanisław Ulam's spiral (1963) places the integers $1,2,3,\dots$ along an outward square
+      path and colors in the primes; the striking part is that primes cluster along certain
+      diagonals more than chance alone would suggest, hinting at patterns in quadratic
+      polynomials. It's a single static picture built from <i>all</i> integers at once.
+    </div>
+    <div class="hero-sub" style="max-width:none;margin-top:10px;">
+      The construction on this page shares only the word "spiral." It fixes one prime and tracks
+      <i>its</i> residue across a family of moduli — a dynamical trace through the Ring view's
+      existing coprimality lattice, not a placement of the integers themselves. If you'd like an
+      actual Ulam-style integer spiral added as a separate view later, that would be a genuinely
+      new visualization rather than an extension of this one — happy to scope that as its own
+      page if useful for SoME6.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Shared decimal precision (kept for visual consistency with other pages; this
+// page has no numeric tables that depend on it, but the control stays functional). ──
+let DECIMALS = 6;
+function setDecimals(v){
+  DECIMALS = v;
+  document.getElementById('decimalVal').textContent = v;
+  document.getElementById('decimalSl').value = v;
+}
+
+// ── Prime sieve ──
+function sievePrimes(limit){
+  const isC = new Uint8Array(limit+1);
+  const out = [];
+  for(let i=2;i<=limit;i++){
+    if(!isC[i]){
+      out.push(i);
+      for(let j=i*i;j<=limit;j+=i) isC[j]=1;
+    }
+  }
+  return out;
+}
+const PRIMES = sievePrimes(400);
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+
+// ── State ──
+let _spP = 2;         // spiral prime
+let _spDir = 'up';     // 'up' -> r = p mod M ; 'down' -> r = -p mod M
+let _spPlayId = null, _spPlayDir = 1;
+
+function spiralPFor(G){
+  if(_spP>=2 && _spP<=G) return _spP;
+  for(let i=PRIMES.length-1;i>=0;i--) if(PRIMES[i]<=G) return PRIMES[i];
+  return 2;
+}
+function spStepG(d){
+  const sl = document.getElementById('sp-gsl');
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+d));
+  sl.value = v; onSpGChange();
+}
+function onSpGChange(){
+  const G = +document.getElementById('sp-gsl').value;
+  document.getElementById('sp-gval').textContent = G;
+  drawSpiral();
+}
+function spStepP(dir){
+  const G = +document.getElementById('sp-gsl').value;
+  let cur = spiralPFor(G), idx = PRIMES.indexOf(cur);
+  if(idx<0) idx=0;
+  idx = Math.max(0, idx+dir);
+  while(idx>0 && PRIMES[idx]>G) idx--;
+  _spP = PRIMES[Math.min(idx, PRIMES.length-1)];
+  drawSpiral();
+}
+function spCycleDir(){
+  _spDir = _spDir==='up' ? 'down' : 'up';
+  const btn = document.getElementById('sp-dirbtn');
+  btn.textContent = _spDir==='up' ? '▲ up' : '▼ down';
+  drawSpiral();
+}
+function spTogglePlay(){
+  const btn = document.getElementById('sp-playbtn');
+  if(_spPlayId){
+    clearInterval(_spPlayId); _spPlayId=null;
+    btn.textContent='▶ Sweep p'; btn.classList.remove('playing');
+    return;
+  }
+  btn.textContent='■ Stop'; btn.classList.add('playing');
+  _spPlayDir = 1;
+  _spPlayId = setInterval(function(){
+    const G = +document.getElementById('sp-gsl').value;
+    const before = spiralPFor(G);
+    spStepP(_spPlayDir);
+    if(spiralPFor(G)===before){ _spPlayDir*=-1; spStepP(_spPlayDir); }
+  }, 260);
+}
+
+function ringXY(cx,cy,maxR,G,r,M){
+  const R = maxR*(M-1)/Math.max(1,G-1);
+  const th = 2*Math.PI*r/M;
+  return [cx+R*Math.cos(th), cy-R*Math.sin(th)];
+}
+
+function drawSpiral(){
+  const cv = document.getElementById('spiralCv');
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const cssW = cv.clientWidth||600, cssH = 440;
+  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+  cv.style.height = cssH+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#020204';
+  ctx.fillRect(0,0,cssW,cssH);
+
+  const G = +document.getElementById('sp-gsl').value;
+  const p = spiralPFor(G);
+  document.getElementById('sp-plabel').textContent = 'p='+p;
+
+  const cx = cssW/2, cy = cssH/2;
+  const maxR = Math.min(cssW,cssH)*0.46;
+  const dir = _spDir;
+  const mirrorOn = document.getElementById('sp-mirror').checked;
+  const allPOn = document.getElementById('sp-allp').checked;
+  const dropOn = document.getElementById('sp-dropout').checked;
+  const baseOn = document.getElementById('sp-base').checked;
+
+  function reduced(prime, M){
+    if(dir==='down'){
+      const m = ((M - (prime % M)) % M);
+      return m===0 ? M : m;
+    }
+    return prime % M;
+  }
+
+  // Base lattice: faint dots for every coprime residue on every ring
+  if(baseOn){
+    ctx.save();
+    for(let M=3;M<=G;M++){
+      for(let r=1;r<M;r++){
+        if(gcd(r,M)!==1) continue;
+        const [x,y] = ringXY(cx,cy,maxR,G,r,M);
+        ctx.fillStyle = 'rgba(232,227,219,.12)';
+        ctx.beginPath(); ctx.arc(x,y,1.0,0,6.2832); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // All-primes overlay (dim), skipping the selected prime (drawn bright below)
+  if(allPOn){
+    ctx.save();
+    for(let pi=0; pi<PRIMES.length; pi++){
+      const ap = PRIMES[pi];
+      if(ap>=G) break;
+      if(ap===p) continue;
+      for(let M=ap+1; M<=G; M++){
+        const r = reduced(ap,M);
+        if(r<1||r>=M) continue;
+        const [x,y] = ringXY(cx,cy,maxR,G,r,M);
+        ctx.fillStyle = 'rgba(230,56,72,.25)';
+        ctx.beginPath(); ctx.arc(x,y,1.3,0,6.2832); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // Dropout ring — dashed circle at M = p
+  if(dropOn && p>=2 && p<=G){
+    const R = maxR*(p-1)/Math.max(1,G-1);
+    ctx.save();
+    ctx.setLineDash([3,3]);
+    ctx.strokeStyle = 'rgba(230,56,72,.6)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Main spiral trace
+  const pts = [];
+  for(let M=p+1; M<=G; M++){
+    const r = reduced(p,M);
+    if(r<1||r>=M) continue;
+    pts.push(ringXY(cx,cy,maxR,G,r,M));
+  }
+  ctx.save();
+  ctx.strokeStyle = 'rgba(230,56,72,.4)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
+  ctx.stroke();
+  ctx.restore();
+  pts.forEach(function(pt){
+    ctx.fillStyle = 'rgba(230,56,72,.95)';
+    ctx.beginPath(); ctx.arc(pt[0],pt[1],2.6,0,6.2832); ctx.fill();
+  });
+
+  // Mirror conjugate σ(r) = M − r
+  if(mirrorOn){
+    const mpts = [];
+    for(let M=p+1; M<=G; M++){
+      const r = reduced(p,M);
+      const rm = M - r;
+      if(rm<1||rm>=M) continue;
+      mpts.push(ringXY(cx,cy,maxR,G,rm,M));
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(155,127,232,.32)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    mpts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
+    ctx.stroke();
+    ctx.restore();
+    mpts.forEach(function(pt){
+      ctx.fillStyle = 'rgba(155,127,232,.85)';
+      ctx.beginPath(); ctx.arc(pt[0],pt[1],2.3,0,6.2832); ctx.fill();
+    });
+  }
+
+  document.getElementById('sp-r1').textContent = 'p = '+p+' ('+(dir==='up'?'r ≡ +p':'r ≡ −p')+' mod M)';
+  document.getElementById('sp-r2').textContent = pts.length+' points, rings '+(p+1)+'…'+G;
+  document.getElementById('sp-r3').textContent = (p<=G) ? ('M = '+p+' — gcd(p,p) = p, excluded') : '— (p > G, not shown)';
+}
+
+window.addEventListener('load', function(){ drawSpiral(); });
+window.addEventListener('resize', function(){ drawSpiral(); });
+
+function openOpener(){
+  sessionStorage.setItem('wg_open_opener','1');
+  window.open('index.html','_blank');
+}
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+</script>
+
+</body>
+</html>
