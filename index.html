@@ -8,7 +8,7 @@
 <meta property="og:title" content="C(n) — Block-Coprime Density">
 <meta property="og:description" content="The density of integers coprime to n+1 consecutive integers, plotted six ways. C(1) ≈ 0.5307.">
 <meta name="twitter:card" content="summary">
-<title>C(n) — Block-Coprime Density · Wessen Getachew</title>
+<title>C(n) — Block-Coprime Density · Wessen Getachew — Page 1</title>
 
 <script>
 window.closeWelcome = function(){
@@ -1663,12 +1663,12 @@ function heroToggleTopBars(){
         </div>
       </details>
 
-      <!-- Gap Diagonal — Page 2's φ(g)/g strip dynamic, works on all five views -->
+      <!-- Gap Diagonal — Page 5's φ(g)/g strip dynamic, works on all five views -->
       <details id="w-diag-dd" style="margin-top:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);">
         <summary style="cursor:pointer;padding:7px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
           <span style="color:rgba(200,168,74,.7);font-size:8px;">▸</span>
           <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#c8a84a;letter-spacing:.06em;">GAP DIAGONAL</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#a8a294;">strip |M−r| = g · coprime density exactly φ(g)/g — the Page 2 identity, on every view</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#a8a294;">strip |M−r| = g · coprime density exactly φ(g)/g — the Page 5 identity, on every view</span>
         </summary>
         <div style="padding:4px 9px 9px;display:flex;flex-direction:column;gap:6px;">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -1753,7 +1753,7 @@ function heroToggleTopBars(){
         <span id="w-line-thick-lbl" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(120,180,240,.85);min-width:22px;">1.0×</span>
         </div>
 
-        <!-- Residue Points — page7-style "Residue Path Details" dropdown:
+        <!-- Residue Points — page10-style "Residue Path Details" dropdown:
              click one or more R's to highlight just those paths live. -->
         <div style="margin:0 9px 9px;padding:9px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:2px;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
@@ -1974,6 +1974,76 @@ function heroToggleTopBars(){
     wRedrawCanvas();
   };
   window.wToggleLift=function(v){ _wShowLift=!!v; wRedrawCanvas(); };
+
+  // ── OPENER GOLDBACH OVERLAY ───────────────────────────────────────────────
+  // Mirrors the hero overlay. Positions come from _wHitPts (x,y,r,M recorded by
+  // whichever view just drew), so this works in Grid/Ring/Farey/Gauss/Smith
+  // without any per-view code.
+  window._wGoldbachActive=false; var _wGoldbachN=4,_wGoldbachPlayId=null,_wGoldbachDir=1,_wGbDimAlpha=0.5;
+  window.wGoldbachSetN=function(N){
+    N=Math.max(4,(N%2===0)?N:N+1);
+    var cap=2*(_wG||40); if(N>cap)N=cap-(cap%2);
+    _wGoldbachN=N; window._wGoldbachActive=true;
+    var sl=document.getElementById('w-gb-sl'), num=document.getElementById('w-gb-num'),
+        lbl=document.getElementById('w-gb-val');
+    if(sl){sl.max=cap; sl.value=N;}
+    if(num){num.max=cap; num.value=N;}
+    var pairs=(typeof _goldbachHeroPairs==='function')?_goldbachHeroPairs(N,_wG||40):[];
+    var uniq=new Set(pairs.map(function(p){return Math.min(p.r,p.M)+'+'+Math.max(p.r,p.M);}));
+    if(lbl)lbl.textContent='N='+N+' ('+uniq.size+'p)';
+    _wsEnsureLoop(); wRedrawCanvas();
+  };
+  window.wGoldbachPlay=function(){
+    var b=document.getElementById('w-gb-play');
+    if(_wGoldbachPlayId){ clearInterval(_wGoldbachPlayId); _wGoldbachPlayId=null;
+      if(b){b.textContent='\u25b6 Pairs';b.style.color='rgba(126,200,122,.9)';} return; }
+    window._wGoldbachActive=true; _wGoldbachDir=1;
+    if(b){b.textContent='\u25a0 Stop';b.style.color='rgba(224,80,96,.9)';}
+    _wsEnsureLoop();
+    _wGoldbachPlayId=setInterval(function(){
+      var cap=2*(_wG||40); cap-=(cap%2);
+      _wGoldbachN+=_wGoldbachDir*2;
+      if(_wGoldbachN>=cap){_wGoldbachN=cap;_wGoldbachDir=-1;}
+      else if(_wGoldbachN<=4){_wGoldbachN=4;_wGoldbachDir=1;}
+      window.wGoldbachSetN(_wGoldbachN);
+    },260);
+  };
+  window.wGoldbachClear=function(){
+    window._wGoldbachActive=false;
+    if(_wGoldbachPlayId){clearInterval(_wGoldbachPlayId);_wGoldbachPlayId=null;}
+    var b=document.getElementById('w-gb-play'), lbl=document.getElementById('w-gb-val');
+    if(b){b.textContent='\u25b6 Pairs';b.style.color='rgba(126,200,122,.9)';}
+    if(lbl)lbl.textContent='off';
+    wRedrawCanvas();
+  };
+  window.wSetGbDim=function(v){
+    _wGbDimAlpha=Math.max(0,Math.min(1,+v||0));
+    var l=document.getElementById('w-gb-dim-lbl');
+    if(l)l.textContent=Math.round(_wGbDimAlpha*100)+'%';
+    wRedrawCanvas();
+  };
+  window._wDrawGoldbach=function(ctx,drawG){
+    if(!window._wGoldbachActive||typeof _drawGoldbachOverlay!=='function')return;
+    // Dim the whole lattice, then reassert the pair points on top.
+    ctx.save();
+    ctx.globalAlpha=1-_wGbDimAlpha; ctx.fillStyle='#04040d';
+    ctx.fillRect(-20000,-20000,40000,40000);
+    ctx.restore();
+    var map=new Map();
+    for(var q=0;q<_wHitPts.length;q+=4){
+      var key=_wHitPts[q+2]+','+_wHitPts[q+3];
+      if(!map.has(key))map.set(key,[_wHitPts[q],_wHitPts[q+1]]);
+    }
+    var xy=function(r,M){return map.get(r+','+M)||null;};
+    var pairs=_goldbachHeroPairs(_wGoldbachN,drawG);
+    ctx.save(); ctx.fillStyle='rgba(190,255,175,.95)';
+    for(var i=0;i<pairs.length;i++){
+      var pt=xy(pairs[i].r,pairs[i].M); if(!pt)continue;
+      ctx.beginPath();ctx.arc(pt[0],pt[1],2.2/(_wZoom||1),0,6.2832);ctx.fill();
+    }
+    ctx.restore();
+    _drawGoldbachOverlay(ctx,xy,drawG,performance.now()/1000);
+  };
   window.wToggleLiftStraight=function(v){ _wLiftStraight=!!v; wRedrawCanvas(); };
 
   window.wAdvToggle=function(){
@@ -2782,7 +2852,7 @@ function heroToggleTopBars(){
   // While Play is cycling, holds the ONE gap currently spotlighted (mirrors
   // _heroGapSpotlight); null = show every active gap at once.
   var _wGapSpotlight=null;
-  // Lock the diagonal gap g to half of Grid G — ported from page2's
+  // Lock the diagonal gap g to half of Grid G — ported from page5's
   // "🔒 g=G/2" button. Stays applied through G changes (wSetG) until the
   // user either toggles it off or manually drags the gap slider elsewhere.
   var _wGapLockHalf=false;
@@ -3647,6 +3717,7 @@ function heroToggleTopBars(){
         }
       }
     }
+    if(window._wGoldbachActive&&typeof window._wDrawGoldbach==='function') window._wDrawGoldbach(ctx,drawG);
     ctx.restore();
     _drawWResidueLegend(ctx,W,H);
   }
@@ -3693,10 +3764,10 @@ function heroToggleTopBars(){
     return 1+(((r-1)+(M-1)*frac*mod)%mod+mod)%mod;
   }
 
-  // ══ PAGE-2 DYNAMICS, VIEW-AGNOSTIC — driven by an xy(r,M)→[x,y] closure
+  // ══ PAGE-5 DYNAMICS, VIEW-AGNOSTIC — driven by an xy(r,M)→[x,y] closure
   // supplied by each view, so one implementation serves all five. ══
   //
-  // Gap Diagonal (Page 2 identity): the strip M−r=g holds pairs (r,r+g)
+  // Gap Diagonal (Page 5 identity): the strip M−r=g holds pairs (r,r+g)
   // whose coprime density is exactly φ(g)/g. Gold-filled = coprime on the
   // strip, faint outline = not.
   var _wDiagG=0, _wDiagLockHalf=false, _wDiagPlayId=null, _wDiagPlayDir=1;
@@ -4239,7 +4310,7 @@ function heroToggleTopBars(){
     });
   }
 
-  // ── ℤ[i] view — ported from Page 2's ℤ[i] tab: a full G×G grid mirrored
+  // ── ℤ[i] view — ported from Page 5's ℤ[i] tab: a full G×G grid mirrored
   // into all 4 quadrants (one base grid, rotated 90° three times), colored
   // by sector angle, with auto r/M labels when zoomed in enough.
   function _wGaussSectorHue(ri,mi,G){ return (Math.atan2(mi-G/2,ri-G/2)*180/Math.PI+360)%360; }
@@ -4578,7 +4649,7 @@ function heroToggleTopBars(){
   function _wsLoopTick(now){
     wsAnimTick(now);
     wRedrawCanvas();
-    if(_wsSpinning||_wsFlipping||_wPerRingSpinning){ _wsRaf=requestAnimationFrame(_wsLoopTick); }
+    if(_wsSpinning||_wsFlipping||_wPerRingSpinning||window._wGoldbachActive){ _wsRaf=requestAnimationFrame(_wsLoopTick); }
     else { _wsRaf=null; _wsLastT=null; }
   }
   function _wsEnsureLoop(){
@@ -5015,17 +5086,17 @@ function heroToggleTopBars(){
 (function(){
   var links=[
    ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
-   ['page2.html','P2','Gap Diagonal Identity — Page 2','#3dc8b8'],
+   ['page2.html','P2','How C(n) Works — Guided Walkthrough — Page 2','#7ec87a'],
    ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
-   ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
-   ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
-   ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
-   ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
-   ['page8.html','P8','The Prime Spiral — Page 8','#ff6b9d'],
-   ['page9.html','P9','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 9','#ff8c42'],
-   ['page10.html','P10','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 10','#ff2fd0'],
-   ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
-   ['page12.html','P12','Dirichlet Character-Twisted Density — Page 12','#d2691e'],
+   ['page4.html','P4','The Prime Filter — Sieve View — Page 4','#4a9eff'],
+   ['page5.html','P5','Gap Diagonal Identity — Page 5','#3dc8b8'],
+   ['page6.html','P6','Strip Correlations — Where Independence Breaks — Page 6','#e05060'],
+   ['page7.html','P7','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7','#ff8c42'],
+   ['page8.html','P8','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 8','#ff2fd0'],
+   ['page9.html','P9','Dirichlet Character-Twisted Density — Page 9','#d2691e'],
+   ['page10.html','P10','Farey & Unit Circle — Page 10','#a855f7'],
+   ['page11.html','P11','Farey Sequence Summatory Function — Page 11','#f2c14e'],
+   ['page12.html','P12','The Prime Spiral — Page 12','#ff6b9d'],
    ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
   ];
   var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
@@ -5048,35 +5119,15 @@ function heroToggleTopBars(){
 
   // ── Credits panel — historical / mathematical attributions, collapsed by default ──
   var creditGroups=[
-   ['Analytic foundations',[
-     ['Leonhard Euler','Euler product formula; the ζ(2)=π²/6 identity underlying the C(n) normalization.'],
-     ['Bernhard Riemann','Analytic continuation of ζ(s); the complex framework echoed in the C(t,s) extension.'],
-     ['Peter Gustav Lejeune Dirichlet','Dirichlet characters and L-functions, relevant to the modular twist constructions.']
-   ]],
-   ['Density & sieve results',[
-     ['William Feller & Erhard Tornier','The Feller–Tornier constant D_FT — a distinct classical object referenced against C(1), not the same quantity.'],
-     ['G. H. Hardy & J. E. Littlewood','Prime k-tuple conjecture and constants, the natural point of comparison for the primorial survivor counts.'],
-     ['Franz Mertens','Mertens\' theorems on prime products, foundational to the Euler-product asymptotics used throughout.']
-   ]],
-   ['Geometric & number-theoretic tools',[
-     ['John Farey','Farey sequences, used in several lattice/ring views across the explorer.'],
-     ['Lester R. Ford Sr.','Ford circles, referenced in the conformal/hyperbolic geometry views.'],
-     ['Carl Friedrich Gauss','Gaussian integers ℤ[i], used in the lattice visualization on Page 2.'],
-     ['Phillip H. Smith','The Smith chart, repurposed here as a visualization mode rather than for its original transmission-line context.']
-   ]],
-   ['OEIS — constants in the credits ledger',[
-     ['C(1) \u2248 0.530711820472','\u03b6(2)\u00b7\u220f\u209a(1\u22122/p\u00b2) \u2014 relative density of squarefree numbers followed by a squarefree successor. <a href="https://oeis.org/A065469" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A065469 \u2197</a>'],
-     ['D(1) \u2248 0.322634098940','the raw density \u220f\u209a(1\u22122/p\u00b2), the Feller\u2013Tornier Euler product D_FT. <a href="https://oeis.org/A065474" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A065474 \u2197</a>'],
-     ['1/\u03b6(2) \u2248 0.607927101854','6/\u03c0\u00b2 \u2014 density of squarefree integers; the total raw ratio C(1)=D(1)/(1/\u03b6(2)). <a href="https://oeis.org/A059956" target="_blank" rel="noopener" style="color:#3dc8b8;">OEIS A059956 \u2197</a>']
-   ]],
-   ['Other classical references noted in the honesty audit',[
-     ['Ernesto Cesàro','Cesàro summation/averaging, referenced where relevant and explicitly distinguished from this site\'s own constructions.'],
-     ['J. Franel & E. Landau','Franel–Landau results connecting error terms to the Riemann Hypothesis, cited for context around the decay theorem.']
-   ]]
-  ];
-  var cp='<div id="wg-credits-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
+   ['Analytic foundations',[['Leonhard Euler (1735, 1737, 1763)','The Basel problem \u03b6(2)=\u03c0\u00b2/6; the Euler product over primes; the totient \u03c6. Every Euler product on this site descends from these. \u00b7 all pages'],['Peter Gustav Lejeune Dirichlet (1837, 1849)','Dirichlet characters and L-functions; average orders and the coprime-pair density. \u00b7 P5, P9, P10'],['Bernhard Riemann (1859)','\u03b6(s) in the complex plane, the explicit formula, and the Riemann Hypothesis. \u00b7 P10, P11'],['Franz Mertens (1874)','Summatory totient \u03a3\u03c6(n) = (3/\u03c0\u00b2)N\u00b2 + O(N log N), and the error term for coprime-pair counts. \u00b7 P5, P11'],['Ernesto Ces\u00e0ro (1881) & J. J. Sylvester (1883)','Independent early derivations of the 6/\u03c0\u00b2 coprimality density. \u00b7 P5, P11'],['Pafnuty Chebyshev (1852)','Elementary bounds on \u03c0(x), used as the counting backdrop. \u00b7 P10'],['Roger Ap\u00e9ry (1978)','Irrationality of \u03b6(3), cited where 1/\u03b6(3) appears as a lattice density. \u00b7 P6'],['Eug\u00e8ne Catalan','Catalan\'s constant G = L(2,\u03c7\u2084), the normalising value in the character-twisted density. \u00b7 P9']]],
+   ['Sieve theory and density constants',[['Eratosthenes (c. 240 BC)','The sieve itself \u2014 Page 4 runs it literally, prime by prime, on a fixed block. \u00b7 P4'],['Adrien-Marie Legendre (1808)','Inclusion\u2013exclusion form of the sieve. \u00b7 P4'],['Viggo Brun (1919) & Atle Selberg (1947)','Modern sieve methods, cited for context on what a finite sieve can and cannot prove. \u00b7 P4'],['Willy Feller & Erhard Tornier (Math. Ann. 107, 188\u2013232, 1932/33)','The product \u220f(1\u22122/p\u00b2); the classical Feller\u2013Tornier constant is \u00bd(1+\u220f(1\u22122/p\u00b2)) \u2248 0.66131705. This is exactly the n=1 case of C(n)/\u03b6(2). \u00b7 P1, P6'],['G. H. Hardy & J. E. Littlewood (1923)','Partitio Numerorum III: the k-tuple conjecture and its singular series, whose \u03bd_p(\u210b) = #{h mod p} is the same local count that appears in C(n\u2081,\u2026,n_k). \u00b7 P7, P8'],['G. H. Hardy & E. M. Wright','An Introduction to the Theory of Numbers, Theorem 332, for the coprime-pair density with error term. \u00b7 P6'],['August Ferdinand M\u00f6bius (1832)','The function \u03bc and M\u00f6bius inversion. \u00b7 P1, P10, P12']]],
+   ['Farey geometry and the unit circle',[['John Farey (1816) & Augustin-Louis Cauchy (1816)','The mediant property, stated by Farey and first proved by Cauchy: adjacent a/b, c/d satisfy |ad \u2212 bc| = 1. (C. Haros described the same sequence in 1802.) \u00b7 P10, P11'],['Moritz Stern (1858) & Achille Brocot (1861)','The Stern\u2013Brocot tree, generating every positive rational exactly once in lowest terms. \u00b7 P2, P11'],['Lester R. Ford Sr. (1938)','Ford circles \u2014 the tangency picture of Farey neighbours. \u00b7 P6, P10, P11'],['J\u00e9r\u00f4me Franel & Edmund Landau (1924)','Farey-sequence discrepancy as an equivalent of the Riemann Hypothesis; Landau\'s companion paper completes the argument. \u00b7 P10, P11'],['Srinivasa Ramanujan (1918)','Ramanujan sums c_M(a), giving the closed form for the prime exponential sum on Page 12. \u00b7 P12']]],
+   ['Geometric and computational tools',[['Carl Friedrich Gauss','Gaussian integers, underlying the Gauss lattice view. \u00b7 P1, P3, P12'],['Arthur Cayley','The Cayley transform \u0393(z) = (z\u22121)/(z+1), used purely as lattice geometry. \u00b7 P1, P3'],['Phillip H. Smith (1939)','The Smith chart, the engineering form of the same conformal map. \u00b7 P1, P11'],['Ernst Meissel (1870) & D. H. Lehmer (1959)','The Meissel\u2013Lehmer algorithm for \u03c0(x) in sublinear time. \u00b7 P11'],['Stanis\u0142aw Ulam (1963)','The Ulam spiral \u2014 cited explicitly for contrast: the Page 12 spiral is a different construction. \u00b7 P12']]],
+   ['Lattice visibility',[['Herzog & Stewart (1971)','Visible lattice points and \'invisible forests\', the local form of the Mertens error term. \u00b7 P6'],['Bureaux & Enriquez (2016)','Modern treatment of visible-point statistics. \u00b7 P6']]],
+   ['OEIS cross-references',[['A013661','\u03b6(2) = \u03c0\u00b2/6 \u2248 1.644934066848'],['A065474','\u220f(1\u22122/p\u00b2) \u2248 0.322634098940 \u2014 this is D(1)'],['A065493','Feller\u2013Tornier constant \u00bd(1+\u220f(1\u22122/p\u00b2)) \u2248 0.661317049470'],['A065469, A005117, A007674, A059956','Further constants and sequences cross-checked in the Euler-product ledger'],['Values verified here','C(1) \u2248 0.530711820472 \u00b7 D(1) \u2248 0.322634098940 \u00b7 1/\u03b6(2) \u2248 0.607927101854']]]
+  ];var cp='<div id="wg-credits-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
   cp+='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:.12em;color:#c8a84a;margin-bottom:10px;text-transform:uppercase;">Credits — Classical Foundations</div>';
-  cp+='<div style="font-size:9.5px;color:rgba(255,255,255,.55);margin-bottom:12px;max-width:70ch;">This site builds on centuries of number theory. C(n) itself, the Wessen Identity, and the derived curves/theorems are original constructions by Wessen Getachew; the mathematicians below provided the classical tools, theorems, and comparison constants that make this work possible. See each page\'s own notes for detailed attributions.</div>';
+  cp+='<div style="font-size:9.5px;color:rgba(255,255,255,.55);margin-bottom:12px;max-width:70ch;">Complete attribution ledger for all twelve pages. C(n), its generalisations C(n\u2081,\u2026,n_k) and C_\u03c7(n), and the block-coprimality framing are original constructions by Wessen Getachew; everything listed below is classical work supplying the tools, theorems, and comparison constants they are built on and measured against. Each entry names the pages it is used on.</div>';
   creditGroups.forEach(function(g){
     cp+='<div style="margin-bottom:10px;"><div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">'+g[0]+'</div>';
     g[1].forEach(function(e){cp+='<div style="margin-bottom:3px;"><b style="color:rgba(255,255,255,.88);">'+e[0]+'</b> — '+e[1]+'</div>';});
@@ -5090,17 +5141,17 @@ function heroToggleTopBars(){
   cp+='</div>';
   var pageInfo=[
    ['Page 1 — C(n): Block-Coprime Density','Six interactive lattice views of the C(n) block-coprime density function: Grid, Ring, Lift, Farey, Gauss, and Cayley.','Most interesting: the Cayley View hero view, which renders C(n) through the conformal map Γ(z)=(z−1)/(z+1) — the same construction used in RF Smith charts, reused here purely for lattice geometry.'],
-   ['Page 2 — Gap Diagonal Identity','Explores the diagonal gap identity that underlies the lattice structure C(n) is built on.','Most interesting: watching how gaps between block-coprime residues line up diagonally as n grows.'],
+   ['Page 2 — How C(n) Works: Guided Walkthrough','Builds the C(n) formula piece by piece, ending in a full live working table with every prime shown, nothing left out.','Most interesting: the "see it happen" step where the abstract formula turns into a concrete per-prime computation you can watch.'],
    ['Page 3 — Color & Label Modes: The Mathematics','A codex of 34 color/label modes, each pixel a function of (r, M, n), with MathJax swatches and deep-linkable state.','Most interesting: a sticky master control bar drives every canvas on the page simultaneously from one set of controls.'],
-   ['Page 4 — How C(n) Works: Guided Walkthrough','Builds the C(n) formula piece by piece, ending in a full live working table with every prime shown, nothing left out.','Most interesting: the "see it happen" step where the abstract formula turns into a concrete per-prime computation you can watch.'],
-   ['Page 5 — Strip Correlations: Where Independence Breaks','Derives the exact correlation factor between residue strips and explains why C(n) needs min(n+1, p).','Most interesting: the live two-strip comparison showing exactly where the independence assumption used elsewhere on the site stops holding.'],
-   ['Page 6 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
-   ['Page 7 — Farey & Unit Circle','Farey modular residue rings on concentric circles: ten representations of the unit circle, cyclotomic presets, Ford circles, and the Franel\u2013Landau discrepancy connection to RH.','Most interesting: the spectral-correlation panel comparing Farey gap statistics against GUE, Poisson, and the actual Riemann zeros.'],
-   ['Page 8 — The Prime Spiral','Isolates the "Lift Dynamics" spiral overlay from the hero Ring/Lift view: fix one prime p, mark where it lands on every ring modulus M from p+1 up to G, and watch the sequence of markers read as a spiral arm.','Most interesting: the live spiral demo lets you drive G and the chosen prime directly, with an explicit aside on why this is unrelated to the Ulam spiral despite the name.'],
-   ['Page 9 — C(n\u2081,n\u2082): Multi-Block Coprime Density — Prime Gaps','Extends C(n) to two independent blocks with lengths n\u2081+1 and n\u2082+1, anchored at independent random M\u2081, M\u2082.','Most interesting: lock M\u2082=M\u2081+g (gap mode, with twin/cousin/sexy presets) and set n\u2081=n\u2082=0 \u2014 the correlation ratio \u03c1 = C(n\u2081,n\u2082)/[C(n\u2081)\u00b7C(n\u2082)] becomes the exact finite picture behind prime gaps, with a closed-form f_p(g)=1\u2212\u03bd_p(g)/p\u00b2 matching the Hardy\u2013Littlewood \u03bd_p.'],
-   ['Page 10 — C(n\u2081,\u2026,n_k): k-Block Coprime Density — Prime Constellations','The full k-fold generalization — any number of independent blocks, each with its own depth n\u1d62, unified in one Euler product.','Most interesting: constellation mode locks M\u1d62=M\u2081+h\u1d62 to a k-tuple \u2130={0,h\u2082,\u2026,h_k} (presets for {0,2,6}, {0,4,6}, {0,2,6,8}) \u2014 at n\u1d62=0 this gives the exact k-tuple analogue of Page 9\u2019s gap correspondence, alongside the 3D Ring view stacking survival by block-1 depth n\u2081.'],
-   ['Page 11 — The Prime Filter','A sieve-construction view showing how successive prime moduli filter down the surviving residues, building intuition for why the Euler product converges the way it does.','Most interesting: watching the live filter count shrink prime by prime toward the asymptotic density.'],
-   ['Page 12 — Dirichlet Character-Twisted Density','Twists the block-coprime density by a Dirichlet character \u03c7 mod Q, connecting C(n) to L-functions and character orthogonality.','Most interesting: the L(s,\u03c7) Euler product explorer sitting right next to the character explorer, so you can watch the same \u03c7 drive both a residue-class picture and a classical L-function at once.'],
+   ['Page 4 — The Prime Filter','A sieve-construction view showing how successive prime moduli filter down the surviving residues, building intuition for why the Euler product converges the way it does.','Most interesting: watching the live filter count shrink prime by prime toward the asymptotic density.'],
+   ['Page 5 — Gap Diagonal Identity','Explores the diagonal gap identity that underlies the lattice structure C(n) is built on.','Most interesting: watching how gaps between block-coprime residues line up diagonally as n grows.'],
+   ['Page 6 — Strip Correlations: Where Independence Breaks','Derives the exact correlation factor between residue strips and explains why C(n) needs min(n+1, p).','Most interesting: the live two-strip comparison showing exactly where the independence assumption used elsewhere on the site stops holding.'],
+   ['Page 7 — C(n\u2081,n\u2082): Multi-Block Coprime Density — Prime Gaps','Extends C(n) to two independent blocks with lengths n\u2081+1 and n\u2082+1, anchored at independent random M\u2081, M\u2082.','Most interesting: lock M\u2082=M\u2081+g (gap mode, with twin/cousin/sexy presets) and set n\u2081=n\u2082=0 \u2014 the correlation ratio \u03c1 = C(n\u2081,n\u2082)/[C(n\u2081)\u00b7C(n\u2082)] becomes the exact finite picture behind prime gaps, with a closed-form f_p(g)=1\u2212\u03bd_p(g)/p\u00b2 matching the Hardy\u2013Littlewood \u03bd_p.'],
+   ['Page 8 — C(n\u2081,\u2026,n_k): k-Block Coprime Density — Prime Constellations','The full k-fold generalization — any number of independent blocks, each with its own depth n\u1d62, unified in one Euler product.','Most interesting: constellation mode locks M\u1d62=M\u2081+h\u1d62 to a k-tuple \u2130={0,h\u2082,\u2026,h_k} (presets for {0,2,6}, {0,4,6}, {0,2,6,8}) \u2014 at n\u1d62=0 this gives the exact k-tuple analogue of Page 7\u2019s gap correspondence, alongside the 3D Ring view stacking survival by block-1 depth n\u2081.'],
+   ['Page 9 — Dirichlet Character-Twisted Density','Twists the block-coprime density by a Dirichlet character \u03c7 mod Q, connecting C(n) to L-functions and character orthogonality.','Most interesting: the L(s,\u03c7) Euler product explorer sitting right next to the character explorer, so you can watch the same \u03c7 drive both a residue-class picture and a classical L-function at once.'],
+   ['Page 10 — Farey & Unit Circle','Farey modular residue rings on concentric circles: ten representations of the unit circle, cyclotomic presets, Ford circles, and the Franel\u2013Landau discrepancy connection to RH.','Most interesting: the spectral-correlation panel comparing Farey gap statistics against GUE, Poisson, and the actual Riemann zeros.'],
+   ['Page 11 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
+   ['Page 12 — The Prime Spiral','Isolates the "Lift Dynamics" spiral overlay from the hero Ring/Lift view: fix one prime p, mark where it lands on every ring modulus M from p+1 up to G, and watch the sequence of markers read as a spiral arm.','Most interesting: the live spiral demo lets you drive G and the chosen prime directly, with an explicit aside on why this is unrelated to the Ulam spiral despite the name.'],
   ];
   var pi='<div id="wg-pageinfo-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
   pi+='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:.12em;color:#c8a84a;margin-bottom:10px;text-transform:uppercase;">Page Info — What Each Page Does</div>';
@@ -5892,7 +5943,7 @@ function heroToggleTopBars(){
       title="Line thickness of the residue-chord overlay (comet-tail + chord)">
     <span id="hero-line-thick-lbl" style="font-family:var(--mono);font-size:7.5px;color:rgba(120,180,240,.85);min-width:22px;">1.0×</span>
   </div>
-  <!-- Residue Points — the page7-style "Residue Path Details" dropdown:
+  <!-- Residue Points — the page10-style "Residue Path Details" dropdown:
        click one or more R's to highlight just those paths (comet-tail
        descent lines) live on the canvas, on top of the Active Gap above. -->
   <div style="margin:0 14px 10px;padding:9px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:2px;">
@@ -5992,7 +6043,7 @@ function heroToggleTopBars(){
   <div style="padding:10px 14px;border-top:1px solid rgba(126,200,122,.14);">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <span class="cv-lbl" style="color:rgba(126,200,122,.85);">N =</span>
-      <input type="range" id="hero-goldbach-n" min="4" max="200" step="2" value="4"
+      <input type="range" id="hero-goldbach-n" min="4" max="2048" step="2" value="4"
         style="width:140px;accent-color:rgba(126,200,122,.85);"
         oninput="heroGoldbachSetN(+this.value)">
       <input type="number" id="hero-goldbach-n-num" value="4" min="4" max="9998" step="2"
@@ -6001,6 +6052,13 @@ function heroToggleTopBars(){
       <div class="cv-sep"></div>
       <button id="hero-goldbach-play" class="cv-btn" onclick="heroGoldbachPlay()" style="color:rgba(126,200,122,.9);background:rgba(126,200,122,.1);border-color:rgba(126,200,122,.4);">▶ Pairs</button>
       <button class="cv-btn" onclick="heroGoldbachClear()">Clear</button>
+      <div class="cv-sep"></div>
+      <span class="cv-lbl" style="font-size:8px;color:rgba(126,200,122,.75);">Dim</span>
+      <input type="range" id="hero-gb-dim" min="0" max="100" step="1" value="50"
+        style="width:78px;accent-color:#7ec87a;"
+        title="Opacity of non-pair lattice points while the Goldbach overlay is active"
+        oninput="heroSetGbDim(this.value/100)">
+      <span id="hero-gb-dim-lbl" style="font-size:8px;color:rgba(126,200,122,.8);min-width:26px;">50%</span>
       <span id="hero-goldbach-lbl" style="font-size:8px;color:rgba(126,200,122,.8);">N=—</span>
     </div>
   </div>
@@ -7186,7 +7244,7 @@ function heroToggleTopBars(){
     $$A(G) = \frac{2}{G^2}\sum_{g=1}^{G-1}(G-g)\cdot\frac{\varphi(g)}{g} \;\to\; \frac{6}{\pi^2}$$
     Each offset g corresponds to two mirrored strips M−r=±g (hence the factor 2), each of length (G−g) and coprime density φ(g)/g.
     The block-coprime extension replaces φ(g)/g with B(g,n) to recover D(n) = C(n)/ζ(2) for any n.
-    This is the explicit bridge to the Gap Diagonal Identity (page2.html).
+    This is the explicit bridge to the Gap Diagonal Identity (page5.html).
   </div>
   <div class="cv-controls" style="flex-wrap:wrap;row-gap:6px;margin-bottom:8px;">
     <span class="cv-lbl">G max:</span>
@@ -9245,7 +9303,7 @@ function renderRing(){
   drawDHGSSpiral(ctx,cW,cH);
   drawRingBarriers(ctx,cW,cH);
   drawRingPrimeSpiral(ctx,cW,cH);
-  drawRingSpire(ctx,cW,cH);     // Prime Spire — p mod M trajectory (from page 2)
+  drawRingSpire(ctx,cW,cH);     // Prime Spire — p mod M trajectory (from page 5)
   if(inspectMode&&_inspectRingPts.length>0){
     ctx.fillStyle='rgba(4,4,13,0.38)';
     ctx.fillRect(0,0,cW,cH);
@@ -11298,7 +11356,7 @@ function getCellColorForMode(r,M,n,mode){
       const DCOLS=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#34495e','#e67e22','#95a5a6','#d35400','#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad','#16a085','#2c3e50','#d35400','#7f8c8d','#c0392b'];
       return DCOLS[g%DCOLS.length]+(block?'':'55');
     }
-    // ── Hero-origin modes + page2-ported modes (available on grid/ring/hero) ──
+    // ── Hero-origin modes + page5-ported modes (available on grid/ring/hero) ──
     case 'mod_residue':{
       const rem=r%Math.max(1,M);
       const h=(rem/Math.max(1,M))*360;
@@ -12080,7 +12138,7 @@ function _addExportLegend(panelCv, panelName){
   return out;
 }
 // ══════════════════════════════════════════════════════════════════════════════
-// SHARED EXPORT LAYOUT HELPERS  (same system as page2.html)
+// SHARED EXPORT LAYOUT HELPERS  (same system as page5.html)
 // ══════════════════════════════════════════════════════════════════════════════
 function _makeExportHelpers(ctx,SIZE){
   const TX=Math.round(SIZE*0.038);
@@ -12169,7 +12227,7 @@ function _makeExportHelpers(ctx,SIZE){
   return{TX,MAX_TXT_W,drawTag,drawTitleRow,drawFormula,drawStatBoxes,drawSubStats,drawSeparator,drawFooter};
 }
 
-// ── GRID EXPORT (page2-style layout) ──────────────────────────────────────
+// ── GRID EXPORT (page5-style layout) ──────────────────────────────────────
 function exportGridPNG(){
   const G=getGridG(), gridN=getGridN();
   const Cn=getCn(gridN).toFixed(6);
@@ -12240,7 +12298,7 @@ function exportGridPNG(){
   a.href=cv.toDataURL('image/png'); a.click();
 }
 
-// ── RING EXPORT (page2-style layout) ──────────────────────────────────────
+// ── RING EXPORT (page5-style layout) ──────────────────────────────────────
 function exportRingPNG(){
   const mMax=parseInt(document.getElementById('ring-max-num')?.value)||128;
   const ringN=N;
@@ -12986,7 +13044,7 @@ function exportHero4K(){
           }
         }
         if(typeof _heroGoldbachActive!=='undefined'&&_heroGoldbachActive&&typeof _drawGoldbachOverlay==='function')
-          _drawGoldbachOverlay(offCtx,0,0,cW,cH,G,0);
+          _drawGoldbachOverlay(offCtx,(r,M)=>(r<1||r>G||M<1||M>G)?null:[(r-0.5)*cW,(M-0.5)*cH],G,0,Math.max(0.8,Math.min(cW,cH)*0.38));
       } else if(liveCv){
         offCtx.imageSmoothingEnabled=false;
         offCtx.drawImage(liveCv,0,0,sz,sz);
@@ -14310,7 +14368,7 @@ function isValidPrimeGap(g){ g=+g; return g===1 || (g>0 && g%2===0); }
 // every active gap at once, the normal (non-playing) state.
 let _heroGapSpotlight=null;
 // Lock the diagonal gap g to half of Grid G — mirrors the opener's own
-// "🔒 g=G/2" lock (ported from page2's gLockHalf). Stays applied through G
+// "🔒 g=G/2" lock (ported from page5's gLockHalf). Stays applied through G
 // changes (heroLatticeSetG) until toggled off or the slider is dragged
 // manually to something other than the current half.
 let _heroGapLockHalf=false;
@@ -14362,6 +14420,9 @@ function _heroDynOverlays(ctx,xy,G,n,cap){
     _sharedLiftOverlay(ctx,xy,G,n,cap,_heroRingActive);
   if(dg>0&&typeof _sharedDiagOverlay==='function')
     _sharedDiagOverlay(ctx,xy,G,_heroRingActive);
+
+  if(typeof _heroGoldbachActive!=='undefined'&&_heroGoldbachActive&&typeof _drawGoldbachOverlay==='function')
+    _drawGoldbachOverlay(ctx,xy,G,performance.now()/1000);
 }
 function _heroCharPass(pureCop){ return _heroCharFilter==='both' || (_heroCharFilter==='support'&&pureCop) || (_heroCharFilter==='vanishing'&&!pureCop); }
 function _heroCharSizeMul(pureCop){ return pureCop?_heroCharSupportSize:_heroCharVanishSize; }
@@ -14457,7 +14518,7 @@ let _heroOverlayCacheKey='';
 const _heroGapNames={1:'Gap 1 (2→3)',2:'Twin Primes',4:'Cousin Primes',6:'Sexy Primes'};
 // Active Gap tab — individually selected residues (from the R dropdown/list).
 // Empty set = every residue from the active gap pairs is shown (old behavior);
-// non-empty = only the clicked R's paths are drawn, brightened, page7-style.
+// non-empty = only the clicked R's paths are drawn, brightened, page10-style.
 let _heroSelectedR=new Set();
 
 function heroToggleResidueOverlay(){
@@ -14588,7 +14649,7 @@ function _drawHeroResidueChords(ctx,W,H,mMax,ptXY){
 
   // ── comet-tail descent lines, one per unique residue — when the R
   // dropdown has an explicit selection, only those R's paths are drawn
-  // (and drawn brighter/thicker, page7-style highlight). ──
+  // (and drawn brighter/thicker, page10-style highlight). ──
   const rList=[],rSeen={};
   pairs.forEach(pr=>{
     if((!hasRSel||_heroSelectedR.has(pr.r1))&&!rSeen[pr.r1]){rSeen[pr.r1]=pr.gap;rList.push(pr.r1);}
@@ -15223,7 +15284,7 @@ function heroRotate(dir){
 
 // ── HERO RING OPACITY & GOLDBACH DIM ──
 let _heroRingOpacity=1.0;
-let _heroGbDimAlpha=0.10;
+let _heroGbDimAlpha=0.50;
 function heroSetRingOpacity(v){
   _heroRingOpacity=Math.max(0,Math.min(1,+v||0));
   const lbl=document.getElementById('hero-ring-opacity-lbl');
@@ -15233,6 +15294,8 @@ function heroSetGbDim(v){
   _heroGbDimAlpha=Math.max(0,Math.min(1,+v||0));
   const lbl=document.getElementById('hero-gb-dim-lbl');
   if(lbl)lbl.textContent=Math.round(_heroGbDimAlpha*100)+'%';
+  const sl=document.getElementById('hero-gb-dim');
+  if(sl&&+sl.value!==Math.round(_heroGbDimAlpha*100))sl.value=Math.round(_heroGbDimAlpha*100);
 }
 
 // ── VIEW-SPECIFIC PANEL STATE ──────────────────────────────────────────────────
@@ -15419,7 +15482,7 @@ function _liftPrimeSyncSkip(p){
   return nDepthDone&&finiteDone;
 }
 // If the governing n just saturated the current spiral prime, advance it to
-// the first still-live prime ≤ G (mirrors the saturation lock on Page 8).
+// the first still-live prime ≤ G (mirrors the saturation lock on Page 12).
 function _liftPSyncReconcile(){
   if(!_liftPSyncCn)return;
   var G=_liftCurrentG();
@@ -16730,8 +16793,9 @@ function heroGoldbachSetN(N){
   _heroGoldbachActive=true;
   const sl=document.getElementById('hero-goldbach-n');
   const num=document.getElementById('hero-goldbach-n-num');
-  if(sl){sl.max=Math.max(+sl.max,N);sl.value=Math.min(N,+sl.max);}
-  if(num) num.value=N;
+  const gMax=2*((typeof _heroG!=='undefined'&&_heroG)?_heroG:100);
+  if(sl){sl.max=Math.max(gMax,N);sl.value=Math.min(N,+sl.max);}
+  if(num){num.max=Math.max(gMax,N);num.value=N;}
 
   // Get unique pairs (p ≤ q only)
   const allPairs=_goldbachHeroPairs(N,_heroG);
@@ -16805,22 +16869,34 @@ function heroGoldbachClear(){
 // ── GOLDBACH LIGHTNING DRAW ──────────────────────────────────────
 // Called from inside the animate loop after all cells are drawn.
 // Draws: dimming overlay, glow on pairs, connecting path, traveling spark.
-function _drawGoldbachOverlay(ctx,originX,originY,cW,cH,G,t){
+function _gbEstimateDotR(xy,G){
+  // Sample a few neighbouring lattice points and take the smallest spacing seen,
+  // so the glow scales sensibly in every view (grid cells, ring arcs, Cayley discs).
+  let best=Infinity;
+  for(let M=2;M<=Math.min(G,24);M++){
+    const a=xy(1,M), b=xy(2,M);
+    if(a&&b){ const dd=Math.hypot(a[0]-b[0],a[1]-b[1]); if(dd>0.01&&dd<best)best=dd; }
+  }
+  if(!isFinite(best)) best=6;
+  return Math.max(0.8, Math.min(14, best*0.38));
+}
+
+function _drawGoldbachOverlay(ctx,xy,G,t,dotRHint){
   const N=_heroGoldbachN;
-  const pairs=_goldbachHeroPairs(N,G);
+  const all=_goldbachHeroPairs(N,G);
+  if(all.length===0) return;
+
+  // Keep only pairs this view can actually place (ring/Farey/Cayley reject r>=M etc.)
+  const pairs=[];
+  for(const pr of all){ const q=xy(pr.r,pr.M); if(q) pairs.push({...pr,x:q[0],y:q[1]}); }
   if(pairs.length===0) return;
 
-  const dotR=Math.max(0.8,Math.min(cW,cH)*0.38);
+  const dotR=dotRHint||_gbEstimateDotR(xy,G);
 
-  // Screen position helper
-  const scr=(ri,mi)=>({
-    x:originX+(ri+0.5)*cW,
-    y:originY+(mi+0.5)*cH
-  });
+  const scr=(r,M)=>{const q=xy(r,M);return q?{x:q[0],y:q[1]}:null;};
 
   // ── Glow rings on each pair cell ──
-  for(const{ri,mi} of pairs){
-    const{x,y}=scr(ri,mi);
+  for(const{ri,mi,x,y} of pairs){
     const pulse=0.5+0.38*Math.sin(t*3.0+ri*0.41+mi*0.29);
     const grad=ctx.createRadialGradient(x,y,dotR*0.8,x,y,dotR*3.5);
     grad.addColorStop(0,`rgba(126,200,122,${(pulse*0.75).toFixed(2)})`);
@@ -16846,8 +16922,8 @@ function _drawGoldbachOverlay(ctx,originX,originY,cW,cH,G,t){
     seen.add(key);
 
     // A = cell(r=p, M=q), B = cell(r=q, M=p)
-    const A=scr(p-1,q-1);
-    const B=scr(q-1,p-1);
+    const A=scr(p,q), B=scr(q,p);
+    if(!A||!B) continue;
     const mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
 
     // Arch control point: curve toward origin (top-left), perpendicular to A→B
@@ -16913,12 +16989,8 @@ function _drawGoldbachOverlay(ctx,originX,originY,cW,cH,G,t){
     ctx.lineWidth=0.8;
     ctx.setLineDash([3,5]);
     ctx.beginPath();
-    const s0=scr(sorted[0].ri,sorted[0].mi);
-    ctx.moveTo(s0.x,s0.y);
-    for(let i=1;i<sorted.length;i++){
-      const si=scr(sorted[i].ri,sorted[i].mi);
-      ctx.lineTo(si.x,si.y);
-    }
+    ctx.moveTo(sorted[0].x,sorted[0].y);
+    for(let i=1;i<sorted.length;i++) ctx.lineTo(sorted[i].x,sorted[i].y);
     ctx.stroke();
     ctx.setLineDash([]);
   }
@@ -16926,8 +16998,8 @@ function _drawGoldbachOverlay(ctx,originX,originY,cW,cH,G,t){
   // ── N= label floating near the center of the anti-diagonal ──
   if(sorted.length>0){
     const mid=sorted[Math.floor(sorted.length/2)];
-    const{x,y}=scr(mid.ri,mid.mi);
-    const fz=Math.max(9,Math.min(cW*.65,15))|0;
+    const x=mid.x, y=mid.y;
+    const fz=Math.max(9,Math.min(dotR*2.2,15))|0;
     ctx.font=`bold ${fz}px 'JetBrains Mono',monospace`;
     ctx.textAlign='left';ctx.textBaseline='bottom';
     ctx.shadowColor='rgba(0,0,0,.95)';ctx.shadowBlur=5;
@@ -18804,7 +18876,6 @@ function initHeroThree(){
       const sRi=_heroRowShift===0?ri:((ri+mi*_heroRowShift*G)%G+G)%G;
       return[originX+(sRi+0.5)*cW,originY+(mi+0.5)*cH];
     },G,nAnim,400);
-    if(_heroGoldbachActive) _drawGoldbachOverlay(ctx,originX,originY,cW,cH,G,t);
 
     // Residue-chord gap overlay — same row-shifted grid-cell positions.
     _drawHeroResidueChords(ctx,W,H,G,(r,M)=>{
@@ -19666,7 +19737,7 @@ function drawRingPrimeSpiral(ctx,cW,cH){
 }
 
 // ══════════════════════════════════════════════════════════
-//  PRIME SPIRE — RING VIEW  (ported from page2.html combined view)
+//  PRIME SPIRE — RING VIEW  (ported from page5.html combined view)
 //  Shows r(M) = p mod M — the residue of prime p across all rings.
 //  Phase 1 (M < p): gold dots. Dropout at M = p: coral ring.
 //  Phase 2 (M > p): teal dots fading to origin. Mirror σ in violet.
@@ -22834,7 +22905,12 @@ function _drawHeroSmith(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
       if(onGap) col=_gapColor(gap);
       else col=_getHeroColor(r,M,nAnim,d,heroMode,t||0,null,dimmed,false,false,true);
 
-      const dimAlpha=(dimmed?0.4:1)*(_heroRingOpacity??1);
+      let gbDimSmith=false;
+        if(typeof _heroGoldbachActive!=='undefined'&&_heroGoldbachActive){
+          const PSs=(typeof PS!=='undefined')?PS:new Set();
+          gbDimSmith=!(PSs.has(r)&&PSs.has(M)&&r+M===_heroGoldbachN);
+        }
+        const dimAlpha=(gbDimSmith?_heroGbDimAlpha:(dimmed?0.4:1))*(_heroRingOpacity??1);
       ctx.globalAlpha=dimAlpha*_hDynDim();
       ctx.fillStyle=col;
       const drawR=(isInspected?dotR*1.6*_heroSecDotScale:dotR)*_heroCharSizeMul(pureCop);

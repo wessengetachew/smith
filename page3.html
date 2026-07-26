@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Color &amp; Label Modes — The Mathematics — Page 3</title>
+<title>Color &amp; Label Modes — The Mathematics · Wessen Getachew — Page 3</title>
 <script>
 window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};
 </script>
@@ -143,18 +143,18 @@ footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;fon
 (function(){
   var links=[
    ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
-   ['page2.html','P2','Gap Diagonal Identity — Page 2','#3dc8b8'],
+   ['page2.html','P2','How C(n) Works — Guided Walkthrough — Page 2','#7ec87a'],
    ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
-   ['page4.html','P4','How C(n) Works — Guided Walkthrough — Page 4','#7ec87a'],
-   ['page5.html','P5','Strip Correlations — Where Independence Breaks — Page 5','#e05060'],
-   ['page6.html','P6','Farey Sequence Summatory Function — Page 6','#f2c14e'],
-   ['page7.html','P7','Farey & Unit Circle — Page 7','#a855f7'],
-   ['page8.html','P8','The Prime Spiral — Page 8','#ff6b9d'],
-   ['page9.html','P9','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 9','#ff8c42'],
-   ['page10.html','P10','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 10','#ff2fd0'],
-   ['page11.html','P11','The Prime Filter — Page 11','#4a9eff'],
-   ['page12.html','P12','Dirichlet Character-Twisted Density — Page 12','#d2691e'],
-   ['#opener','Opener','Open the Welcome / Opener Teaser on the home page','#f2a84a']
+   ['page4.html','P4','The Prime Filter — Sieve View — Page 4','#4a9eff'],
+   ['page5.html','P5','Gap Diagonal Identity — Page 5','#3dc8b8'],
+   ['page6.html','P6','Strip Correlations — Where Independence Breaks — Page 6','#e05060'],
+   ['page7.html','P7','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7','#ff8c42'],
+   ['page8.html','P8','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 8','#ff2fd0'],
+   ['page9.html','P9','Dirichlet Character-Twisted Density — Page 9','#d2691e'],
+   ['page10.html','P10','Farey & Unit Circle — Page 10','#a855f7'],
+   ['page11.html','P11','Farey Sequence Summatory Function — Page 11','#f2c14e'],
+   ['page12.html','P12','The Prime Spiral — Page 12','#ff6b9d'],
+   ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
   ];
   var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:\'JetBrains Mono\',monospace;">';
   bar+='<span style="font-family:\'Cinzel\',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
@@ -181,7 +181,7 @@ function openOpener(){
   <div class="eyebrow">Page 3 · Reference — Color &amp; Label Codex</div>
   <h1>Every pixel is a <b>function of (r,&thinsp;M,&thinsp;n)</b></h1>
   <p class="lede">
-    Every lattice on Pages 1–2 colors the point \((r,M)\) by evaluating an arithmetic
+    Every lattice on Pages 1 and 5 colors the point \((r,M)\) by evaluating an arithmetic
     quantity — a gcd, a totient, a depth, an angle — and mapping it onto the hue wheel.
     This page documents <em>the exact formula behind each mode</em>, in each of the three
     coloring scopes, with a live swatch rendered by that same formula: each swatch is a
@@ -249,7 +249,7 @@ function openOpener(){
     <div class="adv-title">Dirichlet Character Controls</div>
     <label><input type="checkbox" id="mb-chi-sup" checked> Show χ(r) ≠ 0 (Character Support)</label>
     <label class="van"><input type="checkbox" id="mb-chi-van" checked> Show χ(r) = 0 (Character Vanishing)</label>
-    <label style="color:var(--gold);" title="Ported from Page 2's 🔒 g=G/2 — locks each swatch's highlighted diagonal gap to half of its own G, staying in sync as G changes, on every view"><input type="checkbox" id="mb-gaplock" checked> Gap diagonal lock (g = G/2)</label>
+    <label style="color:var(--gold);" title="Ported from Page 5's 🔒 g=G/2 — locks each swatch's highlighted diagonal gap to half of its own G, staying in sync as G changes, on every view"><input type="checkbox" id="mb-gaplock" checked> Gap diagonal lock (g = G/2)</label>
     <div class="rings-row">
       <span class="mb-sub" style="color:var(--violet);">Custom rings M:</span>
       <input type="text" id="mb-rings" placeholder="e.g. 7, 11, 13, 30 — empty = all" spellcheck="false">
@@ -309,7 +309,7 @@ function openOpener(){
     <tr><td>fail_j</td><td>j</td><td>The first failure index: smallest \(j\le n\) with \(\gcd(r,M+j)&gt;1\).</td></tr>
     <tr><td>phi_M</td><td>φ(M)</td><td>Euler's totient of the modulus — the length of the reduced residue system on that ring.</td></tr>
     <tr><td>mobius_M</td><td>μ(M)</td><td>The Möbius function of \(M\): \(0\) if \(p^2\mid M\), else \((-1)^{\omega(M)}\).</td></tr>
-    <tr><td>gap</td><td>|M−r|</td><td>The diagonal gap — distance to the \(r=M\) diagonal, the coordinate of Page 2's gap identity.</td></tr>
+    <tr><td>gap</td><td>|M−r|</td><td>The diagonal gap — distance to the \(r=M\) diagonal, the coordinate of Page 5's gap identity.</td></tr>
     <tr><td>r_val ★</td><td>r</td><td>Residue only (default).</td></tr>
     <tr><td>M_val</td><td>M</td><td>Modulus only.</td></tr>
   </table>
@@ -567,13 +567,13 @@ const APPLY_VALS={
  'depth_grad':{gl:'depth_grad',p2:'depth_grad'}
 };
 const APPLY_PARAM={op:'wcm',he:'hcm',gl:'gcm',p2:'pcm'};
-const APPLY_NAME={op:'Opener',he:'Hero',gl:'Global',p2:'Page 2'};
-const APPLY_FILE={op:'index.html',he:'index.html',gl:'index.html',p2:'page2.html'};
+const APPLY_NAME={op:'Opener',he:'Hero',gl:'Global',p2:'Page 5'};
+const APPLY_FILE={op:'index.html',he:'index.html',gl:'index.html',p2:'page5.html'};
 // Per-scope canvas-state params, appended alongside the color-mode param so the
 // destination switches to the same view/G/n this swatch is currently showing —
 // not just the color. index.html already understands wv/wg/wn (Opener) and
 // hv/hg/hn (Hero) via its hash deep-link handler; gview/gg/gn is a new trio for
-// the Global "Block-Coprimality Canvas" section; page2.html gains pv/pg/pn.
+// the Global "Block-Coprimality Canvas" section; page5.html gains pv/pg/pn.
 function _canvasParams(scope,st,n){
   const G=st.G,view=st.view;
   if(scope==='op')return`&wv=${view}&wg=${G}&wn=${n}`;
@@ -635,7 +635,7 @@ function _drawLabel(c,x,y,rVal){
     c.fillStyle='#f5f2ea';c.fillText(txt,x,y);
   }
 }
-/* ── Gap diagonal lock — ported from Page 2 / index.html's "🔒 g=G/2":
+/* ── Gap diagonal lock — ported from Page 5 / index.html's "🔒 g=G/2":
    locks the highlighted diagonal gap g to half of this swatch's own G,
    staying in sync as G changes. Draws a violet ring around every point
    with |M−r| = round(G/2), on top of whatever color mode is active. ── */
@@ -738,7 +738,7 @@ const DRAW={grid:drawGrid,ring:drawRing,farey:drawFarey,smith:drawSmith};
    color-mode param (wcm/hcm/gcm/pcm) plus that page's own canvas-state params,
    so opening the link both picks the right mode AND switches to the matching
    canvas (index.html's hash handler already understands wv/wg/wn, hv/hg/hn;
-   gview/gg/gn and pv/pg/pn are new — see index.html / page2.html). ── */
+   gview/gg/gn and pv/pg/pn are new — see index.html / page5.html). ── */
 function updateApply(m,st,n){
   if(!st.applyEl)return;
   const v=APPLY_VALS[m.id];

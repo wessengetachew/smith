@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Prime Spiral — Winding r ≡ ±p (mod M) · Wessen Getachew — Page 8</title>
+<title>C(n₁,…,n_k) — k-Block Coprime Density (Prime Constellations) · Wessen Getachew — Page 8</title>
 <script>
 window.MathJax = {
   tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
@@ -28,9 +28,6 @@ window.MathJax = {
   --violet:#9b7fe8;
   --lime:  #7ec87a;
   --magenta:#ff2fd0;
-  --amber: #ff8c42;
-  --sky:   #4a9eff;
-  --pink:  #ff6b9d;
   --edge:  rgba(255,255,255,.07);
   --edge2: rgba(255,255,255,.13);
   --mono:  'JetBrains Mono', monospace;
@@ -44,45 +41,12 @@ input[type="number"],input[type="range"],select,button{touch-action:manipulation
 input[type="number"]{font-size:16px;}
 canvas{touch-action:none;}
 
-/* ── Interferometer (§ added) ── */
-.intf-ctl{margin:0 0 10px;}
-.intf-ctl .lab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:4px;}
-.intf-ctl .lab .v{color:var(--pink);font-weight:600;}
-.intf-ctl input[type="range"]{width:100%;accent-color:var(--pink);}
-.intf-row{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
-.intf-row button{flex:1;min-width:46px;background:var(--bg2);border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9.5px;padding:5px 3px;cursor:pointer;white-space:nowrap;}
-.intf-row button:hover{color:var(--pink);border-color:rgba(255,107,157,.5);}
-.intf-row button.on{color:var(--pink);border-color:rgba(255,107,157,.6);background:rgba(255,107,157,.08);}
-.intf-row button.playing{color:var(--coral);border-color:rgba(224,80,96,.7);}
-.intf-read{border:1px solid rgba(61,200,184,.3);background:var(--bg1);padding:9px 12px;margin-top:9px;font-family:var(--mono);font-size:10.5px;line-height:1.6;color:var(--cream2);min-height:2.2em;}
-.intf-read b{color:var(--gold);}
-.intf-scroll{max-height:300px;overflow:auto;margin-top:10px;border:1px solid var(--edge2);}
-.intf-scroll table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
-.intf-scroll th{position:sticky;top:0;background:var(--bg2);text-align:right;color:var(--teal);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:5px 7px;border-bottom:1px solid var(--edge2);}
-.intf-scroll th:first-child{text-align:left;}
-.intf-scroll td{padding:4px 7px;border-bottom:1px solid var(--edge);text-align:right;font-variant-numeric:tabular-nums;color:var(--cream2);}
-.intf-scroll td:first-child{text-align:left;}
-.intf-scroll tbody tr{cursor:pointer;} .intf-scroll tbody tr:hover{background:rgba(255,107,157,.06);}
-#decimalBar{
-  position:sticky;top:44px;z-index:500;
-  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
-  display:flex;align-items:center;gap:10px;padding:7px 20px;
-  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
-}
-#decimalBar input[type="range"]{width:140px;accent-color:var(--pink);}
-#decimalBar .val{color:var(--pink);font-weight:600;min-width:16px;text-align:center;}
-
-#content{max-width:1020px;margin:0 auto;padding:0 20px 100px;}
+#content{max-width:1000px;margin:0 auto;padding:0 20px 100px;}
 #hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
-.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);margin-bottom:16px;}
+.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
 h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
 .hero-formula{font-size:1.0rem;margin:14px 0;color:var(--gold);overflow-x:auto;}
-.hero-sub{max-width:74ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
-.shift-banner{
-  max-width:74ch;margin:20px auto 0;padding:14px 18px;background:rgba(255,107,157,.07);
-  border-left:3px solid var(--pink);text-align:left;font-size:.82rem;color:var(--cream2);
-}
-.shift-banner b{color:var(--pink);}
+.hero-sub{max-width:70ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
 
 .card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
 .card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
@@ -90,60 +54,129 @@ h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-
 .card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
 
 .ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
-.ctrl-block{flex:1;min-width:180px;}
+.ctrl-block{flex:1;min-width:200px;}
 .ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
 .ctrl-label span.val{color:var(--teal);font-weight:600;}
-input[type="range"]{width:100%;accent-color:var(--pink);height:3px;}
+input[type="range"]{width:100%;accent-color:var(--violet);height:3px;}
 
 .stepctrl{display:flex;align-items:center;gap:6px;}
 .stepctrl input[type="range"]{flex:1;}
-.step-btn{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;font-size:13px;font-family:var(--mono);transition:background .1s;}
+.step-btn{
+  width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;
+  font-size:13px;font-family:var(--mono);transition:background .1s;
+}
 .step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+.step-num{
+  width:52px;flex-shrink:0;background:var(--bg2);border:1px solid var(--edge2);
+  color:var(--violet);font-family:var(--mono);font-size:12px;font-weight:600;
+  padding:3px 4px;outline:none;text-align:center;
+}
+.step-num:focus{border-color:var(--violet);}
 
-.togglegrid{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:14px;}
-.togglegrid label{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--cream2);cursor:pointer;}
-.togglegrid input[type="checkbox"]{accent-color:var(--coral);}
+.kblock{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:10px 12px;margin-bottom:8px;}
+.kblock .ctrl-label{margin-bottom:5px;}
 
-button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
-button.wgbtn:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,107,157,.08);}
-button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
-
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px;}
-.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--pink);padding:12px 14px;}
-.result-box.violet{border-left-color:var(--violet);}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;}
+.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--teal);padding:12px 14px;}
+.result-box.rho{border-left-color:var(--coral);}
 .result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
-.result-box .rval{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--cream);word-break:break-all;}
+.result-box .rval{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--cream);word-break:break-all;}
+
+table.dt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+table.dt th{text-align:left;padding:6px 8px;color:var(--cream3);letter-spacing:.06em;text-transform:uppercase;font-size:8px;border-bottom:1px solid var(--edge2);}
+table.dt td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.dt td:first-child{color:var(--gold);}
+
+.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
 
 canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;}
 .legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
-.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:50%;}
+.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
 
 .step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
 .step:last-child{border-bottom:none;}
 .step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
 
-.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
-.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
-.skybox{background:rgba(74,158,255,.06);border-left:3px solid var(--sky);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
-.pinkbox{background:rgba(255,107,157,.06);border-left:3px solid var(--pink);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+table.vtab{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:9px;margin-top:8px;}
+table.vtab th{text-align:left;padding:5px 8px;color:var(--cream3);font-size:8px;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--edge2);}
+table.vtab td{padding:5px 8px;border-bottom:1px solid var(--edge);color:var(--cream2);}
+table.vtab td.match{color:var(--lime);}
+
+/* Global decimal-precision bar */
+#decimalBar{
+  position:sticky;top:44px;z-index:500;
+  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
+  display:flex;align-items:center;gap:10px;padding:7px 20px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
+}
+#decimalBar input[type="range"]{width:140px;accent-color:var(--gold);}
+#decimalBar .val{color:var(--gold);font-weight:600;min-width:16px;text-align:center;}
+
+/* Clickable table cells */
+table.dt td.clickable{cursor:pointer;transition:background .12s;}
+table.dt td.clickable:hover{background:rgba(200,168,74,.12);color:var(--gold);}
+
+button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
+button.wgbtn:hover{border-color:var(--teal);color:var(--teal);background:rgba(61,200,184,.08);}
+button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+
+.viewtoggle{display:flex;gap:0;}
+.viewtoggle button{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all .15s;}
+.viewtoggle button:first-child{border-radius:3px 0 0 3px;}
+.viewtoggle button:last-child{border-radius:0 3px 3px 0;border-left:none;}
+.viewtoggle button.active{background:rgba(61,200,184,.14);border-color:var(--teal);color:var(--teal);}
+select.wgselect{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.05em;padding:6px 8px;outline:none;}
+select.wgselect:focus{border-color:var(--violet);}
+
+/* Explain modal */
+#explainOverlay{
+  display:none;position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,4,.72);backdrop-filter:blur(2px);
+  align-items:center;justify-content:center;padding:20px;
+}
+#explainOverlay.open{display:flex;}
+#explainModal{
+  background:var(--bg1);border:1px solid var(--edge2);border-radius:6px;
+  max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:22px 22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+#explainModal .em-title{font-family:var(--disp);font-size:.95rem;color:var(--gold);letter-spacing:.04em;margin-bottom:4px;}
+#explainModal .em-sub{font-family:var(--mono);font-size:9px;color:var(--cream3);letter-spacing:.06em;margin-bottom:14px;}
+#explainModal .em-step{padding:9px 0;border-top:1px solid var(--edge);font-size:.82rem;color:var(--cream2);}
+#explainModal .em-step:first-of-type{border-top:none;}
+#explainModal .em-steplabel{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+#explainModal .em-math{font-family:var(--mono);font-size:.86rem;color:var(--cream);word-break:break-all;}
+#explainModal .em-frac{display:inline-block;color:var(--teal);word-break:break-all;}
+#explainModal .em-close{
+  float:right;background:none;border:1px solid var(--edge2);color:var(--cream3);
+  width:26px;height:26px;cursor:pointer;font-size:14px;line-height:1;border-radius:3px;
+}
+#explainModal .em-close:hover{border-color:var(--coral);color:var(--coral);}
+#explainModal .em-result{
+  margin-top:6px;background:rgba(200,168,74,.08);border-left:3px solid var(--gold);
+  padding:10px 12px;font-family:var(--mono);font-size:.86rem;color:var(--gold);word-break:break-all;
+}
 </style>
 </head>
 <body>
 
 <div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
 <span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
-<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
-<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
+<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #c8a84a59;color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='#c8a84a59'">P1</a>
+<a href="page2.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P2</a>
 <a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
-<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
-<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
-<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
-<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
-<a href="page8.html" title="The Prime Spiral — Page 8 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff6b9d22;border:1px solid #ff6b9d;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P8</a>
-<a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
-<a href="page10.html" target="_blank" title="k-Block Coprime Density — Prime Constellations & k-Tuples — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
-<a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
-<a href="page12.html" target="_blank" title="Dirichlet Character-Twisted Density — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #d2691e59;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#d2691e14';this.style.borderColor='#d2691e'" onmouseout="this.style.background='transparent';this.style.borderColor='#d2691e59'">P12</a>
+<a href="page4.html" target="_blank" title="The Prime Filter — Sieve View — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P4</a>
+<a href="page5.html" target="_blank" title="Gap Diagonal Identity — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P5</a>
+<a href="page6.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P6</a>
+<a href="page7.html" target="_blank" title="Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P7</a>
+<a href="page8.html" title="k-Block Coprime Density — Prime Constellations &amp; k-Tuples — Page 8 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff2fd022;border:1px solid #ff2fd0;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P8</a>
+<a href="page9.html" target="_blank" title="Dirichlet Character-Twisted Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #d2691e59;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#d2691e14';this.style.borderColor='#d2691e'" onmouseout="this.style.background='transparent';this.style.borderColor='#d2691e59'">P9</a>
+<a href="page10.html" target="_blank" title="Farey &amp; Unit Circle — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P10</a>
+<a href="page11.html" target="_blank" title="Farey Sequence Summatory Function — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P11</a>
+<a href="page12.html" target="_blank" title="The Prime Spiral — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff6b9d59;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff6b9d14';this.style.borderColor='#ff6b9d'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff6b9d59'">P12</a>
+
 <button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
 <a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
 </div>
@@ -157,498 +190,703 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
 
 <div id="hero">
   <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
-  <h1 class="hero-title">The Prime Spiral — Winding r ≡ ±p (mod M)</h1>
+  <h1 class="hero-title">C(n₁,…,n_k) — k-Block Coprime Density</h1>
   <div class="hero-formula">
-    $$r_M \;=\; p \bmod M, \qquad M = p{+}1,\, p{+}2,\, \dots,\, G$$
+    $$C(n_1,\ldots,n_k)\;=\;\zeta(2)\cdot\prod_{p}\left(1-\frac{1}{p}\Big[1-\prod_{i=1}^{k}\Big(1-\tfrac{\min(n_i+1,p)}{p}\Big)\Big]\right)$$
   </div>
   <div class="hero-sub">
-    Fix one prime <i>p</i>. On every ring of modulus <i>M</i>, mark the single residue where
-    <i>p</i> itself lands. As <i>M</i> climbs one step at a time, that one dot sweeps around each
-    ring at a different rate — the trail it leaves reads as a spiral arm winding outward through
-    the whole coprimality lattice. This page explains that overlay from the hero Ring/Lift view
-    (also seen driving the animated opener), lets you drive it directly, and shows exactly where
-    it re-enters the C(n) formula.
-  </div>
-  <div class="shift-banner">
-    <b>Not the Ulam spiral.</b> The famous Ulam spiral lays every integer 1, 2, 3, … onto a square
-    grid path and highlights which cells are prime. This spiral is a completely different
-    construction: it's a single fixed prime's residue traced across a stack of concentric
-    coprimality rings as the modulus grows. Same word, unrelated geometry — see the aside near
-    the bottom of this page.
+    Page 7 built the k=2 case. The same derivation — independence of the M_i across blocks, CRT-independence
+    across primes — carries through for <em>any</em> k with zero modification, and it's exact: verified below
+    by direct combinatorial enumeration mod small primes, not just the asymptotic Euler product. The one new
+    phenomenon at k≥3 is that the correlation ratio ρ_k = D(n₁,…,n_k)/∏ᵢD(nᵢ) doesn't just exceed 1 — it grows
+    geometrically in k, for a clean structural reason (see the derivation card).
+    <strong style="color:var(--gold);">Set every nᵢ=0 and lock the anchors to Mᵢ = M₁+hᵢ</strong> (toggle in
+    the lattice canvas below) and this becomes the finite picture behind prime k-tuples / constellations
+    ℋ={0,h₂,…,h_k} — twins, triples like {0,2,6}, quadruplets like {0,2,6,8}. See "Reading this page as
+    k-tuples" for the exact statement.
   </div>
 </div>
 
 <div id="content">
 
-  <!-- WHAT IT IS -->
+  <!-- VERIFICATION -->
   <div class="card">
-    <div class="card-title">What You're Actually Looking At</div>
-    <div class="hero-sub" style="max-width:none;">
-      Every ring of the hero visualization at modulus <i>M</i> holds the residues
-      $r \in \{1,\dots,M-1\}$ with $\gcd(r,M)=1$, arranged at angle $\theta = 2\pi r/M$ and radius
-      proportional to $M$ — this is exactly the Ring view used throughout the site. The spiral
-      overlay does one extra thing: for a chosen prime <i>p</i>, it computes
-      $r_M = p \bmod M$ for every ring $M$ from $p{+}1$ up to the largest ring $G$, and drops a
-      red marker there. Because $p \bmod M$ jumps around non-monotonically as $M$ increases, but
-      the ring radius grows steadily with $M$, the sequence of markers reads visually as a spiral
-      arm — not because anything is literally rotating, but because a fixed quantity ($p$) is
-      being viewed through an increasingly fine set of angular units ($1/M$ of a turn).
+    <div class="card-title">Exact Verification — Brute-Force vs. Formula</div>
+    <div class="vbox">
+      For several (n₁,…,n_k, p), every (r, M₁,…,M_k) tuple mod p was enumerated directly and the survival
+      fraction compared against the closed-form local factor. All five test cases below match to full floating-point
+      precision — this isn't a numerical coincidence, the local-factor derivation is exact combinatorics mod p.
     </div>
-    <div class="ibox">
-      This is the same "Lift Dynamics" spiral overlay that drives the hero page's animated
-      opener and the Ring/Lift view's ▶ p control — this page isolates just that one mechanic
-      so it can be explained on its own, with its own controls and its own derivation.
-      The <b>C(n) block depth</b> slider below brings the opener's other mechanic here too: raise \(n\)
-      and the base lattice thins to the points with \(\gcd(r, M{+}j)=1\) for every \(j\le n\) — in every
-      view — while the measured density locks onto the Euler-product prediction \(D(n)=C(n)/\zeta(2)\).
+    <table class="vtab">
+      <thead><tr><th>(n₁,…,n_k)</th><th>p</th><th>brute-force</th><th>formula</th></tr></thead>
+      <tbody>
+        <tr><td>(2, 3, 1)</td><td>7</td><td>0.88213244</td><td>0.88213244</td></tr>
+        <tr><td>(0, 0, 0)</td><td>5</td><td>0.90240000</td><td>0.90240000</td></tr>
+        <tr><td>(4, 1)</td><td>5</td><td>0.80000000</td><td>0.80000000</td></tr>
+        <tr><td>(1, 1, 1, 1)</td><td>5</td><td>0.82592000</td><td>0.82592000</td></tr>
+        <tr><td>(10, 2, 7)</td><td>11</td><td>0.90909091</td><td>0.90909091</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LIVE CALCULATOR -->
+  <div class="card">
+    <div class="card-title">Live Calculator</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block" style="max-width:260px;">
+        <div class="ctrl-label">k (number of blocks) <span class="val" id="kval">3</span></div>
+        <div class="stepctrl">
+          <button class="step-btn" onclick="stepK(-1)" title="k − 1">−</button>
+          <input type="range" id="ksl" min="1" max="8" value="3" oninput="onKChange()">
+          <button class="step-btn" onclick="stepK(1)" title="k + 1">+</button>
+          <input type="number" id="knum" class="step-num" min="1" max="8" value="3" oninput="onKNumInput()">
+        </div>
+      </div>
+    </div>
+    <div id="nBlocksWrap"></div>
+    <div class="ctrl-row" style="margin-bottom:14px;">
+      <button id="playBtn" class="wgbtn" onclick="togglePlay()" title="Animate n₁ from 0 upward, everything below updates live" style="min-width:110px;">▶ Play n₁</button>
+      <span class="card-note" style="margin-top:0;">Animates n₁ 0→60 (loops), driving the calculator, per-prime table, and lattice canvas together.</span>
+    </div>
+    <div class="result-grid">
+      <div class="result-box"><div class="rlabel">C(n₁,…,n_k)</div><div class="rval" id="rCk">—</div></div>
+      <div class="result-box"><div class="rlabel">∏ᵢ C(nᵢ)</div><div class="rval" id="rProd">—</div></div>
+      <div class="result-box rho"><div class="rlabel">ρ_k = D(n₁,…,n_k) / ∏ᵢD(nᵢ)</div><div class="rval" id="rRhoK">—</div></div>
+    </div>
+    <div class="card-note" id="calcNote">∞ asymptotic product truncated at primes ≤ 2,000,000 — reliable to ~7–8 dp.</div>
+
+    <div style="margin-top:18px;">
+      <div class="card-title" style="margin-bottom:8px;">Per-Prime Local Factors</div>
+      <div class="ctrl-row" style="margin-bottom:8px;align-items:center;">
+        <span class="card-note" style="margin:0;flex:1;">First 500 primes shown (scroll for more) — click any value for its exact step-by-step derivation as a fraction. CSV export covers all ≤2,000,000 (~148,933 rows) at the current k.</span>
+        <button class="wgbtn" id="csvBtn" onclick="exportPrimeCSV()" style="flex:0;white-space:nowrap;">↓ Export CSV</button>
+      </div>
+      <div class="tscroll" style="max-height:400px;overflow-y:auto;">
+        <table class="dt" id="primeTable">
+          <thead><tr><th>p</th><th>f_p(n₁,…,n_k)</th><th>∏ᵢf_p(nᵢ)</th><th title="f_p(n1,...,nk) / prod f_p(ni)">local ρ_p</th></tr></thead>
+          <tbody id="primeTbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- LIVE DEMO -->
+  <!-- FINITE LATTICE CANVAS (k-block generalization of Page 7's canvas) -->
   <div class="card">
-    <div class="card-title">Live Spiral</div>
+    <div class="card-title">Finite Lattice Canvas — G×G, k Blocks</div>
+    <div class="hero-sub" style="max-width:none;margin-bottom:12px;font-size:.82rem;">
+      Same rendering as Page 7, generalized to k blocks: r runs along x, M₁ (block 1) runs along y, and
+      M₂,…,M_k are held at fixed anchors below. Color encodes how many of the k blocks a cell survives —
+      dark = 0, gold = all k. Use the filter to isolate cells surviving at least a chosen number of blocks.
+    </div>
     <div class="ctrl-row">
       <div class="ctrl-block">
-        <div class="ctrl-label">G — rings shown <span class="val" id="sp-gval">42</span></div>
+        <div class="ctrl-label">G (grid size) <span class="val" id="gval">80</span></div>
         <div class="stepctrl">
-          <button class="step-btn" onclick="spStepG(-1)" title="G − 1">−</button>
-          <input type="range" id="sp-gsl" min="8" max="400" value="42" oninput="onSpGChange()">
-          <button class="step-btn" onclick="spStepG(1)" title="G + 1">+</button>
-          <input type="number" id="sp-gnum" min="8" max="400" value="42" style="width:56px;background:var(--bg2);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:11px;padding:3px 4px;text-align:center;" oninput="onSpGNumChange()">
+          <button class="step-btn" onclick="stepLatVal('g',-1)" title="G − 1">−</button>
+          <input type="range" id="gsl" min="10" max="300" value="80" oninput="onGridChange()">
+          <button class="step-btn" onclick="stepLatVal('g',1)" title="G + 1">+</button>
+          <input type="number" id="gnum" class="step-num" min="10" max="300" value="80" oninput="onLatNumInput('g')">
         </div>
       </div>
-      <div class="ctrl-block" style="flex:0;min-width:auto;">
-        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Spiral prime</div>
-        <div class="stepctrl">
-          <button class="step-btn" onclick="spStepP(-1)" title="Previous prime">◀</button>
-          <span id="sp-plabel" style="font-family:var(--mono);font-size:12px;color:var(--coral);min-width:44px;text-align:center;">p=2</span>
-          <button class="step-btn" onclick="spStepP(1)" title="Next prime">▶</button>
-        </div>
+    </div>
+    <div class="ctrl-row" style="margin-bottom:10px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream2);cursor:pointer;">
+        <input type="checkbox" id="constLockChk" onchange="onConstLockToggle()" style="accent-color:var(--gold);"> Lock anchors to Mᵢ = M₁+hᵢ (constellation mode)
+      </label>
+    </div>
+    <div class="ctrl-row" id="constOffsetsRow" style="display:none;margin-bottom:10px;align-items:center;">
+      <div class="ctrl-block" style="min-width:260px;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Offsets h₂,…,h_k (comma-separated, sets k automatically)</div>
+        <input type="text" id="constOffsetsInput" value="2,6" oninput="onConstOffsetsInput()"
+          style="width:100%;background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:12px;padding:6px 8px;">
       </div>
+    </div>
+    <div class="ctrl-row" id="constPresets" style="display:none;margin-bottom:10px;gap:6px;flex-wrap:wrap;">
+      <button class="wgbtn" onclick="setConstPreset('2')" title="k=2, ℋ={0,2} — also set n₁=…=0 for the exact correspondence">Twin {0,2}</button>
+      <button class="wgbtn" onclick="setConstPreset('4')" title="k=2, ℋ={0,4}">Cousin {0,4}</button>
+      <button class="wgbtn" onclick="setConstPreset('6')" title="k=2, ℋ={0,6}">Sexy {0,6}</button>
+      <button class="wgbtn" onclick="setConstPreset('2,6')" title="k=3, ℋ={0,2,6} — admissible prime triple">Triple {0,2,6}</button>
+      <button class="wgbtn" onclick="setConstPreset('4,6')" title="k=3, ℋ={0,4,6} — admissible prime triple">Triple {0,4,6}</button>
+      <button class="wgbtn" onclick="setConstPreset('2,6,8')" title="k=4, ℋ={0,2,6,8} — admissible prime quadruple">Quad {0,2,6,8}</button>
+    </div>
+    <div id="mAnchorsWrap"></div>
+    <div class="ctrl-row" style="margin-bottom:10px;">
       <div class="ctrl-block" style="flex:0;min-width:auto;">
-        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Winding</div>
-        <button class="step-btn" id="sp-dirbtn" onclick="spCycleDir()" title="Toggle r ≡ +p (mod M) vs r ≡ −p (mod M)" style="width:auto;padding:0 12px;">▲ up</button>
-      </div>
-      <div class="ctrl-block" style="flex:0;min-width:auto;">
-        <div class="ctrl-label" style="justify-content:flex-start;">Play</div>
-        <button class="wgbtn" id="sp-playbtn" onclick="spTogglePlay()">▶ Sweep p</button>
-      </div>
-      <div class="ctrl-block" style="flex:0;min-width:140px;">
         <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">View</div>
-        <select id="sp-view" onchange="onSpViewChange()" style="width:100%;background:var(--bg2);border:1px solid var(--edge2);color:var(--pink);font-family:var(--mono);font-size:10px;padding:5px 6px;">
-          <option value="ring">Ring</option>
-          <option value="lift">Lift</option>
-          <option value="grid">Grid</option>
-          <option value="farey">Farey</option>
-          <option value="gauss">Gauss</option>
-          <option value="smith">Cayley</option>
+        <div class="viewtoggle">
+          <button id="viewBtnGrid" class="active" onclick="setLatticeView('grid')">Grid</button>
+          <button id="viewBtnRing" onclick="setLatticeView('ring')">Ring</button>
+          <button id="viewBtnRing3D" onclick="setLatticeView('ring3d')">3D Ring</button>
+        </div>
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Color</div>
+        <select id="colorModeSel" class="wgselect" onchange="renderLattice()">
+          <option value="count">Survival count (default)</option>
+          <option value="rainbow">Rainbow (hue by r)</option>
+          <option value="residue">Residue (r mod 6)</option>
         </select>
       </div>
-    </div>
-    <div class="togglegrid">
-      <label><input type="checkbox" id="sp-mirror" checked onchange="drawSpiral()"> Mirror σ(r)=M−r</label>
-      <label><input type="checkbox" id="sp-allp" onchange="drawSpiral()"> Overlay all primes</label>
-      <label><input type="checkbox" id="sp-dropout" checked onchange="drawSpiral()"> Dropout ring (M=p)</label>
-      <label><input type="checkbox" id="sp-base" checked onchange="drawSpiral()"> Base lattice (dim)</label>
-      <label><input type="checkbox" id="sp-labels" onchange="drawSpiral()"> Point labels (r)</label>
-    </div>
-    <div style="margin:10px 0 8px;font-family:var(--mono);">
-      <div style="display:flex;justify-content:space-between;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:4px;"><span>C(n) block depth — a point survives iff gcd(r, M+j) = 1 for every j ≤ n</span><span style="color:var(--pink);font-weight:600;" id="sp-cnval">n = 0</span></div>
-      <input type="range" id="sp-cnsl" min="0" max="40" step="1" value="0" oninput="cnSetN(+this.value)" style="width:100%;accent-color:var(--pink);">
-      <div class="intf-row" style="margin-top:5px;">
-        <button onclick="cnSetN(_cnN-1)">−1</button><button id="sp-cnplay" onclick="cnTogglePlay()">▶ Play n</button><button onclick="cnSetN(_cnN+1)">+1</button>
-        <label style="flex:2;display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--cream2);border:1px solid var(--edge2);padding:0 8px;cursor:pointer;"><input type="checkbox" id="sp-cnhide" onchange="drawSpiral()"> hide dropped points</label>
-        <label style="flex:2;display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--cream2);border:1px solid var(--edge2);padding:0 8px;cursor:pointer;" title="Saturated primes (p ≤ n+1) have their C(n) factor frozen at 1−1/p; with the lock on, the spiral prime and ▶ Sweep p only visit active primes (p > n+1)."><input type="checkbox" id="sp-cnlock" onchange="drawSpiral()"> lock p to active primes</label>
+      <div class="ctrl-block">
+        <div class="ctrl-label">Filter — min blocks survived <span class="val" id="filtMinVal">0</span></div>
+        <input type="range" id="filtMinSl" min="0" max="8" value="0" oninput="onFilterChange()">
       </div>
     </div>
-    <canvas id="spiralCv" class="plot" style="height:440px;"></canvas>
-    <div class="legend">
-      <span><span class="sw" style="background:#e05060;"></span>r ≡ p (mod M) — the spiral</span>
-      <span><span class="sw" style="background:#9b7fe8;"></span>mirror σ(r) = M − r</span>
-      <span><span class="sw" style="background:rgba(230,56,72,.35);"></span>all-primes overlay (dim)</span>
-      <span><span class="sw" style="background:transparent;border:1px dashed #e05060;"></span>dropout ring M = p</span>
-      <span><span class="sw" style="background:rgba(200,168,74,.7);"></span>C(n) survivors (n &gt; 0)</span>
+    <div class="ctrl-row" id="ring3dCtrls" style="display:none;">
+      <div class="ctrl-block">
+        <div class="ctrl-label">Layers — n₁ depth (block-1 shift) <span class="val" id="r3dLayersVal">6</span></div>
+        <input type="range" id="r3dLayersSl" min="2" max="12" value="6" oninput="onRing3DChange()">
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-label">Points / ring <span class="val" id="r3dPtsVal">90</span></div>
+        <input type="range" id="r3dPtsSl" min="24" max="200" value="90" oninput="onRing3DChange()">
+      </div>
+      <div class="ctrl-block" style="flex:0;min-width:auto;">
+        <div class="ctrl-label" style="justify-content:flex-start;">Rotation</div>
+        <button class="step-btn" id="r3dAutoBtn" onclick="toggleRing3DAuto()" style="width:auto;padding:0 12px;height:30px;">▶ Auto</button>
+      </div>
+    </div>
+    <canvas id="latticeCv" class="plot" style="height:420px;image-rendering:pixelated;"></canvas>
+    <div class="legend" id="latticeLegend"></div>
+    <div class="result-grid" id="ring3dReadout" style="display:none;">
+      <div class="result-box"><div class="rlabel">Azimuth / Elevation (rad)</div><div class="rval" id="r3dAzEl">—</div></div>
+      <div class="result-box"><div class="rlabel">Layers × rings × points</div><div class="rval" id="r3dCount">—</div></div>
     </div>
     <div class="result-grid">
-      <div class="result-box"><div class="rlabel">Current prime</div><div class="rval" id="sp-r1">—</div></div>
-      <div class="result-box violet"><div class="rlabel">Spiral points plotted</div><div class="rval" id="sp-r2">—</div></div>
-      <div class="result-box"><div class="rlabel">Dropout ring (M = p)</div><div class="rval" id="sp-r3">—</div></div>
-      <div class="result-box"><div class="rlabel">Measured block density D̂</div><div class="rval" id="sp-r4">—</div></div>
-      <div class="result-box violet"><div class="rlabel">Predicted D(n) · C(n)</div><div class="rval" id="sp-r5">—</div></div>
+      <div class="result-box"><div class="rlabel">Finite fraction surviving all k (G×G count)</div><div class="rval" id="rFiniteFrac">—</div></div>
+      <div class="result-box rho"><div class="rlabel">Asymptotic D(n₁,…,n_k) = C(n₁,…,n_k)/ζ(2)</div><div class="rval" id="rAsympRef">—</div></div>
     </div>
-    <div class="card-note">Drag isn't needed here — the geometry is flat (2D rings), unlike Page 10's 3D Ring stack. Tap ◀ ▶ to change the spiral prime, or press Play to sweep through every prime ≤ G automatically.</div>
+    <div class="card-note" id="latticeNote">n capped inside this canvas for render speed — the asymptotic value above uses the true, uncapped n values.</div>
+    <div class="card-note" id="ring3dNote" style="display:none;">Each disk is a full Ring slice at a fixed n₁ (block-1 shift depth) — stacked along the vertical axis like sheets of a covering surface, with a slight angular twist per layer. 4 concentric rings sample M₁ at 38%/58%/78%/98% of G; angle = r. Drag the canvas to orbit, or press Auto.</div>
+  </div>
+
+  <!-- CONSTELLATION READING -->
+  <div class="card">
+    <div class="card-title">Reading This Page as Prime k-Tuples</div>
+    <div class="hero-sub" style="max-width:none;font-size:.85rem;">
+      Turn on <strong>constellation mode</strong> above and set every nᵢ=0, so every block shrinks to a single
+      point: block 1 = {M₁}, block i = {M₁+hᵢ}. As M₁ ranges — exactly what the y-axis of the lattice already
+      sweeps — "some block hits 0 mod p" happens iff M₁ mod p lands in one of the residues occupied by
+      ℋ = {0, h₂, …, h_k}. That set has size ν_p(ℋ), so the per-prime survival probability becomes
+    </div>
+    <div class="hero-formula" style="font-size:.95rem;">
+      $$f_p(\mathcal{H}) \;=\; 1-\frac{\nu_p(\mathcal{H})}{p^2},\qquad \nu_p(\mathcal{H})=\#\{h \bmod p : h\in\mathcal{H}\}$$
+    </div>
+    <div class="hero-sub" style="max-width:none;font-size:.85rem;">
+      ν_p(ℋ) is exactly the quantity that drives the Hardy–Littlewood singular series for the k-tuple
+      conjecture: an admissible ℋ is one with ν_p(ℋ)&lt;p for every prime p (so the pattern isn't ruled out
+      by some prime dividing every shift by 0,…,p−1). {0,2,6} and {0,4,6} are the two admissible prime
+      triples below 8; {0,2,6,8} is the smallest admissible quadruple.
+      <strong>As on Page 7, what's computed here is not the Hardy–Littlewood prime density itself</strong> —
+      that's a claim about M₁, M₁+h₂, …, M₁+h_k being simultaneously prime, which lives on Page 4's prime
+      filter. This page measures the structurally identical but elementary coprimality-density analogue: the
+      density, over random r, of surviving a random point and its k−1 fixed shifts at once. Same ν_p(ℋ),
+      same admissibility condition, fully elementary and exactly computable.
+    </div>
+    <div class="ibox">
+      The "Asymptotic D(n₁,…,n_k)" box in the lattice card above switches to the exact, closed-form value
+      C(ℋ) = ζ(2)·∏ₚ(1−ν_p(ℋ)/p²) automatically once constellation mode + all nᵢ=0 are on — compare it
+      against the live G×G finite fraction directly above it, and against ρ_k below to see how much the
+      shared-r correlation grows as the tuple gets denser.
+    </div>
+  </div>
+
+  <!-- GROWTH PLOT -->
+  <div class="card">
+    <div class="card-title">Correlation Growth — ρ_k(n) vs. k (symmetric case, n₁=⋯=n_k=n)</div>
+    <canvas id="growthCv" class="plot" style="height:340px;"></canvas>
+    <div class="legend" id="growthLegend"></div>
+    <div class="card-note">Log-scale y-axis (ρ spans orders of magnitude). k runs 1–12, computed at full precision (primes ≤ 2,000,000) for each point.</div>
   </div>
 
   <!-- DERIVATION -->
   <div class="card">
-    <div class="card-title">Where the Point Actually Lands</div>
+    <div class="card-title">Why ρ_k Grows Geometrically, Not Just &gt;1</div>
     <div class="step">
-      <div class="stepnum">1 — Fix p, sweep M</div>
-      For a chosen prime $p$ and each ring $M = p{+}1, \dots, G$, the marked residue is simply
-      $r_M = p \bmod M$. Since $p < M$ for every ring we draw, this is just $p$ itself whenever
-      $p < M \le$ (well inside range) — the interesting behavior only starts once $M$ has climbed
-      far enough that $p \bmod M$ genuinely wraps.
-    </div>
-    <div class="step">
-      <div class="stepnum">2 — Two winding directions</div>
-      Toggling ▲/▼ switches between $r_M = p \bmod M$ (the "up" branch) and its reflection
-      $r_M = (-p) \bmod M = (M - (p \bmod M)) \bmod M$ (the "down" branch, taken to be $M$ itself
-      when the reduction is $0$, so the marker never lands on the excluded residue $0$). The two
-      branches are mirror images of each other under $r \mapsto M-r$ — which is exactly the
-      conjugate/mirror overlay (σ) you can toggle independently.
+      <div class="stepnum">1 — The formula generalizes with no new assumptions</div>
+      Same setup as Page 7: k independent random starting points M₁,…,M_k, block i has length nᵢ+1. r survives
+      iff it survives every block. At a prime p, independence of the M_i gives
+      P(no block hits 0 mod p) = ∏ᵢ(1 − min(nᵢ+1,p)/p), exactly as before — nothing about the derivation depended on k=2.
     </div>
     <div class="step">
-      <div class="stepnum">3 — Why it looks like a spiral and not noise</div>
-      Radius grows linearly in $M$ (ring $M$ sits at radius $\propto M$), while angle is
-      $\theta_M = 2\pi r_M/M$. For $r_M = p \bmod M$, this angle doesn't grow monotonically —
-      but it does have long stretches where $p \bmod M \approx p$ (when $M$ is still much bigger
-      than $p$'s reductions), giving the smooth arcs you see between the sharper jumps. The
-      "jumps" happen exactly when $M$ passes a value at which $p \bmod M$ wraps around, i.e.
-      roughly every $M \approx p/k$ for integer $k$ — a genuinely number-theoretic cadence, not
-      an artifact of the drawing.
+      <div class="stepnum">2 — Per-prime behavior as k grows, n fixed</div>
+      Write q = min(n+1,p)/p ∈ (0,1]. The single-block factor is f_p(1) = 1 − q/p, so f_p(1)^k → 0
+      <em>exponentially</em> in k (it's a fixed number below 1, raised to the k-th power). But the true joint
+      factor is f_p(k) = 1 − (1/p)[1 − (1−q)^k], and (1−q)^k → 0 as k grows, so f_p(k) → 1 − 1/p — a fixed
+      positive limit, <strong>not</strong> decaying to 0.
     </div>
     <div class="step">
-      <div class="stepnum">4 — The all-primes overlay is the same construction, superposed</div>
-      Turning on "Overlay all primes" simply repeats steps 1–3 for every prime $\le G$
-      simultaneously, dimmed so the selected spiral prime still reads clearly. It's a useful way
-      to see that no single prime's spiral is special — every prime traces one, and they all
-      obey the same $r_M = p \bmod M$ rule.
+      <div class="stepnum">3 — The gap is structural, not a rounding effect</div>
+      The naive independence model (∏C(nᵢ)) requires every one of the k blocks to individually survive — a
+      probability that compounds down geometrically. The true event only requires that not all k blocks hit
+      the same prime at once — a much weaker requirement that saturates near 1−1/p instead of vanishing.
+      Since this happens at essentially every prime simultaneously, the ratio ρ_k = D(n,…,n)/D(n)^k is a product
+      of per-prime terms that are each individually diverging, so ρ_k itself grows without bound as k→∞, for
+      <em>any</em> fixed n ≥ 0.
     </div>
-  </div>
-
-  <!-- CONNECTION TO C(n) -->
-  <div class="card">
-    <div class="card-title">The Dropout Ring Is Not Decoration</div>
-    <div class="hero-sub" style="max-width:none;">
-      Turn on "Dropout ring" and look at what happens exactly at $M = p$: the ring itself is
-      drawn dashed, and the spiral marker is undefined there, because
-      $\gcd(p,p) = p \neq 1$ — the prime is never coprime to a modulus equal to itself. This
-      isn't a rendering edge case; it's the same saturation point that appears directly in the
-      C(n) formula's local factor:
-    </div>
-    <div class="hero-formula" style="margin:14px 0 8px;">
-      $$\rho_p(n) = 1 - \frac{\min(n{+}1,\,p)}{p^2}$$
-    </div>
-    <div class="pinkbox">
-      As the block depth $n$ grows, $\min(n{+}1,p)$ climbs linearly until it hits the ceiling $p$
-      — and it hits that ceiling <i>exactly</i> at $n = p-1$, i.e. once the block has grown wide
-      enough to guarantee it contains a full residue class mod $p$. That's the same $p$ that
-      exits its own multiplicative group at $M=p$ in this spiral: both are the moment a prime
-      stops being able to "dodge" the sieve and becomes fully accounted for. The dropout ring
-      you can see here is a geometric picture of the same saturation the tail-correction
-      analysis (see Page 5 / the derivation notes) bounds analytically via
-      $\sum_{p>y} 1/p^2 = O(1/(y\ln y))$.
-    </div>
-  </div>
-
-  <!-- ULAM ASIDE -->
-  <div class="card">
-    <div class="card-title">From One Wave to All of Them</div>
-    <p>Everything above traces <b>one</b> prime across many rings. Now hold one ring \(M\) fixed and let <b>every</b> prime \(p\le N\) drop its marker at angle \(2\pi p/M\). Each marker is a unit complex number — a wave crest — and the whole picture your eye integrates is the exponential sum</p>
-    $$S\!\left(\tfrac{a}{M}\right)\;=\;\sum_{p\le N} e^{2\pi i \, p a/M},$$
-    <p>the superposition of one wave per prime, read at harmonic \(a\) of the ring. This is not a metaphor: interference here has a classical closed-form first-order amplitude. Writing \(d=\gcd(a,M)\), \(M'=M/d\),</p>
-    $$S\!\left(\tfrac{a}{M}\right)\;\approx\;\frac{c_M(a)}{\varphi(M)}\,\pi(N)\;=\;\frac{\mu(M')}{\varphi(M')}\,\pi(N),$$
-    <p>with \(c_M(a)\) Ramanujan's sum and \(\mu\) the Möbius function — the deterministic interference amplitude. It predicts which harmonics glow, which cancel, the <i>sign</i> of the residue-class bias, and one startling special effect: if a square divides \(M'\), then \(\mu(M')=0\) and the interference is <b>totally destructive</b> at first order. The instrument below measures all of it. The ▶ Sweep p control above steps through the phasors of this sum one prime at a time.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">The Interferometer</div>
-    <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:start;" id="intf-grid">
-      <div>
-        <div class="intf-ctl"><div class="lab"><span>prime cutoff N</span><span class="v" id="if-nval">100 000</span></div>
-          <div class="intf-row" id="if-nrow">
-            <button data-n="10000">10⁴</button><button data-n="50000">5·10⁴</button><button class="on" data-n="100000">10⁵</button><button data-n="400000">4·10⁵</button><button data-n="1000000">10⁶</button>
-          </div></div>
-        <div class="intf-ctl"><div class="lab"><span>ring modulus M</span><span class="v" id="if-mval">30</span></div>
-          <input type="range" id="if-msl" min="2" max="300" step="1" value="30">
-          <div class="intf-row"><button id="if-mpp">⏮p</button><button id="if-md">−1</button><button id="if-mplay">▶</button><button id="if-mu">+1</button><button id="if-mpn">p⏭</button></div></div>
-        <div class="intf-ctl"><div class="lab"><span>harmonic a</span><span class="v" id="if-aval">1</span></div>
-          <input type="range" id="if-asl" min="0" max="29" step="1" value="1">
-          <div class="intf-row"><button id="if-acp">⏮ coprime</button><button id="if-ad">−1</button><button id="if-au">+1</button><button id="if-acn">coprime ⏭</button></div></div>
-        <div class="intf-ctl"><div class="lab"><span>mode</span></div>
-          <div class="intf-row" id="if-moderow">
-            <button class="on" data-mode="spokes">Spokes</button><button data-mode="phasor">Phasor walk</button><button data-mode="standing">Standing wave</button>
-          </div></div>
-        <div class="intf-read" id="if-read">—</div>
-      </div>
-      <div style="position:relative;"><button class="page-fs" style="position:absolute;top:6px;right:6px;z-index:3;background:rgba(4,4,13,.7);border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:10px;padding:3px 8px;cursor:pointer;" onclick="ifFS(this)">⛶</button><canvas id="intfCv" style="width:100%;background:#020204;"></canvas></div>
-    </div>
-    <div class="card-note"><b>Spokes:</b> prime counts per residue class — gold spokes are the \(\varphi(M)\) coprime classes crowding toward \(\pi(N)/\varphi(M)\) each (dashed circle); your current spiral prime's residue is marked in pink. <b>Phasor walk:</b> the running sum \(\sum e^{2\pi i pa/M}\), one step per prime; the coral cross is the predicted endpoint \(\mu(M')/\varphi(M')\cdot\pi(N)\), the dashed circle is the \(\sqrt{\pi(N)}\) random-walk scale of the residual. <b>Standing wave:</b> the real interference pattern \(\mathrm{Re}\,[e^{-2\pi i r a/M}S]\) sampled at every node \(r\) — teal outward, coral inward, with nodes and antinodes exactly where the cosine puts them.</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">The Farey Spectrum — Major Arcs, Measured</div>
-    <div class="intf-ctl" style="max-width:340px;"><div class="lab"><span>spectrum depth — denominators q ≤ Q</span><span class="v" id="if-qval">24</span></div>
-      <input type="range" id="if-qsl" min="4" max="60" step="1" value="24"></div>
-    <canvas id="specCv" style="width:100%;background:#020204;" class="pick"></canvas>
-    <div class="intf-read" id="spec-read">Hover the spectrum: each gold line is a measured \(|S(a/q)|/\pi(N)\) at a reduced fraction; each teal circle is the predicted \(|\mu(q)|/\varphi(q)\).</div>
-    <div class="card-note">This is the circle method's major-arc landscape rendered literally: constructive peaks at low-denominator rationals with amplitudes \(|\mu(q)|/\varphi(q)\), and between them the minor-arc floor. Peaks at squarefree \(q\) only — every square-divisible denominator sits dark on the axis.</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Total Destructive Interference — the μ Ladder</div>
-    <canvas id="muCv" style="width:100%;background:#020204;" class="pick"></canvas>
-    <div class="intf-read" id="mu-read">Tap a bar: measured \(|S(1/q)|/\pi(N)\) (gold) against predicted \(|\mu(q)|/\varphi(q)\) (teal tick).</div>
-    <div class="card-note">The falsifiable exhibit. Squarefree moduli light up on prediction; the moment \(p^2\mid q\) (q = 4, 8, 9, 12, 16, 18, 25, 27…), \(\mu(q)=0\) and the measured amplitude collapses to the noise floor — first-order interference exactly cancelled by the Möbius sign structure. Nothing was fit: one formula, every bar.</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">The Noise Floor — Square-Root Cancellation</div>
-    <canvas id="nfCv" style="width:100%;background:#020204;"></canvas>
-    <div class="intf-read" id="nf-read">—</div>
-    <div class="card-note">For the current reduced harmonic \(a/M\), the residual \(E(N)=|S(a/M)-\tfrac{\mu}{\varphi}\pi(N)|\) is tracked as \(N\) grows, on log–log axes against a slope-½ guide. Honest labeling: square-root cancellation is what GRH-strength bounds <i>predict</i> for this residual; the plot measures consistency with that exponent, it does not prove anything. The minor arcs are where the primes keep their secrets — this panel is a picture of how well they keep them.</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Per-Spoke Decoder — Every Harmonic of the Current Ring</div>
-    <div class="intf-scroll"><table><thead><tr><th>a</th><th>gcd(a,M)</th><th>reduced a′/M′</th><th>μ(M′)</th><th>φ(M′)</th><th>predicted</th><th>measured |S|</th><th>err</th></tr></thead><tbody id="if-table"></tbody></table></div>
-    <div class="intf-read" id="tab-read">Tap any row for the full reduction: gcd, Ramanujan sum \(c_M(a)=\mu(M')\varphi(M)/\varphi(M')\), prediction, measurement, and residual.</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Aside — Why This Isn't the Ulam Spiral</div>
-    <div class="skybox">
-      Stanisław Ulam's spiral (1963) places the integers $1,2,3,\dots$ along an outward square
-      path and colors in the primes; the striking part is that primes cluster along certain
-      diagonals more than chance alone would suggest, hinting at patterns in quadratic
-      polynomials. It's a single static picture built from <i>all</i> integers at once.
-    </div>
-    <div class="hero-sub" style="max-width:none;margin-top:10px;">
-      The construction on this page shares only the word "spiral." It fixes one prime and tracks
-      <i>its</i> residue across a family of moduli — a dynamical trace through the Ring view's
-      existing coprimality lattice, not a placement of the integers themselves. If you'd like an
-      actual Ulam-style integer spiral added as a separate view later, that would be a genuinely
-      new visualization rather than an extension of this one — happy to scope that as its own
-      page if useful for SoME6.
+    <div class="step">
+      <div class="stepnum">4 — Sanity checks against Pages 1 and 7</div>
+      k=1 collapses the bracket exactly to Page 1's C(n). k=2 is exactly Page 7's C(n₁,n₂) — same formula,
+      no relabeling needed. The brute-force table above confirms both the k=2 and general-k cases are exact,
+      not asymptotic approximations of a different true object.
     </div>
   </div>
 
 </div>
 
 <script>
-// ── Shared decimal precision — drives the C(n)/D(n) readouts of the Live Spiral. ──
+// ── Sieve of Eratosthenes ──
+const LIMIT = 2000000;
+function sievePrimes(limit){
+  const comp = new Uint8Array(limit+1);
+  const primes = [];
+  for(let i=2;i<=limit;i++){
+    if(!comp[i]){ primes.push(i); for(let j=i*i;j<=limit;j+=i) comp[j]=1; }
+  }
+  return primes;
+}
+let PRIMES_FULL = [];
+const ZETA2 = Math.PI*Math.PI/6;
+
+function localFactor(ns,p){
+  let inner = 1;
+  for(let i=0;i<ns.length;i++){
+    const m = Math.min(ns[i]+1,p);
+    inner *= (1 - m/p);
+  }
+  return 1 - (1/p)*(1-inner);
+}
+function computeC(ns, primes){
+  let prod = 1;
+  for(let i=0;i<primes.length;i++) prod *= localFactor(ns, primes[i]);
+  return ZETA2*prod;
+}
 let DECIMALS = 6;
 function setDecimals(v){
   DECIMALS = v;
   document.getElementById('decimalVal').textContent = v;
   document.getElementById('decimalSl').value = v;
-  if(typeof drawSpiral==='function' && document.getElementById('spiralCv')) drawSpiral();
+  recompute();
+  if(window._wg10_latticeReady) renderLattice();
+}
+function fmt(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toExponential(d===undefined?DECIMALS:d); }
+function fmtF(x, d){ return x===undefined||x===null||!isFinite(x) ? '—' : x.toFixed(d===undefined?DECIMALS:d); }
+
+// ── Dynamic k-block controls ──
+let K = 3;
+function buildBlocks(){
+  const wrap = document.getElementById('nBlocksWrap');
+  let html = '';
+  for(let i=0;i<K;i++){
+    const v = (window._wg10_vals && window._wg10_vals[i]!==undefined) ? window._wg10_vals[i] : 6;
+    html += '<div class="kblock">'
+      + '<div class="ctrl-label">n'+(i+1)+' (block '+(i+1)+' length − 1) <span class="val" id="nval'+i+'">'+v+'</span></div>'
+      + '<div class="stepctrl">'
+      + '<button class="step-btn" onclick="stepN('+i+',-1)" title="n'+(i+1)+' − 1">−</button>'
+      + '<input type="range" id="nsl'+i+'" min="0" max="150" value="'+v+'" oninput="onNChange('+i+')">'
+      + '<button class="step-btn" onclick="stepN('+i+',1)" title="n'+(i+1)+' + 1">+</button>'
+      + '<input type="number" id="nnum'+i+'" class="step-num" min="0" max="150" value="'+v+'" oninput="onNNumInput('+i+')">'
+      + '</div></div>';
+  }
+  wrap.innerHTML = html;
+}
+function currentNs(){
+  const ns = [];
+  for(let i=0;i<K;i++) ns.push(+document.getElementById('nsl'+i).value);
+  window._wg10_vals = ns.slice();
+  return ns;
+}
+function stepK(delta){
+  const sl = document.getElementById('ksl');
+  let v = Math.max(+sl.min, Math.min(+sl.max, K+delta));
+  sl.value = v; document.getElementById('knum').value = v;
+  onKChange();
+}
+function onKNumInput(){
+  const num = document.getElementById('knum');
+  let v = Math.round(+num.value||1);
+  v = Math.max(1, Math.min(8, v));
+  num.value = v; document.getElementById('ksl').value = v;
+  onKChange();
+}
+function onKChange(){
+  K = +document.getElementById('ksl').value;
+  document.getElementById('kval').textContent = K;
+  document.getElementById('knum').value = K;
+  buildBlocks();
+  recompute();
+  if(window._wg10_latticeReady){ buildMAnchors(); renderLattice(); }
 }
 
-// ── Prime sieve ──
-function sievePrimes(limit){
-  const isC = new Uint8Array(limit+1);
-  const out = [];
-  for(let i=2;i<=limit;i++){
-    if(!isC[i]){
-      out.push(i);
-      for(let j=i*i;j<=limit;j+=i) isC[j]=1;
+// ── Constellation / k-tuple mode: Mi = M1 + hi, offsets parsed from a text field ──
+window._wg10_constOffsets = [2,6];
+function parseOffsets(){
+  const raw = document.getElementById('constOffsetsInput').value;
+  const parts = raw.split(',').map(function(s){ return parseInt(s.trim(),10); })
+    .filter(function(v){ return Number.isFinite(v) && v>0; });
+  return parts.length ? parts : [2];
+}
+function onConstLockToggle(){
+  const on = document.getElementById('constLockChk').checked;
+  document.getElementById('constOffsetsRow').style.display = on ? '' : 'none';
+  document.getElementById('constPresets').style.display = on ? 'flex' : 'none';
+  document.getElementById('mAnchorsWrap').style.display = on ? 'none' : '';
+  if(on) onConstOffsetsInput();
+  else renderLattice();
+}
+function onConstOffsetsInput(){
+  const offsets = parseOffsets();
+  window._wg10_constOffsets = offsets;
+  const kNeeded = Math.min(8, offsets.length+1);
+  if(kNeeded !== K){
+    document.getElementById('ksl').value = kNeeded;
+    document.getElementById('knum').value = kNeeded;
+    onKChange();
+  } else {
+    renderLattice();
+  }
+}
+function setConstPreset(offsetsStr){
+  document.getElementById('constLockChk').checked = true;
+  onConstLockToggle();
+  document.getElementById('constOffsetsInput').value = offsetsStr;
+  const offsets = offsetsStr.split(',').map(function(s){ return parseInt(s.trim(),10); });
+  window._wg10_constOffsets = offsets;
+  const kNeeded = Math.min(8, offsets.length+1);
+  document.getElementById('ksl').value = kNeeded;
+  document.getElementById('knum').value = kNeeded;
+  K = kNeeded;
+  document.getElementById('kval').textContent = K;
+  buildBlocks();
+  // zero every n_i for the exact constellation correspondence
+  for(let i=0;i<K;i++){
+    window._wg10_vals = window._wg10_vals || {};
+  }
+  setTimeout(function(){
+    for(let i=0;i<K;i++){
+      const sl = document.getElementById('nsl'+i), num = document.getElementById('nnum'+i);
+      if(sl){ sl.value = 0; num.value = 0; }
     }
-  }
-  return out;
+    recompute();
+    if(window._wg10_latticeReady){ buildMAnchors(); renderLattice(); }
+  }, 0);
 }
-const PRIMES = sievePrimes(400);
-function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
-
-// ── C(n) block-coprime layer (the opener's mechanic, on every view of this page) ──
-let _cnN = 0, _cnPlayId = null;
-function blockOK(r,M,n){ for(let j=0;j<=n;j++){ if(gcd(r,M+j)!==1) return false; } return true; }
-const CN_P2 = 0.4522474200410654985, ZETA2 = Math.PI*Math.PI/6;
-let _cnPR = null, _cnS2 = 0;
-function cnPrimes(){ if(!_cnPR){ _cnPR = sievePrimes(200000); _cnS2 = 0; for(const p of _cnPR) _cnS2 += 1/(p*p); } return _cnPR; }
-const _cnDcache = {};
-function predD(n){
-  if(_cnDcache[n]!==undefined) return _cnDcache[n];
-  const pr = cnPrimes(); let lg = 0;
-  for(const p of pr) lg += Math.log(1 - Math.min(n+1,p)/(p*p));
-  lg -= (n+1)*(CN_P2 - _cnS2);          // analytic tail beyond the sieve
-  return _cnDcache[n] = Math.exp(lg);
+function stepN(i, delta){
+  const sl = document.getElementById('nsl'+i);
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+delta));
+  sl.value = v; document.getElementById('nnum'+i).value = v;
+  onNChange(i);
 }
-function cnSetN(v){
-  _cnN = Math.max(0, Math.min(40, v));
-  document.getElementById('sp-cnval').textContent = 'n = ' + _cnN;
-  document.getElementById('sp-cnsl').value = _cnN;
-  drawSpiral();
+function onNNumInput(i){
+  const num = document.getElementById('nnum'+i);
+  const sl = document.getElementById('nsl'+i);
+  let v = Math.round(+num.value||0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v; sl.value = v;
+  onNChange(i);
 }
-function cnTogglePlay(){
-  const b = document.getElementById('sp-cnplay');
-  if(_cnPlayId){ clearInterval(_cnPlayId); _cnPlayId=null; b.textContent='▶ Play n'; b.classList.remove('playing'); return; }
-  b.textContent='■ Stop'; b.classList.add('playing');
-  _cnPlayId = setInterval(function(){ cnSetN(_cnN>=40 ? 0 : _cnN+1); }, 320);
-}
-// ── Saturation lock: with lock on, the spiral prime must be active (p > n+1) ──
-function cnLockOn(){ const el=document.getElementById('sp-cnlock'); return !!(el&&el.checked); }
-function cnFirstActive(G){ for(let i=0;i<PRIMES.length;i++){ const q=PRIMES[i]; if(q>G) break; if(q>_cnN+1) return q; } return null; }
-function cnReconcileP(G){
-  if(!cnLockOn() || _cnN===0) return;
-  if(spiralPFor(G) <= _cnN+1){
-    const q = cnFirstActive(G);
-    if(q!==null) _spP = q;      // if every prime ≤ G is saturated, keep p and flag it in the readout
-  }
+function onNChange(i){
+  document.getElementById('nval'+i).textContent = document.getElementById('nsl'+i).value;
+  document.getElementById('nnum'+i).value = document.getElementById('nsl'+i).value;
+  recompute();
+  if(window._wg10_latticeReady) renderLattice();
 }
 
-// ── State ──
-let _spP = 2;         // spiral prime
-let _spDir = 'up';     // 'up' -> r = p mod M ; 'down' -> r = -p mod M
-let _spPlayId = null, _spPlayDir = 1;
-
-function spiralPFor(G){
-  if(_spP>=2 && _spP<=G) return _spP;
-  for(let i=PRIMES.length-1;i>=0;i--) if(PRIMES[i]<=G) return PRIMES[i];
-  return 2;
+// ── Live calculator ──
+function recompute(){
+  const ns = currentNs();
+  const Ck = computeC(ns, PRIMES_FULL);
+  let prodC = 1;
+  const Ci = ns.map(function(n){ const c = computeC([n],PRIMES_FULL); prodC*=c; return c; });
+  // Density-level correlation D(n1..nk)/prod_i D(ni); each C carries one
+  // zeta(2), leaving zeta(2)^(k-1). Equals prod_p rho_p, and rho_1 = 1.
+  const rho = Math.pow(ZETA2, ns.length-1)*Ck/prodC;
+  document.getElementById('rCk').textContent = fmt(Ck);
+  document.getElementById('rProd').textContent = fmt(prodC);
+  document.getElementById('rRhoK').textContent = rho>1e6 ? fmt(rho) : fmtF(rho);
+  renderPrimeTable(ns);
+  const refEl = document.getElementById('rAsympRef');
+  if(refEl) refEl.textContent = fmt(Ck/ZETA2);
 }
-function spStepG(d){
-  const sl = document.getElementById('sp-gsl');
-  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+d));
-  sl.value = v; onSpGChange();
-}
-function onSpGChange(){
-  const G = +document.getElementById('sp-gsl').value;
-  document.getElementById('sp-gval').textContent = G;
-  document.getElementById('sp-gnum').value = G;
-  drawSpiral();
-}
-function onSpGNumChange(){
-  const num = document.getElementById('sp-gnum');
-  const sl = document.getElementById('sp-gsl');
-  let v = Math.max(+sl.min, Math.min(+sl.max, +num.value||42));
-  sl.value = v; num.value = v;
-  document.getElementById('sp-gval').textContent = v;
-  drawSpiral();
-}
-let _spView = 'ring';
-function onSpViewChange(){
-  _spView = document.getElementById('sp-view').value;
-  drawSpiral();
-}
-function spStepP(dir){
-  const G = +document.getElementById('sp-gsl').value;
-  const lock = cnLockOn() && _cnN>0;
-  const cur = spiralPFor(G);
-  let idx = PRIMES.indexOf(cur); if(idx<0) idx=0;
-  let target = idx;
-  for(let j=idx+dir; j>=0 && j<PRIMES.length; j+=dir){
-    const q = PRIMES[j];
-    if(dir>0 && q>G) break;              // nothing above within G — stay (Sweep p bounces here)
-    if(lock && q<=_cnN+1) continue;      // saturated: factor frozen, skip under lock
-    target=j; break;
+const PRIME_TABLE_ROWS = 500;
+function renderPrimeTable(ns){
+  window._wg10_lastNs = ns.slice();
+  const tb = document.getElementById('primeTbody');
+  let rows = '';
+  const count = Math.min(PRIME_TABLE_ROWS, PRIMES_FULL.length);
+  for(let idx=0; idx<count; idx++){
+    const p = PRIMES_FULL[idx];
+    const fk = localFactor(ns,p);
+    let prodFi = 1;
+    ns.forEach(function(n){ prodFi *= (1-Math.min(n+1,p)/(p*p)); });
+    const rp = fk/prodFi;
+    rows += '<tr>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'prime\')">'+p+'</td>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'fk\')">'+fmtF(fk)+'</td>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'prodf\')">'+fmtF(prodFi)+'</td>'
+      + '<td class="clickable" onclick="explainCellK('+p+',\'rho\')">'+fmtF(rp)+'</td>'
+      + '</tr>';
   }
-  _spP = PRIMES[target];
-  drawSpiral();
+  tb.innerHTML = rows;
 }
-function spCycleDir(){
-  _spDir = _spDir==='up' ? 'down' : 'up';
-  const btn = document.getElementById('sp-dirbtn');
-  btn.textContent = _spDir==='up' ? '▲ up' : '▼ down';
-  drawSpiral();
+
+// ── Exact-fraction step-by-step explainer (BigInt, since p^(k+1) can exceed safe-integer range for larger p,k) ──
+function bgcd(a,b){ a=a<0n?-a:a; b=b<0n?-b:b; while(b){ const t=b; b=a%b; a=t; } return a; }
+function bfracReduce(num, den){ const g = bgcd(num,den) || 1n; return { num: num/g, den: den/g }; }
+function bfracStr(f){ return f.num.toString()+'/'+f.den.toString(); }
+function bfracVal(f){ return Number(f.num)/Number(f.den); }
+function openExplain(title, sub, steps, resultVal){
+  document.getElementById('emTitle').textContent = title;
+  document.getElementById('emSub').textContent = sub;
+  document.getElementById('emSteps').innerHTML = steps.map(function(s,i){
+    return '<div class="em-step"><div class="em-steplabel">Step '+(i+1)+' — '+s.label+'</div><div class="em-math">'+s.math+'</div></div>';
+  }).join('');
+  document.getElementById('emResult').innerHTML = resultVal;
+  document.getElementById('explainOverlay').classList.add('open');
 }
-function spTogglePlay(){
-  const btn = document.getElementById('sp-playbtn');
-  if(_spPlayId){
-    clearInterval(_spPlayId); _spPlayId=null;
-    btn.textContent='▶ Sweep p'; btn.classList.remove('playing');
+function closeExplain(){ document.getElementById('explainOverlay').classList.remove('open'); }
+function explainCellK(p, col){
+  const ns = window._wg10_lastNs || [6];
+  const k = ns.length;
+  const P = BigInt(p);
+  const as = ns.map(function(n){ return BigInt(Math.min(n+1,p)); });
+  const cs = as.map(function(a){ return P - a; });
+
+  if(col==='prime'){
+    const idx = PRIMES_FULL.indexOf(p);
+    openExplain('Prime p = '+p, 'Position #'+(idx+1)+' in the prime sequence used by this page\u2019s Euler product', [
+      { label:'Identity', math:'p = '+p+' is prime' },
+      { label:'Role here', math:'k = '+k+' blocks (n\u2081,\u2026,n_'+k+') = ('+ns.join(', ')+'). This row is prime p\u2019s local factor contribution to C(n\u2081,\u2026,n_k).' }
+    ], 'Next prime: '+(PRIMES_FULL[idx+1]||'—')+' · Previous: '+(idx>0?PRIMES_FULL[idx-1]:'—'));
     return;
   }
-  btn.textContent='■ Stop'; btn.classList.add('playing');
-  _spPlayDir = 1;
-  _spPlayId = setInterval(function(){
-    const G = +document.getElementById('sp-gsl').value;
-    const before = spiralPFor(G);
-    spStepP(_spPlayDir);
-    if(spiralPFor(G)===before){ _spPlayDir*=-1; spStepP(_spPlayDir); }
-  }, 260);
+
+  // Shared: f_p(n1,...,nk) = [p^(k+1) - p^k + \u220f c_i] / p^(k+1),  c_i = p - a_i
+  let prodC = 1n; cs.forEach(function(c){ prodC *= c; });
+  const fkNum = P**BigInt(k+1) - P**BigInt(k) + prodC;
+  const fkDen = P**BigInt(k+1);
+  const fkFrac = bfracReduce(fkNum, fkDen);
+  const fkDirect = localFactor(ns, p);
+
+  if(col==='fk'){
+    openExplain('f_p(n\u2081,\u2026,n_k) at p = '+p+', k = '+k, '(n\u2081,\u2026,n_k) = ('+ns.join(', ')+')', [
+      { label:'Formula', math:'f_p(n\u2081,\u2026,n_k) = [p^(k+1) \u2212 p^k + \u220f\u1d62(p\u2212a\u1d62)] / p^(k+1),  a\u1d62 = min(n\u1d62+1, p)' },
+      { label:'Substitute a\u1d62', math:'a = ('+as.map(function(a){return a.toString();}).join(', ')+')  \u2192  (p\u2212a\u1d62) = ('+cs.map(function(c){return c.toString();}).join(', ')+')' },
+      { label:'Product of (p\u2212a\u1d62)', math:'\u220f\u1d62(p\u2212a\u1d62) = '+prodC.toString() },
+      { label:'Assemble', math:'p^'+(k+1)+' \u2212 p^'+k+' + '+prodC.toString()+' = '+fkNum.toString()+',  over p^'+(k+1)+' = '+fkDen.toString() },
+      { label:'Exact fraction', math:'<span class="em-frac">'+bfracStr(fkFrac)+'</span>'+(fkFrac.den!==fkDen?' (reduced)':' (already in lowest terms)') }
+    ], bfracStr(fkFrac)+' \u2248 '+fkDirect.toFixed(DECIMALS));
+    return;
+  }
+
+  if(col==='prodf'){
+    // prod_i f_p(n_i) = prod_i (p^2 - a_i) / p^(2k)
+    let prodFNum = 1n; as.forEach(function(a){ prodFNum *= (P*P - a); });
+    const prodFDen = (P*P)**BigInt(k);
+    const prodFFrac = bfracReduce(prodFNum, prodFDen);
+    let prodFDirect = 1; ns.forEach(function(n){ prodFDirect *= (1-Math.min(n+1,p)/(p*p)); });
+    openExplain('\u220f\u1d62 f_p(n\u1d62) at p = '+p+', k = '+k, 'Product of the k single-block factors, as if independent', [
+      { label:'Formula', math:'f_p(n\u1d62) = (p\u00b2\u2212a\u1d62) / p\u00b2  for each block; multiply all k of them' },
+      { label:'Per-block numerators', math:'(p\u00b2\u2212a\u1d62) = ('+as.map(function(a){return (P*P-a).toString();}).join(', ')+')' },
+      { label:'Multiply numerators', math:'\u220f\u1d62(p\u00b2\u2212a\u1d62) = '+prodFNum.toString() },
+      { label:'Denominator', math:'p^(2k) = p^'+(2*k)+' = '+prodFDen.toString() },
+      { label:'Exact fraction', math:'<span class="em-frac">'+bfracStr(prodFFrac)+'</span>'+(prodFFrac.den!==prodFDen?' (reduced)':' (already in lowest terms)') }
+    ], bfracStr(prodFFrac)+' \u2248 '+prodFDirect.toFixed(DECIMALS));
+    return;
+  }
+
+  if(col==='rho'){
+    let prodFNum = 1n; as.forEach(function(a){ prodFNum *= (P*P - a); });
+    const prodFDen = (P*P)**BigInt(k);
+    // rho = (fkNum/fkDen) / (prodFNum/prodFDen) = fkNum*prodFDen / (fkDen*prodFNum)
+    const rNum = fkNum * prodFDen;
+    const rDen = fkDen * prodFNum;
+    const rFrac = bfracReduce(rNum, rDen);
+    let prodFDirect = 1; ns.forEach(function(n){ prodFDirect *= (1-Math.min(n+1,p)/(p*p)); });
+    const rDirect = fkDirect/prodFDirect;
+    openExplain('local \u03c1_p at p = '+p+', k = '+k, 'How far this prime is from independence across all k blocks', [
+      { label:'Formula', math:'\u03c1_p = f_p(n\u2081,\u2026,n_k) / \u220f\u1d62 f_p(n\u1d62)' },
+      { label:'f_p(n\u2081,\u2026,n_k) as a fraction', math:bfracStr({num:fkNum,den:fkDen}) },
+      { label:'\u220f\u1d62 f_p(n\u1d62) as a fraction', math:bfracStr({num:prodFNum,den:prodFDen}) },
+      { label:'Divide fractions', math:'('+fkNum.toString()+'/'+fkDen.toString()+') \u00f7 ('+prodFNum.toString()+'/'+prodFDen.toString()+') = '+rNum.toString()+' / '+rDen.toString() },
+      { label:'Exact fraction', math:'<span class="em-frac">'+bfracStr(rFrac)+'</span>'+(rFrac.den!==rDen?' (reduced)':' (already in lowest terms)') }
+    ], bfracStr(rFrac)+' \u2248 '+rDirect.toFixed(DECIMALS));
+    return;
+  }
 }
 
-// viewXY: maps a (r,M) residue point to one or more screen [x,y] positions,
-// depending on the chosen hero view. Ring/Lift share the same polar geometry
-// used throughout the site (this page's own construction IS that geometry).
-// Grid, Farey and Smith reuse the exact coordinate formulas from the hero's
-// own _drawHeroGrid / _drawHeroFarey / _conformalSmithXY. Gauss returns 4
-// points (one per quadrant) to match the hero's 4-fold mirrored layout.
-function viewXY(r, M, G, cx, cy, maxR, mode){
-  switch(mode){
-    case 'lift':
-    case 'ring': {
-      const R = maxR*(M-1)/Math.max(1,G-1);
-      const th = 2*Math.PI*r/M;
-      return [[cx+R*Math.cos(th), cy-R*Math.sin(th)]];
+function exportPrimeCSV(){
+  const btn = document.getElementById('csvBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Generating…';
+  btn.disabled = true;
+  setTimeout(function(){
+    const ns = window._wg10_lastNs || currentNs();
+    const parts = new Array(PRIMES_FULL.length+1);
+    parts[0] = 'p,f_p(n1..nk),prod_f_p(ni),local_rho_p';
+    for(let i=0;i<PRIMES_FULL.length;i++){
+      const p = PRIMES_FULL[i];
+      const fk = localFactor(ns,p);
+      let prodFi = 1;
+      ns.forEach(function(n){ prodFi *= (1-Math.min(n+1,p)/(p*p)); });
+      const rp = fk/prodFi;
+      parts[i+1] = p+','+fk.toFixed(10)+','+prodFi.toFixed(10)+','+rp.toFixed(10);
     }
-    case 'smith': {
-      const ringR = M/Math.max(1,G);
-      const th = 2*Math.PI*r/M;
-      const zr = ringR*Math.cos(th), zi = ringR*Math.sin(th);
-      const denom = Math.max(1e-10, (zr+1)*(zr+1)+zi*zi);
-      const gr = ((zr-1)*(zr+1)+zi*zi)/denom;
-      const gi = (2*zi)/denom;
-      return [[cx+gr*maxR, cy-gi*maxR]];
-    }
-    case 'grid': {
-      const cw = (2*maxR)/Math.max(1,G);
-      return [[cx-maxR+(M-0.5)*cw, cy-maxR+(r-0.5)*cw]];
-    }
-    case 'farey': {
-      const rawY = Math.log(2/M)/Math.log(2/Math.max(2,G));
-      const logY = Math.max(0,rawY);
-      const y = cy + (logY*1.8-0.9)*maxR;
-      const fx = (r/M)*2-1;
-      return [[cx+fx*maxR, y]];
-    }
-    case 'gauss': {
-      const cw = maxR/Math.max(1,G);
-      const bx=(r-1+0.5)*cw, by=(M-1+0.5)*cw;
-      const pts=[];
-      for(let q=0;q<4;q++){
-        const ang=q*Math.PI/2;
-        const rx=bx*Math.cos(ang)-by*Math.sin(ang);
-        const ry=bx*Math.sin(ang)+by*Math.cos(ang);
-        pts.push([cx+rx, cy+ry]);
-      }
-      return pts;
+    const csv = parts.join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'page8_local_factors_k'+ns.length+'_ns-'+ns.join('-')+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    btn.textContent = orig;
+    btn.disabled = false;
+  }, 30);
+}
+
+// ── Finite lattice canvas, generalized to k blocks (ported from Page 7, extended) ──
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+let _wg10_view = 'grid';
+function setLatticeView(v){
+  if(v==='ring3d' && document.getElementById('constLockChk') && document.getElementById('constLockChk').checked){
+    v = 'grid'; // constellation mode uses dynamic per-row anchors, not wired into the 3D renderer
+  }
+  _wg10_view = v;
+  document.getElementById('viewBtnGrid').classList.toggle('active', v==='grid');
+  document.getElementById('viewBtnRing').classList.toggle('active', v==='ring');
+  document.getElementById('viewBtnRing3D').classList.toggle('active', v==='ring3d');
+  document.getElementById('ring3dCtrls').style.display   = v==='ring3d' ? 'flex' : 'none';
+  document.getElementById('ring3dReadout').style.display = v==='ring3d' ? 'grid' : 'none';
+  document.getElementById('ring3dNote').style.display    = v==='ring3d' ? 'block' : 'none';
+  document.getElementById('latticeNote').style.display   = v==='ring3d' ? 'none' : 'block';
+  const cv = document.getElementById('latticeCv');
+  if(cv) cv.style.cursor = v==='ring3d' ? 'grab' : 'default';
+  renderLattice();
+}
+function buildMAnchors(){
+  const wrap = document.getElementById('mAnchorsWrap');
+  if(K<2){ wrap.innerHTML=''; return; }
+  let html = '<div class="ctrl-row">';
+  for(let i=2;i<=K;i++){
+    const dflt = 1 + (i-2)*23; // staggered defaults so blocks aren't degenerately identical (see card-note)
+    const v = (window._wg10_manc && window._wg10_manc[i]!==undefined) ? window._wg10_manc[i] : dflt;
+    html += '<div class="ctrl-block">'
+      + '<div class="ctrl-label">M'+i+' (block '+i+' anchor, fixed) <span class="val" id="manc'+i+'val">'+v+'</span></div>'
+      + '<div class="stepctrl">'
+      + '<button class="step-btn" onclick="stepLatVal(\'m'+i+'\',-1)" title="M'+i+' \u2212 1">\u2212</button>'
+      + '<input type="range" id="manc'+i+'sl" min="1" max="300" value="'+v+'" oninput="onGridChange()">'
+      + '<button class="step-btn" onclick="stepLatVal(\'m'+i+'\',1)" title="M'+i+' + 1">+</button>'
+      + '<input type="number" id="manc'+i+'num" class="step-num" min="1" max="300" value="'+v+'" oninput="onLatNumInput(\'m'+i+'\')">'
+      + '</div></div>';
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+function latIds(key){
+  if(key==='g') return {sl:'gsl', num:'gnum'};
+  const idx = key.slice(1);
+  return {sl:'manc'+idx+'sl', num:'manc'+idx+'num'};
+}
+function stepLatVal(key, delta){
+  const ids = latIds(key);
+  const sl = document.getElementById(ids.sl);
+  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+delta));
+  sl.value = v; document.getElementById(ids.num).value = v;
+  onGridChange();
+}
+function onLatNumInput(key){
+  const ids = latIds(key);
+  const num = document.getElementById(ids.num);
+  const sl = document.getElementById(ids.sl);
+  let v = Math.round(+num.value||0);
+  v = Math.max(+sl.min, Math.min(+sl.max, v));
+  num.value = v; sl.value = v;
+  onGridChange();
+}
+function onGridChange(){
+  const G = +document.getElementById('gsl').value;
+  document.getElementById('gval').textContent = G;
+  document.getElementById('gnum').value = G;
+  window._wg10_manc = window._wg10_manc || {};
+  for(let i=2;i<=K;i++){
+    const sl = document.getElementById('manc'+i+'sl');
+    if(sl){
+      document.getElementById('manc'+i+'val').textContent = sl.value;
+      document.getElementById('manc'+i+'num').value = sl.value;
+      window._wg10_manc[i] = +sl.value;
     }
   }
-  return [[cx,cy]];
+  renderLattice();
 }
-
-// dropoutLocus: the M=p boundary, drawn in whatever shape it takes under the
-// current view (circle for Ring/Lift, sampled curve for Smith, a line for
-// Grid/Farey). Gauss has no clean single locus under 4-fold mirroring, so
-// it's skipped there.
-function drawDropoutLocus(ctx, p, G, cx, cy, maxR, mode){
-  ctx.save();
-  ctx.setLineDash([3,3]);
-  ctx.strokeStyle = 'rgba(230,56,72,.6)';
-  ctx.lineWidth = 1.1;
-  if(mode==='ring'||mode==='lift'){
-    const R = maxR*(p-1)/Math.max(1,G-1);
-    ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
-  } else if(mode==='smith'){
-    const ringR = p/Math.max(1,G);
-    ctx.beginPath();
-    for(let i=0;i<=64;i++){
-      const th = 2*Math.PI*i/64;
-      const zr = ringR*Math.cos(th), zi = ringR*Math.sin(th);
-      const denom = Math.max(1e-10, (zr+1)*(zr+1)+zi*zi);
-      const gr = ((zr-1)*(zr+1)+zi*zi)/denom, gi = (2*zi)/denom;
-      const x = cx+gr*maxR, y = cy-gi*maxR;
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-  } else if(mode==='grid'){
-    const cw = (2*maxR)/Math.max(1,G);
-    const x = cx-maxR+(p-0.5)*cw;
-    ctx.beginPath(); ctx.moveTo(x,cy-maxR); ctx.lineTo(x,cy+maxR); ctx.stroke();
-  } else if(mode==='farey'){
-    const rawY = Math.log(2/p)/Math.log(2/Math.max(2,G));
-    const y = cy + (Math.max(0,rawY)*1.8-0.9)*maxR;
-    ctx.beginPath(); ctx.moveTo(cx-maxR,y); ctx.lineTo(cx+maxR,y); ctx.stroke();
+function onFilterChange(){
+  const v = +document.getElementById('filtMinSl').value;
+  document.getElementById('filtMinVal').textContent = v;
+  renderLattice();
+}
+// Color for a cell given how many of the k blocks it survives (0..K)
+function countColor(count, mode, r){
+  const t = K>0 ? count/K : 0;
+  if(mode==='rainbow'){
+    const h = Math.round((r%300)/300*300);
+    return 'hsl('+h+','+(45+t*35)+'%,'+(24+t*32)+'%)';
   }
-  ctx.restore();
+  if(mode==='residue'){
+    const RES_HUES=[0,60,120,180,240,300];
+    const h = RES_HUES[r%6];
+    return 'hsl('+h+','+(40+t*35)+'%,'+(20+t*35)+'%)';
+  }
+  // 'count' (default): dim slate (#3a3f5c) \u2192 gold (#f2c44a) gradient — kept clearly brighter
+  // than the canvas background (#020204) even at count=0, so every cell reads as rendered.
+  const r0=0x3a,g0=0x3f,b0=0x5c, r1=0xf2,g1=0xc4,b1=0x4a;
+  const rr = Math.round(r0+(r1-r0)*t), gg = Math.round(g0+(g1-g0)*t), bb = Math.round(b0+(b1-b0)*t);
+  return 'rgb('+rr+','+gg+','+bb+')';
 }
+function updateLatticeLegendK(mode){
+  const lg = document.getElementById('latticeLegend');
+  lg.innerHTML =
+    '<span><span class="sw" style="background:#3a3f5c;border:1px solid var(--edge2);"></span>0 blocks survived</span>'+
+    '<span><span class="sw" style="background:#f2c44a;"></span>all '+K+' blocks survived</span>'+
+    '<span>color interpolates between them by survival count'+(mode!=='count'?' (hue = '+mode+')':'')+'</span>';
+}
+// Exact asymptotic for the constellation-locked, single-point-block case
+// (every n_i=0, M_i=M1+h_i, H={0,h2,...,hk}): f_p(H) = 1 - nu_p(H)/p^2,
+// nu_p(H) = number of distinct residues mod p among {0, h2, ..., hk}.
+function computeConstC(offsets, primes){
+  const H = [0].concat(offsets);
+  let prod = 1;
+  for(let i=0;i<primes.length;i++){
+    const p = primes[i];
+    const seen = {};
+    let nu = 0;
+    for(let j=0;j<H.length;j++){ const res = H[j]%p; if(!seen[res]){ seen[res]=1; nu++; } }
+    prod *= (1 - nu/(p*p));
+  }
+  return ZETA2*prod;
+}
+function renderLattice(){
+  window._wg10_latticeReady = true;
+  const G = +document.getElementById('gsl').value;
+  const ns = (window._wg10_lastNs || currentNs()).map(function(n){ return Math.min(n,200); });
+  const mode = document.getElementById('colorModeSel').value;
+  const filtMin = +document.getElementById('filtMinSl').value;
+  const constLock = document.getElementById('constLockChk').checked;
+  const offsets = window._wg10_constOffsets || [];
+  updateLatticeLegendK(mode);
 
-function drawSpiral(){
-  const cv = document.getElementById('spiralCv');
+  const allZero = ns.every(function(n){ return n===0; });
+  if(constLock && allZero){
+    const Cconst = computeConstC(offsets, PRIMES_FULL);
+    document.getElementById('rAsympRef').textContent = fmt(Cconst/ZETA2)+' (exact, \u2130={0,'+offsets.join(',')+'})';
+  } else if(constLock){
+    document.getElementById('rAsympRef').textContent = '\u2014 (no closed form for n\u1d62>0 in constellation mode; compare against the finite fraction instead)';
+  } else {
+    const Ck = computeC(window._wg10_lastNs || currentNs(), PRIMES_FULL);
+    document.getElementById('rAsympRef').textContent = fmt(Ck/ZETA2);
+  }
+
+  const cv = document.getElementById('latticeCv');
   const dpr = Math.min(window.devicePixelRatio||1, 2);
-  const cssW = cv.clientWidth||600, cssH = 440;
+  const cssW = cv.clientWidth||600, cssH = 420;
   cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
   cv.style.height = cssH+'px';
   const ctx = cv.getContext('2d');
@@ -656,423 +894,331 @@ function drawSpiral(){
   ctx.fillStyle = '#020204';
   ctx.fillRect(0,0,cssW,cssH);
 
-  const G = +document.getElementById('sp-gsl').value;
-  cnReconcileP(G);
-  const p = spiralPFor(G);
-  document.getElementById('sp-plabel').textContent = 'p='+p;
-
-  const cx = cssW/2, cy = cssH/2;
-  const maxR = Math.min(cssW,cssH)*0.46;
-  const mode = _spView;
-  const dir = _spDir;
-  const mirrorOn = document.getElementById('sp-mirror').checked;
-  const allPOn = document.getElementById('sp-allp').checked;
-  const dropOn = document.getElementById('sp-dropout').checked;
-  const baseOn = document.getElementById('sp-base').checked;
-  const labelsOn = document.getElementById('sp-labels').checked;
-
-  function reduced(prime, M){
-    if(dir==='down'){
-      const m = ((M - (prime % M)) % M);
-      return m===0 ? M : m;
-    }
-    return prime % M;
+  if(constLock){
+    document.getElementById('latticeNote').textContent =
+      'Constellation mode: M\u1d62 = M\u2081+h\u1d62 for every row, H = {0,'+offsets.join(',')+'} \u2014 the exact finite picture behind '+
+      'this k-tuple. '+(allZero
+        ? 'With every n\u1d62=0 this matches the "Reading this page as k-tuples" card below exactly.'
+        : 'n\u1d62 are not all 0, so this is a windowed generalization, not the pure constellation statistic \u2014 zero every n\u1d62 above for the exact correspondence.');
+  } else {
+    document.getElementById('latticeNote').textContent =
+      'n\u2081...n_k capped at 200 each inside this canvas for render speed \u2014 the asymptotic value above uses the true, uncapped values. Note: with M\u2082,\u2026,M_k fixed (not averaged), the finite fraction converges to D(n\u2081,\u2026,n_k) as G grows, but converges faster for larger/more \u201cgeneric\u201d anchor values. Anchors default to staggered values (1, 24, 47, \u2026) rather than all 1 \u2014 identical anchors with identical n\u1d62 make those blocks perfectly correlated and collapse part of the survival-count spectrum, which was making most of the canvas render as near-black \u201cmissing\u201d cells at k\u22653.';
   }
 
-  // Base lattice under C(n): a point survives iff gcd(r, M+j)=1 for all j ≤ n.
-  // At n = 0 this is exactly the old coprime base (blockOK(r,M,0) ⇔ gcd(r,M)=1).
-  let _cnAlive=0, _cnTot=0;
-  {
-    const hideDrop = !!(document.getElementById('sp-cnhide')&&document.getElementById('sp-cnhide').checked);
-    ctx.save();
-    for(let M=3;M<=G;M++){
-      for(let r=1;r<M;r++){
-        _cnTot++;
-        const ok = blockOK(r,M,_cnN);
-        if(ok) _cnAlive++;
-        if(!baseOn) continue;
-        if(ok){
-          ctx.fillStyle = _cnN===0 ? 'rgba(232,227,219,.12)' : 'rgba(200,168,74,.55)';
-        } else {
-          if(_cnN===0 || hideDrop) continue;
-          ctx.fillStyle = 'rgba(232,227,219,.05)';
-        }
-        const rad = ok ? (_cnN===0 ? 1.0 : 1.25) : 0.8;
-        viewXY(r,M,G,cx,cy,maxR,mode).forEach(function(pt){
-          ctx.beginPath(); ctx.arc(pt[0],pt[1],rad,0,6.2832); ctx.fill();
-        });
+  // Fixed-anchor blocks (2..K): in normal mode these are constants and can be
+  // hoisted out of the M1 loop; in constellation mode M_i = M1+h_i depends on
+  // M1, so the count has to be recomputed per row inside the M1 loop instead.
+  let fixedOkArr = null;
+  if(!constLock){
+    fixedOkArr = new Array(G+1);
+    for(let r=1;r<=G;r++){
+      let count = 0;
+      for(let i=2;i<=K;i++){
+        const Mi = window._wg10_manc && window._wg10_manc[i] ? window._wg10_manc[i] : 1;
+        const ni = ns[i-1];
+        let ok = true;
+        for(let j=0;j<=ni;j++){ if(gcd(r, Mi+j) > 1){ ok=false; break; } }
+        if(ok) count++;
+      }
+      fixedOkArr[r] = count;
+    }
+  }
+  function fixedCountFor(r, M1){
+    if(!constLock) return fixedOkArr[r];
+    let count = 0;
+    for(let i=2;i<=K;i++){
+      const h = offsets[i-2] || 0;
+      const Mi = M1 + h;
+      const ni = ns[i-1];
+      let ok = true;
+      for(let j=0;j<=ni;j++){ if(gcd(r, Mi+j) > 1){ ok=false; break; } }
+      if(ok) count++;
+    }
+    return count;
+  }
+
+  let allCount = 0;
+  const n1 = ns[0];
+
+  if(_wg10_view === 'grid'){
+    const cellW = cssW/G, cellH = cssH/G;
+    for(let r=1; r<=G; r++){
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        const total = fixedCountFor(r, M1) + (ok1?1:0);
+        if(total===K) allCount++;
+        if(total < filtMin) continue;
+        ctx.fillStyle = countColor(total, mode, r);
+        const px = (r-1)*cellW, py = cssH - M1*cellH;
+        ctx.fillRect(px, py, Math.max(1,cellW-.4), Math.max(1,cellH-.4));
       }
     }
-    ctx.restore();
-  }
-
-  // All-primes overlay (dim), skipping the selected prime (drawn bright below)
-  if(allPOn){
-    ctx.save();
-    for(let pi=0; pi<PRIMES.length; pi++){
-      const ap = PRIMES[pi];
-      if(ap>=G) break;
-      if(ap===p) continue;
-      for(let M=ap+1; M<=G; M++){
-        const r = reduced(ap,M);
-        if(r<1||r>=M) continue;
-        viewXY(r,M,G,cx,cy,maxR,mode).forEach(function(pt){
-          ctx.fillStyle = 'rgba(230,56,72,.25)';
-          ctx.beginPath(); ctx.arc(pt[0],pt[1],1.3,0,6.2832); ctx.fill();
-        });
+  } else if(_wg10_view === 'ring3d'){
+    // allCount / rFiniteFrac still reflects the true full G×G survival count
+    // at the current n1..nk (same statistic as Grid/Ring), even though the
+    // 3D render itself only samples a subset of points for speed.
+    // Constellation mode isn't wired into the 3D renderer (which assumes
+    // static anchors), so it's forced back to Grid — see setLatticeView.
+    const fixedForRing = fixedOkArr || (function(){
+      const arr = new Array(G+1);
+      for(let r=1;r<=G;r++) arr[r] = fixedCountFor(r, 1);
+      return arr;
+    })();
+    for(let r=1; r<=G; r++){
+      const fixedCount = fixedForRing[r];
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        if(fixedCount + (ok1?1:0) === K) allCount++;
       }
     }
-    ctx.restore();
+    renderRing3D(ctx, cssW, cssH, G, mode, filtMin, fixedForRing);
+  } else {
+    const cx = cssW/2, cy = cssH/2;
+    const R = Math.min(cssW,cssH)*0.47;
+    const dotR = Math.max(1, R/G*0.9);
+    for(let r=1; r<=G; r++){
+      const theta = 2*Math.PI*(r-1)/G;
+      const cosT = Math.cos(theta), sinT = Math.sin(theta);
+      for(let M1=1; M1<=G; M1++){
+        let ok1 = true;
+        for(let j=0;j<=n1;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        const total = fixedCountFor(r, M1) + (ok1?1:0);
+        if(total===K) allCount++;
+        if(total < filtMin) continue;
+        const rho = (M1/G)*R;
+        const x = cx + rho*cosT, y = cy - rho*sinT;
+        ctx.fillStyle = countColor(total, mode, r);
+        ctx.fillRect(x-dotR/2, y-dotR/2, dotR, dotR);
+      }
+    }
+  }
+  document.getElementById('rFiniteFrac').textContent = fmt(allCount/(G*G));
+}
+
+// ── 3D Ring — stacks the flat Ring view into layers along a vertical axis,
+// one disk per n1 depth (0..layers-1), each disk sampling 4 concentric M1
+// radii × `pts` angular r-positions. A slight per-layer angular twist gives
+// the helicoid/covering-surface look; drag or Auto-rotate to orbit. ──
+let _r3dAz = 0.55, _r3dEl = 0.45, _r3dAuto = false, _r3dAutoId = null;
+let _r3dDragging = false, _r3dLastX = 0, _r3dLastY = 0;
+const _R3D_RING_FRACS = [0.38, 0.58, 0.78, 0.98];
+const _R3D_LAYER_COLORS = ['#e05060','#ff8c42','#f2c14e','#7ec87a','#3dc8b8','#4a9eff','#9b7fe8','#ff2fd0','#00d9ff','#c8a84a','#a855f7','#e05060'];
+function renderRing3D(ctx, cssW, cssH, G, mode, filtMin, fixedOkArr){
+  const layers = +document.getElementById('r3dLayersSl').value;
+  const pts = +document.getElementById('r3dPtsSl').value;
+  document.getElementById('r3dLayersVal').textContent = layers;
+  document.getElementById('r3dPtsVal').textContent = pts;
+  document.getElementById('r3dAzEl').textContent = _r3dAz.toFixed(2)+' / '+_r3dEl.toFixed(2);
+  document.getElementById('r3dCount').textContent = layers+' × '+_R3D_RING_FRACS.length+' × '+pts+' = '+(layers*_R3D_RING_FRACS.length*pts).toLocaleString();
+
+  const cx = cssW/2, cy = cssH*0.54;
+  const R = Math.min(cssW,cssH)*0.34;
+  const spacing = Math.min(cssW,cssH)*0.11;
+  const az=_r3dAz, el=_r3dEl;
+  const cosA=Math.cos(az), sinA=Math.sin(az), cosE=Math.cos(el), sinE=Math.sin(el);
+  function proj(x,y,z){
+    const x1 = x*cosA - z*sinA, z1 = x*sinA + z*cosA;
+    const y1 = y*cosE - z1*sinE, z2 = y*sinE + z1*cosE;
+    const persp = 420/(420+z2);
+    return {sx: cx+x1*persp, sy: cy-y1*persp, z: z2, persp: persp};
   }
 
-  // Dropout locus — the M = p boundary in whatever shape the current view gives it
-  if(dropOn && p>=2 && p<=G) drawDropoutLocus(ctx, p, G, cx, cy, maxR, mode);
+  const items = [];
+  const spineTop = proj(0, (layers-1)/2*spacing + spacing*0.7, 0);
+  const spineBot = proj(0, -((layers-1)/2*spacing + spacing*0.7), 0);
+  items.push({type:'spine', a:spineTop, b:spineBot, z:(spineTop.z+spineBot.z)/2});
 
-  // Main spiral trace — one connected path per quadrant (Gauss has 4; everything else has 1)
-  const rmSeq = [];
-  for(let M=p+1; M<=G; M++){
-    const r = reduced(p,M);
-    if(r<1||r>=M) continue;
-    rmSeq.push([r,M]);
+  for(let L=0; L<layers; L++){
+    const n1L = L; // this layer's block-1 shift depth
+    const y3 = (L-(layers-1)/2)*spacing;
+    const twist = L*0.14;
+    const col = _R3D_LAYER_COLORS[L%_R3D_LAYER_COLORS.length];
+    // layer outline (outermost ring) — helps the eye read each disk
+    const N=48; let prevEdge=null;
+    for(let i=0;i<=N;i++){
+      const th=2*Math.PI*i/N + twist;
+      const x3=R*Math.cos(th), z3=R*Math.sin(th);
+      const p=proj(x3,y3,z3);
+      if(prevEdge) items.push({type:'edge', a:prevEdge, b:p, z:(prevEdge.z+p.z)/2, color:col});
+      prevEdge=p;
+    }
+    for(let ri=0; ri<_R3D_RING_FRACS.length; ri++){
+      const M1 = Math.max(1, Math.round(_R3D_RING_FRACS[ri]*G));
+      const rad = _R3D_RING_FRACS[ri]*R;
+      for(let i=0;i<pts;i++){
+        const r = 1 + Math.round(i*(G-1)/Math.max(1,pts-1));
+        if(r<1||r>=Math.max(2,G+1)) continue;
+        let ok1=true;
+        for(let j=0;j<=n1L;j++){ if(gcd(r, M1+j) > 1){ ok1=false; break; } }
+        const total = fixedOkArr[r] + (ok1?1:0);
+        if(total < filtMin) continue;
+        const theta = 2*Math.PI*(r-1)/G + twist;
+        const x3 = rad*Math.cos(theta), z3 = rad*Math.sin(theta);
+        const p = proj(x3, y3, z3);
+        items.push({type:'pt', p:p, z:p.z, color: mode==='count' ? countColor(total, mode, r) : col});
+      }
+    }
   }
-  const nQuad = mode==='gauss' ? 4 : 1;
-  const series = Array.from({length:nQuad}, function(){ return []; });
-  rmSeq.forEach(function(rm){
-    viewXY(rm[0],rm[1],G,cx,cy,maxR,mode).forEach(function(pt,qi){ series[qi].push(pt); });
+
+  items.sort(function(a,b){ return a.z-b.z; });
+  ctx.save();
+  for(let i=0;i<items.length;i++){
+    const it = items[i];
+    if(it.type==='spine'){
+      ctx.strokeStyle='rgba(200,168,74,.55)'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(it.a.sx,it.a.sy); ctx.lineTo(it.b.sx,it.b.sy); ctx.stroke();
+    } else if(it.type==='edge'){
+      ctx.strokeStyle=it.color+'35'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(it.a.sx,it.a.sy); ctx.lineTo(it.b.sx,it.b.sy); ctx.stroke();
+    } else {
+      const rad = Math.max(1, 2.3*it.p.persp);
+      ctx.fillStyle = it.color;
+      ctx.beginPath(); ctx.arc(it.p.sx,it.p.sy,rad,0,6.2832); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function onRing3DChange(){ renderLattice(); }
+function toggleRing3DAuto(){
+  _r3dAuto = !_r3dAuto;
+  const btn = document.getElementById('r3dAutoBtn');
+  if(_r3dAuto){
+    btn.textContent='■ Stop'; btn.style.color='rgba(224,80,96,.9)'; btn.style.borderColor='rgba(224,80,96,.5)';
+    _r3dAutoId = setInterval(function(){ _r3dAz += 0.012; renderLattice(); }, 40);
+  } else {
+    btn.textContent='▶ Auto'; btn.style.color=''; btn.style.borderColor='';
+    if(_r3dAutoId){ clearInterval(_r3dAutoId); _r3dAutoId=null; }
+  }
+}
+function _r3dEventXY(e){ const p=e.touches?e.touches[0]:e; return {x:p.clientX,y:p.clientY}; }
+function _r3dPointerDown(e){
+  if(_wg10_view!=='ring3d') return;
+  _r3dDragging=true; const p=_r3dEventXY(e); _r3dLastX=p.x; _r3dLastY=p.y;
+  const cv=document.getElementById('latticeCv'); if(cv) cv.style.cursor='grabbing';
+}
+function _r3dPointerMove(e){
+  if(!_r3dDragging||_wg10_view!=='ring3d') return;
+  const p=_r3dEventXY(e);
+  const dx=p.x-_r3dLastX, dy=p.y-_r3dLastY;
+  _r3dLastX=p.x; _r3dLastY=p.y;
+  _r3dAz += dx*0.008;
+  _r3dEl = Math.max(-1.4, Math.min(1.4, _r3dEl + dy*0.008));
+  renderLattice();
+  if(e.cancelable) e.preventDefault();
+}
+function _r3dPointerUp(){
+  _r3dDragging=false;
+  const cv=document.getElementById('latticeCv'); if(cv) cv.style.cursor=(_wg10_view==='ring3d'?'grab':'default');
+}
+
+// ── Play button: animates n\u2081, driving the whole page ──
+let _wg10_playId = null;
+function togglePlay(){
+  const btn = document.getElementById('playBtn');
+  if(_wg10_playId){
+    clearInterval(_wg10_playId); _wg10_playId = null;
+    btn.textContent = '\u25b6 Play n\u2081'; btn.classList.remove('playing');
+    return;
+  }
+  btn.textContent = '\u25a0 Stop'; btn.classList.add('playing');
+  _wg10_playId = setInterval(function(){
+    const sl = document.getElementById('nsl0');
+    let v = (+sl.value) + 1;
+    if(v > 60) v = 0;
+    sl.value = v;
+    document.getElementById('nnum0').value = v;
+    onNChange(0);
+  }, 350);
+}
+
+// ── Growth plot: rho_k(n) vs k, symmetric case ──
+const GROWTH_NS = [1,5,10,20];
+const GROWTH_COLORS = ['#3dc8b8','#9b7fe8','#f2c14e','#e05060'];
+function computeGrowthData(){
+  const KMAX = 12;
+  const series = GROWTH_NS.map(function(n){
+    const Cn = computeC([n],PRIMES_FULL);
+    const vals = [];
+    for(let k=1;k<=KMAX;k++){
+      const ns = new Array(k).fill(n);
+      const Ck = computeC(ns,PRIMES_FULL);
+      vals.push(Math.pow(ZETA2,k-1)*Ck/Math.pow(Cn,k));
+    }
+    return {n:n, vals:vals};
   });
-  const showLabels = labelsOn && rmSeq.length<=120;
-  series.forEach(function(pts){
-    ctx.save();
-    ctx.strokeStyle = 'rgba(230,56,72,.4)';
-    ctx.lineWidth = 1;
+  return {series:series, KMAX:KMAX};
+}
+function renderGrowth(){
+  const data = computeGrowthData();
+  const cv = document.getElementById('growthCv');
+  const dpr = window.devicePixelRatio||1;
+  const w = cv.clientWidth||900, h = 340;
+  cv.width = w*dpr; cv.height = h*dpr;
+  cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:56,r:16,t:14,b:28};
+  const pw = w-pad.l-pad.r, ph = h-pad.t-pad.b;
+  let ymin=Infinity, ymax=-Infinity;
+  data.series.forEach(function(s){ s.vals.forEach(function(v){ ymin=Math.min(ymin,v); ymax=Math.max(ymax,v); }); });
+  const logMin = Math.log10(Math.max(ymin,1e-9)), logMax = Math.log10(ymax);
+  function X(k){ return pad.l + ((k-1)/(data.KMAX-1))*pw; }
+  function Y(v){ const lv=Math.log10(Math.max(v,1e-9)); return pad.t + (1-(lv-logMin)/(logMax-logMin))*ph; }
+  ctx.strokeStyle='rgba(255,255,255,.13)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ph); ctx.lineTo(pad.l+pw,pad.t+ph); ctx.stroke();
+  ctx.fillStyle='#6a6560'; ctx.font='9px JetBrains Mono, monospace';
+  const decades = Math.ceil(logMax)-Math.floor(logMin);
+  for(let d=Math.floor(logMin); d<=Math.ceil(logMax); d++){
+    const y = pad.t + (1-(d-logMin)/(logMax-logMin))*ph;
+    ctx.fillText('1e'+d, 4, y+3);
+    ctx.strokeStyle='rgba(255,255,255,.06)';
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+pw,y); ctx.stroke();
+  }
+  for(let k=1;k<=data.KMAX;k++){
+    ctx.fillStyle='#6a6560';
+    ctx.fillText(k, X(k)-3, pad.t+ph+16);
+  }
+  ctx.fillStyle='#8a8378'; ctx.fillText('k \u2192', pad.l+pw-14, pad.t+ph+16);
+  data.series.forEach(function(s, si){
+    ctx.strokeStyle = GROWTH_COLORS[si%GROWTH_COLORS.length]; ctx.lineWidth=1.8;
     ctx.beginPath();
-    pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
+    s.vals.forEach(function(v,ki){ const x=X(ki+1), y=Y(v); if(ki===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
     ctx.stroke();
-    ctx.restore();
-    pts.forEach(function(pt,i){
-      ctx.fillStyle = 'rgba(230,56,72,.95)';
-      ctx.beginPath(); ctx.arc(pt[0],pt[1],2.6,0,6.2832); ctx.fill();
-      if(_cnN>0 && blockOK(rmSeq[i][0], rmSeq[i][1], _cnN)){
-        ctx.strokeStyle='rgba(200,168,74,.9)'; ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.arc(pt[0],pt[1],4.4,0,6.2832); ctx.stroke();
-      }
-      if(showLabels){
-        ctx.font = "8px 'JetBrains Mono',monospace";
-        ctx.fillStyle = 'rgba(232,227,219,.7)';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        ctx.fillText(String(rmSeq[i][0]), pt[0], pt[1]-4);
-      }
-    });
+    ctx.fillStyle = GROWTH_COLORS[si%GROWTH_COLORS.length];
+    s.vals.forEach(function(v,ki){ ctx.beginPath(); ctx.arc(X(ki+1),Y(v),2,0,7); ctx.fill(); });
   });
+  const lg = document.getElementById('growthLegend');
+  lg.innerHTML = data.series.map(function(s,si){
+    return '<span><span class="sw" style="background:'+GROWTH_COLORS[si%GROWTH_COLORS.length]+';"></span>n = '+s.n+'</span>';
+  }).join('');
+}
 
-  // Mirror conjugate σ(r) = M − r
-  if(mirrorOn){
-    const mSeq = [];
-    for(let M=p+1; M<=G; M++){
-      const r = reduced(p,M);
-      const rm = M - r;
-      if(rm<1||rm>=M) continue;
-      mSeq.push([rm,M]);
-    }
-    const mSeries = Array.from({length:nQuad}, function(){ return []; });
-    mSeq.forEach(function(rm){
-      viewXY(rm[0],rm[1],G,cx,cy,maxR,mode).forEach(function(pt,qi){ mSeries[qi].push(pt); });
-    });
-    mSeries.forEach(function(pts){
-      ctx.save();
-      ctx.strokeStyle = 'rgba(155,127,232,.32)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
-      ctx.stroke();
-      ctx.restore();
-      pts.forEach(function(pt,i){
-        ctx.fillStyle = 'rgba(155,127,232,.85)';
-        ctx.beginPath(); ctx.arc(pt[0],pt[1],2.3,0,6.2832); ctx.fill();
-        if(showLabels){
-          ctx.font = "8px 'JetBrains Mono',monospace";
-          ctx.fillStyle = 'rgba(200,190,230,.65)';
-          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-          ctx.fillText(String(mSeq[i][0]), pt[0], pt[1]+4);
-        }
-      });
-    });
+// ── Init ──
+window.addEventListener('load', function(){
+  PRIMES_FULL = sievePrimes(LIMIT);
+  document.getElementById('calcNote').textContent =
+    '∞ asymptotic product truncated at primes ≤ 2,000,000 (' + PRIMES_FULL.length.toLocaleString() + ' primes) — reliable to ~7–8 dp.';
+  buildBlocks();
+  recompute();
+  buildMAnchors();
+  renderLattice();
+  renderGrowth();
+  const cv3d = document.getElementById('latticeCv');
+  if(cv3d){
+    cv3d.addEventListener('mousedown', _r3dPointerDown);
+    window.addEventListener('mousemove', _r3dPointerMove);
+    window.addEventListener('mouseup', _r3dPointerUp);
+    cv3d.addEventListener('touchstart', _r3dPointerDown, {passive:true});
+    cv3d.addEventListener('touchmove', _r3dPointerMove, {passive:false});
+    cv3d.addEventListener('touchend', _r3dPointerUp);
   }
-
-  var _satTxt='';
-  if(_cnN>0){
-    if(p>_cnN+1){ _satTxt=' · active (p > n+1)'; }
-    else { _satTxt=' · SATURATED (p ≤ '+(_cnN+1)+') — factor frozen at 1−1/'+p+(cnLockOn()?' · lock: no active prime ≤ G':''); }
-  }
-  document.getElementById('sp-r1').textContent = 'p = '+p+' ('+(dir==='up'?'r ≡ +p':'r ≡ −p')+' mod M)'+_satTxt;
-  document.getElementById('sp-r2').textContent = rmSeq.length+' points, rings '+(p+1)+'…'+G;
-  document.getElementById('sp-r3').textContent = (p<=G) ? ('M = '+p+' — gcd(p,p) = p, excluded') : '— (p > G, not shown)';
-  const _Dm = _cnAlive/Math.max(1,_cnTot), _Dp = predD(_cnN);
-  document.getElementById('sp-r4').textContent = 'n = '+_cnN+' · D̂ = '+_Dm.toFixed(DECIMALS)+'  ('+_cnAlive+'/'+_cnTot+' pts, G = '+G+')';
-  document.getElementById('sp-r5').textContent = 'D('+_cnN+') = '+_Dp.toFixed(DECIMALS)+' · C('+_cnN+') = '+(_Dp*ZETA2).toFixed(DECIMALS)+(_cnN===0?' — exact: D(0) = 1/ζ(2)':'');
-}
-
-
-// ═══════════════ Interferometer engine ═══════════════
-const IF={N:100000,M:30,a:1,Q:24,mode:'spokes',play:null};
-let _ifPrimes=null,_ifPrimesN=0;
-const _cntCache={};
-function ifPrimes(){ if(_ifPrimesN!==IF.N){_ifPrimes=sievePrimes(IF.N);_ifPrimesN=IF.N;for(const k in _cntCache)delete _cntCache[k];} return _ifPrimes; }
-function ifCounts(q){ const k=IF.N+'|'+q; if(_cntCache[k])return _cntCache[k];
-  const c=new Float64Array(q); for(const p of ifPrimes()) c[p%q]++; _cntCache[k]=c; return c; }
-function ifS(a,q){ const c=ifCounts(q); let re=0,im=0;
-  for(let r=0;r<q;r++){ if(!c[r])continue; const t=2*Math.PI*r*a/q; re+=c[r]*Math.cos(t); im+=c[r]*Math.sin(t); }
-  return [re,im]; }
-function ifFactor(n){const f=[];let x=n;for(let p=2;p*p<=x;p++){if(x%p===0){let e=0;while(x%p===0){e++;x/=p;}f.push([p,e]);}}if(x>1)f.push([x,1]);return f;}
-function ifMu(n){ if(n===1)return 1; let m=1; for(const [,e] of ifFactor(n)){ if(e>1)return 0; m=-m; } return m; }
-function ifPhi(n){ if(n===1)return 1; let r=n; for(const [p] of ifFactor(n)) r=r/p*(p-1); return r; }
-function ifPred(a,q){ if(a%q===0) return ifPrimes().length; const d=gcd(a,q),q2=q/d; return ifMu(q2)/ifPhi(q2)*ifPrimes().length; }
-function ifPiN(){ return ifPrimes().length; }
-
-function _ifSize(cv,h){ const dpr=Math.min(window.devicePixelRatio||1,2); const w=cv.clientWidth||880;
-  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.height=h+'px';
-  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.fillStyle='#020204'; ctx.fillRect(0,0,w,h);
-  return [ctx,w,h]; }
-
-// ── main canvas: spokes / phasor / standing ──
-function drawIntf(){
-  const cv=document.getElementById('intfCv'); const [ctx,W,H]=_ifSize(cv,430);
-  const cx=W/2, cy=H/2, maxR=Math.min(W,H)*0.42;
-  const M=IF.M, a=IF.a, piN=ifPiN(), cnt=ifCounts(M);
-  const [re,im]=ifS(a,M), amp=Math.hypot(re,im), pred=ifPred(a,M);
-  if(IF.mode==='spokes'){
-    const cmax=Math.max.apply(null,Array.from(cnt));
-    const exp=piN/ifPhi(M), expR=maxR*(exp/cmax);
-    ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(61,200,184,.55)'; ctx.lineWidth=1.1;
-    ctx.beginPath(); ctx.arc(cx,cy,expR,0,6.2832); ctx.stroke(); ctx.setLineDash([]);
-    for(let r=0;r<M;r++){
-      const th=2*Math.PI*r/M, L=maxR*(cnt[r]/cmax);
-      const cop=gcd(r,M)===1;
-      ctx.strokeStyle=cop?'rgba(200,168,74,.9)':'rgba(155,127,232,.5)';
-      ctx.lineWidth=Math.max(1.2, 5-M*0.012);
-      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+L*Math.cos(th),cy-L*Math.sin(th)); ctx.stroke();
-    }
-    const rp=_spP%M, thp=2*Math.PI*rp/M, Lp=maxR*(cnt[rp]/cmax);
-    ctx.fillStyle='var(--pink)'; ctx.fillStyle='#ff6b9d';
-    ctx.beginPath(); ctx.arc(cx+Lp*Math.cos(thp),cy-Lp*Math.sin(thp),4.5,0,6.2832); ctx.fill();
-    ctx.font="10px 'JetBrains Mono'"; ctx.fillStyle='rgba(255,107,157,.9)'; ctx.textAlign='center';
-    ctx.fillText('p='+_spP+' → r='+rp, cx+Lp*Math.cos(thp), cy-Lp*Math.sin(thp)-9);
-    document.getElementById('if-read').innerHTML='M = <b>'+M+'</b> · π(N) = <b>'+piN.toLocaleString()+'</b> across '+M+' classes · φ(M) = <b>'+ifPhi(M)+'</b> coprime classes at ≈ '+(piN/ifPhi(M)).toFixed(1)+' each (dashed) · non-coprime classes hold only the finitely many p | M.';
-  } else if(IF.mode==='phasor'){
-    const prs=ifPrimes(), n=prs.length, step=Math.max(1,Math.floor(n/3800));
-    let zr=0,zi=0; const pts=[[0,0]]; let mMax=1;
-    for(let i=0;i<n;i++){ const t=2*Math.PI*(prs[i]%M)*a/M; zr+=Math.cos(t); zi+=Math.sin(t);
-      if(i%step===0||i===n-1){ pts.push([zr,zi]); mMax=Math.max(mMax,Math.abs(zr),Math.abs(zi)); } }
-    mMax=Math.max(mMax,Math.abs(pred),Math.sqrt(n))*1.12;
-    const sx=v=>cx+v/mMax*maxR, sy=v=>cy-v/mMax*maxR;
-    ctx.strokeStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.moveTo(cx-maxR,cy);ctx.lineTo(cx+maxR,cy);ctx.moveTo(cx,cy-maxR);ctx.lineTo(cx,cy+maxR);ctx.stroke();
-    ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(232,227,219,.3)';
-    ctx.beginPath();ctx.arc(sx(pred),sy(0),Math.sqrt(n)/mMax*maxR,0,6.2832);ctx.stroke();ctx.setLineDash([]);
-    for(let i=1;i<pts.length;i++){
-      const t=i/pts.length;
-      ctx.strokeStyle='rgba('+Math.round(200-139*t)+','+Math.round(168+32*t)+','+Math.round(74+110*t)+',.85)';
-      ctx.lineWidth=1.3;
-      ctx.beginPath();ctx.moveTo(sx(pts[i-1][0]),sy(pts[i-1][1]));ctx.lineTo(sx(pts[i][0]),sy(pts[i][1]));ctx.stroke();
-    }
-    ctx.fillStyle='#e05060';
-    ctx.beginPath();ctx.moveTo(sx(pred)-7,sy(0));ctx.lineTo(sx(pred)+7,sy(0));ctx.moveTo(sx(pred),sy(0)-7);ctx.lineTo(sx(pred),sy(0)+7);ctx.strokeStyle='#e05060';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='#3dc8b8';ctx.beginPath();ctx.arc(sx(zr),sy(zi),4.5,0,6.2832);ctx.fill();
-    document.getElementById('if-read').innerHTML='Walk of '+n.toLocaleString()+' phasors, e(pa/M), a/M = '+a+'/'+M+' · endpoint <b>('+re.toFixed(1)+', '+im.toFixed(1)+')</b>, |S| = <b>'+amp.toFixed(1)+'</b> · predicted (coral ✚) <b>'+pred.toFixed(1)+'</b> · residual '+Math.hypot(re-pred,im).toFixed(1)+' vs √π(N) ≈ '+Math.sqrt(n).toFixed(0)+' (dashed circle).';
-  } else { // standing
-    const base=maxR*0.55, cmaxI=Math.max(1e-9,amp);
-    ctx.setLineDash([2,3]);ctx.strokeStyle='rgba(232,227,219,.25)';ctx.beginPath();ctx.arc(cx,cy,base,0,6.2832);ctx.stroke();ctx.setLineDash([]);
-    for(let r=0;r<M;r++){
-      const t=2*Math.PI*r*a/M;
-      const I=Math.cos(t)*re+Math.sin(t)*im;      // Re(e(-rat)S)
-      const th=2*Math.PI*r/M, ext=(I/cmaxI)*maxR*0.42;
-      ctx.strokeStyle= I>=0?'rgba(61,200,184,.9)':'rgba(224,80,96,.9)';
-      ctx.lineWidth=Math.max(1.2,4.5-M*0.01);
-      ctx.beginPath();
-      ctx.moveTo(cx+base*Math.cos(th),cy-base*Math.sin(th));
-      ctx.lineTo(cx+(base+ext)*Math.cos(th),cy-(base+ext)*Math.sin(th));
-      ctx.stroke();
-    }
-    document.getElementById('if-read').innerHTML='Standing wave at harmonic a = '+a+' on ring M = '+M+': node intensity Re[e(−2πira/M)·S] — <span style="color:var(--teal)">teal outward</span> / <span style="color:var(--coral)">coral inward</span>. '+(Math.abs(pred)<1e-9?'μ(M′)=0 here: first-order amplitude cancels; what remains is pure noise floor.':'Antinodes align with the residue bias the μ/φ amplitude predicts.');
-  }
-}
-
-// ── Farey spectrum ──
-let _specPts=[];
-function drawSpec(){
-  const cv=document.getElementById('specCv'); const [ctx,W,H]=_ifSize(cv,270);
-  const PAD=42, piN=ifPiN(); _specPts=[];
-  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.moveTo(PAD,H-30);ctx.lineTo(W-14,H-30);ctx.stroke();
-  ctx.font="9px 'JetBrains Mono'";ctx.fillStyle='rgba(232,227,219,.45)';ctx.textAlign='center';
-  for(let i=0;i<=4;i++)ctx.fillText((i/4).toFixed(2),PAD+(W-PAD-14)*i/4,H-16);
-  const xAt=al=>PAD+(W-PAD-14)*al, yAt=v=>H-30-(H-52)*Math.min(1,v);
-  for(let q=2;q<=IF.Q;q++){
-    const mu=ifMu(q),ph=ifPhi(q),predAmp=Math.abs(mu)/ph;
-    for(let a2=1;a2<q;a2++){
-      if(gcd(a2,q)!==1)continue;
-      const [re,im]=ifS(a2,q), meas=Math.hypot(re,im)/piN;
-      const x=xAt(a2/q);
-      ctx.strokeStyle='rgba(200,168,74,'+(q<8?.95:.55)+')';ctx.lineWidth=q<8?1.8:1;
-      ctx.beginPath();ctx.moveTo(x,H-30);ctx.lineTo(x,yAt(meas));ctx.stroke();
-      ctx.strokeStyle='rgba(61,200,184,.85)';ctx.lineWidth=1.2;
-      ctx.beginPath();ctx.arc(x,yAt(predAmp),2.6,0,6.2832);ctx.stroke();
-      _specPts.push({x,a:a2,q,meas,pred:predAmp});
-    }
-  }
-  ctx.fillStyle='rgba(232,227,219,.5)';ctx.textAlign='left';
-  ctx.fillText('|S(a/q)|/π(N) measured (gold) vs |μ(q)|/φ(q) predicted (teal) — q ≤ '+IF.Q+', N = '+IF.N.toLocaleString(),PAD,14);
-}
-function specPick(e){
-  const cv=document.getElementById('specCv'),r=cv.getBoundingClientRect();
-  const px=(e.clientX-r.left);
-  let best=null,bd=1e9;
-  for(const s of _specPts){const d=Math.abs(px-s.x);if(d<bd){bd=d;best=s;}}
-  if(!best||bd>8)return;
-  document.getElementById('spec-read').innerHTML='α = <b>'+best.a+'/'+best.q+'</b> · measured |S|/π(N) = <b>'+best.meas.toFixed(4)+'</b> · predicted |μ('+best.q+')|/φ('+best.q+') = <b>'+best.pred.toFixed(4)+'</b>'+(best.pred===0?' — square divides '+best.q+': total first-order cancellation; the residue is minor-arc noise.':' · residual '+(Math.abs(best.meas-best.pred)).toFixed(4));
-}
-
-// ── μ ladder ──
-let _muBars=[];
-function drawMu(){
-  const cv=document.getElementById('muCv'); const [ctx,W,H]=_ifSize(cv,240);
-  const PAD=42, piN=ifPiN(); _muBars=[];
-  const Q=Math.min(40,IF.Q+16), bw=(W-PAD-14)/(Q-1);
-  const yAt=v=>H-28-(H-52)*Math.min(1,v/0.55);
-  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.moveTo(PAD,H-28);ctx.lineTo(W-14,H-28);ctx.stroke();
-  ctx.font="9px 'JetBrains Mono'";
-  for(let q=2;q<=Q;q++){
-    const x=PAD+(q-2)*bw+bw*0.15;
-    const [re,im]=ifS(1,q), meas=Math.hypot(re,im)/piN;
-    const mu=ifMu(q), pred=Math.abs(mu)/ifPhi(q);
-    ctx.fillStyle= mu===0?'rgba(155,127,232,.45)':'rgba(200,168,74,.85)';
-    ctx.fillRect(x,yAt(meas),bw*0.7,H-28-yAt(meas));
-    ctx.strokeStyle='rgba(61,200,184,.95)';ctx.lineWidth=1.6;
-    ctx.beginPath();ctx.moveTo(x-1,yAt(pred));ctx.lineTo(x+bw*0.7+1,yAt(pred));ctx.stroke();
-    ctx.fillStyle= mu===0?'rgba(155,127,232,.8)':'rgba(232,227,219,.5)';ctx.textAlign='center';
-    if(q<=Q)ctx.fillText(q,x+bw*0.35,H-14);
-    _muBars.push({x0:x,x1:x+bw*0.7,q,meas,pred,mu});
-  }
-  ctx.fillStyle='rgba(232,227,219,.5)';ctx.textAlign='left';
-  ctx.fillText('measured |S(1/q)|/π(N) (bars, violet ⇒ μ=0) vs predicted |μ(q)|/φ(q) (teal ticks)',PAD,14);
-}
-function muPick(e){
-  const cv=document.getElementById('muCv'),r=cv.getBoundingClientRect();
-  const px=(e.clientX-r.left);
-  const b=_muBars.find(b=>px>=b.x0-2&&px<=b.x1+2);
-  if(!b)return;
-  const f=ifFactor(b.q).map(([p,e2])=>e2>1?p+'<sup>'+e2+'</sup>':p).join('·');
-  document.getElementById('mu-read').innerHTML='q = <b>'+b.q+'</b> = '+f+' · μ('+b.q+') = <b>'+b.mu+'</b>, φ('+b.q+') = '+ifPhi(b.q)+' · predicted <b>'+b.pred.toFixed(4)+'</b> · measured <b>'+b.meas.toFixed(4)+'</b>'+(b.mu===0?' — <span style="color:var(--violet)">p² | q ⇒ total first-order destructive interference; the bar is pure noise floor.</span>':' · the sign μ = '+b.mu+' is the direction of the residue-class bias.');
-}
-
-// ── noise floor scaling ──
-function drawNf(){
-  const cv=document.getElementById('nfCv'); const [ctx,W,H]=_ifSize(cv,260);
-  const PAD=52;
-  const d=gcd(IF.a===0?IF.M:IF.a,IF.M), q=IF.M/d, a2=(IF.a===0?IF.M:IF.a)/d;
-  const prs=ifPrimes(), n=prs.length;
-  const mu=ifMu(q), ph=ifPhi(q), ratio=mu/ph;
-  const K=10, cks=[]; for(let k=0;k<K;k++) cks.push(Math.round(Math.pow(n,(k+3)/(K+2))));
-  const pts=[]; let zr=0,zi=0,ci=0;
-  for(let i=0;i<n;i++){ const t=2*Math.PI*(prs[i]%q)*a2/q; zr+=Math.cos(t); zi+=Math.sin(t);
-    while(ci<K && i+1===cks[ci]){ const E=Math.hypot(zr-ratio*(i+1),zi); pts.push({N:i+1,E:Math.max(E,1e-3)}); ci++; } }
-  const lx=v=>Math.log10(v);
-  const xmin=lx(pts[0].N),xmax=lx(pts[pts.length-1].N);
-  const ys=pts.map(p2=>lx(p2.E)); const ymin=Math.min.apply(null,ys)-0.3, ymax=Math.max.apply(null,ys)+0.3;
-  const xAt=v=>PAD+(W-PAD-16)*((lx(v)-xmin)/(xmax-xmin||1));
-  const yAt=v=>16+(H-52-16)*(1-((lx(v)-ymin)/(ymax-ymin||1)));
-  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.strokeRect(PAD,16,W-PAD-16,H-68);
-  // slope-1/2 guide anchored at last point
-  const g0=pts[pts.length-1];
-  ctx.setLineDash([4,3]);ctx.strokeStyle='rgba(61,200,184,.6)';ctx.beginPath();
-  ctx.moveTo(xAt(pts[0].N), yAt(g0.E*Math.sqrt(pts[0].N/g0.N)));
-  ctx.lineTo(xAt(g0.N), yAt(g0.E)); ctx.stroke(); ctx.setLineDash([]);
-  ctx.strokeStyle='#c8a84a';ctx.lineWidth=1.6;ctx.beginPath();
-  pts.forEach((p2,i)=>{ i?ctx.lineTo(xAt(p2.N),yAt(p2.E)):ctx.moveTo(xAt(p2.N),yAt(p2.E)); });ctx.stroke();
-  pts.forEach(p2=>{ctx.fillStyle='#c8a84a';ctx.beginPath();ctx.arc(xAt(p2.N),yAt(p2.E),3,0,6.2832);ctx.fill();});
-  // fitted slope
-  const mx=ys.length; let sx=0,sy=0,sxy=0,sxx=0;
-  pts.forEach(p2=>{const X=lx(p2.N),Y=lx(p2.E);sx+=X;sy+=Y;sxy+=X*Y;sxx+=X*X;});
-  const slope=(mx*sxy-sx*sy)/(mx*sxx-sx*sx||1);
-  ctx.font="9px 'JetBrains Mono'";ctx.fillStyle='rgba(232,227,219,.5)';ctx.textAlign='center';
-  pts.forEach((p2,i)=>{ if(i%3===0||i===pts.length-1)ctx.fillText(p2.N.toLocaleString(),xAt(p2.N),H-38); });
-  ctx.textAlign='left';
-  ctx.fillText('residual E(N) = |S − (μ/φ)π(N)| for a/M = '+a2+'/'+q+' (log–log) · teal dashed: slope ½ guide',PAD,12);
-  document.getElementById('nf-read').innerHTML='Fitted slope over '+K+' checkpoints: <b>'+slope.toFixed(3)+'</b> · square-root cancellation corresponds to slope ½; GRH-strength bounds predict ½+ε. A measured value near ½ is <i>consistency</i>, not proof — the minor arcs hold the open problem.';
-}
-
-// ── decoder table ──
-let _ifRows=[];
-function drawTable(){
-  const piN=ifPiN(), M=IF.M;
-  _ifRows=[];
-  const rows=[];
-  for(let a2=1;a2<M;a2++){
-    const d=gcd(a2,M), q=M/d, ar=a2/d;
-    const mu=ifMu(q), ph=ifPhi(q), pred=Math.abs(mu)/ph*piN;
-    const [re,im]=ifS(a2,M), meas=Math.hypot(re,im);
-    const err= pred>0 ? Math.abs(meas-pred)/pred : meas/piN;
-    _ifRows.push({a:a2,d,q,ar,mu,ph,pred,meas,re,im,err});
-    rows.push('<tr data-i="'+a2+'"><td>'+a2+'</td><td>'+d+'</td><td>'+ar+'/'+q+'</td><td>'+mu+'</td><td>'+ph+'</td><td>'+pred.toFixed(1)+'</td><td>'+meas.toFixed(1)+'</td><td>'+(mu===0?'<span style="color:var(--violet)">'+(meas/piN*100).toFixed(2)+'% of π(N)</span>':(err*100).toFixed(1)+'%')+'</td></tr>');
-  }
-  document.getElementById('if-table').innerHTML=rows.join('');
-}
-function tableTap(e){
-  const tr=e.target.closest('tr'); if(!tr||tr.dataset.i===undefined)return;
-  const r=_ifRows.find(x=>x.a===+tr.dataset.i); if(!r)return;
-  document.getElementById('tab-read').innerHTML=
-    '<b>a = '+r.a+'</b>: d = gcd('+r.a+','+IF.M+') = '+r.d+' → reduced <b>'+r.ar+'/'+r.q+'</b>. Ramanujan sum c<sub>'+IF.M+'</sub>('+r.a+') = μ('+r.q+')·φ('+IF.M+')/φ('+r.q+') = '+r.mu+'·'+ifPhi(IF.M)+'/'+r.ph+' = <b>'+(r.mu*ifPhi(IF.M)/r.ph)+'</b>. First-order S ≈ c/φ(M)·π(N) = <b>'+(r.mu/r.ph*ifPiN()).toFixed(1)+'</b>. Measured S = ('+r.re.toFixed(1)+', '+r.im.toFixed(1)+'), |S| = <b>'+r.meas.toFixed(1)+'</b>. '+(r.mu===0?'μ = 0: first-order term vanishes — the entire measured amplitude is minor-arc residual ('+(r.meas/ifPiN()*100).toFixed(2)+'% of π(N)), the noise floor whose depth is the GRH-strength question.':'Residual '+Math.abs(r.meas-Math.abs(r.mu)/r.ph*ifPiN()).toFixed(1)+' against noise scale √π(N) ≈ '+Math.sqrt(ifPiN()).toFixed(0)+'.');
-}
-
-// ── wiring ──
-function ifRedraw(){ drawIntf(); drawSpec(); drawMu(); drawNf(); drawTable(); }
-function ifSetM(v){ v=Math.max(2,Math.min(300,v)); IF.M=v;
-  document.getElementById('if-mval').textContent=v; document.getElementById('if-msl').value=v;
-  const asl=document.getElementById('if-asl'); asl.max=v-1; if(IF.a>v-1){IF.a=1;} asl.value=IF.a;
-  document.getElementById('if-aval').textContent=IF.a; ifRedraw(); }
-function ifSetA(v){ v=Math.max(0,Math.min(IF.M-1,v)); IF.a=v;
-  document.getElementById('if-aval').textContent=v; document.getElementById('if-asl').value=v; ifRedraw(); }
-function ifNextPrime(v,dir){ let x=v+dir; while(x>=2&&x<=300){ let ok=true; for(let d=2;d*d<=x;d++) if(x%d===0){ok=false;break;} if(ok&&x>1)return x; x+=dir; } return v; }
-function ifCopStep(dir){ let x=IF.a+dir; while(x>=1&&x<IF.M){ if(gcd(x,IF.M)===1) return ifSetA(x); x+=dir; } }
-document.getElementById('if-msl').addEventListener('input',function(){ifSetM(+this.value);});
-document.getElementById('if-asl').addEventListener('input',function(){ifSetA(+this.value);});
-document.getElementById('if-md').addEventListener('click',function(){ifSetM(IF.M-1);});
-document.getElementById('if-mu').addEventListener('click',function(){ifSetM(IF.M+1);});
-document.getElementById('if-mpp').addEventListener('click',function(){ifSetM(ifNextPrime(IF.M,-1));});
-document.getElementById('if-mpn').addEventListener('click',function(){ifSetM(ifNextPrime(IF.M,1));});
-document.getElementById('if-ad').addEventListener('click',function(){ifSetA(IF.a-1);});
-document.getElementById('if-au').addEventListener('click',function(){ifSetA(IF.a+1);});
-document.getElementById('if-acp').addEventListener('click',function(){ifCopStep(-1);});
-document.getElementById('if-acn').addEventListener('click',function(){ifCopStep(1);});
-document.getElementById('if-mplay').addEventListener('click',function(){
-  const b=this;
-  if(IF.play){clearInterval(IF.play);IF.play=null;b.textContent='▶';b.classList.remove('playing');return;}
-  b.textContent='⏸';b.classList.add('playing');
-  IF.play=setInterval(function(){ ifSetM(IF.M>=300?2:IF.M+1); },220);
 });
-document.getElementById('if-nrow').addEventListener('click',function(e){
-  const b=e.target.closest('button'); if(!b)return;
-  IF.N=+b.dataset.n;
-  document.querySelectorAll('#if-nrow button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  document.getElementById('if-nval').textContent=IF.N.toLocaleString();
-  ifRedraw();
+window.addEventListener('resize', function(){
+  if(PRIMES_FULL.length){ renderGrowth(); renderLattice(); }
 });
-document.getElementById('if-moderow').addEventListener('click',function(e){
-  const b=e.target.closest('button'); if(!b)return;
-  IF.mode=b.dataset.mode;
-  document.querySelectorAll('#if-moderow button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  drawIntf();
-});
-document.getElementById('if-qsl').addEventListener('input',function(){ IF.Q=+this.value; document.getElementById('if-qval').textContent=IF.Q; drawSpec(); drawMu(); });
-document.getElementById('specCv').addEventListener('mousemove',specPick);
-document.getElementById('specCv').addEventListener('click',specPick);
-document.getElementById('muCv').addEventListener('mousemove',muPick);
-document.getElementById('muCv').addEventListener('click',muPick);
-document.getElementById('if-table').addEventListener('click',tableTap);
-function ifFS(btn){ const wrap=btn.parentElement;
-  if(document.fullscreenElement)document.exitFullscreen();
-  else if(wrap.requestFullscreen)wrap.requestFullscreen(); }
-
-window.addEventListener('load', function(){ drawSpiral(); ifRedraw(); });
-window.addEventListener('resize', function(){ drawSpiral(); ifRedraw(); });
 
 function openOpener(){
   sessionStorage.setItem('wg_open_opener','1');
@@ -1080,6 +1226,15 @@ function openOpener(){
 }
 function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
 </script>
+<div id="explainOverlay" onclick="if(event.target===this) closeExplain()">
+  <div id="explainModal">
+    <button class="em-close" onclick="closeExplain()">×</button>
+    <div class="em-title" id="emTitle">—</div>
+    <div class="em-sub" id="emSub">—</div>
+    <div id="emSteps"></div>
+    <div class="em-result" id="emResult">—</div>
+  </div>
+</div>
 
 </body>
 </html>
