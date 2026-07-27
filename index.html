@@ -5012,16 +5012,15 @@ function heroToggleTopBars(){
     var footerH=Math.round(SIZE*0.036);
     var ty=Math.round(SIZE*0.020);
     ty=H.drawTag(ty);
-    ty=H.drawTitleRow(ty,
-      'C(n) — '+viewLabel+' View',
-      'G = '+G+'  ·  n = '+n+'  ·  '+modeLabel);
-    ty=H.drawFormula(ty,'C(n) = ζ(2)·∏_p(1−min(n+1,p)/p²)  ·  Color: '+colorLabel+'  ·  '+charLabel);
+    // G / n / mode are in the stat boxes just below — no second copy here.
+    ty=H.drawTitleRow(ty, 'C(n) — '+viewLabel+' View', '');
+    ty=H.drawFormula(ty,'C(n) = ζ(2)·∏_p(1−min(n+1,p)/p²)');
     ty=H.drawStatBoxes(ty,[
       {label:'View', val:viewLabel, col:'rgba(126,200,122,.9)'},
       {label:'G', val:String(G), col:'rgba(200,168,74,.9)'},
       {label:'n', val:String(n), col:'rgba(155,127,232,.9)'},
       {label:'C(n)', val:Cn+(_piAnnotation(+Cn)?(' '+_piAnnotation(+Cn)):''), col:'rgba(200,168,74,.9)'},
-      {label:'Mode', val:modeLabel, col:(_wMode==='finite')?'rgba(126,200,122,.9)':'rgba(200,168,74,.9)'},
+      ...((_wMode==='finite')?[{label:'Mode', val:modeLabel, col:'rgba(126,200,122,.9)'}]:[]),
     ]);
     ty=H.drawSeparator(ty);
 
@@ -5076,10 +5075,7 @@ function heroToggleTopBars(){
     ty=H.drawSeparator(ty);
 
     ty=H.drawSubStats(ty,[
-      {label:'View', val:viewLabel, col:'rgba(126,200,122,.85)'},
-      {label:'G', val:String(G), col:'rgba(200,168,74,.85)'},
-      {label:'n', val:String(n), col:'rgba(155,127,232,.85)'},
-      {label:'C(n)', val:Cn, col:'rgba(200,168,74,.85)'},
+      {label:'χ', val:charLabel, col:'rgba(61,200,184,.85)'},
       {label:'Color', val:colorLabel.slice(0,16), col:'rgba(184,178,166,.75)'},
       {label:'Rings', val:ringLabel.slice(0,18), col:'rgba(155,127,232,.8)'},
       {label:'Gaps ('+((typeof _gapSemantics!=='undefined'&&_gapSemantics==='diagonal')?'|M−r|':'Δp')+')',
@@ -5097,9 +5093,7 @@ function heroToggleTopBars(){
     if(_selTxt) ty=H.drawFormula(ty,_selTxt,'rgba(61,200,184,.92)');
 
     H.drawFooter(SIZE-footerH+Math.round(SIZE*0.004),[
-      ['rgba(126,200,122,.80)', viewLabel+' view  ·  G='+G+'  ·  n='+n],
-      ['rgba(200,168,74,.80)', 'C('+n+') = '+Cn+'  ·  '+modeLabel],
-      ['rgba(184,178,166,.65)','Color: '+colorLabel+'  ·  '+charLabel],
+      ['rgba(126,200,122,.75)', viewLabel+' view · G='+G+' · n='+n+' · C('+n+')='+Cn+((_wMode==='finite')?(' · '+modeLabel):'')],
     ]);
   };;
 
@@ -12438,7 +12432,7 @@ function _makeExportHelpers(ctx,SIZE){
     return ty+Math.round(SIZE*0.012);
   }
   function drawFooter(ty,cols){
-    const cW=Math.round((SIZE-TX*2)/cols.length);
+    const cW=Math.round((SIZE-TX*2-SIZE*0.24)/Math.max(1,cols.length)); // keep the right edge clear for the watermark
     cols.forEach(([col,txt],i)=>{
       _fitFont(txt,Math.round(SIZE*0.012),10,false,cW*0.94);
       ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(txt,TX+i*cW,ty);
