@@ -1363,6 +1363,10 @@ function heroToggleTopBars(){
             <option value="r_val" selected>r only</option>
             <option value="M_val">M only</option>
           </select>
+          <label style="display:flex;align-items:center;gap:3px;margin-left:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.7);cursor:pointer;white-space:nowrap;" title="Only label points admitted by the current C(n) — points excluded by the block-coprime filter go unlabeled">
+            <input type="checkbox" id="w-label-lock" onchange="wRedrawCanvas()" style="accent-color:rgba(200,168,74,.85);">🔒 C(n)</label>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.85);white-space:nowrap;margin-left:4px;" title="Tap any point on the canvas to pin its label — tap again to unpin. Multiple pins stay labeled and ring-highlighted regardless of Label mode.">📌<span id="w-pin-count"></span></span>
+          <button onclick="_wClearPinnedLabels()" title="Clear all pinned/tapped labels" style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.75);font-family:'JetBrains Mono',monospace;font-size:7px;padding:1px 5px;cursor:pointer;margin-left:2px;">clear</button>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#6a6560;">all 5 views</span>
       </div>
     </div>
@@ -2107,52 +2111,87 @@ function heroToggleTopBars(){
   // this inside its transform, the labels land in the export too.
   window._wDrawPointLabels=function(ctx,G){
     var mode=document.getElementById('w-label-mode')?.value||'none';
-    if(mode==='none'||typeof _getHeroLabel!=='function'||!_wHitPts.length)return;
+    var hasPins=_wPinnedPts.length>0;
+    if((mode==='none'&&!hasPins)||typeof _getHeroLabel!=='function'||!_wHitPts.length)return;
+    var locked=!!document.getElementById('w-label-lock')?.checked;
     var K=(typeof _wExportScale!=='undefined'&&_wExportScale>0)?_wExportScale:1;
+    var Z=(typeof _wZoom!=='undefined'&&_wZoom>0)?_wZoom:1;
     // Spacing guard: mirror the hero's dotR>=2 rule so dense grids don't turn
-    // into a solid block of text. Exports get more room, hence the K factor.
+    // into a solid block of text. Measured in world units, but the guard
+    // itself compares the on-screen (zoom-scaled) spacing — so zooming into
+    // a dense grid opens the points up on screen and their labels appear,
+    // rather than staying hidden because the world-space spacing never grew.
     var sp=Infinity;
     for(var t=4;t<Math.min(_wHitPts.length,400);t+=4){
       var dd=Math.hypot(_wHitPts[t]-_wHitPts[t-4],_wHitPts[t+1]-_wHitPts[t-3]);
       if(dd>0.01&&dd<sp)sp=dd;
     }
     if(!isFinite(sp))sp=6;
-    if(sp<4*K)return;
-    var fz=Math.max(5*K,Math.min(sp*0.62,13*K))|0;
+    var effSp=sp*Z;
+    var showGeneral=(mode!=='none')&&effSp>=4*K;
+    // fz is in world units (ctx is already zoom-scaled), sized off the
+    // on-screen spacing then divided back down by Z so the rendered label
+    // stays a sane on-screen size instead of ballooning as you zoom in.
+    var fz=Math.max(5*K,Math.min(effSp*0.62,13*K))/Z;
+    if(fz<0.5)fz=0.5;
     var n=(typeof _wN!=='undefined')?_wN:0;
     var cnt=_wHitPts.length>>2;
     var rot=(typeof _wRotSteps!=='undefined')?(_wRotSteps&3):0;
     // Halo costs a second text op per label; at high counts drop it rather than
     // dropping the labels. Labels stay on during playback.
     var halo=cnt<=2500;
-    var off=sp*0.42;
 
     ctx.save();
     ctx.font="bold "+fz+"px 'JetBrains Mono',monospace";
-    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.textAlign='center';ctx.textBaseline='middle'; // centered INSIDE the dot, not floating above it
     ctx.lineWidth=Math.max(1,2*K);ctx.strokeStyle='rgba(4,4,13,.9)';
     ctx.fillStyle='rgba(232,227,219,.88)';
-    if(!rot){
-      // Fast path: no rotation, so no per-label transform push/pop.
-      for(var q=0;q<_wHitPts.length;q+=4){
-        var lbl=_getHeroLabel(_wHitPts[q+2],_wHitPts[q+3],n,
-          (typeof _heroTrueDepth==='function')?_heroTrueDepth(_wHitPts[q+2],_wHitPts[q+3]):-1,mode);
-        if(!lbl)continue;
-        var x=_wHitPts[q], y=_wHitPts[q+1]-off;
-        if(halo)ctx.strokeText(lbl,x,y);
-        ctx.fillText(lbl,x,y);
+    if(showGeneral){
+      if(!rot){
+        // Fast path: no rotation, so no per-label transform push/pop.
+        for(var q=0;q<_wHitPts.length;q+=4){
+          var lbl=_getHeroLabel(_wHitPts[q+2],_wHitPts[q+3],n,
+            (typeof _heroTrueDepth==='function')?_heroTrueDepth(_wHitPts[q+2],_wHitPts[q+3]):-1,mode,locked);
+          if(!lbl)continue;
+          var x=_wHitPts[q], y=_wHitPts[q+1];
+          if(halo)ctx.strokeText(lbl,x,y);
+          ctx.fillText(lbl,x,y);
+        }
+      } else {
+        for(var q2=0;q2<_wHitPts.length;q2+=4){
+          var r2=_wHitPts[q2+2],M2=_wHitPts[q2+3];
+          var lbl2=_getHeroLabel(r2,M2,n,
+            (typeof _heroTrueDepth==='function')?_heroTrueDepth(r2,M2):-1,mode,locked);
+          if(!lbl2)continue;
+          ctx.save();ctx.translate(_wHitPts[q2],_wHitPts[q2+1]);
+          ctx.rotate(-rot*Math.PI/2);   // keep text upright under global rotation
+          if(halo)ctx.strokeText(lbl2,0,0);
+          ctx.fillText(lbl2,0,0);
+          ctx.restore();
+        }
       }
-    } else {
-      for(var q2=0;q2<_wHitPts.length;q2+=4){
-        var r2=_wHitPts[q2+2],M2=_wHitPts[q2+3];
-        var lbl2=_getHeroLabel(r2,M2,n,
-          (typeof _heroTrueDepth==='function')?_heroTrueDepth(r2,M2):-1,mode);
-        if(!lbl2)continue;
-        ctx.save();ctx.translate(_wHitPts[q2],_wHitPts[q2+1]-off);
-        ctx.rotate(-rot*Math.PI/2);   // keep text upright under global rotation
-        if(halo)ctx.strokeText(lbl2,0,0);
-        ctx.fillText(lbl2,0,0);
-        ctx.restore();
+    }
+    // Tap-to-label pins: always shown, regardless of mode/lock/density, in a
+    // distinct gold color. Falls back to "r,M" if no Label mode is chosen.
+    if(hasPins){
+      var pfz=Math.max(fz,9*K/Z);
+      ctx.font="bold "+pfz+"px 'JetBrains Mono',monospace";
+      ctx.fillStyle='rgba(255,224,140,.98)';
+      for(var pi=0;pi<_wPinnedPts.length;pi++){
+        var pr=_wPinnedPts[pi].r, pM=_wPinnedPts[pi].M;
+        var pd=(typeof _heroTrueDepth==='function')?_heroTrueDepth(pr,pM):-1;
+        var plbl=(mode!=='none')?(_getHeroLabel(pr,pM,n,pd,mode,false)||(pr+','+pM)):(pr+','+pM);
+        for(var qi=0;qi<_wHitPts.length;qi+=4){
+          if(_wHitPts[qi+2]!==pr||_wHitPts[qi+3]!==pM)continue;
+          var hx=_wHitPts[qi],hy=_wHitPts[qi+1];
+          if(rot){ctx.save();ctx.translate(hx,hy);ctx.rotate(-rot*Math.PI/2);
+            if(halo)ctx.strokeText(plbl,0,0);
+            ctx.fillText(plbl,0,0);ctx.restore();
+          } else {
+            if(halo)ctx.strokeText(plbl,hx,hy);
+            ctx.fillText(plbl,hx,hy);
+          }
+        }
       }
     }
     ctx.restore();
@@ -3798,6 +3837,37 @@ function heroToggleTopBars(){
   // ── Opener tap-to-inspect: dot positions recorded during draw (robust to
   // per-ring twist, spin, zoom-out G expansion — no per-view inverse math) ──
   var _wHitPts=[]; var _wHitRec=false; var _wInspectPt=null;
+  // ── Tap-to-label pins: unlike _wInspectPt (single point, info panel only),
+  // this is a growing set — every tap on a new point adds it, tapping an
+  // already-pinned point removes it. Always labeled + ring-highlighted
+  // regardless of the Label dropdown, lock state, or density guard.
+  var _wPinnedPts=[];
+  window._wClearPinnedLabels=function(){
+    _wPinnedPts=[];
+    var el=document.getElementById('w-pin-count'); if(el)el.textContent='';
+    if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+  };
+  function _wSyncPinCount(){
+    var el=document.getElementById('w-pin-count');
+    if(el)el.textContent=_wPinnedPts.length?(' ('+_wPinnedPts.length+')'):'';
+  }
+  // Re-centers + zooms the canvas on a world-space point (wx,wy) — same
+  // coordinate space as _wHitPts — so a tapped point on any view (Cayley,
+  // Ring, Grid, Farey, Gauss) jumps to center and its neighborhood opens up,
+  // mirroring the hero's click-to-zoom inspect behavior.
+  function _wZoomToWorldPoint(wx,wy,newZoom){
+    var cv=document.getElementById('welcome-teaser');
+    if(!cv)return;
+    var W=cv.clientWidth,H=cv.clientHeight;
+    var flip=(_wView==='smith')?_wsFlipScale:1;
+    var Z=Math.max(_wZoomMin,Math.min(_wZoomMax,newZoom));
+    var px0=wx-W/2, py0=wy-H/2;
+    var sx=px0*Z*flip, sy=py0*Z;
+    var th=(_wRotSteps||0)*Math.PI/2, c=Math.cos(th), s=Math.sin(th);
+    var rx=sx*c-sy*s, ry=sx*s+sy*c;
+    _wZoom=Z; _wPanX=-rx; _wPanY=-ry;
+    if(typeof _wZoomSyncUI==='function')_wZoomSyncUI();
+  }
 
   function wRedrawCanvas(){
     var cv=document.getElementById('welcome-teaser');
@@ -3852,6 +3922,19 @@ function heroToggleTopBars(){
       for(var hi=0;hi<_wHitPts.length;hi+=4){
         if(_wHitPts[hi+2]===_wInspectPt.r&&_wHitPts[hi+3]===_wInspectPt.M){
           ctx.beginPath();ctx.arc(_wHitPts[hi],_wHitPts[hi+1],6/_wZoom,0,Math.PI*2);ctx.stroke();
+        }
+      }
+    }
+    // Highlight every pinned (tap-to-label) point in gold, distinct from the
+    // single teal inspect ring above.
+    if(_wPinnedPts.length){
+      ctx.strokeStyle='rgba(200,168,74,.95)'; ctx.lineWidth=2/_wZoom;
+      for(var pj=0;pj<_wPinnedPts.length;pj++){
+        var pr=_wPinnedPts[pj].r, pM=_wPinnedPts[pj].M;
+        for(var hj=0;hj<_wHitPts.length;hj+=4){
+          if(_wHitPts[hj+2]===pr&&_wHitPts[hj+3]===pM){
+            ctx.beginPath();ctx.arc(_wHitPts[hj],_wHitPts[hj+1],7/_wZoom,0,Math.PI*2);ctx.stroke();
+          }
         }
       }
     }
@@ -4982,6 +5065,18 @@ function heroToggleTopBars(){
         if(d<bd){bd=d;best=i;}
       }
       _wInspectPt=(best>=0&&bd<tol2)?{r:_wHitPts[best+2],M:_wHitPts[best+3]}:null;
+      if(_wInspectPt){
+        var _pIdx=_wPinnedPts.findIndex(function(p){return p.r===_wInspectPt.r&&p.M===_wInspectPt.M;});
+        if(_pIdx>=0){
+          _wPinnedPts.splice(_pIdx,1); // tapping a pinned point again un-pins it
+        } else {
+          _wPinnedPts.push({r:_wInspectPt.r,M:_wInspectPt.M});
+          // Zoom in on the newly-pinned point so its neighborhood opens up —
+          // mirrors the hero's click-to-zoom-and-label behavior.
+          _wZoomToWorldPoint(wx,wy,Math.max(_wZoom,3));
+        }
+        _wSyncPinCount();
+      }
       _wInspectInfo();
       wRedrawCanvas();
     }
@@ -5925,6 +6020,8 @@ function heroToggleTopBars(){
     <option value="r_val" selected>r only</option>
     <option value="M_val">M only</option>
   </select>
+  <label style="display:flex;align-items:center;gap:3px;margin-left:5px;font-family:var(--mono);font-size:7.5px;color:var(--cream3);cursor:pointer;white-space:nowrap;" title="Only label points admitted by the current C(n) — points excluded by the block-coprime filter go unlabeled">
+    <input type="checkbox" id="hero-label-lock" onchange="heroLabelModeChange()" style="accent-color:var(--teal);">🔒 C(n)</label>
 
   <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
 
@@ -13294,6 +13391,7 @@ function exportHero4K(){
         const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
         const heroCM=_heroColorModeLocal||'modular_distance';
         const labelMode=document.getElementById('hero-label-mode')?.value||'none';
+        const labelLocked=!!document.getElementById('hero-label-lock')?.checked;
         // ── Pass 1: dots ──
         for(let ri=0;ri<G;ri++){
           for(let mi=0;mi<G;mi++){
@@ -13347,7 +13445,7 @@ function exportHero4K(){
               // Only draw labels on gap-highlighted cells (when gap active) or all cells (when no gap)
               const drawLabel=hasGaps?onGap:true;
               if(!drawLabel||dimmed)continue;
-              const lbl=_getHeroLabel(r,M,nAnim,d,labelMode);
+              const lbl=_getHeroLabel(r,M,nAnim,d,labelMode,labelLocked);
               if(!lbl)continue;
               const ok=d>=nAnim&&d>=0;
               const fz=Math.max(8,Math.min(dotR*0.48,72))|0;
@@ -16222,6 +16320,7 @@ function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
   const heroMode=_heroColorModeLocal||'modular_distance';
   const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
   const labelMode=document.getElementById('hero-label-mode')?.value||'none';
+        const labelLocked=!!document.getElementById('hero-label-lock')?.checked;
 
   ctx.fillStyle='#04040d';
   ctx.fillRect(0,0,W,H);
@@ -16278,7 +16377,7 @@ function _drawHeroFarey(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
         ctx.beginPath();ctx.arc(sx,sy,drawR*1.8,0,6.2832);ctx.stroke();
       }
       if(labelMode!=='none'&&!dimmed&&dotR>=2){
-        const lbl=_getHeroLabel(r,M,nAnim,d,labelMode);
+        const lbl=_getHeroLabel(r,M,nAnim,d,labelMode,labelLocked);
         if(lbl){
           const fz=Math.max(4,Math.min(dotR*0.9,10))|0;
           ctx.font=`${fz}px 'JetBrains Mono',monospace`;
@@ -16345,6 +16444,7 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
   const maxR=Math.min(W,H)*0.46*zoom;
   const globalRot=typeof getGlobalRotRing==='function'?getGlobalRotRing():0;
   const labelMode=document.getElementById('hero-label-mode')?.value||'none';
+        const labelLocked=!!document.getElementById('hero-label-lock')?.checked;
   const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
 
   ctx.fillStyle='#04040d';
@@ -16474,7 +16574,7 @@ function _drawHeroLift(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift){
         ctx.beginPath();ctx.arc(sx,sy,sz*1.8*_heroSecDotScale,0,6.2832);ctx.stroke();
       }
       if(labelMode!=='none'&&sz>=2){
-        const lbl=_getHeroLabel(r,M,nAnim,d,labelMode);
+        const lbl=_getHeroLabel(r,M,nAnim,d,labelMode,labelLocked);
         if(lbl){
           const fz=Math.max(4,Math.min(sz*0.9,10))|0;
           ctx.font=`${fz}px 'JetBrains Mono',monospace`;
@@ -16704,6 +16804,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
   const globalRot=(_heroRotSteps&3)*Math.PI/2;
   const hasGaps=_heroActiveGaps&&_heroActiveGaps.size>0;
   const labelMode=document.getElementById('hero-label-mode')?.value||'none';
+        const labelLocked=!!document.getElementById('hero-label-lock')?.checked;
 
   ctx.fillStyle='#04040d';
   ctx.fillRect(0,0,W,H);
@@ -16795,7 +16896,7 @@ function _drawHeroRingMain(ctx,W,H,nAnim,t,zoom,panX,panY,rowShift,opacityOverri
 
       // ── Labels ──
       if(labelMode!=='none'&&!isFocused&&!dimmed&&dotR>=2){
-        const lbl=_getHeroLabel(r,M,nAnim,d,labelMode);
+        const lbl=_getHeroLabel(r,M,nAnim,d,labelMode,labelLocked);
         if(lbl){
           const fz=Math.max(4,Math.min(dotR*0.9,10))|0;
           ctx.font=`${fz}px 'JetBrains Mono',monospace`;
@@ -17092,9 +17193,10 @@ function _getHeroColor(r,M,n,d,mode,t,gapColor,dimmed,onGap,isFocused,textHidden
 }
 
 // ── HERO LABEL TEXT ──
-function _getHeroLabel(r,M,n,d,mode){
+function _getHeroLabel(r,M,n,d,mode,locked){
   if(!mode||mode==='none')return'';
   const ok=d>=n&&d>=0;
+  if(locked&&!ok)return''; // lock-to-C(n): only label points this n admits
   switch(mode){
     case 'coords': return`${r},${M}`;
     case 'fraction_raw': return`${r}/${M}`; // unreduced — same digits as 'coords' but slash-separated, for an actual visual contrast with the reduced version below
@@ -19139,6 +19241,7 @@ function initHeroThree(){
     // Read current hero-specific mode (not global)
     const heroMode=_heroColorModeLocal||'default';
     const labelMode=document.getElementById('hero-label-mode')?.value||'none';
+        const labelLocked=!!document.getElementById('hero-label-lock')?.checked;
 
     // Origin offset — centre of the zoomed grid, shifted by pan
     const originX=(W-W*zoom)/2+panX;
@@ -19224,7 +19327,7 @@ function initHeroThree(){
         if(labelMode!=='none'&&!isFocused&&!dimmed){
           const ok2=d>=nAnim&&d>=0;
           if(onGap&&dotR>=2){
-            const lbl=_getHeroLabel(r,M,nAnim,d,labelMode);
+            const lbl=_getHeroLabel(r,M,nAnim,d,labelMode,labelLocked);
             if(lbl){
               const fz=Math.max(5,Math.min(dotR*0.78,12))|0;
               ctx.save();
@@ -19239,7 +19342,7 @@ function initHeroThree(){
               ctx.restore();
             }
           } else if(!gbDimmed&&dotR>=5){
-            const lbl=_getHeroLabel(r,M,nAnim,d,labelMode);
+            const lbl=_getHeroLabel(r,M,nAnim,d,labelMode,labelLocked);
             if(lbl){
               const fz=Math.max(5,Math.min(dotR*0.72,11))|0;
               ctx.save();
