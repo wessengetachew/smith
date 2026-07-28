@@ -1330,7 +1330,8 @@ function heroToggleTopBars(){
           style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(168,162,148,.75);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;">Half (diagonal)</button>
       </div>
 
-      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+      <span id="wfs-anchor-colorlabel" style="display:none;"></span>
+        <div id="w-colorlabel-row" style="display:flex;align-items:center;gap:6px;margin-top:6px;">
         <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.7);white-space:nowrap;">Color:</span>
         <select id="w-color-mode" onchange="wSetColorMode()"
           style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;flex:1;max-width:220px;">
@@ -1344,6 +1345,24 @@ function heroToggleTopBars(){
           <option value="gcd_value">By gcd(r,M) Value</option>
           <option value="fraction_ab">By r/M Position (a/b, Farey ratio)</option>
         </select>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.7);white-space:nowrap;margin-left:6px;">Label:</span>
+          <select id="w-label-mode" onchange="wSetLabelMode()"
+            title="Per-point labels on every lattice point — same set the Sector Path panel uses, and it renders into the PNG export"
+            style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+            <option value="none">None</option>
+            <option value="coords">r, M</option>
+            <option value="fraction">r/M (reduced)</option>
+            <option value="angle">2πr/M °</option>
+            <option value="gcd">gcd(r,M)</option>
+            <option value="depth">depth d</option>
+            <option value="status">ok/cop/no</option>
+            <option value="fail_j">fail j</option>
+            <option value="phi_M">φ(M)</option>
+            <option value="mobius_M">μ(M)</option>
+            <option value="gap">gap |M-r|</option>
+            <option value="r_val" selected>r only</option>
+            <option value="M_val">M only</option>
+          </select>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#6a6560;">all 5 views</span>
       </div>
     </div>
@@ -1429,9 +1448,6 @@ function heroToggleTopBars(){
           style="width:46px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;text-align:center;padding:2px 3px;outline:none;"
           oninput="wGMarkUserTouched();wSetG(+this.value)">
         <span id="ws-g-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);white-space:nowrap;">G=109  (grid p²=11881)</span>
-        <span id="ws-spiral-lbl"
-          title="Prime spiral: direction, prime, and the residue r/M it lands on"
-          style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(230,120,130,.95);white-space:nowrap;"></span>
       </div>
 
       <!-- p² jumps + global 90°-step rotation — mirrors the hero's p²−/p²+
@@ -1448,7 +1464,7 @@ function heroToggleTopBars(){
         <div style="width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0;"></div>
         <button onclick="wRotate(-1)" title="Rotate all opener views 90° counter-clockwise (×−i)"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">−i</button>
-        <span id="ws-rot-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);min-width:26px;text-align:center;">270°</span>
+        <span id="ws-rot-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);min-width:26px;text-align:center;">0°</span>
         <button onclick="wRotate(1)" title="Rotate all opener views 90° clockwise (×i)"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;flex-shrink:0;">+i</button>
         <div style="width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0;"></div>
@@ -1469,6 +1485,9 @@ function heroToggleTopBars(){
         onkeydown="if(event.key==='Enter'){this.blur();wSetSpiralP(this.value);}"
         style="width:48px;background:#0a0a16;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.95);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 2px;text-align:center;flex-shrink:0;">
       <button onclick="liftCycleSpiralP(1)" title="Next prime" style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 8px;cursor:pointer;flex-shrink:0;">+</button>
+      <span id="ws-spiral-lbl"
+          title="Prime spiral: direction, prime, and the residue r/M it lands on"
+          style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(230,120,130,.95);white-space:nowrap;"></span>
       </div>
 
       <!-- Zoom control — always visible (this is a descendant of
@@ -1636,7 +1655,7 @@ function heroToggleTopBars(){
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Label:</span>
           <select id="wsec-label-mode" onchange="wTraceSector()"
             style="background:rgba(255,255,255,.04);border:1px solid rgba(155,127,232,.3);color:#9b7fe8;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
-            <option value="none">None</option>
+            <option value="none" selected>None</option>
             <option value="coords">r, M</option>
             <option value="fraction">r/M (reduced)</option>
             <option value="angle">2πr/M °</option>
@@ -1648,7 +1667,7 @@ function heroToggleTopBars(){
             <option value="mobius_M">μ(M)</option>
             <option value="gap">gap |M-r|</option>
             <option value="r_val">r only</option>
-            <option value="M_val" selected>M only</option>
+            <option value="M_val">M only</option>
           </select>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">Side:</span>
           <select id="wsec-label-side" onchange="wRedrawCanvas()" title="Where labels sit relative to each point — alternating spreads dense runs apart"
@@ -1711,7 +1730,8 @@ function heroToggleTopBars(){
 
       <!-- Goldbach overlay — every even N = p + q highlighted as (r,M) pairs.
            Positions come from _wHitPts, so it renders in all five views. -->
-      <details style="border:1px solid rgba(126,200,122,.22);border-radius:3px;margin-top:6px;">
+      <span id="wfs-anchor-goldbach" style="display:none;"></span>
+      <details id="ws-goldbach-dd" style="border:1px solid rgba(126,200,122,.22);border-radius:3px;margin-top:6px;">
         <summary style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;
           text-transform:uppercase;color:rgba(126,200,122,.9);padding:6px 9px;cursor:pointer;">
           Goldbach Overlay
@@ -2079,6 +2099,65 @@ function heroToggleTopBars(){
     if(l)l.textContent=Math.round(_wGbDimAlpha*100)+'%';
     wRedrawCanvas();
   };
+  window.wSetLabelMode=function(){ if(typeof wRedrawCanvas==='function')wRedrawCanvas(); };
+
+  // Per-point labels for every view. Positions come from _wHitPts (x,y,r,M),
+  // the same trick the Goldbach overlay uses, so Grid/Ring/Farey/Gauss/Smith
+  // are all covered by one implementation — and because the 4K renderer calls
+  // this inside its transform, the labels land in the export too.
+  window._wDrawPointLabels=function(ctx,G){
+    var mode=document.getElementById('w-label-mode')?.value||'none';
+    if(mode==='none'||typeof _getHeroLabel!=='function'||!_wHitPts.length)return;
+    var K=(typeof _wExportScale!=='undefined'&&_wExportScale>0)?_wExportScale:1;
+    // Spacing guard: mirror the hero's dotR>=2 rule so dense grids don't turn
+    // into a solid block of text. Exports get more room, hence the K factor.
+    var sp=Infinity;
+    for(var t=4;t<Math.min(_wHitPts.length,400);t+=4){
+      var dd=Math.hypot(_wHitPts[t]-_wHitPts[t-4],_wHitPts[t+1]-_wHitPts[t-3]);
+      if(dd>0.01&&dd<sp)sp=dd;
+    }
+    if(!isFinite(sp))sp=6;
+    if(sp<4*K)return;
+    var fz=Math.max(5*K,Math.min(sp*0.62,13*K))|0;
+    var n=(typeof _wN!=='undefined')?_wN:0;
+    var cnt=_wHitPts.length>>2;
+    var rot=(typeof _wRotSteps!=='undefined')?(_wRotSteps&3):0;
+    // Halo costs a second text op per label; at high counts drop it rather than
+    // dropping the labels. Labels stay on during playback.
+    var halo=cnt<=2500;
+    var off=sp*0.42;
+
+    ctx.save();
+    ctx.font="bold "+fz+"px 'JetBrains Mono',monospace";
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.lineWidth=Math.max(1,2*K);ctx.strokeStyle='rgba(4,4,13,.9)';
+    ctx.fillStyle='rgba(232,227,219,.88)';
+    if(!rot){
+      // Fast path: no rotation, so no per-label transform push/pop.
+      for(var q=0;q<_wHitPts.length;q+=4){
+        var lbl=_getHeroLabel(_wHitPts[q+2],_wHitPts[q+3],n,
+          (typeof _heroTrueDepth==='function')?_heroTrueDepth(_wHitPts[q+2],_wHitPts[q+3]):-1,mode);
+        if(!lbl)continue;
+        var x=_wHitPts[q], y=_wHitPts[q+1]-off;
+        if(halo)ctx.strokeText(lbl,x,y);
+        ctx.fillText(lbl,x,y);
+      }
+    } else {
+      for(var q2=0;q2<_wHitPts.length;q2+=4){
+        var r2=_wHitPts[q2+2],M2=_wHitPts[q2+3];
+        var lbl2=_getHeroLabel(r2,M2,n,
+          (typeof _heroTrueDepth==='function')?_heroTrueDepth(r2,M2):-1,mode);
+        if(!lbl2)continue;
+        ctx.save();ctx.translate(_wHitPts[q2],_wHitPts[q2+1]-off);
+        ctx.rotate(-rot*Math.PI/2);   // keep text upright under global rotation
+        if(halo)ctx.strokeText(lbl2,0,0);
+        ctx.fillText(lbl2,0,0);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+  };
+
   window._wDrawGoldbach=function(ctx,drawG){
     if(!window._wGoldbachActive||typeof _drawGoldbachOverlay!=='function')return;
     // Dim the whole lattice, then reassert the pair points on top.
@@ -2405,7 +2484,7 @@ function heroToggleTopBars(){
     // otherwise be unreachable). Moved, not cloned — single source of truth.
     var btnRow=document.getElementById('wfs-btn-row');
     // Formula + view-select rows go ABOVE the spin/flip/zoom button row
-    var topRows=[['welcome-cn-block','wfs-anchor-formula'],['ws-mode-row','wfs-anchor-mode'],['wm-finite-panel','wfs-anchor-finite'],['ws-view-row','wfs-anchor-view'],['w-ringlift-ctrl','wfs-anchor-ringlift'],['w-adv-section','wfs-anchor-adv'],['ws-sector-ctrl','wfs-anchor-sector'],['ws-gaps-dd','wfs-anchor-gaps'],['hero-working-dd','wfs-anchor-working'],['ws-smith-ctrl','wfs-anchor-smithctrl'],['ws-perring-dd','wfs-anchor-perring']];
+    var topRows=[['welcome-cn-block','wfs-anchor-formula'],['ws-mode-row','wfs-anchor-mode'],['wm-finite-panel','wfs-anchor-finite'],['ws-view-row','wfs-anchor-view'],['w-ringlift-ctrl','wfs-anchor-ringlift'],['w-adv-section','wfs-anchor-adv'],['ws-sector-ctrl','wfs-anchor-sector'],['ws-gaps-dd','wfs-anchor-gaps'],['hero-working-dd','wfs-anchor-working'],['ws-smith-ctrl','wfs-anchor-smithctrl'],['ws-perring-dd','wfs-anchor-perring'],['w-colorlabel-row','wfs-anchor-colorlabel'],['ws-goldbach-dd','wfs-anchor-goldbach']];
     topRows.forEach(function(pair){
       var row=document.getElementById(pair[0]);
       var anchor=document.getElementById(pair[1]);
@@ -3580,7 +3659,7 @@ function heroToggleTopBars(){
   // turns the hero already has. Applied as a whole-canvas rotation in
   // wRedrawCanvas, mirrored into thumbnails, 4K export, hit-testing,
   // the state snapshot, and Send to Hero.
-  var _wRotSteps=3;   // 270° by default — 3 quarter-turns
+  var _wRotSteps=0;   // 0° by default
   window.wRotate=function(dir){
     _wRotSteps=(_wRotSteps+dir+4)%4;
     var l=document.getElementById('ws-rot-lbl');
@@ -3725,6 +3804,7 @@ function heroToggleTopBars(){
     if(!cv)return;
     var dpr=window.devicePixelRatio||1;
     var W=cv.clientWidth||536,H=cv.clientHeight||536;
+    if(W<24||H<24) return;   // mid-layout / hidden: nothing sane to draw
     if(cv._W!==W||cv._H!==H){cv.width=W*dpr;cv.height=H*dpr;cv._W=W;cv._H=H;}
     var ctx=cv.getContext('2d');
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -3775,6 +3855,7 @@ function heroToggleTopBars(){
         }
       }
     }
+    if(typeof window._wDrawPointLabels==='function') window._wDrawPointLabels(ctx,drawG);
     if(window._wGoldbachActive&&typeof window._wDrawGoldbach==='function') window._wDrawGoldbach(ctx,drawG);
     ctx.restore();
     _drawWResidueLegend(ctx,W,H);
@@ -3832,7 +3913,7 @@ function heroToggleTopBars(){
   // Shared-engine plumbing: the hero calls the SAME overlay code through
   // window._sharedLiftOverlay/_sharedDiagOverlay, passing its own
   // active-ring predicate; _dynExt bypasses the opener's _wRingLift gate.
-  var _dynExt=false,_dynAct=null;
+  var _dynExt=false,_dynAct=null,_dynLiftOn=true;
   function _dynA(M){return _dynAct?_dynAct(M):_wRingActive(M);}
   // Dim the base lattice to 25% while any dynamic overlay (Lift suite or
   // gap-diagonal) is active, so the dynamic reads without shrinking dots.
@@ -3878,7 +3959,7 @@ function heroToggleTopBars(){
   // with one red dot" first-paint bug). Always read the label mode through
   // this guard.
   function _wLblMode(){return (typeof _liftLblMode==='undefined')?'none':_liftLblMode;}
-  var _wExportScale=0, _wExportGain=1, _wExport4KConfirmed=false, _wExportSize=3840;
+  var _wExportScale=0, _wExportGain=1, _wExport4KConfirmed=false, _wExportSize=3840, _wExportZoom=0.92;
 
   // Detail line for the currently inspected point — same facts as the live
   // inspect bar under the opener canvas, so an export is self-describing.
@@ -3951,7 +4032,7 @@ function heroToggleTopBars(){
   function _wDynSpiralLabel(ctx,x,y,sr,pM,rich){
     if(rich&&!(typeof _wExportScale!=='undefined'&&_wExportScale>0)){
       var _el0=document.getElementById('ws-spiral-lbl');
-      if(_el0){ _el0.textContent=rich+' '+sr+'/'+pM; return; }
+      if(_el0){ _el0.textContent=rich+' '+sr+'/'+pM+' = '+(pM?(sr/pM).toFixed(4):'—'); return; }
     }
     var k=Math.max(1,Math.floor(pM/Math.max(1,sr)));
     // Channel-mode sector filter: label only the picked Farey sector
@@ -3981,7 +4062,7 @@ function heroToggleTopBars(){
     // Live: unreadable over a dense lattice, so it goes to the control row.
     // Exports still bake it onto the canvas.
     if(!ex){ var _el=document.getElementById('ws-spiral-lbl');
-      if(_el){ _el.textContent=rich+' '+sr+'/'+pM; return; } }
+      if(_el){ _el.textContent=rich+' '+sr+'/'+pM+' = '+(pM?(sr/pM).toFixed(4):'—'); return; } }
     var dpr=ex?1:(window.devicePixelRatio||1);
     var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
     var K=ex||1;
@@ -3993,7 +4074,7 @@ function heroToggleTopBars(){
     ctx.textAlign='right';ctx.textBaseline='middle';
     ctx.strokeStyle='rgba(4,4,13,.85)';
     ctx.fillStyle='rgba(230,120,130,.95)';
-    var lbl=rich+' '+sr+'/'+pM;
+    var lbl=rich+' '+sr+'/'+pM+' = '+(pM?(sr/pM).toFixed(4):'—');
     ctx.strokeText(lbl,W-pad,H/2);
     ctx.fillText(lbl,W-pad,H/2);
     ctx.restore();
@@ -4009,7 +4090,7 @@ function heroToggleTopBars(){
     // drawWRing and drawWSmith draw it unconditionally (gated only by
     // _liftShowSpiral), so Grid/Farey/Gauss — which reach it through here —
     // must behave the same, on screen and in every export.
-    if((_wRingLift||_dynExt) && G<=(lineCap||400)){
+    if((_dynExt?_dynLiftOn:_wRingLift) && G<=(lineCap||400)){
       var pLift=new Path2D(),pDie=new Path2D();
       for(var lM=2;lM<G;lM++){
         if(!_dynA(lM)||!_dynA(lM+1))continue;
@@ -4162,9 +4243,11 @@ function heroToggleTopBars(){
     b.style.color=_wDiagLockHalf?'#9b7fe8':'rgba(155,127,232,.85)';
   }
   window._wGetDiagG=function(){return _wDiagG;};
-  window._sharedLiftOverlay=function(ctx,xy,G,n,lineCap,act){
-    _dynExt=true;_dynAct=act||null;
-    try{_wDynLiftOverlay(ctx,xy,G,n,lineCap);}finally{_dynExt=false;_dynAct=null;}
+  window._sharedLiftOverlay=function(ctx,xy,G,n,lineCap,act,liftOn){
+    // liftOn gates the lift ARCS only. The prime spiral draws whenever
+    // _liftShowSpiral is set, matching how the opener behaves.
+    _dynExt=true;_dynAct=act||null;_dynLiftOn=(liftOn===undefined)?true:!!liftOn;
+    try{_wDynLiftOverlay(ctx,xy,G,n,lineCap);}finally{_dynExt=false;_dynAct=null;_dynLiftOn=true;}
   };
   window._sharedDiagOverlay=function(ctx,xy,G,act){
     _dynAct=act||null;
@@ -4179,7 +4262,7 @@ function heroToggleTopBars(){
   function drawWGrid(ctx,W,H,n,G){
     // Square cell grid, both axes sized off G (previously one axis used G-1,
     // which skewed the cells and made the coprime triangle read as "half a square").
-    var side=Math.min(W,H)-20;
+    var side=Math.max(1,Math.min(W,H)-20);   // never negative: a sub-20px canvas made cell (and arc radii) negative
     var cell=side/G;
     var ox=(W-side)/2, oy=(H-side)/2;
     // Faint boundary so the full G×G extent (grid size p²=G²) is visible
@@ -4188,7 +4271,7 @@ function heroToggleTopBars(){
     // Active Gaps: highlight the full row for every M in a twin/cousin/sexy-prime pair
     var gapSet=_wGapHighlightSet(G);
     gapSet.forEach(function(color,M){
-      var gy=oy+(M-1)*cell;
+      var gy=oy+(M-0.5)*cell;
       ctx.strokeStyle=color+'55';ctx.lineWidth=Math.max(1.5,cell*0.5);
       ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox+side,gy);ctx.stroke();
     });
@@ -4213,9 +4296,9 @@ function heroToggleTopBars(){
         // M increasing downward — matches the hero grid's y=originY+(mi+0.5)*cH
         // convention exactly (was previously inverted here, which is why the
         // opener grid read as vertically flipped / "rotated" next to the hero).
-        var x=ox+rDisp*cell,y=oy+(M-1)*cell;
+        var x=ox+(rDisp-0.5)*cell,y=oy+(M-0.5)*cell;
         var radBase=Math.min(cell*0.45,Math.max(cell*0.28,0.9/_wZoom)); // never-overlap cap, ≥~1px on screen
-        var rad=(ok?radBase:radBase*0.55)*_wCharSizeMul(pureCop);
+        var rad=Math.max(0.05,(ok?radBase:radBase*0.55)*_wCharSizeMul(pureCop));
         if(_wHitRec&&_wHitPts.length<_hitCap)_wHitPts.push(x,y,r,M);
         var col=_wModColor(r,M,ok,pureCop);
         var gp=_gridBatch.get(col);
@@ -4232,7 +4315,7 @@ function heroToggleTopBars(){
     for(var si=0;si<_wSectorPts.length;si++){
       var sp=_wSectorPts[si];
       var spDisp=_wPerRingShiftedR(sp.r,sp.M,G,_wPerRing);
-      var spx=ox+spDisp*cell,spy=oy+(sp.M-1)*cell;
+      var spx=ox+(spDisp-0.5)*cell,spy=oy+(sp.M-0.5)*cell;
       var spRad=Math.min(cell*0.42,Math.max(cell*0.22,0.9/_wZoom))*_wSecDotScale;
       ctx.beginPath();ctx.arc(spx,spy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,spRad*1.7,0,Math.PI*2);
@@ -4241,7 +4324,7 @@ function heroToggleTopBars(){
     }
     // Page-2 dynamics — lift/spiral/±n (rides the +Lift toggle) and the
     // gap-diagonal strip, at the exact per-ring-shifted dot positions.
-    var _dynXY=function(r,M){var rD=_wPerRingShiftedR(r,M,G,_wPerRing);return[ox+rD*cell,oy+(M-1)*cell];};
+    var _dynXY=function(r,M){var rD=_wPerRingShiftedR(r,M,G,_wPerRing);return[ox+(rD-0.5)*cell,oy+(M-0.5)*cell];};
     _wDynLiftOverlay(ctx,_dynXY,G,n,400,W,H);
     _wDynDiagOverlay(ctx,_dynXY,G);
     _drawWResidueChords(ctx,W,H,G,_dynXY);
@@ -4459,7 +4542,7 @@ function heroToggleTopBars(){
   function _wGaussSectorHue(ri,mi,G){ return (Math.atan2(mi-G/2,ri-G/2)*180/Math.PI+360)%360; }
   function _wBlockCoprime2D(r,M,n){ for(var j=1;j<=n;j++){ if(gcd(r,M+j)!==1) return false; } return true; }
   function drawWGauss(ctx,W,H,n,G){
-    var side=Math.min(W,H)-20;
+    var side=Math.max(1,Math.min(W,H)-20);   // never negative: a sub-20px canvas made cell (and arc radii) negative
     var halfW=side/2;
     var cw=halfW/G;
     var cx=W/2, cy=H/2;
@@ -4479,7 +4562,7 @@ function heroToggleTopBars(){
           var ok=coprime&&(n===0||_wBlockCoprime2D(rA,mA,n));
           var rAdisp=_wPerRingShiftedR(rA,mA,G,_wPerRing); // same twist as Grid — shears each row by (mA-1)×frac
           var x=(rAdisp-1+0.5)*cw, y=(mi+0.5)*cw;
-          var rad=Math.max(0.6,cw*0.36)*_wCharSizeMul(coprime);
+          var rad=Math.max(0.05,Math.max(0.6,cw*0.36)*_wCharSizeMul(coprime));
           if(!coprime) ctx.fillStyle='rgba(224,80,96,.78)'; // χ(r)=0 — clearly red, not the old near-invisible dim
           else if(_wColorMode!=='default'){
             ctx.fillStyle=_wModColor(rA,mA,ok,true); // reuse the shared palette so Gauss finally follows the Color dropdown too
@@ -4967,8 +5050,9 @@ function heroToggleTopBars(){
         ({smith:'Cayley',ring:'Ring',grid:'Grid',farey:'Farey',gauss:'Gaussian'}[_wView]||_wView)+' view',
         [['G',String(_wG)],['n',String(_wN)],
          ['Brightness',(_wExportGain||1).toFixed(2)+'\u00d7'],
+         ['Canvas zoom',((_wZoom||1)*(_wExportZoom||1)).toFixed(2)+'\u00d7'],
          ['Output',(_wExportSize/1024).toFixed(0)+'K']]);
-      _pxShowGain(true); _pxShowRes(true);
+      _pxShowGain(true); _pxShowRes(true); _pxShowZoom(true);
       _pxFn=function(){ _wExport4KConfirmed=true; try{ window.wExport4K(); } finally { _wExport4KConfirmed=false; } };
       _pxReRender=function(){
         _pxRender(function(cv,PW){
@@ -5026,7 +5110,7 @@ function heroToggleTopBars(){
 
     var availH=SIZE-ty-subH-footerH;
     var availW=SIZE-H.TX*2;
-    var squareSide=Math.min(availW,availH);
+    var squareSide=Math.max(40,Math.min(availW,availH));   // guard against a negative panel
     var xOff=H.TX+Math.floor((availW-squareSide)/2);
 
     // Render the opener's CURRENT view at full resolution, using the same
@@ -5041,9 +5125,19 @@ function heroToggleTopBars(){
     // then put the live hit-table back exactly as it was.
     var _savedHit=_wHitPts.slice(), _savedRec=_wHitRec;
     _wHitPts.length=0; _wHitRec=true;
+    // Mirror the LIVE transform so the export reflects the zoom/pan on screen.
+    // Previously only rotation and flip were applied, so the picture was locked
+    // at zoom 1 with no pan no matter what the canvas showed.
+    var _cvL=document.getElementById('welcome-teaser');
+    var _pk=squareSide/((_cvL&&_cvL.clientWidth)||536);
+    var _fs=(_wView==='smith')?_wsFlipScale:1;
+    var _z=(_wZoom||1)*(_wExportZoom||1);
     offCtx.save();
-    if(_wRotSteps){offCtx.translate(squareSide/2,squareSide/2);offCtx.rotate(_wRotSteps*Math.PI/2);offCtx.translate(-squareSide/2,-squareSide/2);}
-    if(_wView==='smith'&&_wsFlipScale<0){offCtx.translate(squareSide/2,0);offCtx.scale(-1,1);offCtx.translate(-squareSide/2,0);}
+    offCtx.translate(_wPanX*_pk,_wPanY*_pk);
+    offCtx.translate(squareSide/2,squareSide/2);
+    if(_wRotSteps)offCtx.rotate(_wRotSteps*Math.PI/2);
+    offCtx.scale(_z*_fs,_z);
+    offCtx.translate(-squareSide/2,-squareSide/2);
     if(_wView==='smith') drawWSmith(offCtx,squareSide,squareSide,n,drawG,_wSmithZoomOut);
     else if(_wView==='ring') drawWRing(offCtx,squareSide,squareSide,n,drawG);
     else if(_wView==='grid') drawWGrid(offCtx,squareSide,squareSide,n,drawG);
@@ -5054,6 +5148,7 @@ function heroToggleTopBars(){
     // so they must be drawn while the rotation is still on the stack.
     // Drawing them after restore() put every marker at the 0° position.
     if(window._wGoldbachActive&&typeof window._wDrawGoldbach==='function') window._wDrawGoldbach(offCtx,drawG);
+    if(typeof window._wDrawPointLabels==='function') window._wDrawPointLabels(offCtx,drawG);
     window._wDrawInspectMark(offCtx,_wHitPts,squareSide/500);
     offCtx.restore();
     _wHitPts.length=0; Array.prototype.push.apply(_wHitPts,_savedHit); _wHitRec=_savedRec;
@@ -5860,6 +5955,13 @@ function heroToggleTopBars(){
       <button class="lift-p-play-btn" onclick="liftPPlay()"
         title="Play/stop the prime-spiral sweep (same control as Dynamics → p)"
         style="background:rgba(200,168,74,.08);border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.06em;">▶ p</button>
+      <button onclick="liftCycleSpiralP(-1)" title="Previous prime" style="background:none;border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;white-space:nowrap;">−</button>
+      <input type="number" class="lift-spiralp-inp" id="hero-spiralp-inp" min="2" step="1" value="2"
+        title="Prime traced by the spiral — type any number, it snaps to the nearest prime ≤ G"
+        onchange="wSetSpiralP(this.value)"
+        onkeydown="if(event.key==='Enter'){this.blur();wSetSpiralP(this.value);}"
+        style="width:52px;background:#0a0a16;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.95);font-family:var(--mono);font-size:7.5px;padding:3px 2px;text-align:center;">
+      <button onclick="liftCycleSpiralP(1)" title="Next prime" style="background:none;border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.85);font-family:var(--mono);font-size:7.5px;padding:3px 9px;cursor:pointer;white-space:nowrap;">+</button>
   <span style="font-family:var(--mono);font-size:8px;color:var(--cream3);white-space:nowrap;">G=<span id="hero-g-val">2</span></span>
   <input type="range" id="hero-g-sl" min="2" max="512" value="2" step="1"
     style="width:90px;accent-color:rgba(200,168,74,.8);"
@@ -14633,8 +14735,11 @@ function heroToggleLiftMode(){
 function _hDynDim(){return (typeof _heroDynDimA==='function')?_heroDynDimA():1;}
 function _heroDynOverlays(ctx,xy,G,n,cap){
   const dg=(typeof _wGetDiagG==='function')?_wGetDiagG():0;
-  if(window._heroLiftMode&&typeof _sharedLiftOverlay==='function')
-    _sharedLiftOverlay(ctx,xy,G,n,cap,_heroRingActive);
+  // The spiral is gated on _liftShowSpiral, NOT on Lift mode — otherwise the
+  // hero's ▶ p button appears dead whenever Lift is off (its default).
+  const _spOnHero=(typeof _liftShowSpiral==='undefined')||_liftShowSpiral;
+  if((window._heroLiftMode||_spOnHero)&&typeof _sharedLiftOverlay==='function')
+    _sharedLiftOverlay(ctx,xy,G,n,cap,_heroRingActive,window._heroLiftMode);
   if(dg>0&&typeof _sharedDiagOverlay==='function')
     _sharedDiagOverlay(ctx,xy,G,_heroRingActive);
 
@@ -15584,9 +15689,15 @@ function liftSpiralPFor(G){
 // high as whichever grid the person actually moved. (The per-frame drawing
 // code elsewhere already passes its own G explicitly and doesn't need this.)
 function _liftCurrentG(){
+  // Stay inside the grid actually on screen. Use _liftOpenerVisible(): the modal
+  // has no inline display until it is opened/closed once, so testing
+  // style.display for truthiness reports "closed" on first load.
   const wg=(typeof window._wGetG==='function')?(window._wGetG()||0):0;
   const hg=(typeof _heroG!=='undefined')?(_heroG||0):0;
-  return Math.max(wg,hg)||100;
+  const openerUp=(typeof _liftOpenerVisible==='function')?_liftOpenerVisible():true;
+  if(openerUp&&wg) return wg;
+  if(!openerUp&&hg) return hg;
+  return (wg||hg||100);
 }
 function _wSyncSpiralPInputs(){
   var p=(typeof _liftSpiralP!=='undefined')?_liftSpiralP:2;
@@ -21972,6 +22083,18 @@ let _pxFn=null; let _pxReRender=null;
     if(sub) sub.textContent=sub.textContent.replace(/^\d+\s*\u00d7\s*\d+/, v+' \u00d7 '+v);
     if(_pxReRender) _pxReRender();
   };
+  window.pxSetZoom=function(v){
+    const z=Math.max(0.4,Math.min(2,+v||1));
+    if(typeof _wExportZoom!=='undefined') _wExportZoom=z;
+    const sl=document.getElementById('px-zoom'), lbl=document.getElementById('px-zoom-lbl');
+    if(sl) sl.value=Math.round(z*100);
+    if(lbl) lbl.textContent=z.toFixed(2)+'\u00d7';
+    if(_pxReRender) _pxReRender();
+  };
+  function _pxShowZoom(on){
+    const r=document.getElementById('px-zoom-row');
+    if(r) r.style.display=on?'flex':'none';
+  }
   function _pxShowRes(on){
     var r=document.getElementById('px-res-row');
     if(r) r.style.display=on?'flex':'none';
@@ -22025,7 +22148,7 @@ function openChartPNGPreview(){
     '1920 × 800 · Dark background',
     [['n',N],['C(n)',(getCn(N)||0).toFixed(6)],['D(n)',((getCn(N)||0)/ZETA2).toFixed(6)],['X-max',xMax]]
   );
-  _pxShowGain(false); _pxShowRes(false); _pxReRender=null; _pxFn=exportChartPNG;
+  _pxShowGain(false); _pxShowRes(false); _pxShowZoom(false); _pxReRender=null; _pxFn=exportChartPNG;
   _pxRender((cv,PW)=>{
     const PH=Math.round(PW*800/1920);
     cv.width=PW; cv.height=PH;
@@ -22069,7 +22192,7 @@ async function doExportWithPreview(){
     `${eW} × ${eH} · ${isDark?'Dark':'Parchment'} background`,
     [['Layout',layoutName],['Panels',getSelectedPanels().join(' + ')],['n',N],['C(n)',(getCn(N)||0).toFixed(6)]]
   );
-  _pxShowGain(false); _pxShowRes(false); _pxReRender=null; _pxFn=()=>{ doExport(); };
+  _pxShowGain(false); _pxShowRes(false); _pxShowZoom(false); _pxReRender=null; _pxFn=()=>{ doExport(); };
   _pxRender(async(cv,PW)=>{
     const PH=Math.round(PW*eH/eW);
     cv.width=PW; cv.height=PH;
@@ -22602,6 +22725,18 @@ function drawStripAverage(overrideG,overrideW){
         <button class="px-res-btn" data-s="3840" onclick="pxSetRes(3840)">4K</button>
         <button class="px-res-btn" data-s="7680" onclick="pxSetRes(7680)">8K</button>
         <span id="px-res-lbl" style="color:#c8a84a;">3840 &times; 3840</span>
+      </div>
+      <div class="px-note" id="px-zoom-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <span style="color:#c8a84a;">Canvas zoom</span>
+        <input type="range" id="px-zoom" min="40" max="200" step="1" value="92"
+          style="width:150px;accent-color:#c8a84a;"
+          title="Scales the lattice inside the frame. Below 100% zooms out so the top row and its labels clear the border."
+          oninput="pxSetZoom(this.value/100)">
+        <span id="px-zoom-lbl" style="color:#c8a84a;min-width:38px;">0.92&times;</span>
+        <button onclick="pxSetZoom(0.92)" style="background:none;border:1px solid rgba(200,168,74,.35);
+          color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;">Fit</button>
+        <button onclick="pxSetZoom(1)" style="background:none;border:1px solid rgba(200,168,74,.35);
+          color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;">1:1</button>
       </div>
       <div class="px-note" id="px-gain-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
         <span style="color:#c8a84a;">Canvas brightness</span>
