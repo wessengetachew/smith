@@ -995,9 +995,7 @@ function openOpener(){
                     <span style="font-size:12px;color:#94a3b8;font-weight:600;">Ring Display Controls</span>
                 </div>
                 <div id="ringControlsPanel" style="display:none;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px;">
-                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount();if(window.cnUpdatePanel)cnUpdatePanel();">
-                        <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
-                    </select></label>
+                    <span style="font-size:11px;color:#64748b;">Sector selector is below the ring &darr;</span>
                     <label style="font-size:12px;">Color: <select id="colorMode" onchange="drawMainRing()" style="padding:4px;">
                         <optgroup label="Basic">
                             <option value="sector">Sector</option>
@@ -1348,7 +1346,7 @@ function openOpener(){
                             <label style="font-size:11px;"><input type="checkbox" id="showMediantLines" onchange="drawMainRing()"> Mediant Lines</label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
-                            <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" checked onchange="drawMainRing()"> Point Labels</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" onchange="drawMainRing()"> Point Labels</label>
                             <label style="font-size:11px;">Type: <select id="labelType" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
                                 <optgroup label="Basic">
                                     <option value="fraction">r/m</option>
@@ -1531,8 +1529,8 @@ function openOpener(){
         <!-- Ring Visualization (Hero) -->
         <div class="panel" style="text-align:center;padding:15px;position:relative;">
             <!-- Zoom Controls - moved above canvas to avoid blocking corner data -->
-            <div style="display:flex;gap:12px;justify-content:space-between;margin-bottom:8px;align-items:center;">
-                <div style="display:flex;gap:12px;align-items:center;">
+            <div style="display:flex;gap:12px;justify-content:space-between;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
                     <div style="background:rgba(15,23,42,0.9);padding:6px 12px;border-radius:6px;border:1px solid #334155;">
                         <label style="font-size:12px;color:#94a3b8;cursor:pointer;">
                             <input type="checkbox" id="showCornerLegend" checked onchange="toggleCornerLegend()" style="margin-right:6px;">
@@ -1546,6 +1544,23 @@ function openOpener(){
                         </label>
                         <button onclick="playInvolutionAnimation()" id="involutionPlayBtn" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">▶ Play</button>
                         <button onclick="stopInvolutionAnimation()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
+                    </div>
+                    <div style="background:rgba(217,119,6,0.9);padding:6px 12px;border-radius:6px;border:1px solid #d97706;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <button onclick="playErrorBySector('error')" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;" title="Play the relative-error sweep, following the ring">▶ Play All (Error)</button>
+                        <button onclick="stopAllPlayback()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
+                        <label style="font-size:10px;color:#fff;display:flex;align-items:center;gap:4px;">
+                            Speed
+                            <input type="range" id="errorPlaySpeedSlider" min="1" max="360" step="1" value="25"
+                                oninput="syncPlaybackSpeed(this.value,'errorSlider')"
+                                style="width:70px;vertical-align:middle;">
+                            <span id="errorPlaySpeedLabel" style="min-width:36px;display:inline-block;">25ms</span>
+                        </label>
+                        <label style="font-size:10px;color:#fff;cursor:pointer;" title="Pan/zoom the ring to follow the currently played point, zooming in a bit more each step. If you manually zoom/pan away, it snaps back after a moment.">
+                            <input type="checkbox" id="ringAutoZoomTracker" checked style="margin-right:3px;vertical-align:middle;">Auto Zoom Tracker
+                        </label>
+                        <label style="font-size:10px;color:#fff;cursor:pointer;" title="Dim every point except the one currently playing and its trail">
+                            <input type="checkbox" id="ringDimOthers" checked style="margin-right:3px;vertical-align:middle;">Dim Others
+                        </label>
                     </div>
                 </div>
                 <div style="display:flex;gap:4px;background:rgba(15,23,42,0.9);padding:6px 10px;border-radius:6px;border:1px solid #334155;">
@@ -1564,7 +1579,7 @@ function openOpener(){
                 Drag to pan • Scroll to zoom
             </div>
             
-            <div style="position:relative;background:#000000;display:inline-block;" id="ringContainer">
+            <div style="position:relative;background:#000000;display:inline-block;overflow:hidden;" id="ringContainer">
                 <canvas id="mainRing" class="ring-canvas" width="800" height="800" style="max-width:100%;cursor:grab;"></canvas>
                 <div id="ringFractionDisplay" style="position:absolute;bottom:10px;left:10px;font-size:18px;font-weight:bold;color:#22c55e;text-shadow:2px 2px 4px rgba(0,0,0,0.8);display:none;z-index:100;pointer-events:none;"></div>
                 <div id="ringDecimalDisplay" style="position:absolute;bottom:10px;right:10px;font-size:18px;font-weight:bold;color:#3b82f6;text-shadow:2px 2px 4px rgba(0,0,0,0.8);display:none;z-index:100;pointer-events:none;"></div>
@@ -1584,6 +1599,20 @@ function openOpener(){
                 <button class="secondary" onclick="stopAllPlayback()" style="padding:6px 12px;">■ Stop</button>
                 <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)" style="padding:6px 12px;">View Details</button>
                 <button class="secondary" onclick="exportRingHiRes()" style="padding:6px 12px;">Export Ring</button>
+                <label style="font-size:10px;color:#94a3b8;" title="Export the whole ring instead of just the zoomed view"><input type="checkbox" id="exportFullRing"> Full ring</label>
+                <label style="font-size:10px;color:#94a3b8;" title="Burn the four corner readouts into the exported image"><input type="checkbox" id="exportWithLabels" checked> Corner labels</label>
+            </div>
+            
+            <!-- Sector Selector (moved here from Ring Display Controls) -->
+            <div style="margin-top:8px;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#1e1b4b;border-radius:6px;border:1px solid #8b5cf6;">
+                <span style="color:#c4b5fd;font-size:11px;font-weight:600;">Sector:</span>
+                <button onclick="stepViewSector(-1)" class="secondary" style="padding:4px 9px;font-size:11px;" title="Previous sector">&#9664;</button>
+                <select id="viewSector" style="padding:4px 8px;font-size:12px;background:#0f172a;border:1px solid #8b5cf6;border-radius:4px;color:#e2e8f0;min-width:70px;" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount();updateViewSectorRangeLabel();if(window.cnUpdatePanel)cnUpdatePanel();">
+                    <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
+                </select>
+                <button onclick="stepViewSector(1)" class="secondary" style="padding:4px 9px;font-size:11px;" title="Next sector">&#9654;</button>
+                <span style="color:#a5b4fc;font-size:10px;margin-left:6px;">range <span id="viewSectorRangeLabel" style="color:#fbbf24;font-family:monospace;">-</span></span>
+                <label style="color:#a5b4fc;font-size:10px;margin-left:8px;"><input type="checkbox" id="viewSectorSoloMode" onchange="applyViewSectorSolo()"> Solo this sector</label>
             </div>
             
             <!-- Sector Range Playback Controls -->
@@ -1611,8 +1640,20 @@ function openOpener(){
                 </select>
                 <span style="color:#86efac;font-size:10px;">Total: <span id="sectorPointCount" style="color:#fbbf24;font-family:monospace;">-</span></span>
                 <span style="color:#86efac;font-size:10px;margin-left:8px;">Speed:</span>
-                <input type="number" id="playbackSpeed" min="50" max="2000" value="250" step="50" style="width:60px;padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;text-align:center;" title="ms per note">
+                <input type="number" id="playbackSpeed" min="1" max="2000" value="25" step="1" oninput="syncPlaybackSpeed(this.value,'number')" style="width:60px;padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;text-align:center;" title="ms per note">
                 <span style="color:#64748b;font-size:9px;">ms</span>
+                <input type="range" id="playbackSpeedSlider" min="1" max="360" step="1" value="25" oninput="syncPlaybackSpeed(this.value,'slider')" style="width:120px;vertical-align:middle;accent-color:#22c55e;" title="ms per note (1–360)">
+                <span id="playbackSpeedLabel" style="color:#fbbf24;font-size:10px;font-family:monospace;min-width:46px;display:inline-block;">25 ms</span>
+                <span style="color:#86efac;font-size:10px;margin-left:8px;">Zoom:</span>
+                <select id="sectorZoomMode" onchange="onSectorZoomModeChange()" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;" title="Camera behaviour while Play Sector runs">
+                    <option value="off">Off</option>
+                    <option value="fit" selected>Fit sector</option>
+                    <option value="follow">Follow point</option>
+                    <option value="fitfollow">Fit then follow</option>
+                </select>
+                <label style="color:#86efac;font-size:10px;"><input type="checkbox" id="sectorZoomDim" checked> Dim others</label>
+                <button onclick="fitCameraToSector(+document.getElementById('viewSector').value)" class="secondary" style="padding:3px 8px;font-size:10px;" title="Zoom to the current sector now">Fit now</button>
+                <button onclick="resetRingZoom()" class="secondary" style="padding:3px 8px;font-size:10px;">Reset Zoom</button>
             </div>
             
             <!-- Ring Loop Playback Controls -->
@@ -1752,7 +1793,7 @@ function openOpener(){
         <div style="margin-top:12px;">
             <div onclick="toggleResidueTrackerPanel()" style="background:linear-gradient(135deg,#831843,#9f1239);border:2px solid #f43f5e;border-radius:8px 8px 0 0;padding:10px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="color:#fda4af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">🔢 Prime Residue Tracker</span>
+                    <span style="color:#fda4af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Prime Residue Tracker</span>
                     <span id="residueTrackerPreview" style="color:#f0fdf4;font-family:monospace;font-size:13px;"></span>
                 </div>
                 <span id="residueTrackerArrow" style="color:#fda4af;font-size:14px;transition:transform 0.3s;">▼</span>
@@ -1778,6 +1819,75 @@ function openOpener(){
                         style="background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:6px;color:white;padding:10px 20px;cursor:pointer;font-weight:600;margin-top:18px;">
                         Track Residues
                     </button>
+                    <div style="margin-top:18px;">
+                        <label style="color:#fda4af;font-size:10px;">Highlight class</label>
+                        <select id="primeResidueClassFilter" style="display:block;margin-top:4px;width:90px;padding:6px 8px;background:#0f172a;border:1px solid #f43f5e;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                            <option value="all">All classes</option>
+                        </select>
+                    </div>
+                    <button onclick="highlightPrimeResiduesOnCanvas()" 
+                        style="background:linear-gradient(135deg,#06b6d4,#0891b2);border:none;border-radius:6px;color:white;padding:10px 20px;cursor:pointer;font-weight:600;margin-top:18px;" 
+                        title="Highlight the class picked in the dropdown and scroll up to the ring. With 'All classes' only the primes are marked, since there is no single class to shade.">
+                        Highlight &amp; Show on Ring
+                    </button>
+                    <button onclick="clearPrimeResidueHighlight()" 
+                        style="background:#475569;border:none;border-radius:6px;color:white;padding:10px 18px;cursor:pointer;font-weight:600;margin-top:18px;">
+                        Clear
+                    </button>
+                </div>
+                <!-- Two-colour highlight settings: the residue class as a whole,
+                     and the primes inside that class, drawn separately. -->
+                <div style="margin-top:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:8px 12px;background:rgba(15,23,42,0.6);border-radius:6px;border:1px solid rgba(244,63,94,0.4);">
+                    <label style="color:#fda4af;font-size:11px;display:flex;align-items:center;gap:6px;">
+                        <input type="checkbox" id="prClassLayerOn" checked onchange="drawMainRing()">
+                        Residue class r &equiv; a (mod p)
+                        <input type="color" id="prClassColor" value="#38bdf8" style="width:30px;height:22px;border:none;cursor:pointer;" onchange="drawMainRing()">
+                    </label>
+                    <label style="color:#fda4af;font-size:11px;display:flex;align-items:center;gap:6px;">
+                        <input type="checkbox" id="prPrimeLayerOn" checked onchange="drawMainRing()">
+                        Primes in that class
+                        <input type="color" id="prPrimeColor" value="#f43f5e" style="width:30px;height:22px;border:none;cursor:pointer;" onchange="drawMainRing()">
+                    </label>
+                    <label style="color:#fda4af;font-size:11px;">Match on: <select id="prMatchOn" onchange="if(primeResidueHighlight){drawMainRing();updatePrimeResidueStatusFromCounts(primeResidueHighlight.primes.size);}" style="padding:3px 5px;font-size:11px;background:#0f172a;border:1px solid #f43f5e;border-radius:3px;color:#e2e8f0;" title="Which part of r/m the residue and prime tests apply to">
+                        <option value="r" selected>numerator r</option>
+                        <option value="m">denominator m</option>
+                        <option value="either">r or m</option>
+                    </select></label>
+                    <label style="color:#fda4af;font-size:11px;">Size: <input type="number" id="prHighlightSize" value="6" min="1" max="30" step="0.5" style="width:52px;padding:3px 5px;font-size:11px;background:#0f172a;border:1px solid #f43f5e;border-radius:3px;color:#e2e8f0;" onchange="drawMainRing()"></label>
+                    <label style="color:#fda4af;font-size:11px;"><input type="checkbox" id="prHighlightGlow" checked onchange="drawMainRing()"> Glow</label>
+                    <label style="color:#fda4af;font-size:11px;"><input type="checkbox" id="prHighlightDimRest" onchange="drawMainRing()"> Dim the rest</label>
+                    <span id="prHighlightStatus" style="color:#94a3b8;font-size:11px;font-family:monospace;"></span>
+                </div>
+                <!-- Play the tracked set as audio, using the same queue engine,
+                     Play Range and speed controls as Play Sector. -->
+                <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:rgba(15,23,42,0.6);border-radius:6px;border:1px solid rgba(6,182,212,0.45);">
+                    <span style="color:#67e8f9;font-size:11px;font-weight:600;">Play set:</span>
+                    <select id="trackPlaySet" onchange="updateTrackedPlayCount()" style="padding:4px 6px;font-size:11px;background:#0f172a;border:1px solid #06b6d4;border-radius:3px;color:#e2e8f0;">
+                        <optgroup label="Highlighted class">
+                            <option value="highlight" selected>Class + its primes</option>
+                            <option value="highlightPrimes">Primes in class only</option>
+                            <option value="highlightClass">Class only (non-prime)</option>
+                        </optgroup>
+                        <optgroup label="Primality">
+                            <option value="primeNum">Prime numerator r</option>
+                            <option value="primeDen">Prime denominator m</option>
+                            <option value="bothPrime">Both prime (r and m)</option>
+                            <option value="neitherPrime">Neither prime</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                            <option value="tracker">Ring Residue Tracker list</option>
+                            <option value="coprime">All gcd(r,m)=1</option>
+                        </optgroup>
+                    </select>
+                    <select id="trackPlayScope" onchange="updateTrackedPlayCount()" style="padding:4px 6px;font-size:11px;background:#0f172a;border:1px solid #06b6d4;border-radius:3px;color:#e2e8f0;">
+                        <option value="sector" selected>This sector</option>
+                        <option value="all">All sectors</option>
+                    </select>
+                    <button onclick="playTrackedFractions('forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;">&#9654; Play</button>
+                    <button onclick="playTrackedFractions('backward')" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);border:none;border-radius:4px;color:white;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;">&#9664; Play</button>
+                    <button onclick="stopAllPlayback()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;">&#9632; Stop</button>
+                    <label style="color:#67e8f9;font-size:10px;"><input type="checkbox" id="trackPlayHighlight" checked> Light up as it plays</label>
+                    <span id="trackPlayCount" style="color:#94a3b8;font-size:11px;font-family:monospace;"></span>
                 </div>
                 <!-- Residue Results -->
                 <div id="residueResults" style="margin-top:15px;padding:15px;background:#0f172a;border-radius:8px;border:1px solid #f43f5e;color:#e2e8f0;font-size:12px;max-height:400px;overflow-y:auto;">
@@ -1883,6 +1993,8 @@ function openOpener(){
                     <span style="font-size:9px;color:#64748b;margin-left:5px;">Scroll to zoom, drag to pan</span>
                 </h4>
                 <div style="margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <button class="secondary" onclick="clearRingPlaybackTrail()" style="font-size:10px;padding:3px 8px;">Clear Ring Trail</button>
+                    <span style="border-left:1px solid #475569;margin:0 8px;height:20px;"></span>
                     <label style="color:#94a3b8;font-size:11px;">Click/Selection Mode:</label>
                     <select id="errorPlaybackMode" onchange="updateErrorModeHint()" style="font-size:11px;padding:3px 8px;background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
                         <option value="error">Error Magnitude (pitch = error%)</option>
@@ -3593,7 +3705,7 @@ function openOpener(){
         </div>
         
         <div class="chart-box chart-wrapper" style="margin-top:15px;">
-            <h4>Primorial Comparison: φ(P_k)/P_k → 6/π² Convergence</h4>
+            <h4>Primorial Comparison: ∏(1−1/p²) → 6/π², φ(P_k)/P_k → 0</h4>
             <div class="control-row" style="margin-bottom:8px;">
                 <label>Show primorials up to P_<input type="number" id="primorialCompareMax" value="8" min="3" max="12" onchange="drawPrimorialComparison()"></label>
                 <label><input type="checkbox" id="primorialShowProduct" checked onchange="drawPrimorialComparison()"> Show ∏(1-1/p²)</label>
@@ -4671,19 +4783,15 @@ function screenshotMainCanvas() {
     // ===== CANVAS (Left side) - WITH ZOOM APPLIED =====
     ctx.save();
     
-    // Calculate the center point for zoom
     const canvasX = padding;
     const canvasY = padding;
-    const centerX = canvasX + scaledCanvasWidth / 2;
-    const centerY = canvasY + scaledCanvasHeight / 2;
     
-    // Apply zoom transformation
-    ctx.translate(centerX, centerY);
-    ctx.scale(ringView.zoom, ringView.zoom);
-    ctx.translate(-centerX + ringView.panX * ringView.zoom, -centerY + ringView.panY * ringView.zoom);
-    
-    // Draw the zoomed/panned canvas
-    ctx.drawImage(canvas, canvasX, canvasY, scaledCanvasWidth, scaledCanvasHeight);
+    // Use the shared view renderer: it crops to the live zoom/pan window, so
+    // no transform is needed here and the pan can't drift out of frame.
+    const viewCanvas = (typeof renderRingViewToCanvas === 'function')
+        ? (renderRingViewToCanvas({ useZoom: true, withLabels: false }) || canvas)
+        : canvas;
+    ctx.drawImage(viewCanvas, canvasX, canvasY, scaledCanvasWidth, scaledCanvasHeight);
     
     // Draw 4-corner displays if they are visible
     ctx.font = `bold ${18 * canvasScale}px system-ui`;
@@ -6126,15 +6234,21 @@ function generateScreenshotWithSelection(tabName) {
         ctx.textAlign = 'left';
         ctx.fillText(title.substring(0, 60), x + 10, y + 17);
         
-        // Draw canvas scaled to fit
-        const scale = Math.min((drawCanvasWidth - 20) / canvas.width, (drawCanvasHeight - 45) / canvas.height);
-        const drawWidth = canvas.width * scale;
-        const drawHeight = canvas.height * scale;
+        // Draw canvas scaled to fit. The main ring goes through the shared
+        // view renderer so the export matches what's on screen (zoom crop +
+        // the four corner readouts, which are HTML overlays otherwise).
+        let srcCanvas = canvas;
+        if (canvas.id === 'mainRing' && typeof renderRingViewToCanvas === 'function') {
+            srcCanvas = renderRingViewToCanvas({ useZoom: true, withLabels: true }) || canvas;
+        }
+        const scale = Math.min((drawCanvasWidth - 20) / srcCanvas.width, (drawCanvasHeight - 45) / srcCanvas.height);
+        const drawWidth = srcCanvas.width * scale;
+        const drawHeight = srcCanvas.height * scale;
         const drawX = x + (drawCanvasWidth - drawWidth) / 2;
         const drawY = y + 30 + (drawCanvasHeight - 40 - drawHeight) / 2;
         
         try {
-            ctx.drawImage(canvas, drawX, drawY, drawWidth, drawHeight);
+            ctx.drawImage(srcCanvas, drawX, drawY, drawWidth, drawHeight);
         } catch (e) {
             ctx.fillStyle = '#64748b';
             ctx.fillText('Canvas render error', drawX + 20, drawY + 50);
@@ -6827,6 +6941,60 @@ function cfPath(cf) {
     let path = '';
     for(let i=0; i<cf.length; i++) { path += (i%2===0?'R':'L').repeat(cf[i]); }
     return path;
+}
+
+// ── Continued-fraction detail helpers (used by the point modal "Expand") ──
+
+// Convergents p_k/q_k of a CF, via the standard recurrence
+// h_k = a_k h_{k-1} + h_{k-2},  k_k = a_k k_{k-1} + k_{k-2}.
+function cfConvergents(cf) {
+    let hm1 = 1, hm2 = 0, km1 = 0, km2 = 1;
+    const out = [];
+    for (let i = 0; i < cf.length; i++) {
+        const a = cf[i];
+        const h = a * hm1 + hm2, k = a * km1 + km2;
+        out.push({ i, a, p: h, q: k, val: k ? h / k : NaN });
+        hm2 = hm1; hm1 = h; km2 = km1; km1 = k;
+    }
+    return out;
+}
+
+// Nested (tower) form: a0 + 1/(a1 + 1/(a2 + ...))
+function cfNested(cf) {
+    if (!cf.length) return '';
+    let s = String(cf[cf.length - 1]);
+    for (let i = cf.length - 2; i >= 0; i--) s = cf[i] + ' + 1/(' + s + ')';
+    return s;
+}
+
+// Euclidean algorithm trace — the division steps that produce the CF terms.
+function cfEuclidSteps(r, m) {
+    const steps = [];
+    let a = r, b = m, guard = 0;
+    while (b !== 0 && guard++ < 500) {
+        const q = Math.floor(a / b), rem = a - q * b;
+        steps.push({ a, b, q, rem });
+        a = b; b = rem;
+    }
+    return steps;
+}
+
+// Stern–Brocot descent: mediant walk from 1/1 down to r/m, recording the
+// L/R turn and the running fraction at each step. Computed directly from the
+// mediant rule so the listed fractions are guaranteed to land on r/m.
+function sternBrocotWalk(r, m) {
+    let loN = 0, loD = 1, hiN = 1, hiD = 0;
+    let curN = 1, curD = 1;
+    const steps = [{ dir: '·', n: 1, d: 1, lo: '0/1', hi: '1/0' }];
+    let guard = 0;
+    while ((curN !== r || curD !== m) && guard++ < 20000) {
+        let dir;
+        if (r * curD < curN * m) { hiN = curN; hiD = curD; dir = 'L'; }
+        else { loN = curN; loD = curD; dir = 'R'; }
+        curN = loN + hiN; curD = loD + hiD;
+        steps.push({ dir, n: curN, d: curD, lo: loN + '/' + loD, hi: hiD === 0 ? '1/0' : hiN + '/' + hiD });
+    }
+    return steps;
 }
 
 // Dedekind sum
@@ -7741,7 +7909,7 @@ function updateViewSectorDropdown() {
     const currentVal = select.value || '2';
     const maxSector = state.sectorMax || 10;
     select.innerHTML = '';
-    for (let i = 1; i <= Math.min(maxSector, 20); i++) {
+    for (let i = 1; i <= Math.min(maxSector, 300); i++) {
         const opt = document.createElement('option');
         opt.value = i;
         opt.textContent = i;
@@ -7752,6 +7920,60 @@ function updateViewSectorDropdown() {
     if (typeof updateSectorPointCount === 'function') {
         updateSectorPointCount();
     }
+    updateViewSectorRangeLabel();
+}
+
+// ── Sector selector helpers (selector lives directly under the ring) ──────
+// Shows the sector's defining interval (1/(n+1), 1/n] next to the dropdown.
+function updateViewSectorRangeLabel() {
+    const el = document.getElementById('viewSectorRangeLabel');
+    if (!el) return;
+    const n = parseInt(document.getElementById('viewSector')?.value || 1);
+    if (!n || !isFinite(n)) { el.textContent = '-'; return; }
+    el.textContent = `(1/${n + 1}, 1/${n}]`;
+}
+
+// Programmatic sector change used by "View on All", sector tables, etc.
+// Adds the option on the fly if the sector sits past the generated range so
+// deep sectors (e.g. S180) can still be selected and played.
+function setViewSectorValue(n, redraw) {
+    const select = document.getElementById('viewSector');
+    if (!select) return;
+    n = parseInt(n);
+    if (!n || n < 1) return;
+    if (!Array.from(select.options).some(o => +o.value === n)) {
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        const after = Array.from(select.options).find(o => +o.value > n);
+        if (after) select.insertBefore(opt, after); else select.appendChild(opt);
+    }
+    select.value = String(n);
+    updateViewSectorRangeLabel();
+    if (typeof updateSectorStats === 'function') updateSectorStats(n, state.residuesBySector[n] || []);
+    if (typeof updateSectorPointCount === 'function') updateSectorPointCount();
+    if (window.cnUpdatePanel) window.cnUpdatePanel();
+    if (redraw !== false) drawMainRing();
+}
+
+function stepViewSector(delta) {
+    const select = document.getElementById('viewSector');
+    if (!select) return;
+    const cur = parseInt(select.value || 1);
+    const max = Math.max(state.sectorMax || 10, cur);
+    let next = cur + delta;
+    if (next < 1) next = 1;
+    if (next > max) next = max;
+    state.highlightSectorOnly = null;
+    setViewSectorValue(next);
+}
+
+// "Solo" = show only this sector (unchecks All Sectors); off restores all.
+function applyViewSectorSolo() {
+    const solo = document.getElementById('viewSectorSoloMode')?.checked;
+    const allBox = document.getElementById('showAllSectors');
+    if (allBox) allBox.checked = !solo;
+    state.highlightSectorOnly = null;
+    drawMainRing();
 }
 
 // THEORY VIZ FUNCTIONS
@@ -9499,11 +9721,36 @@ function toggleCornerLegend() {
     
     displays.forEach(id => {
         const elem = document.getElementById(id);
-        if (elem && !showLegend) {
-            elem.style.display = 'none';
-        }
-        // If showing legend, the hover/click handlers will show them when appropriate
+        if (!elem) return;
+        if (!showLegend) elem.style.display = 'none';
+        else if ((elem.textContent || '').trim()) { elem.style.display = 'block'; elem.style.opacity = '1'; }
     });
+}
+
+// Fill the four corner readouts for a given fraction. Called on point click
+// as well as during playback, so an exported still always carries the labels
+// for whatever is currently selected — they're HTML overlays, so the export
+// has to read them from here.
+function setRingCornerLabels(r, m, sector) {
+    const showLegend = document.getElementById('showCornerLegend')?.checked ?? true;
+    const set = (id, text, color) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (!showLegend || !text) { el.style.display = 'none'; return; }
+        el.textContent = text;
+        el.style.display = 'block';
+        el.style.opacity = '1';
+    };
+    
+    if (!m) return;
+    set('ringFractionDisplay', `${r}/${m}`);
+    set('ringDecimalDisplay', (r / m).toFixed(8));
+    const base = (typeof harmonicSettings !== 'undefined' && harmonicSettings?.baseFreq) ? harmonicSettings.baseFreq : 880;
+    set('ringHzDisplay', `${(base * (r / m)).toFixed(2)} Hz`);
+    
+    let s = sector;
+    if (s === undefined || s === null) s = Math.floor(m / r) || null;
+    set('ringSectorDisplay', s ? `Sector ${s}` : '');
 }
 
 // Involution Pairing Animation - rotates through all GCD pairs in the same ring
@@ -9564,6 +9811,7 @@ function animateInvolutionPairing(startR, startM, autoPlay = false) {
     const cy = canvas.height / 2;
     const maxR = Math.min(canvas.width, canvas.height) / 2 - 35;
     const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
     
     // Find all points on the same ring (same m value)
     const currentSector = +document.getElementById('viewSector').value;
@@ -9590,7 +9838,7 @@ function animateInvolutionPairing(startR, startM, autoPlay = false) {
         // Redraw the main ring
         drawMainRing();
         
-        const radius = calculateRadius(startM, maxR, ringSpacing);
+        const radius = calculateRadius(startM, maxR, ringSpacing, invertOrder);
         
         // Find current point index
         const normalizedAngle = (animationAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
@@ -9774,6 +10022,7 @@ function initRingZoomPan() {
         const delta = e.deltaY > 0 ? -0.15 : 0.15;
         ringView.zoom = Math.max(0.5, Math.min(10, ringView.zoom + delta));
         updateRingTransform();
+        scheduleRingAutoZoomSnapBack();
     }, { passive: false });
     
     // Pan with mouse drag
@@ -9795,6 +10044,7 @@ function initRingZoomPan() {
             ringView.lastX = e.clientX;
             ringView.lastY = e.clientY;
             updateRingTransform();
+            scheduleRingAutoZoomSnapBack();
         }
     });
     
@@ -9825,6 +10075,7 @@ function initRingZoomPan() {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
             updateRingTransform();
+            scheduleRingAutoZoomSnapBack();
         }
     }, { passive: true });
     
@@ -9842,6 +10093,7 @@ function initRingZoomPan() {
         
         const maxR = Math.min(canvas.width, canvas.height) / 2 - 35;
         const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+        const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
         let closestPoint = null, minDist = 15;
         
         const currentSector = +document.getElementById('viewSector').value;
@@ -9850,7 +10102,7 @@ function initRingZoomPan() {
         
         residues.forEach(res => {
             const angle = (res.r / res.m) * 2 * Math.PI;
-            const radius = calculateRadius(res.m, maxR, ringSpacing);
+            const radius = calculateRadius(res.m, maxR, ringSpacing, invertOrder);
             const px = cx + radius * Math.cos(angle), py = cy - radius * Math.sin(angle);
             const dist = Math.sqrt((adjustedX - px)**2 + (adjustedY - py)**2);
             if (dist < minDist) { minDist = dist; closestPoint = res; }
@@ -10149,6 +10401,7 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
     const useArcs = document.getElementById('useArcConnections')?.checked;
     const opacity = parseFloat(document.getElementById('connectionOpacity')?.value || 0.3);
     const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
     const thickness = parseFloat(document.getElementById('connectionThickness')?.value || 1);
     const color = document.getElementById('connectionColor')?.value || '#8b5cf6';
     
@@ -10168,7 +10421,7 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
             points.forEach(p => {
                 let current = p.r;
                 const startAngle = 2 * Math.PI * p.r / p.m;
-                const radius = calculateRadius(p.m, maxR, ringSpacing);
+                const radius = calculateRadius(p.m, maxR, ringSpacing, invertOrder);
                 
                 for (let i = 0; i < 8; i++) {
                     const next = (current * 2) % p.m;
@@ -10212,8 +10465,8 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                 const p1 = points[i], p2 = points[i+1];
                 const angle1 = 2 * Math.PI * p1.r / p1.m;
                 const angle2 = 2 * Math.PI * p2.r / p2.m;
-                const r1 = calculateRadius(p1.m, maxR, ringSpacing);
-                const r2 = calculateRadius(p2.m, maxR, ringSpacing);
+                const r1 = calculateRadius(p1.m, maxR, ringSpacing, invertOrder);
+                const r2 = calculateRadius(p2.m, maxR, ringSpacing, invertOrder);
                 
                 ctx.beginPath();
                 ctx.moveTo(cx + r1 * Math.cos(angle1), cy - r1 * Math.sin(angle1));
@@ -10233,8 +10486,8 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                     const p1 = primes[i], p2 = primes[j];
                     const angle1 = 2 * Math.PI * p1.r / p1.m;
                     const angle2 = 2 * Math.PI * p2.r / p2.m;
-                    const r1 = calculateRadius(p1.m, maxR, ringSpacing);
-                    const r2 = calculateRadius(p2.m, maxR, ringSpacing);
+                    const r1 = calculateRadius(p1.m, maxR, ringSpacing, invertOrder);
+                    const r2 = calculateRadius(p2.m, maxR, ringSpacing, invertOrder);
                     
                     ctx.beginPath();
                     ctx.moveTo(cx + r1 * Math.cos(angle1), cy - r1 * Math.sin(angle1));
@@ -10252,8 +10505,8 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                 if (Math.abs(p1.r * p2.m - p2.r * p1.m) === 1) {
                     const angle1 = 2 * Math.PI * p1.r / p1.m;
                     const angle2 = 2 * Math.PI * p2.r / p2.m;
-                    const r1 = calculateRadius(p1.m, maxR, ringSpacing);
-                    const r2 = calculateRadius(p2.m, maxR, ringSpacing);
+                    const r1 = calculateRadius(p1.m, maxR, ringSpacing, invertOrder);
+                    const r2 = calculateRadius(p2.m, maxR, ringSpacing, invertOrder);
                     
                     ctx.beginPath();
                     ctx.moveTo(cx + r1 * Math.cos(angle1), cy - r1 * Math.sin(angle1));
@@ -10292,8 +10545,8 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                         
                         // Only connect if angles are close (within 0.1 radians)
                         if (Math.abs(angle1 - angle2) < 0.1) {
-                            const r1 = calculateRadius(m1, maxR, ringSpacing);
-                            const r2 = calculateRadius(m2, maxR, ringSpacing);
+                            const r1 = calculateRadius(m1, maxR, ringSpacing, invertOrder);
+                            const r2 = calculateRadius(m2, maxR, ringSpacing, invertOrder);
                             
                             ctx.beginPath();
                             ctx.moveTo(cx + r1 * Math.cos(angle1), cy - r1 * Math.sin(angle1));
@@ -10329,8 +10582,8 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                 
                 const angle1 = 2 * Math.PI * p1.r / p1.m;
                 const angle2 = 2 * Math.PI * p2.r / p2.m;
-                const r1 = calculateRadius(p1.m, maxR, ringSpacing);
-                const r2 = calculateRadius(p2.m, maxR, ringSpacing);
+                const r1 = calculateRadius(p1.m, maxR, ringSpacing, invertOrder);
+                const r2 = calculateRadius(p2.m, maxR, ringSpacing, invertOrder);
                 
                 if (useArcs) {
                     // Arc connection
@@ -10385,7 +10638,7 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                     if (p2) {
                         const angle1 = 2 * Math.PI * p1.r / p1.m;
                         const angle2 = 2 * Math.PI * p2.r / p2.m;
-                        const radius = calculateRadius(p1.m, maxR, ringSpacing);
+                        const radius = calculateRadius(p1.m, maxR, ringSpacing, invertOrder);
                         
                         if (useArcs) {
                             // Arc along the ring
@@ -10429,7 +10682,7 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
                     if (p2) {
                         const angle1 = 2 * Math.PI * p1.r / p1.m;
                         const angle2 = 2 * Math.PI * p2.r / p2.m;
-                        const radius = calculateRadius(p1.m, maxR, ringSpacing);
+                        const radius = calculateRadius(p1.m, maxR, ringSpacing, invertOrder);
                         
                         if (useArcs) {
                             // Arc along the ring
@@ -10602,8 +10855,11 @@ function drawMainRing() {
     const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
     const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, maxR=Math.min(W,H)/2-35;
     const sector = +document.getElementById('viewSector').value;
+    if (typeof updateViewSectorRangeLabel === 'function') updateViewSectorRangeLabel();
     const colorMode = document.getElementById('colorMode').value;
     const showAll = document.getElementById('showAllSectors').checked;
+    const _soloBox = document.getElementById('viewSectorSoloMode');
+    if (_soloBox) _soloBox.checked = !showAll;
     const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
     
     // Label settings
@@ -10864,6 +11120,11 @@ function drawMainRing() {
     
     // Draw points
     const labeledPoints = [];
+    const _dimBox = (typeof playbackState !== 'undefined' && (playbackState.mode === 'sector' || playbackState.mode === 'tracked'))
+        ? document.getElementById('sectorZoomDim')
+        : document.getElementById('ringDimOthers');
+    const ringFollowOn = (_dimBox?.checked ?? false) && !!ringFollowCurrent;
+    const ringFollowTrailSet = ringFollowOn ? new Set(ringPlaybackTrail.map(t => t.r + '/' + t.m)) : null;
     residues.forEach(res => {
         if (res.isCusp) return;  // cusps drawn separately as the mod-1 marker
         const {r,m,sector:s,isPrime:ip} = res;
@@ -10953,6 +11214,21 @@ function drawMainRing() {
             }
         }
         
+        // Follow & Zoom playback: dim everything except the point currently
+        // in focus and the already-played trail, so the path stands out.
+        if (ringFollowOn) {
+            const isCurrent = r === ringFollowCurrent.r && m === ringFollowCurrent.m;
+            const isTrail = ringFollowTrailSet.has(r + '/' + m);
+            if (isCurrent) {
+                alpha = 1;
+                size = finalPointSize * 2.5;
+            } else if (isTrail) {
+                alpha = Math.max(alpha, 0.6);
+            } else {
+                alpha = 0.06;
+            }
+        }
+        
         ctx.globalAlpha = alpha;
         ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,2*Math.PI); ctx.fill();
         ctx.globalAlpha = 1;
@@ -11026,6 +11302,49 @@ function drawMainRing() {
         trackerPoints.forEach((p,i) => i === 0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
         ctx.stroke(); 
         ctx.globalAlpha = 1;
+    }
+    
+    // Draw ring playback trail: connects fractions in the order they were
+    // played (e.g. by the error chart's Play All / Play Selection), as a
+    // straight path, so the listener can see the path travelled.
+    if (ringPlaybackTrail.length > 1) {
+        const trailPts = ringPlaybackTrail
+            .map(t => state.ringPoints.find(p => p.r === t.r && p.m === t.m))
+            .filter(Boolean);
+        if (trailPts.length > 1) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(96,165,250,0.85)';
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(trailPts[0].x, trailPts[0].y);
+            for (let i = 1; i < trailPts.length; i++) ctx.lineTo(trailPts[i].x, trailPts[i].y);
+            ctx.stroke();
+            ctx.restore();
+            
+            // Mark the most recently played point (head of the trail)
+            const head = trailPts[trailPts.length - 1];
+            ctx.save();
+            ctx.fillStyle = '#60a5fa';
+            ctx.beginPath();
+            ctx.arc(head.x, head.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+    
+    // Draw prime-residue-tracker highlight (independent of the tracker above,
+    // so a residue class and the ring's own tracked residues can be lit at
+    // the same time in different colours). Wrapped: a throw here used to take
+    // the rest of drawMainRing down with it, which looked like "nothing
+    // happens" rather than an error.
+    try {
+        if (typeof drawTrackedPlaySetOverlay === 'function') drawTrackedPlaySetOverlay(ctx);
+        if (typeof drawPrimeResidueHighlight === 'function') drawPrimeResidueHighlight(ctx);
+    } catch (err) {
+        console.error('Prime residue highlight failed:', err);
+        if (typeof setPrimeResidueStatus === 'function') setPrimeResidueStatus('Highlight error: ' + err.message);
     }
     
     // Draw tracker highlights
@@ -12528,11 +12847,100 @@ function resizeRingCanvas() {
     drawMainRing();
 }
 
+// Renders the ring exactly as it appears on screen: crops to the current
+// zoom/pan window and burns the four corner readouts into the bitmap, since
+// those are HTML overlays that toDataURL() can never see.
+//   useZoom   – false exports the whole ring regardless of the camera
+//   withLabels– false exports the bare plot
+function renderRingViewToCanvas(opts) {
+    opts = opts || {};
+    const useZoom = opts.useZoom !== false;
+    const withLabels = opts.withLabels !== false;
+    const src = document.getElementById('mainRing');
+    if (!src) return null;
+    
+    // CSS transform is scale(zoom) translate(panX,panY) about the centre, so
+    // a point u CSS-px from centre lands at (u + pan)·zoom on screen. Solving
+    // for the visible window and converting CSS px → drawing-buffer px gives
+    // a crop of width/zoom centred on the panned point.
+    const zoom = useZoom ? Math.max(0.05, ringView.zoom || 1) : 1;
+    const panX = useZoom ? (ringView.panX || 0) : 0;
+    const panY = useZoom ? (ringView.panY || 0) : 0;
+    const cssW = src.offsetWidth || src.width;
+    const cssH = src.offsetHeight || src.height;
+    const bufPerCssX = src.width / cssW;
+    const bufPerCssY = src.height / cssH;
+    
+    const sw = src.width / zoom;
+    const sh = src.height / zoom;
+    const sx = src.width / 2 - panX * bufPerCssX - sw / 2;
+    const sy = src.height / 2 - panY * bufPerCssY - sh / 2;
+    
+    // Export at the crop's native resolution — no upscaling, no blur.
+    const outW = Math.max(1, Math.round(sw));
+    const outH = Math.max(1, Math.round(sh));
+    
+    const out = document.createElement('canvas');
+    out.width = outW;
+    out.height = outH;
+    const ctx = out.getContext('2d');
+    
+    ctx.fillStyle = document.getElementById('ringBgColor')?.value || '#0f172a';
+    ctx.fillRect(0, 0, outW, outH);
+    ctx.drawImage(src, sx, sy, sw, sh, 0, 0, outW, outH);
+    
+    if (withLabels) drawCornerLabelsOnExport(ctx, outW, outH);
+    return out;
+}
+
+// The four overlay readouts: Hz (top-left), Sector (top-right),
+// fraction (bottom-left), decimal (bottom-right).
+function drawCornerLabelsOnExport(ctx, w, h) {
+    const items = [
+        { id: 'ringHzDisplay',       color: '#f59e0b', hAlign: 'left',  vAlign: 'top' },
+        { id: 'ringSectorDisplay',   color: '#8b5cf6', hAlign: 'right', vAlign: 'top' },
+        { id: 'ringFractionDisplay', color: '#22c55e', hAlign: 'left',  vAlign: 'bottom' },
+        { id: 'ringDecimalDisplay',  color: '#3b82f6', hAlign: 'right', vAlign: 'bottom' }
+    ];
+    
+    // Scale the type to the export so labels read the same at any crop size.
+    const fontPx = Math.max(14, Math.round(Math.min(w, h) * 0.042));
+    const pad = Math.round(fontPx * 0.7);
+    
+    ctx.save();
+    ctx.font = `bold ${fontPx}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    ctx.shadowColor = 'rgba(0,0,0,0.85)';
+    ctx.shadowBlur = Math.max(3, fontPx * 0.25);
+    ctx.shadowOffsetX = Math.max(1, fontPx * 0.08);
+    ctx.shadowOffsetY = Math.max(1, fontPx * 0.08);
+    
+    items.forEach(it => {
+        const el = document.getElementById(it.id);
+        if (!el) return;
+        const visible = el.style.display !== 'none' && (el.textContent || '').trim() !== '';
+        if (!visible) return;
+        
+        ctx.fillStyle = it.color;
+        ctx.textAlign = it.hAlign;
+        ctx.textBaseline = it.vAlign === 'top' ? 'top' : 'alphabetic';
+        const x = it.hAlign === 'left' ? pad : w - pad;
+        const y = it.vAlign === 'top' ? pad : h - pad;
+        ctx.fillText(el.textContent, x, y);
+    });
+    ctx.restore();
+}
+
 function exportRingHiRes() {
-    const canvas = document.getElementById('mainRing');
+    const src = document.getElementById('mainRing');
+    if (!src) return;
+    const full = document.getElementById('exportFullRing')?.checked || false;
+    const labels = document.getElementById('exportWithLabels')?.checked ?? true;
+    const out = renderRingViewToCanvas({ useZoom: !full, withLabels: labels }) || src;
+    
     const link = document.createElement('a');
-    link.download = `farey_sector_ring_${canvas.width}x${canvas.height}_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
+    const tag = full ? 'full' : `view${(ringView.zoom || 1).toFixed(2)}x`;
+    link.download = `farey_sector_ring_${out.width}x${out.height}_${tag}_${Date.now()}.png`;
+    link.href = out.toDataURL('image/png');
     link.click();
 }
 
@@ -12628,6 +13036,9 @@ document.getElementById('mainRing').addEventListener('click', function(e) {
         highlightedRingPoint = closest;
         drawMainRing(); // Redraw to show highlight
         
+        // Fill the corner readouts so a click-then-export carries the labels
+        if (typeof setRingCornerLabels === 'function') setRingCornerLabels(closest.r, closest.m, closest.sector);
+        
         // Show info modal
         openPointModal(closest);
         
@@ -12681,7 +13092,14 @@ function openPointModal(p) {
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
             ${invCard}
         </div>
-        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
+        <div class="theorem-box">
+            <strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button onclick="toggleCFDetail(${p.r},${p.m})" id="cfDetailBtn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);padding:5px 12px;font-size:11px;">Expand CF</button>
+                <button onclick="copyCFDetail(${p.r},${p.m})" class="secondary" style="padding:5px 12px;font-size:11px;">Copy</button>
+            </div>
+            <div id="cfDetailBox" style="display:none;margin-top:10px;max-height:320px;overflow-y:auto;"></div>
+        </div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
             <button onclick="closePointModal();playFraction(${p.r},${p.m},1.0)" style="background:linear-gradient(135deg,#22c55e,#16a34a);">&#9654; Play</button>
             <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">&#9654; Path</button>
@@ -12695,10 +13113,100 @@ function openPointModal(p) {
 }
 function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
 
+// ── Full continued-fraction breakdown for the clicked point ───────────────
+// Nested form, convergent path (successive rational approximations), the
+// Euclidean division trace, and the Stern–Brocot mediant descent.
+function buildCFDetailHTML(r, m) {
+    const cf = toCF(r, m);
+    const conv = cfConvergents(cf);
+    const euc = cfEuclidSteps(r, m);
+    const sb = sternBrocotWalk(r, m);
+    const target = r / m;
+    
+    let h = '';
+    
+    h += `<div style="color:#7dd3fc;font-size:11px;font-weight:600;margin:4px 0 4px;">Nested form</div>`;
+    h += `<div style="font-family:monospace;font-size:11px;color:#e2e8f0;word-break:break-all;background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;">${r}/${m} = ${cfNested(cf)}</div>`;
+    
+    h += `<div style="color:#7dd3fc;font-size:11px;font-weight:600;margin:10px 0 4px;">Convergents &mdash; the fraction path</div>`;
+    h += `<div style="font-family:monospace;font-size:11px;color:#e2e8f0;word-break:break-all;background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;">`;
+    h += conv.map(c => `${c.p}/${c.q}`).join(' &rarr; ');
+    h += `</div>`;
+    h += `<table style="width:100%;border-collapse:collapse;font-family:monospace;font-size:10px;margin-top:6px;">`;
+    h += `<tr style="color:#94a3b8;"><th style="text-align:left;padding:3px 6px;">k</th><th style="text-align:left;padding:3px 6px;">a<sub>k</sub></th><th style="text-align:left;padding:3px 6px;">p<sub>k</sub>/q<sub>k</sub></th><th style="text-align:left;padding:3px 6px;">value</th><th style="text-align:left;padding:3px 6px;">error</th></tr>`;
+    conv.forEach(c => {
+        const err = c.val - target;
+        const last = c.i === conv.length - 1;
+        h += `<tr style="color:${last ? '#22c55e' : '#cbd5e1'};border-top:1px solid rgba(148,163,184,0.15);">` +
+             `<td style="padding:3px 6px;">${c.i}</td>` +
+             `<td style="padding:3px 6px;">${c.a}</td>` +
+             `<td style="padding:3px 6px;font-weight:${last ? 'bold' : 'normal'};">${c.p}/${c.q}</td>` +
+             `<td style="padding:3px 6px;">${c.val.toFixed(8)}</td>` +
+             `<td style="padding:3px 6px;color:#94a3b8;">${last ? '0' : (err >= 0 ? '+' : '') + err.toExponential(2)}</td></tr>`;
+    });
+    h += `</table>`;
+    
+    h += `<div style="color:#7dd3fc;font-size:11px;font-weight:600;margin:10px 0 4px;">Euclidean reduction</div>`;
+    h += `<div style="font-family:monospace;font-size:11px;color:#e2e8f0;background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;line-height:1.6;">`;
+    h += euc.map(s => `${s.a} = ${s.q}&middot;${s.b} + ${s.rem}`).join('<br>');
+    h += `</div>`;
+    
+    h += `<div style="color:#7dd3fc;font-size:11px;font-weight:600;margin:10px 0 4px;">Stern&ndash;Brocot descent (${sb.length - 1} steps)</div>`;
+    h += `<div style="font-family:monospace;font-size:11px;color:#e2e8f0;background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;word-break:break-all;line-height:1.7;">`;
+    h += sb.map((s, i) => {
+        const last = i === sb.length - 1;
+        const col = last ? '#22c55e' : (s.dir === 'L' ? '#a78bfa' : '#fbbf24');
+        return `<span style="color:${col};">${s.dir === '·' ? '' : s.dir + ' '}${s.n}/${s.d}</span>`;
+    }).join(' <span style="color:#475569;">&rarr;</span> ');
+    h += `</div>`;
+    
+    return h;
+}
+
+function toggleCFDetail(r, m) {
+    const box = document.getElementById('cfDetailBox');
+    const btn = document.getElementById('cfDetailBtn');
+    if (!box) return;
+    const hidden = box.style.display === 'none';
+    if (hidden && !box.dataset.built) {
+        box.innerHTML = buildCFDetailHTML(r, m);
+        box.dataset.built = '1';
+    }
+    box.style.display = hidden ? 'block' : 'none';
+    if (btn) btn.textContent = hidden ? 'Collapse CF' : 'Expand CF';
+}
+
+function copyCFDetail(r, m) {
+    const cf = toCF(r, m);
+    const conv = cfConvergents(cf);
+    const euc = cfEuclidSteps(r, m);
+    const sb = sternBrocotWalk(r, m);
+    const txt = [
+        `${r}/${m} = ${(r/m).toFixed(10)}`,
+        `CF: [${cf.join('; ')}]`,
+        `Nested: ${cfNested(cf)}`,
+        `Convergents: ${conv.map(c => c.p + '/' + c.q).join(' -> ')}`,
+        `Euclid:`,
+        ...euc.map(s => `  ${s.a} = ${s.q}*${s.b} + ${s.rem}`),
+        `Stern-Brocot: ${sb.map(s => (s.dir === '·' ? '' : s.dir) + s.n + '/' + s.d).join(' -> ')}`,
+        `Path word: ${cfPath(cf)}`
+    ].join('\n');
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(
+            () => { if (typeof showPlaybackStatus === 'function') showPlaybackStatus('Continued fraction copied'); },
+            () => {}
+        );
+    }
+}
+
 // View point on all sectors with its sector highlighted
 function viewPointOnAll(r, m, sector) {
     document.getElementById('showAllSectors').checked = true;
     state.highlightSectorOnly = sector;
+    
+    // Move the sector selector to this point's sector so "Play Sector",
+    // "View Details" and the C(n) panel all act on the sector you clicked.
+    if (sector && sector > 0) setViewSectorValue(sector, false);
     
     // Don't change user's ring point size — tracker size will highlight the selected point
     
@@ -12846,11 +13354,18 @@ function trackPrimeResidues() {
         }
     }
     
+    // Declared out here on purpose: it is read again below when caching the
+    // result. Declaring it inside the else block made that read throw a
+    // ReferenceError, which aborted the function right after the results HTML
+    // was written — so the class list rendered, but the class dropdown was
+    // never populated and the cached result stayed null, breaking every
+    // highlight path.
+    let residueGroups = {};
+    
     if (primesInRange.length === 0) {
         html += `<div style="color:#fbbf24;padding:10px;background:rgba(251,191,36,0.1);border-radius:4px;">No primes found in range ${start}-${end}</div>`;
     } else {
         // Group by residue class
-        const residueGroups = {};
         for (let i = 0; i < p; i++) {
             residueGroups[i] = [];
         }
@@ -12865,16 +13380,19 @@ function trackPrimeResidues() {
         html += `<strong style="color:#22c55e;">Found ${primesInRange.length} prime(s)</strong>`;
         html += `</div>`;
         
-        // Show distribution by residue class
-        html += `<div style="font-weight:bold;color:#fda4af;margin:12px 0 8px;">Distribution by Residue Class:</div>`;
+        // Show distribution by residue class — each row is clickable and
+        // lights that class up on the ring canvas.
+        html += `<div style="font-weight:bold;color:#fda4af;margin:12px 0 4px;">Distribution by Residue Class:</div>`;
+        html += `<div style="color:#94a3b8;font-size:10px;margin-bottom:8px;">Tap a class to highlight it on the ring &mdash; the class itself in one colour, its primes in another. Tap again to clear.</div>`;
         
         for (let r = 0; r < p; r++) {
             if (residueGroups[r].length > 0) {
                 const color = r === 0 ? '#ef4444' : '#06b6d4';
                 const bgColor = r === 0 ? 'rgba(239,68,68,0.1)' : 'rgba(6,182,212,0.1)';
-                html += `<div style="padding:8px 12px;margin:6px 0;background:${bgColor};border-left:3px solid ${color};border-radius:4px;">`;
-                html += `<div style="margin-bottom:4px;"><strong style="color:${color};font-size:13px;">Residue ${r} (mod ${p})</strong> `;
-                html += `<span style="color:#94a3b8;font-size:11px;">(${residueGroups[r].length} prime${residueGroups[r].length > 1 ? 's' : ''})</span></div>`;
+                html += `<div id="prClassRow-${r}" class="pr-class-row" data-cls="${r}" role="button" tabindex="0" style="padding:12px 12px;margin:6px 0;background:${bgColor};border-left:3px solid ${color};border-radius:4px;cursor:pointer;transition:background 0.15s;-webkit-tap-highlight-color:rgba(244,63,94,0.35);">`;
+                html += `<div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><strong style="color:${color};font-size:13px;">Residue ${r} (mod ${p})</strong> `;
+                html += `<span style="color:#94a3b8;font-size:11px;">(${residueGroups[r].length} prime${residueGroups[r].length > 1 ? 's' : ''})</span>`;
+                html += `<span class="pr-row-tag" style="margin-left:auto;font-size:10px;color:#64748b;">tap to highlight</span></div>`;
                 
                 // Show primes in this residue class
                 const primesStr = residueGroups[r].map(pr => {
@@ -12907,6 +13425,421 @@ function trackPrimeResidues() {
     document.getElementById('residueTrackerPreview').textContent = `${primesInRange.length} primes (mod ${p})`;
     
     resultsDiv.innerHTML = html;
+    
+    // Cache results for the "Highlight on Canvas" button, and populate the
+    // residue-class filter dropdown to match this modulus.
+    lastPrimeResidueTrackerResult = { p, start, end, primesInRange, residueGroups: primesInRange.length ? residueGroups : {} };
+    const classSelect = document.getElementById('primeResidueClassFilter');
+    if (classSelect) {
+        const prevValue = classSelect.value;
+        classSelect.innerHTML = '<option value="all">All classes</option>' +
+            Array.from({length: p}, (_, r) => `<option value="${r}">Residue ${r} (mod ${p})</option>`).join('');
+        classSelect.value = (prevValue === 'all' || parseInt(prevValue) < p) ? prevValue : 'all';
+    }
+    
+    // A highlight from a different modulus is meaningless here — drop it.
+    if (primeResidueHighlight && primeResidueHighlight.p !== p) {
+        primeResidueHighlight = null;
+        setPrimeResidueStatus('');
+        if (typeof drawMainRing === 'function') drawMainRing();
+    }
+    markActivePrimeResidueRow();
+}
+
+var lastPrimeResidueTrackerResult = null;
+
+// Independent highlight layer for the prime residue tracker. It is drawn by
+// drawMainRing() alongside — not instead of — the ring's own Residue Tracker,
+// so the two can be on at once in different colours.
+//   cls   : the residue class a (points with r ≡ a mod p)
+//   primes: the primes of that class (points with r equal to one of them)
+// Declared with var, not let: drawMainRing() is defined far above this point
+// and reads this on every redraw. A let here sits in the temporal dead zone
+// until this line runs, so any redraw during script evaluation would throw
+// and silently abort the rest of the draw.
+var primeResidueHighlight = null; // { p, cls, primes:Set, label }
+
+// Make sure the tracker result matches the current inputs, recomputing if not.
+function ensurePrimeResidueResult() {
+    const p = parseInt(document.getElementById('residuePrime').value);
+    const start = parseInt(document.getElementById('residueStart').value);
+    const end = parseInt(document.getElementById('residueEnd').value);
+    if (!lastPrimeResidueTrackerResult || lastPrimeResidueTrackerResult.p !== p ||
+        lastPrimeResidueTrackerResult.start !== start || lastPrimeResidueTrackerResult.end !== end) {
+        trackPrimeResidues();
+    }
+    return lastPrimeResidueTrackerResult;
+}
+
+function setPrimeResidueHighlight(cls, scroll) {
+    const res = ensurePrimeResidueResult();
+    if (!res || res.primesInRange.length === 0) {
+        setPrimeResidueStatus('No primes in this range yet — widen Start/End.');
+        return;
+    }
+    const { p, primesInRange, residueGroups } = res;
+    const isAll = (cls === 'all' || cls === null || cls === undefined);
+    const primes = isAll ? primesInRange : (residueGroups[parseInt(cls)] || []);
+    
+    primeResidueHighlight = {
+        p,
+        cls: isAll ? 'all' : parseInt(cls),
+        primes: new Set(primes),
+        label: isAll ? `all classes (mod ${p})` : `r ≡ ${cls} (mod ${p})`
+    };
+    
+    const sel = document.getElementById('primeResidueClassFilter');
+    if (sel) sel.value = isAll ? 'all' : String(cls);
+    
+    // Acknowledge the tap immediately, then let the browser paint before the
+    // ring redraw — on a big lattice the redraw takes long enough that doing
+    // it synchronously makes the tap feel like it never registered.
+    markActivePrimeResidueRow();
+    setPrimeResidueStatus(`Drawing ${primeResidueHighlight.label} …`);
+    if (scroll !== false) scrollRingIntoView();
+    
+    requestAnimationFrame(() => {
+        drawMainRing();
+        updatePrimeResidueStatusFromCounts(primes.length);
+        if (typeof updateTrackedPlayCount === 'function') updateTrackedPlayCount();
+    });
+}
+
+// Delegated so the rows keep working no matter how many times the results
+// panel is re-rendered, and so a stray inline-handler scope problem can't
+// break it. Bound once, on document.
+document.addEventListener('click', function (e) {
+    const row = e.target && e.target.closest ? e.target.closest('.pr-class-row') : null;
+    if (!row || !row.dataset || row.dataset.cls === undefined) return;
+    e.preventDefault();
+    togglePrimeResidueClass(parseInt(row.dataset.cls));
+});
+
+function scrollRingIntoView() {
+    const el = document.getElementById('ringContainer') || document.getElementById('mainRing');
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── Play the tracked set ──────────────────────────────────────────────────
+// Builds a queue from the same residue records the ring draws, then hands it
+// to the existing playback loop so speed, Play Range and the zoom/dim camera
+// all behave exactly as they do for Play Sector.
+
+// Predicate for each "Play set" option. The residue records already carry
+// isPrimeNum (numerator) and isPrime (denominator), and every record is
+// coprime by construction, so these are simple field tests.
+function trackedSetPredicate(mode) {
+    const h = primeResidueHighlight;
+    const matchOn = document.getElementById('prMatchOn')?.value || 'r';
+    const valOf = res => matchOn === 'm' ? [res.m] : matchOn === 'either' ? [res.r, res.m] : [res.r];
+    const inClass = res => !h ? false : (h.cls === 'all' || valOf(res).some(v => ((v % h.p) + h.p) % h.p === h.cls));
+    const isSelPrime = res => !h ? false : valOf(res).some(v => h.primes.has(v));
+    
+    switch (mode) {
+        case 'highlight':      return res => inClass(res) || isSelPrime(res);
+        case 'highlightPrimes':return res => isSelPrime(res) && inClass(res);
+        case 'highlightClass': return res => inClass(res) && !isSelPrime(res);
+        case 'primeNum':       return res => !!res.isPrimeNum;
+        case 'primeDen':       return res => !!res.isPrime;
+        case 'bothPrime':      return res => !!res.isPrimeNum && !!res.isPrime;
+        case 'neitherPrime':   return res => !res.isPrimeNum && !res.isPrime;
+        case 'tracker': {
+            const list = parseTrackerResidues(document.getElementById('trackResidues')?.value || '');
+            const set = new Set(list);
+            return res => set.has(res.r);
+        }
+        case 'coprime':
+        default:               return () => true;
+    }
+}
+
+function trackedSetNeedsHighlight(mode) {
+    return mode === 'highlight' || mode === 'highlightPrimes' || mode === 'highlightClass';
+}
+
+function buildTrackedPlayList() {
+    const mode = document.getElementById('trackPlaySet')?.value || 'highlight';
+    const scope = document.getElementById('trackPlayScope')?.value || 'sector';
+    
+    if (trackedSetNeedsHighlight(mode) && !primeResidueHighlight) {
+        return { list: [], mode, err: 'Pick a residue class first (tap one in the list below).' };
+    }
+    
+    const sector = +(document.getElementById('viewSector')?.value || 1);
+    const src = scope === 'all'
+        ? Object.values(state.residuesBySector).flat()
+        : (state.residuesBySector[sector] || []);
+    
+    const pred = trackedSetPredicate(mode);
+    const list = src.filter(pred).sort((a, b) => (a.r / a.m) - (b.r / b.m));
+    return { list, mode, scope, sector };
+}
+
+// Reuses the Play Range dropdown so First N / Last N / Custom Range work here
+// too rather than needing a second set of controls.
+function applyPlayRangeSlice(sorted) {
+    const rangeMode = document.getElementById('sectorRangeMode')?.value || 'all';
+    if (rangeMode === 'first') {
+        const n = parseInt(document.getElementById('sectorRangeN')?.value || 100);
+        return sorted.slice(0, Math.min(n, sorted.length));
+    }
+    if (rangeMode === 'last') {
+        const n = parseInt(document.getElementById('sectorRangeN')?.value || 100);
+        return sorted.slice(-Math.min(n, sorted.length));
+    }
+    if (rangeMode === 'range') {
+        const start = Math.max(1, parseInt(document.getElementById('sectorRangeStart')?.value || 1)) - 1;
+        const end = parseInt(document.getElementById('sectorRangeEnd')?.value || sorted.length);
+        return sorted.slice(start, Math.min(end, sorted.length));
+    }
+    return sorted;
+}
+
+function updateTrackedPlayCount() {
+    const el = document.getElementById('trackPlayCount');
+    if (!el) return;
+    const { list, err } = buildTrackedPlayList();
+    if (err) { el.textContent = err; return; }
+    const sliced = applyPlayRangeSlice(list);
+    el.textContent = sliced.length === list.length
+        ? `${list.length.toLocaleString()} fractions`
+        : `${sliced.length.toLocaleString()} of ${list.length.toLocaleString()} fractions`;
+}
+
+function playTrackedFractions(direction) {
+    const { list, mode, scope, err } = buildTrackedPlayList();
+    if (err) { setPrimeResidueStatus(err); showPlaybackStatus(err); return; }
+    if (!list.length) {
+        const msg = 'Nothing in that set — try All sectors, or a different Play set.';
+        setPrimeResidueStatus(msg); showPlaybackStatus(msg);
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    let playList = applyPlayRangeSlice(list);
+    const cnFiltered = cnAudioSurvivorFilter(playList, 'Tracked set');
+    if (cnFiltered === null) return;
+    playList = cnFiltered;
+    if (!playList.length) { showPlaybackStatus('All points in that set were filtered out by the C(n) lock'); return; }
+    
+    if (direction === 'backward') playList = [...playList].reverse();
+    
+    playbackState.queue = playList;
+    playbackState.direction = direction;
+    playbackState.mode = 'tracked';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    playbackState.sectorNum = +(document.getElementById('viewSector')?.value || 1);
+    
+    // Camera setup mirrors Play Sector: same Zoom control, same trail reset.
+    const zoomMode = document.getElementById('sectorZoomMode')?.value || 'off';
+    ringPlaybackTrail = [];
+    ringFollowStep = 0;
+    ringFollowCurrent = null;
+    ringFollowTotalSteps = playList.length;
+    if (zoomMode === 'fit' || zoomMode === 'fitfollow') {
+        drawMainRing();
+        fitCameraToSector(playbackState.sectorNum);
+    } else if (zoomMode === 'off') {
+        resetRingZoom();
+    }
+    
+    // Optionally light the set up on the ring for the duration of the run.
+    if (document.getElementById('trackPlayHighlight')?.checked) {
+        trackedPlaySetOverlay = { keys: new Set(playList.map(f => f.r + '/' + f.m)) };
+        drawMainRing();
+    } else {
+        trackedPlaySetOverlay = null;
+    }
+    
+    const label = document.getElementById('trackPlaySet')?.selectedOptions?.[0]?.textContent || mode;
+    showPlaybackStatus(`Playing ${label} ${direction === 'forward' ? '→' : '←'} (${playList.length.toLocaleString()} fractions, ${scope === 'all' ? 'all sectors' : 'sector ' + playbackState.sectorNum})`);
+    updateTrackedPlayCount();
+    scrollRingIntoView();
+    startPlaybackLoop();
+}
+
+// Set being played, drawn as a faint underlay so you can see the path the
+// audio is walking. Cleared by stopAllPlayback().
+var trackedPlaySetOverlay = null;
+
+function drawTrackedPlaySetOverlay(ctx) {
+    const o = trackedPlaySetOverlay;
+    if (!o || !state.ringPoints || !state.ringPoints.length) return;
+    const size = Math.max(1, parseFloat(document.getElementById('prHighlightSize')?.value || 6) * 0.55);
+    const path = new Path2D();
+    let n = 0;
+    const TAU = 2 * Math.PI;
+    state.ringPoints.forEach(pt => {
+        if (!o.keys.has(pt.r + '/' + pt.m)) return;
+        path.moveTo(pt.x + size, pt.y);
+        path.arc(pt.x, pt.y, size, 0, TAU);
+        n++;
+    });
+    if (!n) return;
+    ctx.save();
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = '#67e8f9';
+    ctx.fill(path);
+    ctx.restore();
+}
+
+function clearPrimeResidueHighlight() {
+    primeResidueHighlight = null;
+    trackedPlaySetOverlay = null;
+    markActivePrimeResidueRow();
+    setPrimeResidueStatus('');
+    if (typeof updateTrackedPlayCount === 'function') updateTrackedPlayCount();
+    drawMainRing();
+}
+
+// Clicking the same class twice turns it off.
+function togglePrimeResidueClass(cls) {
+    if (primeResidueHighlight && primeResidueHighlight.cls === cls) {
+        clearPrimeResidueHighlight();
+    } else {
+        setPrimeResidueHighlight(cls);
+    }
+}
+
+function highlightPrimeResiduesOnCanvas() {
+    const sel = document.getElementById('primeResidueClassFilter');
+    const cls = sel ? sel.value : 'all';
+    setPrimeResidueHighlight(cls === 'all' ? 'all' : parseInt(cls));
+}
+
+function setPrimeResidueStatus(msg) {
+    const el = document.getElementById('prHighlightStatus');
+    if (el) el.textContent = msg;
+}
+
+function updatePrimeResidueStatusFromCounts(primeCount) {
+    const h = primeResidueHighlight;
+    if (!h) { setPrimeResidueStatus(''); return; }
+    const clsPts = state.prHighlightCounts?.cls ?? 0;
+    const primePts = state.prHighlightCounts?.prime ?? 0;
+    const what = document.getElementById('prMatchOn')?.value === 'm' ? 'denominator m'
+               : document.getElementById('prMatchOn')?.value === 'either' ? 'r or m' : 'numerator r';
+    if (clsPts === 0 && primePts === 0) {
+        setPrimeResidueStatus(`${h.label}: nothing matched on the ring (matching ${what}) — try Match on: r or m, or raise N.`);
+        return;
+    }
+    setPrimeResidueStatus(`${h.label} · ${primeCount} primes in range · on ring: ${primePts.toLocaleString()} prime pts, ${clsPts.toLocaleString()} class pts (matching ${what})`);
+}
+
+// Highlight the row that is currently live.
+function markActivePrimeResidueRow() {
+    document.querySelectorAll('.pr-class-row').forEach(row => {
+        const isActive = primeResidueHighlight && String(primeResidueHighlight.cls) === row.dataset.cls;
+        row.style.outline = isActive ? '2px solid #f43f5e' : 'none';
+        row.style.boxShadow = isActive ? '0 0 10px rgba(244,63,94,0.5)' : 'none';
+        const tag = row.querySelector('.pr-row-tag');
+        if (tag) {
+            tag.textContent = isActive ? 'highlighted — tap to clear' : 'tap to highlight';
+            tag.style.color = isActive ? '#fda4af' : '#64748b';
+        }
+    });
+}
+
+// Called from drawMainRing() after the points are laid out.
+//
+// Batched deliberately: an earlier version issued one ctx.arc()+fill() per
+// point with shadowBlur set, which for a class like r ≡ 1 (mod 5) means
+// thousands of separate blurred composites — and for "All classes" it meant
+// blurring essentially every point on the ring. That locked the browser up
+// for long enough to look like the button did nothing. Both layers are now
+// accumulated into a single Path2D and filled once, so the glow costs one
+// composite instead of thousands.
+function drawPrimeResidueHighlight(ctx) {
+    const h = primeResidueHighlight;
+    if (!h || !state.ringPoints || !state.ringPoints.length) return;
+    
+    const classOn = (document.getElementById('prClassLayerOn')?.checked ?? true) && h.cls !== 'all';
+    const primeOn = document.getElementById('prPrimeLayerOn')?.checked ?? true;
+    const classColor = document.getElementById('prClassColor')?.value || '#38bdf8';
+    const primeColor = document.getElementById('prPrimeColor')?.value || '#f43f5e';
+    const size = Math.max(0.5, parseFloat(document.getElementById('prHighlightSize')?.value || 6));
+    const glow = document.getElementById('prHighlightGlow')?.checked ?? true;
+    const dimRest = document.getElementById('prHighlightDimRest')?.checked || false;
+    const matchOn = document.getElementById('prMatchOn')?.value || 'r';
+    
+    // Which part of the fraction the residue/prime test applies to.
+    const valOf = pt => matchOn === 'm' ? [pt.m] : matchOn === 'either' ? [pt.r, pt.m] : [pt.r];
+    const inClass = pt => h.cls === 'all' || valOf(pt).some(v => ((v % h.p) + h.p) % h.p === h.cls);
+    const isPrimePt = pt => valOf(pt).some(v => h.primes.has(v));
+    
+    const classPath = new Path2D();
+    const primePath = new Path2D();
+    let clsCount = 0, primeCount = 0;
+    const TAU = 2 * Math.PI;
+    
+    state.ringPoints.forEach(pt => {
+        const prime = isPrimePt(pt) && inClass(pt);
+        if (prime) {
+            if (primeOn) { primePath.moveTo(pt.x + size, pt.y); primePath.arc(pt.x, pt.y, size, 0, TAU); primeCount++; }
+            return;
+        }
+        if (classOn && inClass(pt)) {
+            const s = size * 0.7;
+            classPath.moveTo(pt.x + s, pt.y); classPath.arc(pt.x, pt.y, s, 0, TAU); clsCount++;
+        }
+    });
+    
+    ctx.save();
+    
+    // Optional wash over everything else so the class reads clearly.
+    if (dimRest) {
+        ctx.globalAlpha = 0.62;
+        ctx.fillStyle = document.getElementById('ringBgColor')?.value || '#0f172a';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.globalAlpha = 1;
+    }
+    
+    // Glow is one composite per layer, and is skipped entirely once a layer
+    // gets dense — a blur over tens of thousands of dots reads as mud anyway.
+    const GLOW_LIMIT = 4000;
+    
+    if (clsCount > 0) {
+        if (glow && clsCount <= GLOW_LIMIT) { ctx.shadowColor = classColor; ctx.shadowBlur = 10; }
+        ctx.fillStyle = classColor;
+        ctx.fill(classPath);
+        ctx.shadowBlur = 0;
+    }
+    if (primeCount > 0) {
+        if (glow && primeCount <= GLOW_LIMIT) { ctx.shadowColor = primeColor; ctx.shadowBlur = 14; }
+        ctx.fillStyle = primeColor;
+        ctx.fill(primePath);
+        ctx.shadowBlur = 0;
+    }
+    
+    ctx.restore();
+    
+    state.prHighlightCounts = { cls: clsCount, prime: primeCount };
+    
+    // On-canvas badge — unambiguous proof the highlight ran, and what it hit.
+    const bx = 18, by = 18;
+    const lines = [
+        h.cls === 'all' ? `Primes (mod ${h.p}) — all classes` : `Residue class ${h.cls} (mod ${h.p})`,
+        `${primeCount.toLocaleString()} prime pts` + (classOn ? ` · ${clsCount.toLocaleString()} class pts` : '')
+    ];
+    ctx.save();
+    ctx.font = 'bold 22px ui-monospace, Menlo, monospace';
+    const wBox = Math.max(...lines.map(t => ctx.measureText(t).width)) + 28;
+    ctx.globalAlpha = 0.82;
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(bx, by, wBox, 74);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = primeColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bx, by, wBox, 74);
+    ctx.fillStyle = classOn ? classColor : primeColor;
+    ctx.textBaseline = 'top';
+    ctx.fillText(lines[0], bx + 14, by + 12);
+    ctx.fillStyle = primeColor;
+    ctx.fillText(lines[1], bx + 14, by + 42);
+    ctx.restore();
 }
 
 
@@ -16878,7 +17811,7 @@ function playTwinPrimeGaps() {
     
     // Play as intervals (both notes of each pair together)
     let idx = 0;
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = +(document.getElementById('playbackSpeed')?.value || 25);
     
     playbackState.isPlaying = true;
     
@@ -18225,7 +19158,7 @@ function playHorizonByValue(direction) {
 
 // Special playback loop for horizon with highlighting
 function startHorizonPlaybackLoop() {
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = +(document.getElementById('playbackSpeed')?.value || 25);
     
     // Clear any previous highlights
     document.querySelectorAll('.horizon-frac-playing').forEach(el => {
@@ -20980,7 +21913,7 @@ function drawPrimorialComparison() {
     
     ctx.fillStyle = '#cbd5e1';
     ctx.font = 'bold 11px system-ui';
-    ctx.fillText('Primorial Comparison: φ(P_k)/P_k → 6/π²', margin.l + plotW / 2, 18);
+    ctx.fillText('Primorial Comparison: ∏(1−1/p²) → 6/π², φ(P_k)/P_k → 0', margin.l + plotW / 2, 18);
 }
 
 function updateSectorResidueTable() {
@@ -21287,6 +22220,21 @@ function playSectorAudio(sectorNum, direction = 'forward') {
     playbackState.isPlaying = true;
     playbackState.sectorNum = sectorNum;
     
+    // Camera setup for this run: clear the old trail, size the zoom ramp to
+    // the queue length, and frame the sector if "Fit" is selected.
+    const zoomMode = document.getElementById('sectorZoomMode')?.value || 'off';
+    ringPlaybackTrail = [];
+    ringFollowStep = 0;
+    ringFollowCurrent = null;
+    ringFollowTotalSteps = playList.length;
+    if (zoomMode === 'fit' || zoomMode === 'fitfollow') {
+        // ringPoints must reflect the current view before measuring the wedge.
+        drawMainRing();
+        fitCameraToSector(sectorNum);
+    } else if (zoomMode === 'off') {
+        resetRingZoom();
+    }
+    
     const rangeDesc = rangeMode === 'all' ? '' : ` [${rangeMode}: ${playList.length}]`;
     showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'} (${playList.length}/${sorted.length} fractions)${rangeDesc}`);
     startPlaybackLoop();
@@ -21438,8 +22386,38 @@ function playGapsAsIntervals(direction = 'forward') {
 }
 
 // Main playback loop
+// Keeps the ms number box, the 1–360 slider and the error panel's slider in
+// step. Sliders top out at 360ms; the number box still accepts up to 2000,
+// in which case the sliders just park at their maximum.
+function syncPlaybackSpeed(val, source) {
+    let v = parseInt(val);
+    if (!isFinite(v)) v = 25;
+    v = Math.max(1, Math.min(2000, v));
+    
+    const num = document.getElementById('playbackSpeed');
+    const slider = document.getElementById('playbackSpeedSlider');
+    const errSlider = document.getElementById('errorPlaySpeedSlider');
+    const label = document.getElementById('playbackSpeedLabel');
+    const errLabel = document.getElementById('errorPlaySpeedLabel');
+    
+    if (num && source !== 'number') num.value = v;
+    const sliderVal = Math.max(1, Math.min(360, v));
+    if (slider && source !== 'slider') slider.value = sliderVal;
+    if (errSlider && source !== 'errorSlider') errSlider.value = sliderVal;
+    if (label) label.textContent = v + ' ms';
+    if (errLabel) errLabel.textContent = v + 'ms';
+    
+    // If a playback is already running, restart its timer at the new rate so
+    // the slider takes effect immediately rather than on the next run.
+    if (typeof playbackState !== 'undefined' && playbackState.isPlaying && playbackState.intervalId && (playbackState.mode === 'sector' || playbackState.mode === 'tracked')) {
+        startPlaybackLoop();
+    }
+}
+
 function startPlaybackLoop() {
-    const speed = Math.max(100, +(document.getElementById('playbackSpeed')?.value || 250));
+    const speed = Math.max(1, +(document.getElementById('playbackSpeed')?.value || 25));
+    // Corner-label flash: keep the blink readable and cheap even at 1ms/note.
+    const flashMs = Math.max(40, speed / 12);
     
     // Clear any existing interval first
     if (playbackState.intervalId) {
@@ -21469,6 +22447,15 @@ function startPlaybackLoop() {
             updateSolverLive(f.r, f.m);
             pulseToolbar();
             
+            // Follow & zoom the ring during sector playback — same camera the
+            // error-chart playback uses, driven by the Zoom control.
+            if ((playbackState.mode === 'sector' || playbackState.mode === 'tracked') && typeof sectorPlaybackCameraStep === 'function') {
+                if (sectorPlaybackCameraStep(f.r, f.m)) {
+                    if (typeof scheduleRingAutoZoomSnapBack === 'function') scheduleRingAutoZoomSnapBack();
+                    drawMainRing();
+                }
+            }
+            
             // Display fraction on main ring canvas with flashing effect
             const ringFractionDisplay = document.getElementById('ringFractionDisplay');
             const ringDecimalDisplay = document.getElementById('ringDecimalDisplay');
@@ -21489,7 +22476,7 @@ function startPlaybackLoop() {
                     if (flashCount >= 6) {
                         clearInterval(flashInterval);
                     }
-                }, speed / 12);
+                }, flashMs);
             }
             
             // Display decimal representation on right side
@@ -21507,7 +22494,7 @@ function startPlaybackLoop() {
                     if (flashCount >= 6) {
                         clearInterval(flashInterval);
                     }
-                }, speed / 12);
+                }, flashMs);
             }
             
             // Display Hz (frequency)
@@ -21525,7 +22512,7 @@ function startPlaybackLoop() {
                     if (flashCount >= 6) {
                         clearInterval(flashInterval);
                     }
-                }, speed / 12);
+                }, flashMs);
             }
             
             // Display Sector
@@ -21550,7 +22537,7 @@ function startPlaybackLoop() {
                         if (flashCount >= 6) {
                             clearInterval(flashInterval);
                         }
-                    }, speed / 12);
+                    }, flashMs);
                 }
             }
         }
@@ -21568,6 +22555,16 @@ function stopAllPlayback() {
     }
     stopAudio();
     
+    // Drop the tracked-set underlay so the ring reads normally again.
+    if (typeof trackedPlaySetOverlay !== 'undefined') trackedPlaySetOverlay = null;
+    
+    // Turn off Follow & Zoom dimming (leaves the trail and camera position
+    // as they were, just stops singling out one point) so the ring reads
+    // normally again once playback ends.
+    if (typeof ringFollowCurrent !== 'undefined') ringFollowCurrent = null;
+    if (typeof ringAutoZoomTimeout !== 'undefined' && ringAutoZoomTimeout) { clearTimeout(ringAutoZoomTimeout); ringAutoZoomTimeout = null; }
+    if (typeof drawMainRing === 'function') drawMainRing();
+    
     // Hide fraction displays on all canvases
     const countDisplay = document.getElementById('countChartFractionDisplay');
     const errorDisplay = document.getElementById('errorChartFractionDisplay');
@@ -21577,10 +22574,15 @@ function stopAllPlayback() {
     const ringSector = document.getElementById('ringSectorDisplay');
     if (countDisplay) countDisplay.style.display = 'none';
     if (errorDisplay) errorDisplay.style.display = 'none';
-    if (ringDisplay) ringDisplay.style.display = 'none';
-    if (ringDecimal) ringDecimal.style.display = 'none';
-    if (ringHz) ringHz.style.display = 'none';
-    if (ringSector) ringSector.style.display = 'none';
+    // Leave the ring's four corner readouts showing the last played fraction
+    // (at full opacity, blink cancelled) so it can still be exported. The
+    // "Show Corner Labels" checkbox is what hides them.
+    const keepCorners = document.getElementById('showCornerLegend')?.checked ?? true;
+    [ringDisplay, ringDecimal, ringHz, ringSector].forEach(el => {
+        if (!el) return;
+        if (keepCorners && (el.textContent || '').trim()) { el.style.display = 'block'; el.style.opacity = '1'; }
+        else el.style.display = 'none';
+    });
     
     // Clear blink highlight
     if (typeof clearBlinkHighlight === 'function') {
@@ -22385,8 +23387,22 @@ function playErrorBySector(mode = 'error') {
         document.getElementById('errorChartFractionDisplay') : 
         document.getElementById('countChartFractionDisplay');
     
-    // Map sector data to frequencies based on error or count
-    const data = state.sectors.map(s => {
+    // Bound to the current error-chart drag selection (start → finish) when
+    // one exists and "Bound Play All to selection" is checked, so Play All
+    // replays just the highlighted range instead of always the full chart.
+    const boundToSelection = mode === 'error';
+    let sectorsToPlay = state.sectors;
+    if (boundToSelection && errorChartSelection.start !== null && errorChartSelection.end !== null) {
+        const minIdx = Math.min(errorChartSelection.start, errorChartSelection.end);
+        const maxIdx = Math.max(errorChartSelection.start, errorChartSelection.end);
+        sectorsToPlay = state.sectors.slice(minIdx, maxIdx + 1);
+    }
+    
+    // Fresh trail for this run
+    ringPlaybackTrail = [];
+    ringFollowStep = 0;
+    ringFollowTotalSteps = sectorsToPlay.length;
+    const data = sectorsToPlay.map(s => {
         if (mode === 'error') {
             // Map error to frequency: larger error = higher pitch
             const err = Math.abs(s.relError || 0);
@@ -22404,7 +23420,7 @@ function playErrorBySector(mode = 'error') {
     
     playbackState.isPlaying = true;
     let idx = 0;
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = +(document.getElementById('playbackSpeed')?.value || 25);
     
     function playNext() {
         if (!playbackState.isPlaying || idx >= data.length) {
@@ -22459,6 +23475,9 @@ function playErrorBySector(mode = 'error') {
                 const midIdx = Math.floor(residues.length / 2);
                 const r = residues[midIdx].r;
                 const m = residues[midIdx].m;
+                
+                pushRingPlaybackTrailPoint(r, m);
+                applyRingFollowZoom(r, m);
                 
                 ringFractionDisplay.textContent = `${r}/${m}`;
                 ringFractionDisplay.style.display = 'block';
@@ -22524,6 +23543,224 @@ function playErrorBySector(mode = 'error') {
 // =============================================
 
 let errorChartSelection = { start: null, end: null, isDragging: false };
+
+// =============================================
+// RING PLAYBACK TRAIL (continuous path connecting
+// fractions as they play during Play All / Play Selection)
+// =============================================
+let ringPlaybackTrail = []; // array of {r, m} in play order
+
+function clearRingPlaybackTrail() {
+    ringPlaybackTrail = [];
+    resetRingFollowCamera();
+    drawMainRing();
+}
+
+function pushRingPlaybackTrailPoint(r, m) {
+    if (r == null || m == null) return;
+    ringPlaybackTrail.push({ r, m });
+    // Keep it bounded so very long playbacks don't bloat memory
+    if (ringPlaybackTrail.length > 2000) ringPlaybackTrail.shift();
+}
+
+// --- Follow & Zoom: as playback advances through fractions, pan/zoom the
+// ring canvas to keep the current point centered, zooming a little closer
+// with each step, and dim everything that isn't the played point/trail so
+// the path reads clearly. ---
+let ringFollowCurrent = null; // {r, m} of the point currently in focus
+let ringFollowStep = 0;
+let ringFollowTotalSteps = 40; // set per playback run so the zoom ramp spans the whole run
+const RING_FOLLOW_MAX_ZOOM = 8;
+const RING_FOLLOW_START_ZOOM = 1.8;
+const RING_FOLLOW_ZOOM_INCREMENT = 0.12; // fallback when total steps is unknown
+
+// Auto Zoom Tracker: if the person manually zooms/pans away mid-playback,
+// snap the camera back to the tracked point after a short pause so it
+// doesn't stay lost off-screen.
+let ringFollowLastZoom = null, ringFollowLastPanX = null, ringFollowLastPanY = null;
+let ringAutoZoomTimeout = null;
+
+function scheduleRingAutoZoomSnapBack() {
+    const sectorMode = document.getElementById('sectorZoomMode')?.value || 'off';
+    const autoOn = (document.getElementById('ringAutoZoomTracker')?.checked ?? false) ||
+                   (playbackState.mode === 'sector' && sectorMode !== 'off');
+    if (!autoOn || !playbackState.isPlaying || ringFollowLastZoom === null) return;
+    
+    if (ringAutoZoomTimeout) clearTimeout(ringAutoZoomTimeout);
+    ringAutoZoomTimeout = setTimeout(() => {
+        if (!playbackState.isPlaying) return;
+        ringView.zoom = ringFollowLastZoom;
+        ringView.panX = ringFollowLastPanX;
+        ringView.panY = ringFollowLastPanY;
+        updateRingTransform();
+    }, 900);
+}
+
+function resetRingFollowCamera() {
+    ringFollowCurrent = null;
+    ringFollowStep = 0;
+    ringFollowLastZoom = null;
+    ringFollowLastPanX = null;
+    ringFollowLastPanY = null;
+    if (ringAutoZoomTimeout) { clearTimeout(ringAutoZoomTimeout); ringAutoZoomTimeout = null; }
+    resetRingZoom();
+}
+
+function applyRingFollowZoom(r, m, force) {
+    ringFollowCurrent = { r, m };
+    const followOn = force === true || (document.getElementById('ringAutoZoomTracker')?.checked ?? false);
+    if (!followOn) return;
+    
+    const canvas = document.getElementById('mainRing');
+    if (!canvas || !state.nMax) return;
+    
+    // Compute the point's position directly (same geometry drawMainRing
+    // uses) so this works regardless of draw order / which sector is
+    // currently shown.
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const maxR = Math.min(canvas.width, canvas.height) / 2 - 35;
+    const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
+    const angle = (r / m) * 2 * Math.PI;
+    const radius = calculateRadius(m, maxR, ringSpacing, invertOrder);
+    const px = cx + radius * Math.cos(angle);
+    const py = cy - radius * Math.sin(angle);
+    
+    ringFollowStep++;
+    const increment = ringFollowTotalSteps > 0
+        ? (RING_FOLLOW_MAX_ZOOM - RING_FOLLOW_START_ZOOM) / Math.max(10, ringFollowTotalSteps)
+        : RING_FOLLOW_ZOOM_INCREMENT;
+    ringView.zoom = Math.min(RING_FOLLOW_MAX_ZOOM, RING_FOLLOW_START_ZOOM + ringFollowStep * increment);
+    
+    // CSS transform's translate() operates in on-screen (CSS) pixels, but
+    // px/py above are in the canvas's internal drawing-buffer pixels. When
+    // the canvas is displayed smaller than its internal resolution (e.g.
+    // on mobile), those two scales differ — convert or the pan sends the
+    // ring flying off-screen (all-black canvas). offsetWidth/Height reflect
+    // the untransformed layout size, so they stay stable even mid-zoom.
+    const cssW = canvas.offsetWidth || canvas.width;
+    const cssH = canvas.offsetHeight || canvas.height;
+    const scaleX = cssW / canvas.width;
+    const scaleY = cssH / canvas.height;
+    ringView.panX = (cx - px) * scaleX;
+    ringView.panY = (cy - py) * scaleY;
+    
+    ringFollowLastZoom = ringView.zoom;
+    ringFollowLastPanX = ringView.panX;
+    ringFollowLastPanY = ringView.panY;
+    
+    updateRingTransform();
+}
+
+// ── Fit the camera to a sector's wedge ────────────────────────────────────
+// Sector n holds the fractions in (1/(n+1), 1/n], which occupy a pie slice
+// of the ring. Frames that slice so Play Sector is watchable on a sector
+// that would otherwise be a few pixels wide.
+const SECTOR_FIT_MAX_ZOOM = 10;
+const SECTOR_FIT_PADDING = 0.82; // leave a margin around the wedge
+
+function computeSectorBBox(sectorNum) {
+    const canvas = document.getElementById('mainRing');
+    if (!canvas) return null;
+    
+    // Prefer the points actually on screen — they already account for
+    // spacing, inversion and any ring rotation in effect.
+    const pts = (state.ringPoints || []).filter(p => p.sector === sectorNum);
+    if (pts.length >= 2) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        pts.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+        return { minX, maxX, minY, maxY };
+    }
+    
+    // Fallback: the analytic wedge between angles 2π/(n+1) and 2π/n.
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const maxR = Math.min(canvas.width, canvas.height) / 2 - 35;
+    const a1 = (1 / (sectorNum + 1)) * 2 * Math.PI;
+    const a2 = (1 / sectorNum) * 2 * Math.PI;
+    let minX = cx, maxX = cx, minY = cy, maxY = cy;
+    for (let i = 0; i <= 24; i++) {
+        const a = a1 + (a2 - a1) * i / 24;
+        const x = cx + maxR * Math.cos(a), y = cy - maxR * Math.sin(a);
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+    return { minX, maxX, minY, maxY };
+}
+
+function fitCameraToSector(sectorNum) {
+    const canvas = document.getElementById('mainRing');
+    if (!canvas || !sectorNum) return;
+    const bb = computeSectorBBox(sectorNum);
+    if (!bb) return;
+    
+    const bw = Math.max(bb.maxX - bb.minX, 1);
+    const bh = Math.max(bb.maxY - bb.minY, 1);
+    const bcx = (bb.minX + bb.maxX) / 2;
+    const bcy = (bb.minY + bb.maxY) / 2;
+    
+    // The canvas is displayed at cssW×cssH but drawn at canvas.width×height.
+    // A buffer-pixel span of bw shows as bw·(cssW/canvas.width) CSS px at
+    // zoom 1, so the zoom that makes it fill the view is canvas.width/bw.
+    const zoom = Math.max(1, Math.min(SECTOR_FIT_MAX_ZOOM,
+        Math.min(canvas.width / bw, canvas.height / bh) * SECTOR_FIT_PADDING));
+    
+    const cssW = canvas.offsetWidth || canvas.width;
+    const cssH = canvas.offsetHeight || canvas.height;
+    const scaleX = cssW / canvas.width;
+    const scaleY = cssH / canvas.height;
+    
+    ringView.zoom = zoom;
+    ringView.panX = (canvas.width / 2 - bcx) * scaleX;
+    ringView.panY = (canvas.height / 2 - bcy) * scaleY;
+    
+    // Keep the snap-back reference in sync so a stray pan mid-playback
+    // returns here rather than to a stale frame.
+    ringFollowLastZoom = ringView.zoom;
+    ringFollowLastPanX = ringView.panX;
+    ringFollowLastPanY = ringView.panY;
+    
+    updateRingTransform();
+}
+
+// Called each step of a sector playback run. Returns true when the ring
+// needs a redraw (camera moved or the "dim others" focus point changed).
+// The camera transform is cheap CSS and updates every step; the full ring
+// redraw is throttled so a 1–25ms note rate doesn't stall the browser.
+let lastSectorRingDraw = 0;
+const SECTOR_RING_REDRAW_MS = 60;
+
+function sectorPlaybackCameraStep(r, m) {
+    const mode = document.getElementById('sectorZoomMode')?.value || 'off';
+    const dim = document.getElementById('sectorZoomDim')?.checked || false;
+    if (mode === 'off' && !dim) return false;
+    
+    pushRingPlaybackTrailPoint(r, m);
+    if (mode === 'follow' || mode === 'fitfollow') {
+        applyRingFollowZoom(r, m, true);
+    } else {
+        // Record the current point so "Dim others" can single it out,
+        // without moving the camera.
+        ringFollowCurrent = { r, m };
+    }
+    
+    const now = Date.now();
+    if (now - lastSectorRingDraw < SECTOR_RING_REDRAW_MS) return false;
+    lastSectorRingDraw = now;
+    return true;
+}
+
+function onSectorZoomModeChange() {
+    const mode = document.getElementById('sectorZoomMode')?.value || 'off';
+    if (mode === 'off') resetRingZoom();
+    else if (mode === 'fit' || mode === 'fitfollow') {
+        fitCameraToSector(+document.getElementById('viewSector').value);
+    }
+}
 
 function updateErrorModeHint() {
     const mode = document.getElementById('errorPlaybackMode')?.value || 'error';
@@ -22768,8 +24005,11 @@ function playSelectedErrorRange() {
     initAudioContext();
     stopAllPlayback();
     
-    const minIdx = Math.min(start, end);
+    // Fresh trail for this run
+    ringPlaybackTrail = [];
+    ringFollowStep = 0;
     const maxIdx = Math.max(start, end);
+    ringFollowTotalSteps = maxIdx - Math.min(start, end) + 1;
     
     if (mode === 'error') {
         // Original behavior: play error magnitude as pitch
@@ -22796,7 +24036,7 @@ function playErrorMagnitudeMode(minIdx, maxIdx) {
     
     playbackState.isPlaying = true;
     let idx = 0;
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = +(document.getElementById('playbackSpeed')?.value || 25);
     
     function playNext() {
         if (!playbackState.isPlaying || idx >= data.length) {
@@ -22809,6 +24049,14 @@ function playErrorMagnitudeMode(minIdx, maxIdx) {
         const d = data[idx];
         playTone(d.freq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
         showPlaybackStatus(`Sector ${d.n}: Error ${d.value.toFixed(1)}% → ${d.freq.toFixed(0)} Hz (${idx + 1}/${data.length})`);
+        
+        // Representative fraction for this sector, added to the ring trail
+        const residues = (state.residuesBySector[d.n] || []).filter(res => gcd(res.r, res.m) === 1);
+        if (residues.length > 0) {
+            const midIdx = Math.floor(residues.length / 2);
+            pushRingPlaybackTrailPoint(residues[midIdx].r, residues[midIdx].m);
+            applyRingFollowZoom(residues[midIdx].r, residues[midIdx].m);
+        }
         
         // Highlight current sector (bar + table row)
         highlightSectorDuringPlayback(d.n, d.idx, false);
@@ -22847,11 +24095,12 @@ function playAllFractionsMode(minIdx, maxIdx) {
         showPlaybackStatus('No fractions found in selected sectors');
         return;
     }
+    ringFollowTotalSteps = allFractions.length;
     
     playbackState.isPlaying = true;
     let idx = 0;
     let currentSectorIdx = null;
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = +(document.getElementById('playbackSpeed')?.value || 25);
     const baseFreq = 220;
     
     function playNext() {
@@ -22876,6 +24125,10 @@ function playAllFractionsMode(minIdx, maxIdx) {
         
         playTone(clampedFreq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
         showPlaybackStatus(`S${f.sector}: ${f.r}/${f.m} → ${clampedFreq.toFixed(0)} Hz (${idx + 1}/${allFractions.length})`);
+        
+        pushRingPlaybackTrailPoint(f.r, f.m);
+        applyRingFollowZoom(f.r, f.m);
+        drawMainRing();
         
         idx++;
         playbackState.intervalId = setTimeout(playNext, speed);
@@ -22918,7 +24171,7 @@ function playRepresentativeMode(minIdx, maxIdx) {
     
     playbackState.isPlaying = true;
     let idx = 0;
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = +(document.getElementById('playbackSpeed')?.value || 25);
     const baseFreq = 220;
     
     function playNext() {
@@ -22935,6 +24188,9 @@ function playRepresentativeMode(minIdx, maxIdx) {
         
         playTone(clampedFreq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
         showPlaybackStatus(`S${f.sector}: mediant ${f.r}/${f.m} (of ${f.total}) → ${clampedFreq.toFixed(0)} Hz (${idx + 1}/${data.length})`);
+        
+        pushRingPlaybackTrailPoint(f.r, f.m);
+        applyRingFollowZoom(f.r, f.m);
         
         // Highlight current sector (bar + table row)
         highlightSectorDuringPlayback(f.sector, f.sectorIdx, false);
@@ -22998,7 +24254,7 @@ function playAllSectorsSequentially() {
 }
 
 function startAllSectorsPlaybackLoop() {
-    const speed = Math.max(50, +(document.getElementById('playbackSpeed')?.value || 250) / 2); // Faster for continuous play
+    const speed = Math.max(5, +(document.getElementById('playbackSpeed')?.value || 25) / 2); // Faster for continuous play
     
     if (playbackState.intervalId) {
         clearInterval(playbackState.intervalId);
