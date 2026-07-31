@@ -3,530 +3,2767 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Prime Spiral — Winding r ≡ ±p (mod M) · Wessen Getachew — Page 13</title>
-<script>
-window.MathJax = {
-  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$'],['\\[','\\]']] },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
-  startup: { ready() { MathJax.startup.defaultReady(); } }
-};
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Gauss Circle ↔ Wessen Farey Sector Bridge — Page 13</title>
 <style>
-:root {
-  --bg:    #04040d;
-  --bg1:   #07071a;
-  --bg2:   #0c0c22;
-  --cream: #ddd8cc;
-  --cream2:#b8b2a6;
-  --cream3:#6a6560;
-  --gold:  #c8a84a;
-  --gold2: rgba(200,168,74,.12);
-  --teal:  #3dc8b8;
-  --coral: #e05060;
-  --violet:#9b7fe8;
-  --lime:  #7ec87a;
-  --magenta:#ff2fd0;
-  --amber: #ff8c42;
-  --sky:   #4a9eff;
-  --pink:  #ff6b9d;
-  --edge:  rgba(255,255,255,.07);
-  --edge2: rgba(255,255,255,.13);
-  --mono:  'JetBrains Mono', monospace;
-  --serif: 'Spectral', serif;
-  --disp:  'Cinzel', serif;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--cream);font-family:var(--serif);font-size:.95rem;line-height:1.75;}
-input[type="number"],input[type="range"],select,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-input[type="number"]{font-size:16px;}
-canvas{touch-action:none;}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI', system-ui, sans-serif; background:#0a0f1a; color:#e2e8f0; line-height:1.6; font-size:14px; }
 
-#decimalBar{
-  position:sticky;top:44px;z-index:500;
-  background:rgba(4,4,13,.96);border-bottom:1px solid var(--edge2);
-  display:flex;align-items:center;gap:10px;padding:7px 20px;
-  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream3);
-}
-#decimalBar input[type="range"]{width:140px;accent-color:var(--pink);}
-#decimalBar .val{color:var(--pink);font-weight:600;min-width:16px;text-align:center;}
+  .nav-links { background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 8px 15px; border-bottom: 1px solid #4338ca; overflow-x: auto; white-space: nowrap; }
+  .nav-links::-webkit-scrollbar { height: 4px; }
+  .nav-links::-webkit-scrollbar-track { background: #1e1b4b; }
+  .nav-links::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 2px; }
+  .nav-links a { display: inline-block; padding: 4px 10px; margin: 2px 3px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 4px; color: #a5b4fc; text-decoration: none; font-size: 11px; font-weight: 500; transition: all 0.2s; }
+  .nav-links a:hover { background: rgba(99, 102, 241, 0.4); color: #e0e7ff; border-color: #6366f1; transform: translateY(-1px); }
+  .nav-links-label { color: #64748b; font-size: 10px; margin-right: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-#content{max-width:1020px;margin:0 auto;padding:0 20px 100px;}
-#hero{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--edge);}
-.hero-tag{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);margin-bottom:16px;}
-h1.hero-title{font-family:var(--disp);font-size:clamp(1.2rem,4vw,1.9rem);letter-spacing:.06em;color:var(--cream);margin-bottom:18px;}
-.hero-formula{font-size:1.0rem;margin:14px 0;color:var(--gold);overflow-x:auto;}
-.hero-sub{max-width:74ch;margin:0 auto;color:var(--cream2);font-size:.86rem;}
-.shift-banner{
-  max-width:74ch;margin:20px auto 0;padding:14px 18px;background:rgba(255,107,157,.07);
-  border-left:3px solid var(--pink);text-align:left;font-size:.82rem;color:var(--cream2);
-}
-.shift-banner b{color:var(--pink);}
+  .container { max-width:1180px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { text-align:center; font-size:1.5em; color:#e2e8f0; }
+  .subtitle { text-align:center; color:#94a3b8; font-size:0.9em; margin-top:6px; }
 
-.card{background:var(--bg1);border:1px solid var(--edge);padding:22px 24px;border-radius:4px;margin:22px 0;}
-.card-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
-.card-title::after{content:'';flex:1;height:1px;background:var(--edge);}
-.card-note{font-size:8px;color:var(--cream3);letter-spacing:.04em;margin-top:8px;line-height:1.7;}
+  .formula-box {
+    margin:18px auto; max-width:760px; padding:16px 18px;
+    background:#151d2e; border:1px solid #334155; border-left:3px solid #06b6d4;
+    border-radius:6px; text-align:center;
+  }
+  .formula-main { font-family:monospace; font-size:1.15em; color:#67e8f9; }
+  .formula-sub { font-size:0.85em; color:#94a3b8; margin-top:6px; }
 
-.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:14px;}
-.ctrl-block{flex:1;min-width:180px;}
-.ctrl-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream3);margin-bottom:6px;display:flex;justify-content:space-between;}
-.ctrl-label span.val{color:var(--teal);font-weight:600;}
-input[type="range"]{width:100%;accent-color:var(--pink);height:3px;}
+  .layout { display:flex; gap:18px; flex-wrap:wrap; margin-top:20px; align-items:flex-start; }
+  .panel { background:#0f172a; border:1px solid #334155; border-radius:10px; padding:16px; }
+  .canvas-panel { flex:1 1 560px; min-width:320px; }
+  .controls-panel { flex:0 0 260px; display:flex; flex-direction:column; gap:14px; }
 
-.stepctrl{display:flex;align-items:center;gap:6px;}
-.stepctrl input[type="range"]{flex:1;}
-.step-btn{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;font-size:13px;font-family:var(--mono);transition:background .1s;}
-.step-btn:hover{background:rgba(61,200,184,.1);border-color:var(--teal);}
+  canvas { background:#060a12; border-radius:6px; display:block; width:100%; cursor:crosshair; }
 
-.togglegrid{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:14px;}
-.togglegrid label{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--cream2);cursor:pointer;}
-.togglegrid input[type="checkbox"]{accent-color:var(--coral);}
+  label.field-label { font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:3px; }
+  .row { margin-bottom:2px; }
+  .row-inline { display:flex; gap:8px; align-items:center; }
+  input[type=range] { width:100%; accent-color:#06b6d4; }
+  input[type=number] { background:#1e293b; border:1px solid #475569; border-radius:4px; color:#e2e8f0; padding:4px 6px; font-size:12px; width:70px; }
+  select { background:#1e293b; border:1px solid #475569; border-radius:4px; color:#e2e8f0; padding:4px 6px; font-size:12px; width:100%; }
+  .valdisp { font-family:monospace; color:#67e8f9; font-weight:600; }
+  .checkrow { display:flex; align-items:center; gap:6px; font-size:12px; color:#cbd5e1; }
+  .checkrow input { accent-color:#22c55e; }
+  fieldset { border:1px solid #334155; border-radius:8px; padding:10px 12px; }
+  legend { font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; padding:0 4px; }
 
-button.wgbtn{background:transparent;border:1px solid var(--edge2);color:var(--cream2);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .15s;}
-button.wgbtn:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,107,157,.08);}
-button.wgbtn.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
+  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .stat { background:#1e293b; border:1px solid #334155; border-radius:6px; padding:7px 9px; }
+  .stat .lbl { color:#64748b; font-size:9px; text-transform:uppercase; letter-spacing:0.04em; }
+  .stat .val { font-family:monospace; font-size:13px; font-weight:600; color:#e2e8f0; margin-top:2px; }
+  .pass { color:#4ade80 !important; } .fail { color:#f87171 !important; }
 
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px;}
-.result-box{background:var(--bg2);border:1px solid var(--edge);border-left:3px solid var(--pink);padding:12px 14px;}
-.result-box.violet{border-left-color:var(--violet);}
-.result-box .rlabel{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream3);margin-bottom:5px;}
-.result-box .rval{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--cream);word-break:break-all;}
+  .legend-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:11px; color:#94a3b8; }
+  .swatch { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:middle; }
+  .grad-swatch { display:inline-block; width:60px; height:10px; border-radius:2px; margin-right:4px; vertical-align:middle; }
 
-canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);display:block;}
-.legend{display:flex;gap:16px;font-family:var(--mono);font-size:8px;color:var(--cream3);margin-top:8px;flex-wrap:wrap;}
-.legend span.sw{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:50%;}
+  .play-btn { padding:4px 10px; font-size:10px; background:rgba(6,182,212,0.2); border:1px solid #06b6d4; border-radius:4px; color:#67e8f9; cursor:pointer; transition:all 0.15s; }
+  .play-btn:hover { background:rgba(6,182,212,0.4); }
+  .play-btn.stop { background:rgba(239,68,68,0.15); border-color:#ef4444; color:#f87171; }
+  .play-btn.stop:hover { background:rgba(239,68,68,0.3); }
+  .play-btn.playing { background:linear-gradient(135deg,#22c55e,#16a34a); border-color:#22c55e; color:#fff; animation:playPulse 0.6s infinite; }
+  @keyframes playPulse { 0%,100%{opacity:1;} 50%{opacity:0.75;} }
 
-.step{padding:10px 0;border-bottom:1px solid var(--edge);font-size:.85rem;color:var(--cream2);}
-.step:last-child{border-bottom:none;}
-.step .stepnum{font-family:var(--mono);font-size:8px;color:var(--violet);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+  #detailPanel, #detail3d { margin-top:10px; padding:10px 12px; background:#1e293b; border:1px solid #334155; border-radius:6px; font-family:monospace; font-size:12px; color:#cbd5e1; min-height:60px; }
+  #detailPanel .hl, #detail3d .hl { color:#67e8f9; font-weight:600; }
 
-.ibox{background:var(--gold2);border-left:3px solid var(--gold);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
-.vbox{background:rgba(126,200,122,.06);border-left:3px solid var(--lime);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
-.skybox{background:rgba(74,158,255,.06);border-left:3px solid var(--sky);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
-.pinkbox{background:rgba(255,107,157,.06);border-left:3px solid var(--pink);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
+  .table-wrap { margin-top:18px; }
+  .table-scroll { max-height:340px; overflow-y:auto; border:1px solid #334155; border-radius:8px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead th { position:sticky; top:0; background:#1e293b; color:#94a3b8; text-align:left; padding:7px 8px; cursor:pointer; user-select:none; border-bottom:1px solid #334155; }
+  thead th:hover { color:#67e8f9; }
+  thead th.sorted::after { content:' \25BE'; color:#06b6d4; }
+  tbody td { padding:5px 8px; border-bottom:1px solid #1e293b; font-family:monospace; }
+  tbody tr { cursor:pointer; }
+  tbody tr:hover { background:rgba(6,182,212,0.08); }
+  tbody tr.selected { background:rgba(6,182,212,0.18); }
+  .true { color:#4ade80; } .false { color:#f87171; }
+
+  /* ---- Dimension tabs ---- */
+  .tabbar { display:flex; gap:8px; justify-content:center; margin:18px auto 0; flex-wrap:wrap; }
+  .tabbtn {
+    padding:9px 20px; font-size:12px; font-family:inherit; letter-spacing:.04em;
+    background:#0f172a; border:1px solid #334155; border-bottom:2px solid #334155;
+    border-radius:8px 8px 0 0; color:#94a3b8; cursor:pointer; transition:all .15s;
+  }
+  .tabbtn:hover { color:#cbd5e1; border-color:#475569; }
+  .tabbtn.active { color:#67e8f9; background:#151d2e; border-color:#06b6d4; border-bottom-color:#06b6d4; font-weight:600; }
+  .tabbtn .dim { font-family:monospace; font-size:10px; color:#64748b; display:block; margin-top:2px; letter-spacing:0; }
+  .tabbtn.active .dim { color:#0891b2; }
+  .tabpane { display:none; }
+  .tabpane.active { display:block; }
+
+  /* ---- 3D description block ---- */
+  .desc-box { margin:18px auto; max-width:900px; padding:16px 18px; background:#151d2e; border:1px solid #334155; border-left:3px solid #a855f7; border-radius:6px; }
+  .desc-box h3 { color:#d8b4fe; font-size:1.02em; margin-bottom:8px; font-weight:600; }
+  .desc-box p { font-size:12.5px; color:#94a3b8; margin-bottom:9px; }
+  .desc-box p:last-child { margin-bottom:0; }
+  .desc-box code { font-family:monospace; color:#67e8f9; background:#0b1220; padding:1px 4px; border-radius:3px; }
+  .desc-box .tag { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.08em; padding:2px 6px; border-radius:3px; margin-right:6px; vertical-align:middle; }
+  .tag-classical { background:rgba(148,163,184,.14); border:1px solid #475569; color:#94a3b8; }
+  .tag-display { background:rgba(168,85,247,.14); border:1px solid #a855f7; color:#d8b4fe; }
+
+  .orbit-tbl { width:100%; border-collapse:collapse; font-size:11.5px; margin-top:8px; }
+  .orbit-tbl th { text-align:left; padding:5px 7px; color:#64748b; font-weight:500; border-bottom:1px solid #334155; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+  .orbit-tbl td { padding:4px 7px; border-bottom:1px solid #1e293b; font-family:monospace; color:#cbd5e1; }
+  .orbit-tbl td.cls { font-weight:600; }
+
+  .hint-bar { display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:#64748b; margin-top:8px; }
+  .hint-bar kbd { background:#1e293b; border:1px solid #475569; border-bottom-width:2px; border-radius:3px; padding:1px 5px; font-family:monospace; font-size:10px; color:#94a3b8; }
+
+  canvas.viewport3d { cursor:grab; touch-action:none; }
+  canvas.viewport3d.grabbing { cursor:grabbing; }
+
+  .warn { font-size:11px; color:#fbbf24; margin-top:6px; display:none; }
+  .warn.show { display:block; }
+
+  /* ---- pinnable / floating canvas ---- */
+  .canvas-panel { position:relative; }
+  .canvas-tools { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+  .canvas-tools .res-select { width:auto; flex:0 0 auto; }
+  .canvas-tools .pin-btn, .canvas-tools .grip { flex:0 0 auto; white-space:nowrap; }
+  .pin-btn { padding:4px 10px; font-size:10px; font-family:inherit; letter-spacing:.04em;
+    background:rgba(6,182,212,.14); border:1px solid #0e7490; border-radius:4px; color:#67e8f9;
+    cursor:pointer; transition:all .15s; }
+  .pin-btn:hover { background:rgba(6,182,212,.3); border-color:#06b6d4; }
+  .pin-btn.on { background:rgba(236,72,153,.18); border-color:#ec4899; color:#f9a8d4; }
+  .grip { cursor:move; user-select:none; color:#64748b; font-size:11px; padding:2px 6px;
+    border:1px dashed #334155; border-radius:4px; }
+  .float-spacer { display:none; }
+  .float-spacer.on { display:block; }
+  .canvas-panel.floating {
+    position:fixed; z-index:900; margin:0; background:#0f172a;
+    border-color:#06b6d4; box-shadow:0 14px 44px rgba(0,0,0,.7);
+    max-height:92vh; overflow:auto;
+  }
+  @media (max-width:900px){
+    .canvas-panel.floating {
+      left:6px !important; right:6px !important; width:auto !important;
+      padding:8px;
+    }
+    .canvas-panel.floating canvas { max-width:min(100%,40vh); margin:0 auto; }
+    .canvas-panel.floating .legend-row,
+    .canvas-panel.floating #detailPanel,
+    .canvas-panel.floating #detail3d,
+    .canvas-panel.floating .hint-bar,
+    .canvas-panel.floating .warn { display:none; }
+  }
+
+  /* The radius/sector and display controls read as one toolbar: the rows flow
+     into as many columns as the panel width allows instead of one tall stack. */
+  .toolbar-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+                  gap:10px 14px; align-items:start; }
+  .toolbar-grid > .row { margin-top:0 !important; }
+  .toolbar-grid > .checkrow { margin-top:0 !important; align-self:center; }
+  .toolbar-grid .row-inline { flex-wrap:wrap; }
+
+  .step-btn { padding:4px 9px; font-size:10px; font-family:inherit; letter-spacing:.03em;
+    background:rgba(168,85,247,.14); border:1px solid #7c3aed; border-radius:4px;
+    color:#c4b5fd; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .step-btn:hover { background:rgba(168,85,247,.3); border-color:#a855f7; }
+  .step-btn:disabled { opacity:.35; cursor:default; }
+  .prime-tag { font-size:10px; font-family:monospace; color:#64748b; align-self:center; }
+  .prime-tag.is-prime { color:#4ade80; }
+
+  /* The controls column is a fixed 260px by default; on a narrow screen that
+     leaves a dead gutter down the right-hand side, so let it fill the row. */
+  @media (max-width:900px){
+    .controls-panel { flex:1 1 100%; width:100%; min-width:0; }
+  }
+
+  /* On a phone the panels should reach both screen edges, so cancel the
+     container gutter rather than leaving a stranded rounded border. */
+  @media (max-width:640px){
+    .container { padding:14px 10px 50px; }
+    .layout { gap:12px; margin-top:14px; }
+    .panel { padding:11px; }
+    .canvas-panel, .controls-panel, .table-wrap {
+      margin-left:-10px; margin-right:-10px;
+      border-radius:0; border-left:none; border-right:none;
+    }
+    .canvas-panel { min-width:0; }
+    .formula-box, .desc-box {
+      margin-left:-10px; margin-right:-10px;
+      border-radius:0; border-right:none;
+    }
+    .canvas-panel.floating { margin-left:0 !important; margin-right:0 !important; }
+  }
+
+  footer { color:#475569; font-size:11px; margin-top:26px; text-align:center; max-width:700px; margin-left:auto; margin-right:auto; }
 </style>
 </head>
 <body>
 
-<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
-<span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
-<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid rgba(200,168,74,.35);color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(200,168,74,.35)'">P1</a>
-<a href="page2.html" target="_blank" title="Gap Diagonal Identity — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #3dc8b859;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#3dc8b814';this.style.borderColor='#3dc8b8'" onmouseout="this.style.background='transparent';this.style.borderColor='#3dc8b859'">P2</a>
-<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
-<a href="page4.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P4</a>
-<a href="page5.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 5" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P5</a>
-<a href="page6.html" target="_blank" title="Farey Sequence Summatory Function — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P6</a>
-<a href="page7.html" target="_blank" title="Farey &amp; Unit Circle — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P7</a>
-<a href="page8.html" target="_blank" title="Möbius Shell Sieve — Page 8 (2025)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #00d9ff59;color:#00d9ff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#00d9ff14';this.style.borderColor='#00d9ff'" onmouseout="this.style.background='transparent';this.style.borderColor='#00d9ff59'">P8</a>
-<a href="page9.html" target="_blank" title="Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P9</a>
-<a href="page10.html" target="_blank" title="k-Block Coprime Density — Prime Constellations & k-Tuples — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P10</a>
-<a href="page11.html" target="_blank" title="The Prime Filter — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P11</a>
-<a href="page12.html" target="_blank" title="Dirichlet Character-Twisted Density — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #d2691e59;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#d2691e14';this.style.borderColor='#d2691e'" onmouseout="this.style.background='transparent';this.style.borderColor='#d2691e59'">P12</a>
-<a href="page13.html" title="The Prime Spiral — Page 13 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#ff6b9d22;border:1px solid #ff6b9d;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P13</a>
-<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
-<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+<script>
+(function(){
+  var links=[
+   ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
+   ['page2.html','P2','How C(n) Works — Guided Walkthrough — Page 2','#7ec87a'],
+   ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
+   ['page4.html','P4','The Prime Filter — Sieve View — Page 4','#4a9eff'],
+   ['page5.html','P5','Gap Diagonal Identity — Page 5','#3dc8b8'],
+   ['page6.html','P6','Strip Correlations — Where Independence Breaks — Page 6','#e05060'],
+   ['page7.html','P7','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7','#ff8c42'],
+   ['page8.html','P8','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 8','#ff2fd0'],
+   ['page9.html','P9','Dirichlet Character-Twisted Density — Page 9','#d2691e'],
+   ['page10.html','P10','Farey & Unit Circle — Page 10','#a855f7'],
+   ['page11.html','P11','Farey Sequence Summatory Function — Page 11','#f2c14e'],
+   ['page12.html','P12','The Prime Spiral — Page 12','#ff6b9d'],
+   ['page13.html','P13','Gauss Circle ↔ Wessen Bridge — Page 13','#06b6d4'],
+   ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
+  ];
+  var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#0a0f1a;border-bottom:1px solid rgba(139,92,246,.3);font-family:\'JetBrains Mono\',monospace,sans-serif;">';
+  bar+='<span style="font-family:\'JetBrains Mono\',monospace;font-size:.7rem;color:#8b5cf6;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
+  links.forEach(function(L){var href=L[0],lab=L[1],ti=L[2],c=L[3];var cur=(href==='page13.html');
+    if(href==='#opener'){
+      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
+    }
+    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
+    else{bar+='<a href="'+href+'" target="_blank" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
+  });
+  bar+='<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(226,232,240,.3);color:rgba(226,232,240,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;">\u26f6 Full</button>';
+  bar+='</div>';
+  document.write(bar);
+})();
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open('index.html','_blank'); }
+</script>
+
+<div class="nav-links">
+    <span class="nav-links-label">Projects:</span>
+    <a href="https://wessengetachew.github.io/Transform/" target="_blank">Transform</a>
+    <a href="https://wessengetachew.github.io/finite/" target="_blank">Finite</a>
+    <a href="https://wessengetachew.github.io/Primes/" target="_blank">Primes</a>
+    <a href="https://wessengetachew.github.io/Farey/" target="_blank">Farey</a>
+    <a href="https://wessengetachew.github.io/Composite/" target="_blank">Composite</a>
+    <a href="https://wessengetachew.github.io/Ethiopian/" target="_blank">Ethiopian</a>
+    <a href="https://wessengetachew.github.io/2pir/" target="_blank">2πr</a>
+    <a href="https://wessengetachew.github.io/1-2/" target="_blank">1-2</a>
+    <a href="https://wessengetachew.github.io/Rational-/" target="_blank">Rational</a>
+    <a href="https://wessengetachew.github.io/Infinitemoduli/" target="_blank">Infinite Moduli</a>
+    <a href="https://wessengetachew.github.io/Pythagorean-/" target="_blank">Pythagorean</a>
+    <a href="https://wessengetachew.github.io/Phase/" target="_blank">Phase</a>
+    <a href="https://wessengetachew.github.io/Gemini/" target="_blank">Gemini</a>
+    <a href="https://wessengetachew.github.io/Rebuild/" target="_blank">Rebuild</a>
+    <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
 </div>
 
-<div id="decimalBar">
-  <span>Decimal precision (whole page)</span>
-  <input type="range" id="decimalSl" min="2" max="15" value="6" oninput="setDecimals(+this.value)">
-  <span class="val" id="decimalVal">6</span>
-  <span style="color:var(--cream3);opacity:.6;">digits</span>
-</div>
+<div class="container">
+  <h1>Gauss Circle ↔ Wessen Farey Sector Bridge</h1>
+  <p class="subtitle">A fundamental domain of the lattice, reconstructed exactly into the full Gauss body by orbit&ndash;stabiliser weights, then filtered by the Farey sector S<sub>n</sub></p>
 
-<div id="hero">
-  <div class="hero-tag">Analytic Number Theory · Wessen Getachew</div>
-  <h1 class="hero-title">The Prime Spiral — Winding r ≡ ±p (mod M)</h1>
-  <div class="hero-formula">
-    $$r_M \;=\; p \bmod M, \qquad M = p{+}1,\, p{+}2,\, \dots,\, G$$
+  <div class="tabbar" role="tablist">
+    <button class="tabbtn active" data-pane="pane2d" onclick="showDim('pane2d',this)">Gauss circle<span class="dim">&#8484;&sup2; &middot; octant &middot; order 8</span></button>
+    <button class="tabbtn" data-pane="pane3d" onclick="showDim('pane3d',this)">Gauss sphere<span class="dim">&#8484;&sup3; &middot; sorted cone &middot; order 48</span></button>
   </div>
-  <div class="hero-sub">
-    Fix one prime <i>p</i>. On every ring of modulus <i>M</i>, mark the single residue where
-    <i>p</i> itself lands. As <i>M</i> climbs one step at a time, that one dot sweeps around each
-    ring at a different rate — the trail it leaves reads as a spiral arm winding outward through
-    the whole coprimality lattice. This page explains that overlay from the hero Ring/Lift view
-    (also seen driving the animated opener), lets you drive it directly, and shows exactly where
-    it re-enters the C(n) formula.
-  </div>
-  <div class="shift-banner">
-    <b>Not the Ulam spiral.</b> The famous Ulam spiral lays every integer 1, 2, 3, … onto a square
-    grid path and highlights which cells are prime. This spiral is a completely different
-    construction: it's a single fixed prime's residue traced across a stack of concentric
-    coprimality rings as the modulus grows. Same word, unrelated geometry — see the aside near
-    the bottom of this page.
-  </div>
-</div>
 
-<div id="content">
+  <div id="pane2d" class="tabpane active">
 
-  <!-- WHAT IT IS -->
-  <div class="card">
-    <div class="card-title">What You're Actually Looking At</div>
-    <div class="hero-sub" style="max-width:none;">
-      Every ring of the hero visualization at modulus <i>M</i> holds the residues
-      $r \in \{1,\dots,M-1\}$ with $\gcd(r,M)=1$, arranged at angle $\theta = 2\pi r/M$ and radius
-      proportional to $M$ — this is exactly the Ring view used throughout the site. The spiral
-      overlay does one extra thing: for a chosen prime <i>p</i>, it computes
-      $r_M = p \bmod M$ for every ring $M$ from $p{+}1$ up to the largest ring $G$, and drops a
-      red marker there. Because $p \bmod M$ jumps around non-monotonically as $M$ increases, but
-      the ring radius grows steadily with $M$, the sequence of markers reads visually as a spiral
-      arm — not because anything is literally rotating, but because a fixed quantity ($p$) is
-      being viewed through an increasingly fine set of angular units ($1/M$ of a turn).
+  <div class="formula-box">
+    <div class="formula-main">N(R) = 1 + 4·A(R) + 4·D(R) + 8·O(R)</div>
+    <div class="formula-sub">A(R): axis points k²≤R² &nbsp;·&nbsp; D(R): diagonal points 2k²≤R² &nbsp;·&nbsp; O(R): strict octant interior (0&lt;y&lt;x, x²+y²≤R²)</div>
+    <div class="formula-sub" style="margin-top:8px;">Sector membership: a/b ∈ S<sub>n</sub> = (1/(n+1), 1/n] &nbsp;⟺&nbsp; b/(n+1) &lt; a ≤ b/n &nbsp;(a=y, b=x, gcd(a,b)=1 for coprime/visible points)</div>
+  </div>
+
+
+    <div class="desc-box" style="border-left-color:#22d3ee;max-width:900px;">
+      <h3 style="color:#67e8f9;">The same n on both sides of the bridge</h3>
+      <p>
+        The sector index and the block length are not two different parameters that happen to share a letter.
+        The Farey sector S<sub>n</sub> = (1/(n+1), 1/n] is the set of slopes whose denominators first separate at
+        step n+1, and C(n) is the density attached to a run of n+1 consecutive integers. Both tabs let you lock
+        them together, so moving one slider moves the geometry and the density in step.
+      </p>
+      <p>
+        <span class="tag tag-display">what's measured</span>
+        For a lattice point, hold every coordinate but one and slide that one through n+1 consecutive values,
+        counting how far gcd = 1 survives. The survivor fraction among coprime points is compared live against the
+        exact Euler product. Both are shown; neither is fitted to the other.
+      </p>
+      <p>
+        <span class="tag tag-classical">the dimensional pattern</span>
+        Writing D<sub>k</sub>(n) = &prod;<sub>p</sub>(1 &minus; min(n+1,p)/p<sup>k</sup>) and
+        C<sub>k</sub>(n) = &zeta;(k)&middot;D<sub>k</sub>(n) = D<sub>k</sub>(n)/D<sub>k</sub>(0), the failure event at p is
+        &ldquo;p divides all k&minus;1 held coordinates and one of the n+1 slid values&rdquo;, which has probability
+        min(n+1,p)/p<sup>k</sup>. k = 2 is page 1's C(n); k = 3 is what the sphere tab measures.
+      </p>
+      <p style="color:#cbd5e1;">
+        The interesting part is what happens at saturation. Once p &le; n+1 the numerator min(n+1,p) freezes at p,
+        so the local factor freezes too &mdash; at <code>1 &minus; 1/p</code> in two dimensions but at
+        <code>1 &minus; 1/p&sup2;</code> in three. The first diverges as a product and the second does not.
+        <strong style="color:#67e8f9">C(n) decays to 0</strong>; <strong style="color:#4ade80">C&#8323;(n) settles on
+        &zeta;(3)/&zeta;(2) &asymp; 0.730763</strong>. Blocks of consecutive integers eventually kill visibility in the plane,
+        and never quite do in space.
+      </p>
+      <p style="color:#64748b;font-size:11.5px;">
+        Both statements follow from the local factors above, and the measured column is there to check them, not to
+        stand in for a proof. Convergence in the octant is noticeably slower than in the ball &mdash; the octant
+        constraint y &le; x correlates the two coordinates, so the finite-R bias is larger at the same point count.
+      </p>
     </div>
-    <div class="ibox">
-      This is the same "Lift Dynamics" spiral overlay that drives the hero page's animated
-      opener and the Ring/Lift view's ▶ p control — this page isolates just that one mechanic
-      so it can be explained on its own, with its own controls and its own derivation.
-    </div>
-  </div>
 
-  <!-- LIVE DEMO -->
-  <div class="card">
-    <div class="card-title">Live Spiral</div>
-    <div class="ctrl-row">
-      <div class="ctrl-block">
-        <div class="ctrl-label">G — rings shown <span class="val" id="sp-gval">42</span></div>
-        <div class="stepctrl">
-          <button class="step-btn" onclick="spStepG(-1)" title="G − 1">−</button>
-          <input type="range" id="sp-gsl" min="8" max="90" value="42" oninput="onSpGChange()">
-          <button class="step-btn" onclick="spStepG(1)" title="G + 1">+</button>
+  <div class="layout">
+    <div class="float-spacer" id="spacer2"></div>
+    <div class="panel canvas-panel" id="cpanel2">
+      <div class="canvas-tools">
+        <button class="pin-btn" id="pin2">&#9678; Float canvas</button>
+        <button class="pin-btn" id="size2" style="display:none">&#10530; Size</button>
+        <span class="grip" id="grip2" style="display:none">&#10303; drag</span>
+        <select id="exportRes2" class="res-select" style="background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;padding:3px 6px;font-size:11px;">
+          <option value="1">Standard (640px)</option>
+          <option value="2" selected>High (1280px)</option>
+          <option value="4">4K (2560px)</option>
+          <option value="8">8K (5120px)</option>
+        </select>
+        <button class="pin-btn" id="exportBtn2">&#8681; Export PNG</button>
+      </div>
+      <canvas id="canvas" width="640" height="640"></canvas>
+      <div class="legend-row" id="legendRow">
+        <span><span class="swatch" style="background:#1e293b"></span>outside circle</span>
+        <span><span class="swatch" style="background:#475569"></span>in circle</span>
+        <span><span class="swatch" style="background:#4ade80"></span>axis / diagonal / origin</span>
+        <span id="legendSector1"><span class="swatch" style="background:#06b6d4"></span>in S<sub>n</sub>, coprime</span>
+        <span id="legendSector2"><span class="swatch" style="background:#f59e0b"></span>in S<sub>n</sub>, gcd&gt;1</span>
+        <span><span class="swatch" style="background:#ec4899"></span>selected point</span>
+      </div>
+      <div id="detailPanel">Click any point on the canvas or a table row to inspect it.</div>
+    </div>
+
+    <div class="controls-panel">
+      <fieldset class="toolbar">
+        <legend>Radius &middot; Sector &middot; Display</legend>
+        <div class="toolbar-grid">
+        <div class="row">
+          <label class="field-label">Radius R = <span id="rVal" class="valdisp">109</span></label>
+          <input type="range" id="rSlider" min="1" max="256" value="109">
+          <div class="row-inline" style="margin-top:4px;">
+            <input type="number" id="rNum" min="1" max="500" value="109">
+            <span style="font-size:10px;color:#64748b;">exact R (slider to 256, typed to 500; unrendered above ~150)</span>
+          </div>
+          <div class="row-inline" style="margin-top:6px;">
+            <button class="play-btn" id="rPlay" data-target="r">▶ Play R</button>
+            <button class="play-btn stop" id="rStop" data-target="r">■ Stop</button>
+          </div>
+          <div class="row-inline" style="margin-top:6px;">
+            <button class="step-btn" id="rPrevPrime" title="previous prime radius">◀ prev prime</button>
+            <button class="step-btn" id="rNextPrime" title="next prime radius">next prime ▶</button>
+            <span class="prime-tag" id="rPrimeTag"></span>
+          </div>
         </div>
-      </div>
-      <div class="ctrl-block" style="flex:0;min-width:auto;">
-        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Spiral prime</div>
-        <div class="stepctrl">
-          <button class="step-btn" onclick="spStepP(-1)" title="Previous prime">◀</button>
-          <span id="sp-plabel" style="font-family:var(--mono);font-size:12px;color:var(--coral);min-width:44px;text-align:center;">p=2</span>
-          <button class="step-btn" onclick="spStepP(1)" title="Next prime">▶</button>
+        <div class="row" style="margin-top:8px;">
+          <label class="field-label">Sector n = <span id="nVal" class="valdisp">1</span> · interval (<span id="nInterval">1/2, 1</span>]</label>
+          <input type="range" id="nSlider" min="1" max="40" value="1">
+          <div class="row-inline" style="margin-top:4px;">
+            <input type="number" id="nNum" min="1" max="200" value="1">
+          </div>
+          <div class="row-inline" style="margin-top:6px;">
+            <button class="play-btn" id="nPlay" data-target="n">▶ Play n</button>
+            <button class="play-btn stop" id="nStop" data-target="n">■ Stop</button>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <label class="field-label">Quick sectors</label>
+            <div class="row-inline" style="flex-wrap:wrap;gap:4px;">
+              <button class="step-btn" onclick="jumpSector2d(1)">S₁ ½→1</button>
+              <button class="step-btn" onclick="jumpSector2d(2)">S₂ ⅓→½</button>
+              <button class="step-btn" onclick="jumpSector2d(3)">S₃ ¼→⅓</button>
+              <button class="step-btn" onclick="jumpSector2d(4)">S₄ ⅕→¼</button>
+              <button class="step-btn" onclick="jumpSector2d(5)">S₅</button>
+              <button class="step-btn" onclick="jumpSector2d(8)">S₈</button>
+              <button class="step-btn" onclick="jumpSector2d(12)">S₁₂</button>
+              <button class="step-btn" onclick="jumpSector2d(20)">S₂₀</button>
+            </div>
+          </div>
         </div>
+        <div class="row">
+          <label class="field-label">Color sector points by</label>
+          <select id="colorMode">
+            <option value="coprime">Coprime / gcd&gt;1</option>
+            <option value="r">r (numerator y) — gradient</option>
+            <option value="m">m (denominator x) — gradient</option>
+            <option value="depth" selected>block survival depth</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <label class="field-label">Label points by</label>
+          <select id="labelMode">
+            <option value="none">Off</option>
+            <option value="x">x (denominator)</option>
+            <option value="y">y (numerator)</option>
+            <option value="frac">y/x (reduced)</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <label class="field-label">Colour scope</label>
+          <select id="colorScope">
+            <option value="sector">sector S&#8345; only</option>
+            <option value="octant">the whole octant</option>
+            <option value="sector8">sector S&#8345; mirrored into all 8 octants</option>
+            <option value="all" selected>every point in the disc &mdash; all 8 mirror images</option>
+          </select>
+        </div>
+        <div class="checkrow" style="margin-top:8px;"><input type="checkbox" id="showNonCoprime" checked> show gcd&gt;1 points</div>
+        <div class="checkrow"><input type="checkbox" id="showGrid" checked> show full circle grid</div>
+        <div class="checkrow"><input type="checkbox" id="showAxisDiag" checked> show axis / diagonal points</div>
+        </div>
+      </fieldset>
+
+      <fieldset style="border-color:#0e7490;">
+        <legend style="color:#22d3ee;">Block-coprime dynamic C(n)</legend>
+        <div style="font-size:10.5px;color:#94a3b8;margin-bottom:8px;line-height:1.5;">
+          Read (x,&nbsp;y) as (denominator&nbsp;M, numerator&nbsp;r). Slide the denominator through a block of
+          n+1 consecutive values and ask how far coprimality survives.
+        </div>
+        <div class="checkrow"><input type="checkbox" id="linkN2" checked> block n follows the sector n</div>
+        <div class="row" style="margin-top:6px;">
+          <label class="field-label">block n = <span id="bn2Val" class="valdisp">1</span> &middot; block length <span id="bl2Val" class="valdisp">2</span></label>
+          <input type="range" id="bn2Slider" min="0" max="40" value="1">
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <label class="field-label">Measure over</label>
+          <select id="scope2">
+            <option value="octant">the whole octant</option>
+            <option value="sector">sector S&#8345; only</option>
+            <option value="disc">the whole disc, radius R</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <label class="field-label">Canvas filter</label>
+          <select id="cnFilter2">
+            <option value="off">off &mdash; draw every point</option>
+            <option value="dim">dim the points that fail C(n)</option>
+            <option value="hide">remove the points that fail C(n)</option>
+          </select>
+        </div>
+        <div style="font-size:10px;color:#64748b;margin-top:6px;line-height:1.5;">
+          Applied across the whole disc, every quadrant. Survival is evaluated per point:
+          depth holds the numerator and slides the denominator, so a point and its swap
+          do not agree and the octant cannot simply be mirrored.
+        </div>
+        <div class="stat-grid" style="margin-top:8px;">
+          <div class="stat"><div class="lbl">coprime pts</div><div class="val" id="cn2Base">&ndash;</div></div>
+          <div class="stat"><div class="lbl">survive block</div><div class="val" id="cn2Surv">&ndash;</div></div>
+          <div class="stat"><div class="lbl">measured</div><div class="val" id="cn2Meas" style="color:#ec4899">&ndash;</div></div>
+          <div class="stat"><div class="lbl">C(n) exact</div><div class="val" id="cn2Exact" style="color:#67e8f9">&ndash;</div></div>
+          <div class="stat"><div class="lbl">gap</div><div class="val" id="cn2Gap">&ndash;</div></div>
+          <div class="stat"><div class="lbl">D(n) = C(n)/&zeta;(2)</div><div class="val" id="cn2Dn">&ndash;</div></div>
+        </div>
+        <canvas id="cnCurve2" width="248" height="96" style="margin-top:8px;border-radius:4px;cursor:default;"></canvas>
+        <div style="font-size:9.5px;color:#64748b;margin-top:4px;line-height:1.5;">
+          <span style="color:#67e8f9">&#9679;</span> exact C(n) &nbsp; <span style="color:#ec4899">&#9679;</span> measured at this R.
+          In two dimensions the local factor picks up 1&minus;1/p once p &le; n+1, so <strong>C(n) &rarr; 0</strong>.
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Verification</legend>
+        <div class="stat-grid">
+          <div class="stat"><div class="lbl">N(R) brute</div><div class="val" id="nFull">–</div></div>
+          <div class="stat"><div class="lbl">N(R) recon</div><div class="val" id="nRecon">–</div></div>
+          <div class="stat"><div class="lbl">Match</div><div class="val" id="reconStatus">–</div></div>
+          <div class="stat"><div class="lbl">Octant pts</div><div class="val" id="octCount">–</div></div>
+          <div class="stat"><div class="lbl">S<sub>n</sub> coprime</div><div class="val" id="sectorCoprime">–</div></div>
+          <div class="stat"><div class="lbl">S<sub>n</sub> gcd&gt;1</div><div class="val" id="sectorNonCoprime">–</div></div>
+        </div>
+        <div style="font-size:10px;color:#64748b;margin-top:8px;">Asymptotic: C(n,R) ≈ 3R² / (π²·n(n+1)) — coprime count in one octant's Sₙ wedge, R→∞</div>
+        <div class="stat-grid" style="margin-top:6px;">
+          <div class="stat"><div class="lbl">Predicted</div><div class="val" id="sectorAsymp" style="color:#94a3b8">–</div></div>
+          <div class="stat"><div class="lbl">Abs err</div><div class="val" id="sectorAbsErr">–</div></div>
+          <div class="stat"><div class="lbl">Rel err</div><div class="val" id="sectorRelErr" style="color:#4ade80">–</div></div>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="table-wrap panel">
+    <div class="row-inline" style="justify-content:space-between;margin-bottom:8px;">
+      <strong style="color:#67e8f9;font-size:0.9em;">Sector S<sub>n</sub> points — click a row to select on canvas</strong>
+      <span style="font-size:11px;color:#64748b;" id="tableCount"></span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="x">x (denom)</th>
+            <th data-key="y">y (numer)</th>
+            <th data-key="slope">slope y/x</th>
+            <th data-key="gcd">gcd(y,x)</th>
+            <th data-key="coprime">coprime</th>
+            <th data-key="onDiag">on diagonal</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  </div>
+
+  <div id="pane3d" class="tabpane">
+
+    <div class="formula-box" style="border-left-color:#a855f7;max-width:860px;">
+      <div class="formula-main" style="color:#d8b4fe;">N&#8323;(R) = 1 + 6&middot;A + 12&middot;E + 8&middot;V + 24&middot;P + 24&middot;M + 48&middot;G</div>
+      <div class="formula-sub">Each term is an orbit class of the octahedral group B&#8323; (signed permutations of three coordinates, order 48) acting on the fundamental domain x &ge; y &ge; z &ge; 0, x&sup2;+y&sup2;+z&sup2; &le; R&sup2;.</div>
+      <div class="formula-sub" style="margin-top:8px;">Orbit size of any lattice point = (distinct arrangements of the multiset {|x|,|y|,|z|}) &times; 2<sup>(number of nonzero coordinates)</sup></div>
+    </div>
+
+    <div class="desc-box">
+      <h3>What this tab shows</h3>
+      <p>
+        The 2D tab reconstructs the Gauss circle count from a single octant using the dihedral group of order 8:
+        <code>N(R) = 1 + 4A + 4D + 8O</code>. Those coefficients are not chosen &mdash; they are the orbit sizes forced by
+        which symmetries fix a point. The origin is fixed by everything (orbit 1), an axis point is fixed by one reflection
+        (orbit 4), a diagonal point likewise (orbit 4), and a generic point has trivial stabiliser (orbit 8).
+      </p>
+      <p>
+        In three dimensions the same argument runs with the signed permutation group of order 2&sup3;&middot;3! = 48.
+        The fundamental domain is the sorted cone x &ge; y &ge; z &ge; 0, and the stabiliser types line up exactly with the
+        symmetry elements of a cube &mdash; 6 face directions, 12 edge directions, 8 vertex directions:
+      </p>
+
+      <table class="orbit-tbl">
+        <thead>
+          <tr><th>Representative</th><th>Orbit size</th><th>Term</th><th>Geometric meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>(0,&nbsp;0,&nbsp;0)</td><td class="cls" style="color:#4ade80">1</td><td>1</td><td>origin</td></tr>
+          <tr><td>(a,&nbsp;0,&nbsp;0), a&gt;0</td><td class="cls" style="color:#22d3ee">6</td><td>6&middot;A</td><td>axis / cube face directions</td></tr>
+          <tr><td>(a,&nbsp;a,&nbsp;0), a&gt;0</td><td class="cls" style="color:#f59e0b">12</td><td>12&middot;E</td><td>face diagonals / cube edge directions</td></tr>
+          <tr><td>(a,&nbsp;a,&nbsp;a), a&gt;0</td><td class="cls" style="color:#f472b6">8</td><td>8&middot;V</td><td>body diagonals / cube vertex directions</td></tr>
+          <tr><td>(a,&nbsp;b,&nbsp;0), a&gt;b&gt;0</td><td class="cls" style="color:#a78bfa">24</td><td>24&middot;P</td><td>generic, lying in a coordinate plane</td></tr>
+          <tr><td>(a,&nbsp;a,&nbsp;b) or (a,&nbsp;b,&nbsp;b)</td><td class="cls" style="color:#818cf8">24</td><td>24&middot;M</td><td>generic, one repeated coordinate</td></tr>
+          <tr><td>(a,&nbsp;b,&nbsp;c) distinct, all&gt;0</td><td class="cls" style="color:#94a3b8">48</td><td>48&middot;G</td><td>trivial stabiliser &mdash; full orbit</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:12px;">
+        <span class="tag tag-classical">classical</span>
+        The orbit&ndash;stabiliser decomposition, the Gauss sphere count, and the primitive density
+        1/&zeta;(3) &asymp; 0.8319 (&zeta;(3) is Ap&eacute;ry's constant) are all standard. Nothing here is claimed as new.
+      </p>
+      <p>
+        <span class="tag tag-display">what's shown</span>
+        The panel below recomputes both sides live: a brute-force sweep of the whole ball, and the reconstruction from the
+        sorted cone alone. They are checked for exact equality at every R, the same PASS/FAIL discipline the 2D tab uses.
+      </p>
+
+      <h3 style="margin-top:14px;">Lifting the Farey sector S<sub>n</sub></h3>
+      <p>
+        In 2D the sector is a slope band S<sub>n</sub> = (1/(n+1), 1/n] &mdash; a wedge between two rays. There are two
+        honest ways to carry that into 3D, and both are available in the sector control:
+      </p>
+      <p>
+        <strong style="color:#cbd5e1">Azimuthal wedge</strong> &mdash; keep points with x &gt; 0 and y/x &isin; S<sub>n</sub>.
+        This is literally the 2D sector extruded along z: a dihedral wedge hinged on the z-axis. Its cross-section in the
+        z = 0 plane is exactly what the 2D tab draws.
+      </p>
+      <p>
+        <strong style="color:#cbd5e1">Polar cone shell</strong> &mdash; keep points with z/&radic;(x&sup2;+y&sup2;) &isin; S<sub>n</sub>.
+        This bands the sphere by latitude instead of longitude, so the sector becomes a cone shell about the z-axis. The
+        counts differ from the wedge; the widget reports each separately rather than assuming they agree.
+      </p>
+      <p style="color:#64748b;font-size:11.5px;">
+        Note on density: the wedge and the cone shell have different solid angles, so their primitive-point densities are
+        <em>not</em> expected to match 1/&zeta;(3) as stated &mdash; only the full-ball density is. The sector readouts below are
+        raw counts and a within-sector primitive ratio, not a claim about a limit.
+      </p>
+    </div>
+
+    <div class="layout">
+      <div class="float-spacer" id="spacer3"></div>
+      <div class="panel canvas-panel" id="cpanel3">
+        <div class="canvas-tools">
+          <button class="pin-btn" id="pin3">&#9678; Float canvas</button>
+          <button class="pin-btn" id="size3" style="display:none">&#10530; Size</button>
+          <span class="grip" id="grip3" style="display:none">&#10303; drag</span>
+          <select id="exportRes3" class="res-select" style="background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;padding:3px 6px;font-size:11px;">
+            <option value="1">Standard (640px)</option>
+            <option value="2" selected>High (1280px)</option>
+            <option value="4">4K (2560px)</option>
+            <option value="8">8K (5120px)</option>
+          </select>
+          <button class="pin-btn" id="exportBtn3">&#8681; Export PNG</button>
+        </div>
+        <canvas id="canvas3d" class="viewport3d" width="640" height="640"></canvas>
+        <div class="hint-bar">
+          <span><kbd>drag</kbd> rotate</span>
+          <span><kbd>wheel</kbd> / <kbd>pinch</kbd> zoom</span>
+          <span><kbd>click</kbd> inspect a point</span>
+          <span><kbd>shift + drag</kbd> pan</span>
+        </div>
+        <div class="legend-row" id="legendRow3d"></div>
+        <div id="detail3d">Drag to rotate the ball. Click any point to inspect its coordinates, gcd and orbit class.</div>
+        <div class="warn" id="warn3d"></div>
       </div>
-      <div class="ctrl-block" style="flex:0;min-width:auto;">
-        <div class="ctrl-label" style="justify-content:flex-start;gap:8px;">Winding</div>
-        <button class="step-btn" id="sp-dirbtn" onclick="spCycleDir()" title="Toggle r ≡ +p (mod M) vs r ≡ −p (mod M)" style="width:auto;padding:0 12px;">▲ up</button>
+
+      <div class="controls-panel">
+        <fieldset>
+          <legend>Radius &amp; Sector</legend>
+          <div class="row">
+            <label class="field-label">Radius R = <span id="r3dVal" class="valdisp">8</span></label>
+            <input type="range" id="r3dSlider" min="1" max="24" value="8">
+            <div class="row-inline" style="margin-top:4px;">
+              <input type="number" id="r3dNum" min="1" max="60" value="8">
+              <span style="font-size:10px;color:#64748b;">exact R (counts to 60, drawn to 24)</span>
+            </div>
+            <div class="row-inline" style="margin-top:6px;">
+              <button class="play-btn" id="r3dPlay">&#9654; Play R</button>
+              <button class="play-btn stop" id="r3dStop">&#9632; Stop</button>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <label class="field-label">Sector lift</label>
+            <select id="sec3dMode">
+              <option value="off">Off &mdash; show the whole ball</option>
+              <option value="wedge">Azimuthal wedge &mdash; y/x &isin; S&#8345;</option>
+              <option value="cone">Polar cone shell &mdash; z/&radic;(x&sup2;+y&sup2;) &isin; S&#8345;</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <label class="field-label">Sector n = <span id="n3dVal" class="valdisp">1</span> &middot; interval (<span id="n3dInterval">1/2, 1</span>]</label>
+            <input type="range" id="n3dSlider" min="1" max="24" value="1">
+            <div class="row-inline" style="margin-top:4px;">
+              <input type="number" id="n3dNum" min="1" max="60" value="1">
+            </div>
+            <div class="row-inline" style="margin-top:6px;">
+              <button class="play-btn" id="n3dPlay">&#9654; Play n</button>
+              <button class="play-btn stop" id="n3dStop">&#9632; Stop</button>
+            </div>
+            <div class="row" style="margin-top:8px;">
+              <label class="field-label">Quick sectors</label>
+              <div class="row-inline" style="flex-wrap:wrap;gap:4px;">
+                <button class="step-btn" onclick="jumpSector3d(1)">S₁ ½→1</button>
+                <button class="step-btn" onclick="jumpSector3d(2)">S₂ ⅓→½</button>
+                <button class="step-btn" onclick="jumpSector3d(3)">S₃ ¼→⅓</button>
+                <button class="step-btn" onclick="jumpSector3d(4)">S₄ ⅕→¼</button>
+                <button class="step-btn" onclick="jumpSector3d(5)">S₅</button>
+                <button class="step-btn" onclick="jumpSector3d(8)">S₈</button>
+                <button class="step-btn" onclick="jumpSector3d(12)">S₁₂</button>
+                <button class="step-btn" onclick="jumpSector3d(20)">S₂₀</button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>View</legend>
+          <div class="row">
+            <label class="field-label">Color points by</label>
+            <select id="col3dMode">
+              <option value="prim">Primitive / gcd&gt;1 (default)</option>
+              <option value="class">Orbit class (1/6/8/12/24/48)</option>
+              <option value="gcd">gcd(x,y,z) &mdash; gradient</option>
+              <option value="norm">Distance from origin &mdash; gradient</option>
+              <option value="blockdepth">Block survival depth</option>
+              <option value="depth">Depth cue only</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <label class="field-label">Point size = <span id="ps3dVal" class="valdisp">1.0</span>&times;</label>
+            <input type="range" id="ps3dSlider" min="0.3" max="3" step="0.1" value="1">
+          </div>
+          <div class="checkrow" style="margin-top:8px;"><input type="checkbox" id="show3dNonCoprime" checked> show gcd&gt;1 points</div>
+          <div class="checkrow"><input type="checkbox" id="show3dSphere" checked> sphere wireframe</div>
+          <div class="checkrow"><input type="checkbox" id="show3dAxes" checked> axes</div>
+          <div class="checkrow"><input type="checkbox" id="show3dCone" checked> highlight fundamental cone x&ge;y&ge;z&ge;0</div>
+          <div class="checkrow"><input type="checkbox" id="fast3d"> fast draw (skip depth sort)</div>
+          <div class="row-inline" style="margin-top:10px;">
+            <button class="play-btn" id="spin3d">&#9654; Spin</button>
+            <button class="play-btn stop" id="spin3dStop">&#9632; Stop</button>
+            <button class="play-btn" id="reset3d" style="background:rgba(148,163,184,.15);border-color:#64748b;color:#cbd5e1;">Reset view</button>
+          </div>
+        </fieldset>
+
+        <fieldset style="border-color:#7e22ce;">
+          <legend style="color:#d8b4fe;">Block-coprime dynamic C&#8323;(n)</legend>
+          <div style="font-size:10.5px;color:#94a3b8;margin-bottom:8px;line-height:1.5;">
+            Hold two coordinates and slide the third through n+1 consecutive values, asking how far
+            gcd(x,&nbsp;y,&nbsp;z) = 1 survives. The local factor gains a power of p:
+            <span style="font-family:monospace;color:#d8b4fe;">1 &minus; min(n+1,p)/p&sup3;</span>.
+          </div>
+          <div class="checkrow"><input type="checkbox" id="linkN3" checked> block n follows the sector n</div>
+          <div class="row" style="margin-top:6px;">
+            <label class="field-label">block n = <span id="bn3Val" class="valdisp">1</span> &middot; block length <span id="bl3Val" class="valdisp">2</span></label>
+            <input type="range" id="bn3Slider" min="0" max="40" value="1">
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <label class="field-label">Slide which coordinate</label>
+            <select id="slide3">
+              <option value="z">z &mdash; hold (x, y)</option>
+              <option value="y">y &mdash; hold (x, z)</option>
+              <option value="x">x &mdash; hold (y, z)</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <label class="field-label">Measure over</label>
+            <select id="scope3">
+              <option value="ball">the whole ball</option>
+              <option value="sector">sector S&#8345; only</option>
+            </select>
+          </div>
+          <div class="stat-grid" style="margin-top:8px;">
+            <div class="stat"><div class="lbl">coprime pts</div><div class="val" id="cn3Base">&ndash;</div></div>
+            <div class="stat"><div class="lbl">survive block</div><div class="val" id="cn3Surv">&ndash;</div></div>
+            <div class="stat"><div class="lbl">measured</div><div class="val" id="cn3Meas" style="color:#ec4899">&ndash;</div></div>
+            <div class="stat"><div class="lbl">C&#8323;(n) exact</div><div class="val" id="cn3Exact" style="color:#d8b4fe">&ndash;</div></div>
+            <div class="stat"><div class="lbl">gap</div><div class="val" id="cn3Gap">&ndash;</div></div>
+            <div class="stat"><div class="lbl">D&#8323;(n) = C&#8323;(n)/&zeta;(3)</div><div class="val" id="cn3Dn">&ndash;</div></div>
+          </div>
+          <canvas id="cnCurve3" width="248" height="96" style="margin-top:8px;border-radius:4px;cursor:default;"></canvas>
+          <div style="font-size:9.5px;color:#64748b;margin-top:4px;line-height:1.5;">
+            <span style="color:#d8b4fe">&#9679;</span> exact C&#8323;(n) &nbsp; <span style="color:#ec4899">&#9679;</span> measured at this R.
+            Here the saturated factor is 1&minus;1/p&sup2;, which converges &mdash; so
+            <strong style="color:#4ade80">C&#8323;(n) &rarr; &zeta;(3)/&zeta;(2) = 0.730763&hellip;</strong>, not 0.
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Verification</legend>
+          <div class="stat-grid">
+            <div class="stat"><div class="lbl">N&#8323;(R) brute</div><div class="val" id="n3Full">&ndash;</div></div>
+            <div class="stat"><div class="lbl">N&#8323;(R) recon</div><div class="val" id="n3Recon">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Match</div><div class="val" id="recon3dStatus">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Cone pts</div><div class="val" id="cone3dCount">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Primitive</div><div class="val" id="prim3dCount">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Density vs 1/&zeta;(3)</div><div class="val" id="prim3dDensity">&ndash;</div></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Orbit class census</legend>
+          <div class="stat-grid" id="classGrid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="stat"><div class="lbl">&times;1</div><div class="val" id="cls1" style="color:#4ade80">&ndash;</div></div>
+            <div class="stat"><div class="lbl">&times;6 A</div><div class="val" id="cls6" style="color:#22d3ee">&ndash;</div></div>
+            <div class="stat"><div class="lbl">&times;8 V</div><div class="val" id="cls8" style="color:#f472b6">&ndash;</div></div>
+            <div class="stat"><div class="lbl">&times;12 E</div><div class="val" id="cls12" style="color:#f59e0b">&ndash;</div></div>
+            <div class="stat"><div class="lbl">&times;24</div><div class="val" id="cls24" style="color:#a78bfa">&ndash;</div></div>
+            <div class="stat"><div class="lbl">&times;48 G</div><div class="val" id="cls48" style="color:#94a3b8">&ndash;</div></div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:#64748b;">Counts are representatives in the sorted cone; multiply by the class size and sum to recover N&#8323;(R).</div>
+        </fieldset>
+
+        <fieldset id="sec3dStatsBox" style="display:none;">
+          <legend>Sector S<sub>n</sub></legend>
+          <div class="stat-grid">
+            <div class="stat"><div class="lbl">In sector</div><div class="val" id="sec3dTotal">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Coprime</div><div class="val" id="sec3dCop">&ndash;</div></div>
+            <div class="stat"><div class="lbl">gcd&gt;1</div><div class="val" id="sec3dNon">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Coprime ratio</div><div class="val" id="sec3dRatio">&ndash;</div></div>
+          </div>
+          <div style="font-size:10px;color:#64748b;margin-top:8px;">Asymptotic: (1/&zeta;(3)) &times; region volume fraction of the ball, R&rarr;&infin; &mdash; slower to converge for large n (thin sector) or the cone at large n, same as the 2D tab's note.</div>
+          <div class="stat-grid" style="margin-top:6px;">
+            <div class="stat"><div class="lbl">Predicted</div><div class="val" id="sec3dAsymp" style="color:#94a3b8">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Abs err</div><div class="val" id="sec3dAbsErr">&ndash;</div></div>
+            <div class="stat"><div class="lbl">Rel err</div><div class="val" id="sec3dRelErr" style="color:#4ade80">&ndash;</div></div>
+          </div>
+        </fieldset>
       </div>
-      <div class="ctrl-block" style="flex:0;min-width:auto;">
-        <div class="ctrl-label" style="justify-content:flex-start;">Play</div>
-        <button class="wgbtn" id="sp-playbtn" onclick="spTogglePlay()">▶ Sweep p</button>
+    </div>
+
+    <div class="table-wrap panel">
+      <div class="row-inline" style="justify-content:space-between;margin-bottom:8px;">
+        <strong style="color:#d8b4fe;font-size:0.9em;">Fundamental cone x &ge; y &ge; z &ge; 0 &mdash; click a row to select on canvas</strong>
+        <span style="font-size:11px;color:#64748b;" id="table3dCount"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-key3="x">x</th>
+              <th data-key3="y">y</th>
+              <th data-key3="z">z</th>
+              <th data-key3="norm2">x&sup2;+y&sup2;+z&sup2;</th>
+              <th data-key3="orbit">orbit size</th>
+              <th data-key3="cls">class</th>
+              <th data-key3="g">gcd</th>
+              <th data-key3="prim">primitive</th>
+            </tr>
+          </thead>
+          <tbody id="tbody3d"></tbody>
+        </table>
       </div>
     </div>
-    <div class="togglegrid">
-      <label><input type="checkbox" id="sp-mirror" checked onchange="drawSpiral()"> Mirror σ(r)=M−r</label>
-      <label><input type="checkbox" id="sp-allp" onchange="drawSpiral()"> Overlay all primes</label>
-      <label><input type="checkbox" id="sp-dropout" checked onchange="drawSpiral()"> Dropout ring (M=p)</label>
-      <label><input type="checkbox" id="sp-base" checked onchange="drawSpiral()"> Base lattice (dim)</label>
-    </div>
-    <canvas id="spiralCv" class="plot" style="height:440px;"></canvas>
-    <div class="legend">
-      <span><span class="sw" style="background:#e05060;"></span>r ≡ p (mod M) — the spiral</span>
-      <span><span class="sw" style="background:#9b7fe8;"></span>mirror σ(r) = M − r</span>
-      <span><span class="sw" style="background:rgba(230,56,72,.35);"></span>all-primes overlay (dim)</span>
-      <span><span class="sw" style="background:transparent;border:1px dashed #e05060;"></span>dropout ring M = p</span>
-    </div>
-    <div class="result-grid">
-      <div class="result-box"><div class="rlabel">Current prime</div><div class="rval" id="sp-r1">—</div></div>
-      <div class="result-box violet"><div class="rlabel">Spiral points plotted</div><div class="rval" id="sp-r2">—</div></div>
-      <div class="result-box"><div class="rlabel">Dropout ring (M = p)</div><div class="rval" id="sp-r3">—</div></div>
-    </div>
-    <div class="card-note">Drag isn't needed here — the geometry is flat (2D rings), unlike Page 10's 3D Ring stack. Tap ◀ ▶ to change the spiral prime, or press Play to sweep through every prime ≤ G automatically.</div>
+
   </div>
 
-  <!-- DERIVATION -->
-  <div class="card">
-    <div class="card-title">Where the Point Actually Lands</div>
-    <div class="step">
-      <div class="stepnum">1 — Fix p, sweep M</div>
-      For a chosen prime $p$ and each ring $M = p{+}1, \dots, G$, the marked residue is simply
-      $r_M = p \bmod M$. Since $p < M$ for every ring we draw, this is just $p$ itself whenever
-      $p < M \le$ (well inside range) — the interesting behavior only starts once $M$ has climbed
-      far enough that $p \bmod M$ genuinely wraps.
-    </div>
-    <div class="step">
-      <div class="stepnum">2 — Two winding directions</div>
-      Toggling ▲/▼ switches between $r_M = p \bmod M$ (the "up" branch) and its reflection
-      $r_M = (-p) \bmod M = (M - (p \bmod M)) \bmod M$ (the "down" branch, taken to be $M$ itself
-      when the reduction is $0$, so the marker never lands on the excluded residue $0$). The two
-      branches are mirror images of each other under $r \mapsto M-r$ — which is exactly the
-      conjugate/mirror overlay (σ) you can toggle independently.
-    </div>
-    <div class="step">
-      <div class="stepnum">3 — Why it looks like a spiral and not noise</div>
-      Radius grows linearly in $M$ (ring $M$ sits at radius $\propto M$), while angle is
-      $\theta_M = 2\pi r_M/M$. For $r_M = p \bmod M$, this angle doesn't grow monotonically —
-      but it does have long stretches where $p \bmod M \approx p$ (when $M$ is still much bigger
-      than $p$'s reductions), giving the smooth arcs you see between the sharper jumps. The
-      "jumps" happen exactly when $M$ passes a value at which $p \bmod M$ wraps around, i.e.
-      roughly every $M \approx p/k$ for integer $k$ — a genuinely number-theoretic cadence, not
-      an artifact of the drawing.
-    </div>
-    <div class="step">
-      <div class="stepnum">4 — The all-primes overlay is the same construction, superposed</div>
-      Turning on "Overlay all primes" simply repeats steps 1–3 for every prime $\le G$
-      simultaneously, dimmed so the selected spiral prime still reads clearly. It's a useful way
-      to see that no single prime's spiral is special — every prime traces one, and they all
-      obey the same $r_M = p \bmod M$ rule.
-    </div>
-  </div>
 
-  <!-- CONNECTION TO C(n) -->
-  <div class="card">
-    <div class="card-title">The Dropout Ring Is Not Decoration</div>
-    <div class="hero-sub" style="max-width:none;">
-      Turn on "Dropout ring" and look at what happens exactly at $M = p$: the ring itself is
-      drawn dashed, and the spiral marker is undefined there, because
-      $\gcd(p,p) = p \neq 1$ — the prime is never coprime to a modulus equal to itself. This
-      isn't a rendering edge case; it's the same saturation point that appears directly in the
-      C(n) formula's local factor:
-    </div>
-    <div class="hero-formula" style="margin:14px 0 8px;">
-      $$\rho_p(n) = 1 - \frac{\min(n{+}1,\,p)}{p^2}$$
-    </div>
-    <div class="pinkbox">
-      As the block depth $n$ grows, $\min(n{+}1,p)$ climbs linearly until it hits the ceiling $p$
-      — and it hits that ceiling <i>exactly</i> at $n = p-1$, i.e. once the block has grown wide
-      enough to guarantee it contains a full residue class mod $p$. That's the same $p$ that
-      exits its own multiplicative group at $M=p$ in this spiral: both are the moment a prime
-      stops being able to "dodge" the sieve and becomes fully accounted for. The dropout ring
-      you can see here is a geometric picture of the same saturation the tail-correction
-      analysis (see Page 5 / the derivation notes) bounds analytically via
-      $\sum_{p>y} 1/p^2 = O(1/(y\ln y))$.
-    </div>
-  </div>
-
-  <!-- ULAM ASIDE -->
-  <div class="card">
-    <div class="card-title">Aside — Why This Isn't the Ulam Spiral</div>
-    <div class="skybox">
-      Stanisław Ulam's spiral (1963) places the integers $1,2,3,\dots$ along an outward square
-      path and colors in the primes; the striking part is that primes cluster along certain
-      diagonals more than chance alone would suggest, hinting at patterns in quadratic
-      polynomials. It's a single static picture built from <i>all</i> integers at once.
-    </div>
-    <div class="hero-sub" style="max-width:none;margin-top:10px;">
-      The construction on this page shares only the word "spiral." It fixes one prime and tracks
-      <i>its</i> residue across a family of moduli — a dynamical trace through the Ring view's
-      existing coprimality lattice, not a placement of the integers themselves. If you'd like an
-      actual Ulam-style integer spiral added as a separate view later, that would be a genuinely
-      new visualization rather than an extension of this one — happy to scope that as its own
-      page if useful for SoME6.
-    </div>
-  </div>
-
+  <footer>
+    <strong style="color:#64748b">2D tab</strong> &mdash; Coordinate convention: x = denominator (Gauss X → Wessen m), y = numerator (Gauss Y → Wessen r). Table is capped to the current octant/sector selection; increase R or widen the sector to see more rows, or narrow either to inspect specific points. gcd(0,x) is undefined and excluded from coprime coloring at the origin/axes.
+    <br><br><strong style="color:#64748b">3D tab</strong> &mdash; The fundamental domain is the sorted cone x &ge; y &ge; z &ge; 0; every lattice point in the ball is a signed permutation of exactly one representative in it. Orbit sizes are computed per point rather than assumed, and the brute-force sweep of the whole ball is compared against the weighted cone sum at every R. gcd(0,0,0) = 0 is reported as such and the origin is excluded from the primitive-density ratio.
+  </footer>
 </div>
 
 <script>
-// ── Shared decimal precision (kept for visual consistency with other pages; this
-// page has no numeric tables that depend on it, but the control stays functional). ──
-let DECIMALS = 6;
-function setDecimals(v){
-  DECIMALS = v;
-  document.getElementById('decimalVal').textContent = v;
-  document.getElementById('decimalSl').value = v;
-}
+/* ============================================================
+   Shared block-coprime density module for page 13.
 
-// ── Prime sieve ──
-function sievePrimes(limit){
-  const isC = new Uint8Array(limit+1);
-  const out = [];
-  for(let i=2;i<=limit;i++){
-    if(!isC[i]){
-      out.push(i);
-      for(let j=i*i;j<=limit;j+=i) isC[j]=1;
+   Dimension-k block density:
+       D_k(n) = PROD_p ( 1 - min(n+1,p) / p^k )
+       C_k(n) = zeta(k) * D_k(n) = D_k(n) / D_k(0)
+
+   k = 2 reproduces page 1's C(n) exactly (C(1) = 0.5307...).
+   k = 3 is the sphere analogue used by the 3D tab.
+
+   Derivation of the local factor (same argument in both):
+     a block fails at p exactly when p divides every "fixed"
+     coordinate AND p divides one of the n+1 slid values.
+     P = (1/p^(k-1)) * (min(n+1,p)/p) = min(n+1,p)/p^k.
+
+   Limits:  C_2(n) -> 0   (the product picks up 1-1/p, which diverges)
+            C_3(n) -> zeta(3)/zeta(2) = 0.7307629...  (picks up 1-1/p^2)
+   ============================================================ */
+(function(){
+  var ZETA2 = Math.PI*Math.PI/6;          // 1.6449340668482264
+  var ZETA3 = 1.2020569031595943;         // Apery
+  var SIEVE = 50000;
+
+  // primes up to SIEVE
+  var PR = (function(){
+    var s = new Uint8Array(SIEVE+1), out = [];
+    for(var i=2;i<=SIEVE;i++){
+      if(!s[i]){ out.push(i); for(var j=i*i;j<=SIEVE;j+=i) s[j]=1; }
     }
-  }
-  return out;
-}
-const PRIMES = sievePrimes(400);
-function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+    return out;
+  })();
 
-// ── State ──
-let _spP = 2;         // spiral prime
-let _spDir = 'up';     // 'up' -> r = p mod M ; 'down' -> r = -p mod M
-let _spPlayId = null, _spPlayDir = 1;
+  // Analytic tail beyond the sieve: log PROD_{p>P}(1-(n+1)/p^k) ~ -(n+1)*SUM_{p>P} p^-k.
+  // P(2) and P(3) are the prime zeta values; subtracting the partial sums leaves the tail.
+  var PZ2 = 0.45224742004106549850, PZ3 = 0.17476263929944353642;
+  var TAIL = (function(){
+    var s2=0, s3=0;
+    for(var i=0;i<PR.length;i++){ var p=PR[i]; s2 += 1/(p*p); s3 += 1/(p*p*p); }
+    return { 2: PZ2-s2, 3: PZ3-s3 };
+  })();
+  // measured accuracy vs a 3,000,000-prime sieve: ~2e-8 (k=2), ~1e-12 (k=3) for n up to 200
 
-function spiralPFor(G){
-  if(_spP>=2 && _spP<=G) return _spP;
-  for(let i=PRIMES.length-1;i>=0;i--) if(PRIMES[i]<=G) return PRIMES[i];
-  return 2;
-}
-function spStepG(d){
-  const sl = document.getElementById('sp-gsl');
-  let v = Math.max(+sl.min, Math.min(+sl.max, (+sl.value)+d));
-  sl.value = v; onSpGChange();
-}
-function onSpGChange(){
-  const G = +document.getElementById('sp-gsl').value;
-  document.getElementById('sp-gval').textContent = G;
-  drawSpiral();
-}
-function spStepP(dir){
-  const G = +document.getElementById('sp-gsl').value;
-  let cur = spiralPFor(G), idx = PRIMES.indexOf(cur);
-  if(idx<0) idx=0;
-  idx = Math.max(0, idx+dir);
-  while(idx>0 && PRIMES[idx]>G) idx--;
-  _spP = PRIMES[Math.min(idx, PRIMES.length-1)];
-  drawSpiral();
-}
-function spCycleDir(){
-  _spDir = _spDir==='up' ? 'down' : 'up';
-  const btn = document.getElementById('sp-dirbtn');
-  btn.textContent = _spDir==='up' ? '▲ up' : '▼ down';
-  drawSpiral();
-}
-function spTogglePlay(){
-  const btn = document.getElementById('sp-playbtn');
-  if(_spPlayId){
-    clearInterval(_spPlayId); _spPlayId=null;
-    btn.textContent='▶ Sweep p'; btn.classList.remove('playing');
-    return;
-  }
-  btn.textContent='■ Stop'; btn.classList.add('playing');
-  _spPlayDir = 1;
-  _spPlayId = setInterval(function(){
-    const G = +document.getElementById('sp-gsl').value;
-    const before = spiralPFor(G);
-    spStepP(_spPlayDir);
-    if(spiralPFor(G)===before){ _spPlayDir*=-1; spStepP(_spPlayDir); }
-  }, 260);
-}
-
-function ringXY(cx,cy,maxR,G,r,M){
-  const R = maxR*(M-1)/Math.max(1,G-1);
-  const th = 2*Math.PI*r/M;
-  return [cx+R*Math.cos(th), cy-R*Math.sin(th)];
-}
-
-function drawSpiral(){
-  const cv = document.getElementById('spiralCv');
-  const dpr = Math.min(window.devicePixelRatio||1, 2);
-  const cssW = cv.clientWidth||600, cssH = 440;
-  cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
-  cv.style.height = cssH+'px';
-  const ctx = cv.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.fillStyle = '#020204';
-  ctx.fillRect(0,0,cssW,cssH);
-
-  const G = +document.getElementById('sp-gsl').value;
-  const p = spiralPFor(G);
-  document.getElementById('sp-plabel').textContent = 'p='+p;
-
-  const cx = cssW/2, cy = cssH/2;
-  const maxR = Math.min(cssW,cssH)*0.46;
-  const dir = _spDir;
-  const mirrorOn = document.getElementById('sp-mirror').checked;
-  const allPOn = document.getElementById('sp-allp').checked;
-  const dropOn = document.getElementById('sp-dropout').checked;
-  const baseOn = document.getElementById('sp-base').checked;
-
-  function reduced(prime, M){
-    if(dir==='down'){
-      const m = ((M - (prime % M)) % M);
-      return m===0 ? M : m;
+  var memo = {2:{}, 3:{}};
+  function cn(n, k){
+    if(n < 0) return NaN;
+    var m = memo[k];
+    if(m[n] !== undefined) return m[n];
+    var ld = 0, np1 = n+1;
+    for(var i=0;i<PR.length;i++){
+      var p = PR[i];
+      var pk = (k===2) ? p*p : p*p*p;
+      ld += Math.log(1 - (np1<p?np1:p)/pk);
     }
-    return prime % M;
+    ld += -np1*TAIL[k];
+    var v = (k===2?ZETA2:ZETA3)*Math.exp(ld);
+    if(n<=4096) m[n] = v;
+    return v;
   }
 
-  // Base lattice: faint dots for every coprime residue on every ring
-  if(baseOn){
-    ctx.save();
-    for(let M=3;M<=G;M++){
-      for(let r=1;r<M;r++){
-        if(gcd(r,M)!==1) continue;
-        const [x,y] = ringXY(cx,cy,maxR,G,r,M);
-        ctx.fillStyle = 'rgba(232,227,219,.12)';
-        ctx.beginPath(); ctx.arc(x,y,1.0,0,6.2832); ctx.fill();
+  function gcd(a,b){ a=a<0?-a:a; b=b<0?-b:b; while(b){ var t=a%b; a=b; b=t; } return a; }
+
+  // depth(fixedGcd, slid) = largest d <= cap with gcd(fixedGcd, slid+j) = 1 for all 0<=j<=d.
+  // Returns -1 when the point is not coprime to begin with.
+  // fixedGcd is gcd of the coordinates that stay put: |y| in 2D, gcd(|x|,|y|) in 3D.
+  function depth(fixedGcd, slid, cap){
+    if(gcd(fixedGcd, slid) !== 1) return -1;
+    if(fixedGcd === 1) return cap;          // gcd(1, anything) = 1 forever
+    for(var d=1; d<=cap; d++){
+      if(gcd(fixedGcd, slid+d) !== 1) return d-1;
+    }
+    return cap;
+  }
+
+  // colour ramp for survival depth: dark teal (dies at once) -> hot gold (survives the cap)
+  function depthColor(d, cap){
+    if(d < 0) return '#3f3f46';
+    var t = cap>0 ? Math.min(1, d/cap) : 0;
+    return 'hsl(' + Math.round(190 - 145*t) + ',' + Math.round(55+35*t) + '%,' + Math.round(38+22*t) + '%)';
+  }
+
+  window.WGCn = {
+    ZETA2: ZETA2, ZETA3: ZETA3,
+    PLATEAU3: ZETA3/ZETA2,     // 0.7307629... the limit of C_3(n)
+    primes: PR,
+    cn: cn,
+    gcd: gcd,
+    depth: depth,
+    depthColor: depthColor,
+
+    /* Draw the C_k(n) curve into a small canvas, with the live measured point.
+       nMax fixes the horizontal range; measured may be null. */
+    drawCurve: function(cvs, k, nNow, measured, nMax){
+      if(!cvs) return;
+      var c = cvs.getContext('2d'), W = cvs.width, H = cvs.height;
+      var padL = 30, padR = 6, padT = 8, padB = 16;
+      c.clearRect(0,0,W,H);
+      c.fillStyle = '#0b1220'; c.fillRect(0,0,W,H);
+
+      var yMax = 1.0, yMin = 0;
+      var X = function(n){ return padL + (n/nMax)*(W-padL-padR); };
+      var Y = function(v){ return H-padB - ((v-yMin)/(yMax-yMin))*(H-padT-padB); };
+
+      // frame
+      c.strokeStyle = '#1e293b'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(padL, padT); c.lineTo(padL, H-padB); c.lineTo(W-padR, H-padB); c.stroke();
+      c.fillStyle = '#475569'; c.font = '8px monospace';
+      c.fillText('1.0', 4, Y(1)+3); c.fillText('0.0', 4, Y(0)+3);
+      c.fillText('n=0', padL-2, H-4); c.fillText('n='+nMax, W-padR-26, H-4);
+
+      // the 3D plateau zeta(3)/zeta(2)
+      if(k===3){
+        var pl = window.WGCn.PLATEAU3;
+        c.strokeStyle = 'rgba(74,222,128,.45)'; c.setLineDash([3,3]);
+        c.beginPath(); c.moveTo(padL, Y(pl)); c.lineTo(W-padR, Y(pl)); c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = '#4ade80'; c.font = '7px monospace';
+        c.fillText('ζ(3)/ζ(2)', padL+3, Y(pl)-3);
+      }
+
+      // curve
+      c.strokeStyle = k===2 ? '#06b6d4' : '#a855f7'; c.lineWidth = 1.6;
+      c.beginPath();
+      for(var n=0;n<=nMax;n++){
+        var v = cn(n,k);
+        if(n===0) c.moveTo(X(n), Y(v)); else c.lineTo(X(n), Y(v));
+      }
+      c.stroke();
+
+      // marker at current n
+      var vNow = cn(nNow, k);
+      c.strokeStyle = 'rgba(236,72,153,.5)';
+      c.beginPath(); c.moveTo(X(nNow), padT); c.lineTo(X(nNow), H-padB); c.stroke();
+      c.fillStyle = k===2 ? '#67e8f9' : '#d8b4fe';
+      c.beginPath(); c.arc(X(nNow), Y(vNow), 3, 0, 6.283185); c.fill();
+
+      // measured value
+      if(measured != null && isFinite(measured)){
+        c.fillStyle = '#ec4899';
+        c.beginPath(); c.arc(X(nNow), Y(measured), 3, 0, 6.283185); c.fill();
+        c.strokeStyle = '#fbcfe8'; c.lineWidth = 1;
+        c.beginPath(); c.arc(X(nNow), Y(measured), 5, 0, 6.283185); c.stroke();
       }
     }
-    ctx.restore();
-  }
+  };
+})();
 
-  // All-primes overlay (dim), skipping the selected prime (drawn bright below)
-  if(allPOn){
-    ctx.save();
-    for(let pi=0; pi<PRIMES.length; pi++){
-      const ap = PRIMES[pi];
-      if(ap>=G) break;
-      if(ap===p) continue;
-      for(let M=ap+1; M<=G; M++){
-        const r = reduced(ap,M);
-        if(r<1||r>=M) continue;
-        const [x,y] = ringXY(cx,cy,maxR,G,r,M);
-        ctx.fillStyle = 'rgba(230,56,72,.25)';
-        ctx.beginPath(); ctx.arc(x,y,1.3,0,6.2832); ctx.fill();
+</script>
+
+<script>
+(function(){
+  const WGCn = window.WGCn;
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const rSlider = document.getElementById('rSlider'), rNum = document.getElementById('rNum');
+  const nSlider = document.getElementById('nSlider'), nNum = document.getElementById('nNum');
+  const showNonCoprime = document.getElementById('showNonCoprime');
+  const showGrid = document.getElementById('showGrid');
+  const showAxisDiag = document.getElementById('showAxisDiag');
+  const labelMode = document.getElementById('labelMode');
+  const colorMode = document.getElementById('colorMode');
+  const linkN2 = document.getElementById('linkN2');
+  const bn2Slider = document.getElementById('bn2Slider');
+  const scope2 = document.getElementById('scope2');
+  const colorScope = document.getElementById('colorScope');
+  const cnFilter2 = document.getElementById('cnFilter2');
+
+  // Prime-radius stepping. WGCn already sieved to 2e5, well past the R cap.
+  const PRIMES = WGCn.primes;
+  function isPrimeR(v){
+    if(v < 2) return false;
+    let lo = 0, hi = PRIMES.length - 1;
+    while(lo <= hi){ const m = (lo+hi)>>1;
+      if(PRIMES[m] === v) return true;
+      if(PRIMES[m] < v) lo = m+1; else hi = m-1; }
+    return false;
+  }
+  function stepPrime(v, dir){
+    const cap = parseInt(rNum.max,10);
+    if(dir > 0){
+      for(let i=0;i<PRIMES.length;i++){
+        if(PRIMES[i] > cap) break;
+        if(PRIMES[i] > v) return PRIMES[i];
+      }
+      // already at or past the last prime in range: hold on that prime, not the cap
+      let top = 2;
+      for(let i=0;i<PRIMES.length && PRIMES[i] <= cap;i++) top = PRIMES[i];
+      return top;
+    }
+    let best = 2;
+    for(let i=0;i<PRIMES.length && PRIMES[i] < v;i++) best = PRIMES[i];
+    return best;
+  }
+  function setR(v){
+    const cap = parseInt(rNum.max,10);
+    v = Math.max(1, Math.min(cap, v));
+    rNum.value = v;
+    rSlider.value = Math.min(v, parseInt(rSlider.max,10));
+    draw();
+  }
+  function updatePrimeTag(){
+    const v = parseInt(rNum.value,10) || 0;
+    const tag = document.getElementById('rPrimeTag');
+    if(!tag) return;
+    const p = isPrimeR(v);
+    tag.textContent = p ? ('R = ' + v + ' is prime') : ('R = ' + v + ' is not prime');
+    tag.classList.toggle('is-prime', p);
+  }
+  // A point lies in the mirrored sector when its sorted representative does.
+  // The 8 dihedral images of S_n form a pinwheel of congruent wedges.
+  function inSector8(x, y, n){
+    const ax=Math.abs(x), ay=Math.abs(y);
+    const a=Math.max(ax,ay), b=Math.min(ax,ay);
+    if(a===0) return false;
+    const sl=b/a;
+    return sl > 1/(n+1) && sl <= 1/n;
+  }
+  // survival depth of any lattice point, in any quadrant
+  function cnDepthAt(x, y, cap){ return WGCn.depth(Math.abs(y), Math.abs(x), cap); }
+
+  // Every point with x>=1, y>=1 inside the disc.
+  // Sign images share all properties because depth reads |x| and |y|, but SWAPPED
+  // images do not: depth holds the numerator and slides the denominator, so
+  // depth(y,x) and depth(x,y) generally differ. The quadrant is therefore
+  // enumerated in full rather than mirrored out of the octant.
+  let _qMemo = { key:null, val:null };
+  function quadrantPoints(R, n, cap){
+    const key = R+'|'+n+'|'+cap;
+    if(_qMemo.key===key) return _qMemo.val;
+    const Ri=Math.floor(R), lower=1/(n+1), upper=1/n, out=[];
+    for(let x=1;x<=Ri;x++){
+      if(x*x>R*R) break;
+      for(let y=1;y<=Ri;y++){
+        if(x*x+y*y>R*R) break;
+        const g=gcd(y,x), cop=(g===1), sl=y/x;
+        out.push({x,y,slope:sl,gcd:g,coprime:cop,onDiag:(x===y),
+                  inSector:(sl>lower && sl<=upper),
+                  depth: cop ? WGCn.depth(y,x,cap) : -1});
       }
     }
-    ctx.restore();
+    _qMemo={key,val:out}; return out;
+  }
+  const cnCurve2 = document.getElementById('cnCurve2');
+
+  // Block length used by the C(n) panel. Locked to the sector index by default:
+  // the sector S_n and the block of n+1 consecutive denominators share the same n.
+  function blockN2(){
+    if(linkN2.checked) return Math.max(0, parseInt(nNum.value,10) || parseInt(nSlider.value,10) || 1);
+    return Math.max(0, parseInt(bn2Slider.value,10) || 0);
+  }
+  function depthCap2(){ return Math.min(48, Math.max(blockN2(), 8)); }
+  const legendSector1 = document.getElementById('legendSector1');
+  const legendSector2 = document.getElementById('legendSector2');
+
+  function gradientColor(v, maxV){
+    const t = maxV>0 ? Math.min(1, v/maxV) : 0;
+    const hue = 260 - 260*t; // 260=violet (low) -> 0=red (high)
+    return `hsl(${hue.toFixed(0)},75%,55%)`;
   }
 
-  // Dropout ring — dashed circle at M = p
-  if(dropOn && p>=2 && p<=G){
-    const R = maxR*(p-1)/Math.max(1,G-1);
-    ctx.save();
-    ctx.setLineDash([3,3]);
-    ctx.strokeStyle = 'rgba(230,56,72,.6)';
-    ctx.lineWidth = 1.1;
-    ctx.beginPath(); ctx.arc(cx,cy,R,0,6.2832); ctx.stroke();
-    ctx.restore();
-  }
-
-  // Main spiral trace
-  const pts = [];
-  for(let M=p+1; M<=G; M++){
-    const r = reduced(p,M);
-    if(r<1||r>=M) continue;
-    pts.push(ringXY(cx,cy,maxR,G,r,M));
-  }
-  ctx.save();
-  ctx.strokeStyle = 'rgba(230,56,72,.4)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  pts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
-  ctx.stroke();
-  ctx.restore();
-  pts.forEach(function(pt){
-    ctx.fillStyle = 'rgba(230,56,72,.95)';
-    ctx.beginPath(); ctx.arc(pt[0],pt[1],2.6,0,6.2832); ctx.fill();
-  });
-
-  // Mirror conjugate σ(r) = M − r
-  if(mirrorOn){
-    const mpts = [];
-    for(let M=p+1; M<=G; M++){
-      const r = reduced(p,M);
-      const rm = M - r;
-      if(rm<1||rm>=M) continue;
-      mpts.push(ringXY(cx,cy,maxR,G,rm,M));
+  function updateLegend(mode, R){
+    if(mode==='coprime'){
+      legendSector1.innerHTML = '<span class="swatch" style="background:#06b6d4"></span>in S<sub>n</sub>, coprime';
+      legendSector2.innerHTML = '<span class="swatch" style="background:#f59e0b"></span>in S<sub>n</sub>, gcd&gt;1';
+      legendSector2.style.display = '';
+    } else if(mode==='depth'){
+      const cap = depthCap2();
+      legendSector1.innerHTML = '<span class="grad-swatch" style="background:linear-gradient(90deg, hsl(190,55%,38%), hsl(45,90%,60%));"></span>block survival depth 0 &rarr; ' + cap + '+';
+      legendSector2.innerHTML = '<span class="swatch" style="background:#3f3f46"></span>gcd&gt;1 (no block)';
+      legendSector2.style.display = '';
+    } else {
+      const label = mode==='r' ? 'r (numerator y)' : 'm (denominator x)';
+      legendSector1.innerHTML = `<span class="grad-swatch" style="background:linear-gradient(90deg, hsl(260,75%,55%), hsl(0,75%,55%));"></span>low → high ${label} (0–${R})`;
+      legendSector2.style.display = 'none';
     }
-    ctx.save();
-    ctx.strokeStyle = 'rgba(155,127,232,.32)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    mpts.forEach(function(pt,i){ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); });
-    ctx.stroke();
-    ctx.restore();
-    mpts.forEach(function(pt){
-      ctx.fillStyle = 'rgba(155,127,232,.85)';
-      ctx.beginPath(); ctx.arc(pt[0],pt[1],2.3,0,6.2832); ctx.fill();
+  }
+  const detailPanel = document.getElementById('detailPanel');
+  const tbody = document.getElementById('tbody');
+  const tableCount = document.getElementById('tableCount');
+
+  let sortKey = 'x', sortAsc = true;
+  let selected = null; // {x,y}
+  let currentPoints = []; // full render list for hit-testing: {x,y,inSector,coprime,onDiag,kind}
+  let scaleGlobal = 1, cxGlobal=0, cyGlobal=0;
+
+  function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b, a%b]; } return a; }
+
+  function reduceFrac(y,x){
+    const g = gcd(y,x) || 1;
+    return (y/g) + '/' + (x/g);
+  }
+
+  function syncPair(slider, num){
+    slider.addEventListener('input', ()=>{ num.value = slider.value; draw(); });
+    num.addEventListener('input', ()=>{
+      let v = parseInt(num.value,10);
+      if(isNaN(v)) return;
+      v = Math.max(parseInt(num.min,10), Math.min(parseInt(num.max,10), v));
+      if (slider.max && v <= parseInt(slider.max,10)) slider.value = v;
+      draw();
     });
   }
+  syncPair(rSlider, rNum);
+  syncPair(nSlider, nNum);
 
-  document.getElementById('sp-r1').textContent = 'p = '+p+' ('+(dir==='up'?'r ≡ +p':'r ≡ −p')+' mod M)';
-  document.getElementById('sp-r2').textContent = pts.length+' points, rings '+(p+1)+'…'+G;
-  document.getElementById('sp-r3').textContent = (p<=G) ? ('M = '+p+' — gcd(p,p) = p, excluded') : '— (p > G, not shown)';
+  // Memoised: repeated draws at identical settings (colour change, table sort,
+  // point selection) reuse the octant scan instead of redoing it.
+  let _caMemo = { key:null, val:null };
+  function computeAll(R, n){
+    const dCap = depthCap2();
+    const _key = R + '|' + n + '|' + dCap;
+    if(_caMemo.key === _key) return _caMemo.val;
+    const Ri = Math.floor(R);
+    let axisK=0, diagK=0, interior=0;
+    for(let k=1;k<=Ri;k++){
+      if(k*k <= R*R) axisK++;
+      if(2*k*k <= R*R) diagK++;
+    }
+    const lower = 1/(n+1), upper = 1/n;
+    const octantPoints = [];
+    for(let x=1;x<=Ri;x++){
+      for(let y=1;y<=x;y++){
+        if(x*x+y*y > R*R) continue;
+        const slope = y/x;
+        const inSector = (slope > lower && slope <= upper);
+        const g = gcd(y,x);
+        const cop = (g===1);
+        if(y<x) interior++;
+        // hold the numerator y, slide the denominator x through x, x+1, ..., x+n
+        const dep = cop ? WGCn.depth(y, x, dCap) : -1;
+        octantPoints.push({x,y,slope,gcd:g,coprime:cop,onDiag:(x===y),inSector,depth:dep});
+      }
+    }
+    const nRecon = 1 + 4*axisK + 4*diagK + 8*interior;
+    _caMemo = { key:_key, val:{ axisK, diagK, interior, nRecon, octantPoints } };
+    return _caMemo.val;
+  }
+
+  function bruteForce(R){
+    const Ri = Math.floor(R);
+    let c=0;
+    for(let x=-Ri;x<=Ri;x++) for(let y=-Ri;y<=Ri;y++) if(x*x+y*y<=R*R) c++;
+    return c;
+  }
+
+  function renderTable(rows){
+    const sorted = rows.slice().sort((a,b)=>{
+      let av=a[sortKey], bv=b[sortKey];
+      if(sortKey==='coprime'||sortKey==='onDiag'){ av=av?1:0; bv=bv?1:0; }
+      if(av<bv) return sortAsc?-1:1;
+      if(av>bv) return sortAsc?1:-1;
+      return 0;
+    });
+    const cap = 500;
+    const capped = sorted.slice(0, cap);
+    tbody.innerHTML = capped.map(p=>{
+      const isSel = selected && selected.x===p.x && selected.y===p.y;
+      return `<tr data-x="${p.x}" data-y="${p.y}" class="${isSel?'selected':''}">
+        <td>${p.x}</td><td>${p.y}</td><td>${p.slope.toFixed(4)}</td><td>${p.gcd}</td>
+        <td class="${p.coprime?'true':'false'}">${p.coprime}</td>
+        <td class="${p.onDiag?'true':'false'}">${p.onDiag}</td>
+      </tr>`;
+    }).join('');
+    tableCount.textContent = sorted.length > cap
+      ? `showing ${cap} of ${sorted.length} rows (sorted)`
+      : `${sorted.length} rows`;
+  }
+
+  tbody.addEventListener('click', (e)=>{
+    const tr = e.target.closest('tr[data-x]');
+    if(!tr) return;
+    selected = { x:+tr.getAttribute('data-x'), y:+tr.getAttribute('data-y') };
+    draw();
+  });
+
+  document.querySelectorAll('#pane2d thead th[data-key]').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const key = th.getAttribute('data-key');
+      if(sortKey===key) sortAsc=!sortAsc; else { sortKey=key; sortAsc=true; }
+      document.querySelectorAll('#pane2d thead th').forEach(h=>h.classList.remove('sorted'));
+      th.classList.add('sorted');
+      draw(true); // re-render table only via full draw, cheap enough
+    });
+  });
+
+  function showDetail(p){
+    if(!p){ detailPanel.innerHTML = 'Click any point on the canvas or a table row to inspect it.'; return; }
+    const frac = reduceFrac(p.y||0, p.x||1);
+    detailPanel.innerHTML =
+      `x = <span class="hl">${p.x}</span> &nbsp; y = <span class="hl">${p.y}</span> &nbsp; `
+      + `slope y/x = <span class="hl">${(p.y/ (p.x||1)).toFixed(5)}</span> &nbsp; reduced = <span class="hl">${frac}</span><br>`
+      + `gcd(y,x) = <span class="hl">${p.gcd!=null?p.gcd:gcd(p.y,p.x)}</span> &nbsp; `
+      + `coprime = <span class="hl">${p.coprime!=null?p.coprime:(gcd(p.y,p.x)===1)}</span> &nbsp; `
+      + `on diagonal = <span class="hl">${p.x===p.y}</span> &nbsp; `
+      + `in S<sub>n</sub> = <span class="hl">${p.inSector!=null?p.inSector:'—'}</span>`;
+  }
+
+  window.jumpSector2d = function(n){
+    const maxN = parseInt(nSlider.max,10) || 40;
+    const v = Math.min(n, maxN);
+    nNum.value = v; nSlider.value = v;
+    draw();
+  };
+
+  function syncSectorMax(R){
+    const maxN = Math.max(1, Math.floor(R));
+    nSlider.max = maxN;
+    nNum.max = maxN;
+    if(parseInt(nSlider.value,10) > maxN) nSlider.value = maxN;
+    if(parseInt(nNum.value,10) > maxN) nNum.value = maxN;
+  }
+
+  function draw(tableOnly){
+    const R = parseInt(rNum.value,10) || parseInt(rSlider.value,10);
+    syncSectorMax(R);
+    const n = parseInt(nNum.value,10) || parseInt(nSlider.value,10);
+    document.getElementById('rVal').textContent = R;
+    updatePrimeTag();
+    document.getElementById('nVal').textContent = n;
+    document.getElementById('nInterval').textContent = `1/${n+1}, 1/${n}`;
+
+    const { nRecon, octantPoints } = computeAll(R, n);
+
+    if(!tableOnly){
+      const nFull = R <= 200 ? bruteForce(R) : null;
+      document.getElementById('nFull').textContent = nFull!=null ? nFull.toLocaleString() : 'skipped (R>200)';
+      document.getElementById('nRecon').textContent = nRecon.toLocaleString();
+      const statusEl = document.getElementById('reconStatus');
+      if(nFull==null){ statusEl.textContent='—'; statusEl.className='val'; }
+      else if(nRecon===nFull){ statusEl.textContent='PASS'; statusEl.className='val pass'; }
+      else { statusEl.textContent='FAIL'; statusEl.className='val fail'; }
+    }
+
+    document.getElementById('octCount').textContent = octantPoints.length.toLocaleString();
+    const sectorPts = octantPoints.filter(p=>p.inSector);
+    const observedCop = sectorPts.filter(p=>p.coprime).length;
+    document.getElementById('sectorCoprime').textContent = observedCop.toLocaleString();
+    document.getElementById('sectorNonCoprime').textContent = sectorPts.filter(p=>!p.coprime).length.toLocaleString();
+
+    const predicted = 3*R*R/(Math.PI*Math.PI*n*(n+1));
+    document.getElementById('sectorAsymp').textContent = predicted.toFixed(1);
+    const absErr = Math.abs(observedCop - predicted);
+    document.getElementById('sectorAbsErr').textContent = absErr.toFixed(1);
+    document.getElementById('sectorRelErr').textContent = predicted>0 ? (100*absErr/predicted).toFixed(2)+'%' : '—';
+
+    updateCn2(octantPoints, R, n);
+
+    renderTable(sectorPts);
+
+    // --- canvas render ---
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2;
+    const scale = (Math.min(W,H)/2 - 24) / R;
+    scaleGlobal = scale; cxGlobal = cx; cyGlobal = cy;
+
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx,cy,R*scale,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = '#1e293b';
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+
+    const dotR = Math.max(1.5, Math.min(4.5, scale*0.35));
+    currentPoints = [];
+
+    function plot(x,y,color,kind){
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(cx + x*scale, cy - y*scale, dotR, 0, Math.PI*2);
+      ctx.fill();
+      currentPoints.push({x,y,kind});
+    }
+
+    const Ri = Math.floor(R);
+    const renderDetail = (scale > 3); // avoid clutter at high R
+
+    const bnNow = blockN2(), capNow = depthCap2(), cnf = cnFilter2.value;
+    const DEAD = '#1b2436';
+
+    if(showGrid.checked){
+      if(cnf === 'off'){
+        for(let x=-Ri;x<=Ri;x++) for(let y=-Ri;y<=Ri;y++){
+          if(x===0&&y===0) continue;
+          if(x*x+y*y<=R*R) plot(x,y,'#475569','grid');
+        }
+      } else {
+        // Walk the quadrant, where each point carries its own depth, and mirror
+        // only the four SIGN images -- those share |x| and |y| so they share a
+        // verdict. The swapped image is a separate quadrant entry with its own.
+        const qp = quadrantPoints(R, n, capNow);
+        for(let i=0;i<qp.length;i++){
+          const p = qp[i], ok = p.depth >= bnNow;
+          if(!ok && cnf === 'hide') continue;
+          const c = ok ? '#475569' : DEAD;
+          plot( p.x,  p.y, c, 'grid'); plot(-p.x,  p.y, c, 'grid');
+          plot( p.x, -p.y, c, 'grid'); plot(-p.x, -p.y, c, 'grid');
+        }
+        // the axes carry no quadrant entry, so test them directly
+        for(let k=1;k<=Ri;k++){
+          if(k*k > R*R) break;
+          const axOk = cnDepthAt(k,0,capNow) >= bnNow, ayOk = cnDepthAt(0,k,capNow) >= bnNow;
+          if(axOk || cnf !== 'hide'){
+            const c = axOk ? '#475569' : DEAD;
+            plot(k,0,c,'grid'); plot(-k,0,c,'grid');
+          }
+          if(ayOk || cnf !== 'hide'){
+            const c = ayOk ? '#475569' : DEAD;
+            plot(0,k,c,'grid'); plot(0,-k,c,'grid');
+          }
+        }
+      }
+    }
+
+    plot(0,0,'#4ade80','origin');
+    if(showAxisDiag.checked){
+      const keep = (x,y) => cnf === 'off' || cnDepthAt(x,y,capNow) >= bnNow;
+      const mark = (x,y,kind) => {
+        const ok = keep(x,y);
+        if(!ok && cnf === 'hide') return;
+        plot(x, y, ok ? '#4ade80' : DEAD, kind);
+      };
+      for(let k=1;k<=Ri;k++){
+        if(k*k<=R*R){ mark(k,0,'axis'); mark(-k,0,'axis'); mark(0,k,'axis'); mark(0,-k,'axis'); }
+        if(2*k*k<=R*R){ mark(k,k,'diag'); mark(k,-k,'diag'); mark(-k,k,'diag'); mark(-k,-k,'diag'); }
+      }
+    }
+
+    updateLegend(colorMode.value, R);
+
+    const cscope = colorScope.value;
+    // 'all' and 'sector8' both need per-point data across the quadrant: colours and
+    // survival depth are computed from each image's own (x,y), never mirrored from
+    // the octant, because the swapped image is a different point.
+    const useQuad = (cscope==='all' || cscope==='sector8');
+    const srcPts = useQuad ? quadrantPoints(R, n, depthCap2()) : octantPoints;
+    srcPts.forEach(p=>{
+      if(cscope==='sector' && !p.inSector) return;
+      if(cscope==='sector8' && !inSector8(p.x, p.y, n)) return;
+      if(!p.coprime && !showNonCoprime.checked) return;
+      const cnOk = (cnf === 'off') || (p.depth >= bnNow);
+      if(!cnOk && cnf === 'hide') return;
+      let color;
+      if(colorMode.value==='r') color = gradientColor(p.y, R);
+      else if(colorMode.value==='m') color = gradientColor(p.x, R);
+      else if(colorMode.value==='depth') color = WGCn.depthColor(p.depth, depthCap2());
+      else color = p.coprime ? '#06b6d4' : '#f59e0b';
+      if(!cnOk && cnf === 'dim') color = DEAD;
+      if(useQuad){
+        // the four sign images; the swapped partner is a separate quadrant entry
+        plot( p.x,  p.y, color, 'sector');
+        plot(-p.x,  p.y, color, 'sector');
+        plot( p.x, -p.y, color, 'sector');
+        plot(-p.x, -p.y, color, 'sector');
+        if(p.inSector){                      // keep S_n readable inside the full disc
+          ctx.strokeStyle = '#f9a8d4'; ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(cx + p.x*scale, cy - p.y*scale, dotR+2, 0, Math.PI*2);
+          ctx.stroke();
+        }
+      } else {
+        plot(p.x, p.y, color, 'sector');
+      }
+
+      if(renderDetail && labelMode.value!=='none'){
+        let txt = '';
+        if(labelMode.value==='x') txt = String(p.x);
+        else if(labelMode.value==='y') txt = String(p.y);
+        else if(labelMode.value==='frac') txt = reduceFrac(p.y,p.x);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px monospace';
+        ctx.fillText(txt, cx + p.x*scale + 5, cy - p.y*scale - 4);
+      }
+    });
+
+    // selection highlight
+    if(selected){
+      const ax = Math.abs(selected.x), ay = Math.abs(selected.y);
+      let sp = srcPts.find(p=>p.x===ax && p.y===ay);
+      if(!sp) sp = octantPoints.find(p=>p.x===Math.max(ax,ay) && p.y===Math.min(ax,ay));
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.arc(cx + selected.x*scale, cy - selected.y*scale, dotR+2.5, 0, Math.PI*2);
+      ctx.fill();
+      showDetail(sp || {x:selected.x, y:selected.y, gcd:gcd(selected.y,selected.x), coprime:gcd(selected.y,selected.x)===1});
+      // sync table row selection
+      document.querySelectorAll('#pane2d tbody tr').forEach(tr=>{
+        tr.classList.toggle('selected', +tr.getAttribute('data-x')===selected.x && +tr.getAttribute('data-y')===selected.y);
+      });
+    }
+  }
+
+  function updateCn2(pts, Rv, nv){
+    const bn = blockN2();
+    if(linkN2.checked && +bn2Slider.value !== bn && bn <= +bn2Slider.max) bn2Slider.value = bn;
+    document.getElementById('bn2Val').textContent = bn;
+    document.getElementById('bl2Val').textContent = bn+1;
+
+    const sc = scope2.value;
+    const onlySector = sc === 'sector';
+    // The disc scope reads the full quadrant, not the octant mirrored: swapped
+    // images carry a different survival depth. Each quadrant point stands for its
+    // four sign images, so the ratio is unchanged and only the counts are scaled.
+    const pool = (sc==='disc') ? quadrantPoints(Rv, nv, depthCap2()) : pts;
+    const mult = (sc==='disc') ? 4 : 1;
+    let base = 0, surv = 0;
+    for(let i=0;i<pool.length;i++){
+      const p = pool[i];
+      if(!p.coprime) continue;
+      if(onlySector && !p.inSector) continue;
+      base++;
+      if(p.depth >= bn) surv++;
+    }
+    base *= mult; surv *= mult;
+    const meas  = base ? surv/base : NaN;
+    const exact = WGCn.cn(bn, 2);
+
+    document.getElementById('cn2Base').textContent  = base.toLocaleString();
+    document.getElementById('cn2Surv').textContent  = surv.toLocaleString();
+    document.getElementById('cn2Meas').textContent  = base ? meas.toFixed(5) : '—';
+    document.getElementById('cn2Exact').textContent = exact.toFixed(5);
+    const gapEl = document.getElementById('cn2Gap');
+    if(base){
+      const d = meas - exact;
+      gapEl.textContent = (d>=0?'+':'') + d.toFixed(5);
+      gapEl.className = 'val ' + (Math.abs(d) < 0.01 ? 'pass' : '');
+    } else { gapEl.textContent = '—'; gapEl.className = 'val'; }
+    document.getElementById('cn2Dn').textContent = (exact/WGCn.ZETA2).toFixed(5);
+
+    WGCn.drawCurve(cnCurve2, 2, bn, base ? meas : null, 40);
+  }
+
+  canvas.addEventListener('click', (e)=>{
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width/rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height/rect.height);
+    let best=null, bestD=Infinity;
+    currentPoints.forEach(p=>{
+      const px = cxGlobal + p.x*scaleGlobal, py = cyGlobal - p.y*scaleGlobal;
+      const d = (px-mx)*(px-mx) + (py-my)*(py-my);
+      if(d<bestD){ bestD=d; best=p; }
+    });
+    if(best && bestD < 400){
+      selected = {x:best.x, y:best.y};
+      draw();
+    }
+  });
+
+  [rSlider,rNum,nSlider,nNum,showNonCoprime,showGrid,showAxisDiag,labelMode,colorMode,
+   linkN2,bn2Slider,scope2,colorScope,cnFilter2].forEach(el=>{
+    el.addEventListener('input', ()=>draw());
+    el.addEventListener('change', ()=>draw());
+  });
+
+  // --- Play / Stop animation for R and n ---
+  let playTimers = { r:null, n:null };
+
+  function stopPlay(target){
+    if(playTimers[target]){ clearInterval(playTimers[target]); playTimers[target]=null; }
+    document.getElementById(target+'Play').classList.remove('playing');
+  }
+
+  function startPlay(target){
+    stopPlay(target === 'r' ? 'n' : 'r'); // don't run both at once -- avoids conflicting rapid redraws
+    stopPlay(target);
+    document.getElementById(target+'Play').classList.add('playing');
+    playTimers[target] = setInterval(()=>{
+      if(target==='r'){
+        let v = parseInt(rNum.value,10);
+        const max = parseInt(rNum.max,10);
+        v = (v>=max) ? 1 : v+1;
+        rNum.value = v; rSlider.value = Math.min(v, parseInt(rSlider.max,10));
+      } else {
+        let v = parseInt(nNum.value,10);
+        const max = parseInt(nSlider.max,10); // n is capped to current R
+        v = (v>=max) ? 1 : v+1;
+        nNum.value = v; nSlider.value = v;
+      }
+      draw();
+    }, 350);
+  }
+
+  document.getElementById('rPrevPrime').addEventListener('click', ()=>{
+    setR(stepPrime(parseInt(rNum.value,10) || 2, -1));
+  });
+  document.getElementById('rNextPrime').addEventListener('click', ()=>{
+    setR(stepPrime(parseInt(rNum.value,10) || 1, +1));
+  });
+
+  document.getElementById('rPlay').addEventListener('click', ()=>startPlay('r'));
+  document.getElementById('rStop').addEventListener('click', ()=>stopPlay('r'));
+  document.getElementById('nPlay').addEventListener('click', ()=>startPlay('n'));
+  document.getElementById('nStop').addEventListener('click', ()=>stopPlay('n'));
+
+  document.getElementById('exportBtn2').addEventListener('click', ()=>{
+    const mult = parseInt(document.getElementById('exportRes2').value,10) || 1;
+    const baseSize = 640;
+    const plotPx = baseSize * mult;
+    const origW = canvas.width, origH = canvas.height;
+    canvas.width = plotPx; canvas.height = plotPx;
+    draw();
+
+    const R = rNum.value, n = nNum.value;
+    const pad = Math.round(plotPx*0.055);
+    const headerH = Math.round(plotPx*0.39);
+    const legendH = Math.round(plotPx*0.14);
+    const compW = plotPx + pad*2;
+    const compH = pad + headerH + plotPx + legendH + pad;
+
+    const out = document.createElement('canvas');
+    out.width = compW; out.height = compH;
+    const octx = out.getContext('2d');
+
+    // background
+    octx.fillStyle = '#0a0f1a';
+    octx.fillRect(0,0,compW,compH);
+
+    const F = plotPx/640; // font scale factor relative to base 640px plot
+    let y = pad + 26*F;
+
+    // title
+    octx.fillStyle = '#e2e8f0';
+    octx.font = `${Math.round(22*F)}px 'Segoe UI', sans-serif`;
+    octx.textAlign = 'left';
+    octx.fillText('Gauss Circle ↔ Wessen Farey Sector Bridge — 2D', pad, y);
+
+    // top-right run parameters
+    octx.textAlign = 'right';
+    octx.fillStyle = '#94a3b8';
+    octx.font = `${Math.round(13*F)}px monospace`;
+    octx.fillText(`R = ${R}  ·  n = ${n}  ·  Sₙ = (1/${+n+1}, 1/${n}]`, compW-pad, y);
+    octx.textAlign = 'left';
+
+    y += 22*F;
+    octx.fillStyle = '#67e8f9';
+    octx.font = `${Math.round(13*F)}px monospace`;
+    octx.fillText('N(R) = 1 + 4·A(R) + 4·D(R) + 8·O(R)', pad, y);
+
+    y += 26*F;
+
+    // stat cards
+    const stats = [
+      ['N(R) brute', document.getElementById('nFull').textContent],
+      ['N(R) recon', document.getElementById('nRecon').textContent],
+      ['Match', document.getElementById('reconStatus').textContent],
+      ['Octant pts', document.getElementById('octCount').textContent],
+      ['Sₙ coprime', document.getElementById('sectorCoprime').textContent],
+      ['Sₙ gcd>1', document.getElementById('sectorNonCoprime').textContent],
+    ];
+    const cardGap = 8*F;
+    const cardW = (compW - pad*2 - cardGap*(stats.length-1)) / stats.length;
+    const cardH = 46*F;
+    stats.forEach((s,i)=>{
+      const cx0 = pad + i*(cardW+cardGap);
+      octx.fillStyle = '#1e293b';
+      octx.strokeStyle = '#334155';
+      octx.lineWidth = 1;
+      octx.fillRect(cx0, y, cardW, cardH);
+      octx.strokeRect(cx0, y, cardW, cardH);
+      octx.fillStyle = '#64748b';
+      octx.font = `${Math.round(8.5*F)}px monospace`;
+      octx.textAlign = 'center';
+      octx.fillText(s[0].toUpperCase(), cx0+cardW/2, y+15*F);
+      const matchColor = s[0]==='Match' ? (s[1]==='PASS' ? '#4ade80' : (s[1]==='FAIL' ? '#f87171' : '#e2e8f0')) : '#e2e8f0';
+      octx.fillStyle = matchColor;
+      octx.font = `bold ${Math.round(13*F)}px monospace`;
+      octx.fillText(s[1], cx0+cardW/2, y+33*F);
+    });
+    octx.textAlign = 'left';
+
+    // caption (moved above the plot image, was previously a footer)
+    y += cardH + 24*F;
+    octx.fillStyle = '#475569';
+    octx.font = `${Math.round(10*F)}px monospace`;
+    octx.textAlign = 'center';
+    octx.fillText(`gauss circle ↔ wessen farey sector bridge · 2D · R=${R} n=${n} · wessengetachew.github.io`, compW/2, y);
+    octx.textAlign = 'left';
+
+    // plot
+    const plotY = pad + headerH;
+    octx.strokeStyle = '#334155';
+    octx.strokeRect(pad-1, plotY-1, plotPx+2, plotPx+2);
+    octx.drawImage(canvas, pad, plotY, plotPx, plotPx);
+
+    // legend — read live from the DOM so it matches whatever color/label mode is active
+    let ly = plotY + plotPx + 20*F;
+    let lx = pad;
+    octx.font = `${Math.round(11*F)}px monospace`;
+    Array.from(document.getElementById('legendRow').children).forEach(item=>{
+      const swatchEl = item.querySelector('.swatch, .grad-swatch');
+      const label = item.textContent.trim();
+      const sw = 10*F;
+      if(swatchEl){
+        if(swatchEl.classList.contains('grad-swatch')){
+          const grad = octx.createLinearGradient(lx, 0, lx+sw*3, 0);
+          const stops = (swatchEl.style.background.match(/hsl\([^)]+\)|#[0-9a-fA-F]{3,6}/g)) || ['#67e8f9','#f59e0b'];
+          grad.addColorStop(0, stops[0]); grad.addColorStop(1, stops[stops.length-1]);
+          octx.fillStyle = grad;
+          octx.fillRect(lx, ly-sw*0.8, sw*3, sw);
+          lx += sw*3 + 5*F;
+        } else {
+          octx.fillStyle = swatchEl.style.background || '#94a3b8';
+          octx.fillRect(lx, ly-sw*0.8, sw, sw);
+          lx += sw + 5*F;
+        }
+      }
+      octx.fillStyle = '#94a3b8';
+      if(lx + octx.measureText(label).width > compW - pad){ lx = pad; ly += 16*F; }
+      octx.fillText(label, lx, ly);
+      lx += octx.measureText(label).width + 16*F;
+    });
+
+    const url = out.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gauss-wessen-2d-R${R}-n${n}-${plotPx}px.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+    canvas.width = origW; canvas.height = origH;
+    draw();
+  });
+
+  draw();
+})();
+</script>
+<script>
+/* ============================================================
+   Page 13 — 3D pane: Gauss sphere reconstruction from the
+   sorted cone x >= y >= z >= 0 under the octahedral group B3.
+   Self-contained: no dependencies on the 2D pane's closure.
+   ============================================================ */
+(function(){
+  var WGCn = window.WGCn;
+  var cv = document.getElementById('canvas3d');
+  if(!cv) return;
+  var ctx = cv.getContext('2d');
+
+  var RENDER_MAX = 30;    // above this we count but do not build a point cloud
+  var MAX_DRAW   = 45000; // above this we stride-subsample the drawn cloud
+  var ZETA3_INV  = 0.8319073725807073;
+
+  var el = function(id){ return document.getElementById(id); };
+
+  var rSlider = el('r3dSlider'), rNum = el('r3dNum');
+  var nSlider = el('n3dSlider'), nNum = el('n3dNum');
+  var secMode = el('sec3dMode'), colMode = el('col3dMode'), psSlider = el('ps3dSlider');
+  var showNon = el('show3dNonCoprime'), showSphere = el('show3dSphere');
+  var showAxes = el('show3dAxes'), showCone = el('show3dCone'), fastDraw = el('fast3d');
+  var detail = el('detail3d'), warn = el('warn3d'), legend = el('legendRow3d');
+  var tbody = el('tbody3d'), tableCount = el('table3dCount');
+  var linkN3 = el('linkN3'), bn3Slider = el('bn3Slider');
+  var slide3 = el('slide3'), scope3 = el('scope3'), cnCurve3 = el('cnCurve3');
+
+  // Block length for the C3(n) panel; locked to the sector index by default.
+  function blockN3(){
+    if(linkN3.checked) return Math.max(0, currentN());
+    return Math.max(0, parseInt(bn3Slider.value,10) || 0);
+  }
+  function depthCap3(){ return Math.min(48, Math.max(blockN3(), 8)); }
+
+  /* ---------- view state ---------- */
+  var rotX = -0.42, rotY = 0.65, zoom = 1, panX = 0, panY = 0;
+  var selected = null;        // sorted representative {x,y,z}
+  var orbitKeys = null;       // Set of "x,y,z" for the selected orbit
+  var sortKey = 'norm2', sortAsc = true;
+  var booted = false, dirty = true, rafId = null;
+
+  /* ---------- data ---------- */
+  var cloud = null;   // {xs,ys,zs,g,count}
+  var cone  = [];     // representatives
+  var stats = {};
+  var proj  = { px:null, py:null, idx:null, count:0 };
+
+  /* ---------- number theory helpers ---------- */
+  function gcd2(a,b){ while(b){ var t=a%b; a=b; b=t; } return a; }
+  function gcd3(x,y,z){ return gcd2(gcd2(Math.abs(x),Math.abs(y)),Math.abs(z)); }
+
+  // orbit size = (distinct arrangements of the multiset) * 2^(nonzero count)
+  function orbitSize(x,y,z){
+    var nz = (x!==0?1:0)+(y!==0?1:0)+(z!==0?1:0);
+    var perms;
+    if(x===y && y===z) perms = 1;
+    else if(x===y || y===z || x===z) perms = 3;
+    else perms = 6;
+    return perms * (1<<nz);
+  }
+  function className(o){
+    return o===1 ? 'origin' : o===6 ? 'A · face' : o===8 ? 'V · vertex'
+         : o===12 ? 'E · edge' : o===24 ? 'P/M · generic' : 'G · full';
+  }
+  function classColor(o){
+    return o===1 ? '#4ade80' : o===6 ? '#22d3ee' : o===8 ? '#f472b6'
+         : o===12 ? '#f59e0b' : o===24 ? '#a78bfa' : '#94a3b8';
+  }
+  function sortedRep(x,y,z){
+    var a=[Math.abs(x),Math.abs(y),Math.abs(z)].sort(function(p,q){return q-p;});
+    return {x:a[0], y:a[1], z:a[2]};
+  }
+  function orbitOf(x,y,z){
+    var keys = new Set(), v=[x,y,z];
+    var perms = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+    for(var p=0;p<6;p++){
+      var a=v[perms[p][0]], b=v[perms[p][1]], c=v[perms[p][2]];
+      for(var s=0;s<8;s++){
+        var sa=(s&1)?-a:a, sb=(s&2)?-b:b, sc=(s&4)?-c:c;
+        keys.add(sa+','+sb+','+sc);
+      }
+    }
+    return keys;
+  }
+
+  /* ---------- counting ---------- */
+  function bruteCount(R){
+    var Ri = Math.floor(R), R2 = R*R, c = 0;
+    for(var x=-Ri;x<=Ri;x++){
+      var x2 = x*x; if(x2>R2) continue;
+      for(var y=-Ri;y<=Ri;y++){
+        var xy = x2+y*y; if(xy>R2) continue;
+        var zm = Math.floor(Math.sqrt(R2-xy));
+        c += 2*zm+1;
+      }
+    }
+    return c;
+  }
+
+  function buildCone(R){
+    var Ri = Math.floor(R), R2 = R*R;
+    var out = [], total = 0, cls = {1:0,6:0,8:0,12:0,24:0,48:0};
+    for(var x=0;x<=Ri;x++){
+      var x2=x*x; if(x2>R2) break;
+      for(var y=0;y<=x;y++){
+        var xy=x2+y*y; if(xy>R2) break;
+        for(var z=0;z<=y;z++){
+          var n2 = xy+z*z; if(n2>R2) break;
+          var o = orbitSize(x,y,z);
+          var g = gcd3(x,y,z);
+          total += o; cls[o] = (cls[o]||0)+1;
+          out.push({x:x,y:y,z:z,norm2:n2,orbit:o,g:g,prim:(g===1),cls:o});
+        }
+      }
+    }
+    return { pts:out, recon:total, cls:cls };
+  }
+
+  // Survival depth for every point in the cloud: hold two coordinates, slide the
+  // third, and record how far gcd stays 1. Recomputed only when R, the slid
+  // coordinate, or the required cap changes -- moving n alone is then free.
+  function ensureDepths(){
+    if(!cloud) return;
+    var cap = depthCap3(), sl = slide3.value;
+    if(cloud.dep && cloud.depCap >= cap && cloud.depSlide === sl) return;
+    var d = new Int8Array(cloud.count);
+    var xs = cloud.xs, ys = cloud.ys, zs = cloud.zs;
+    for(var i=0;i<cloud.count;i++){
+      var x = xs[i], y = ys[i], z = zs[i], held, slid;
+      if(sl === 'z')      { held = WGCn.gcd(x, y); slid = z; }
+      else if(sl === 'y') { held = WGCn.gcd(x, z); slid = y; }
+      else                { held = WGCn.gcd(y, z); slid = x; }
+      d[i] = WGCn.depth(held, slid, cap);
+    }
+    cloud.dep = d; cloud.depCap = cap; cloud.depSlide = sl;
+  }
+
+  function buildCloud(R){
+    var Ri = Math.floor(R), R2 = R*R;
+    var cap = Math.ceil(4.3*Math.PI*R*R*R/3)+64;
+    var xs = new Int16Array(cap), ys = new Int16Array(cap), zs = new Int16Array(cap);
+    var gg = new Uint16Array(cap);
+    var k = 0;
+    for(var x=-Ri;x<=Ri;x++){
+      var x2=x*x; if(x2>R2) continue;
+      for(var y=-Ri;y<=Ri;y++){
+        var xy=x2+y*y; if(xy>R2) continue;
+        var zm = Math.floor(Math.sqrt(R2-xy));
+        for(var z=-zm;z<=zm;z++){
+          if(k>=cap) break;
+          xs[k]=x; ys[k]=y; zs[k]=z; gg[k]=gcd3(x,y,z); k++;
+        }
+      }
+    }
+    return { xs:xs, ys:ys, zs:zs, g:gg, count:k };
+  }
+
+  /* ---------- sector membership ---------- */
+  function sectorTest(mode, n){
+    var lo = 1/(n+1), hi = 1/n;
+    if(mode==='wedge'){
+      return function(x,y,z){
+        if(x<=0) return false;
+        var s = y/x;
+        return s>lo && s<=hi;
+      };
+    }
+    if(mode==='cone'){
+      return function(x,y,z){
+        var rho = Math.sqrt(x*x+y*y);
+        if(rho===0) return false;
+        var s = z/rho;
+        return s>lo && s<=hi;
+      };
+    }
+    return null;
+  }
+
+  /* ---------- colours ---------- */
+  function grad(t){
+    t = t<0?0:(t>1?1:t);
+    return 'hsl('+Math.round(260-260*t)+',75%,58%)';
+  }
+  function colourFor(mode, x, y, z, g, R, depth01, bdep){
+    if(mode==='blockdepth') return WGCn.depthColor(bdep, depthCap3());
+    if(mode==='prim')  return g===1 ? '#06b6d4' : '#f59e0b';
+    if(mode==='class') return classColor(orbitSize(Math.abs(x),Math.abs(y),Math.abs(z)));
+    if(mode==='gcd')   return g<=1 ? '#06b6d4' : grad(Math.min(1, (g-1)/Math.max(1,R/2)));
+    if(mode==='norm')  return grad(Math.sqrt(x*x+y*y+z*z)/R);
+    return 'hsl(190,70%,'+Math.round(24+52*depth01)+'%)';
+  }
+
+  function renderLegend(mode){
+    var h = '';
+    if(mode==='prim'){
+      h = sw('#06b6d4','gcd = 1 (visible)') + sw('#f59e0b','gcd &gt; 1');
+    } else if(mode==='class'){
+      h = sw('#4ade80','&times;1') + sw('#22d3ee','&times;6') + sw('#f472b6','&times;8')
+        + sw('#f59e0b','&times;12') + sw('#a78bfa','&times;24') + sw('#94a3b8','&times;48');
+    } else if(mode==='blockdepth'){
+      h = '<span><span class="grad-swatch" style="background:linear-gradient(90deg,hsl(190,55%,38%),hsl(45,90%,60%))"></span>block survival depth 0 &rarr; '+depthCap3()+'+</span>'
+        + sw('#3f3f46','gcd &gt; 1 (no block)');
+    } else if(mode==='gcd'){
+      h = sw('#06b6d4','gcd = 1') + gradSw('gcd growing');
+    } else if(mode==='norm'){
+      h = gradSw('near &rarr; far from origin');
+    } else {
+      h = gradSw('depth cue');
+    }
+    h += sw('#ec4899','selected orbit');
+    legend.innerHTML = h;
+  }
+  function sw(c,l){ return '<span><span class="swatch" style="background:'+c+'"></span>'+l+'</span>'; }
+  function gradSw(l){ return '<span><span class="grad-swatch" style="background:linear-gradient(90deg,hsl(260,75%,58%),hsl(0,75%,58%))"></span>'+l+'</span>'; }
+
+  /* ---------- projection ---------- */
+  var view = { scale:1, cx:0, cy:0, camD:1, cosX:1, sinX:0, cosY:1, sinY:0 };
+
+  function setView(R){
+    var W = cv.width, H = cv.height;
+    view.cx = W/2; view.cy = H/2;
+    view.scale = ((Math.min(W,H)/2) - 34) / Math.max(1,R);
+    view.camD = 3.2 * Math.max(1,R);
+    view.cosX = Math.cos(rotX); view.sinX = Math.sin(rotX);
+    view.cosY = Math.cos(rotY); view.sinY = Math.sin(rotY);
+  }
+  function project(x,y,z){
+    var x1 =  x*view.cosY + z*view.sinY;
+    var z1 = -x*view.sinY + z*view.cosY;
+    var y1 =  y*view.cosX - z1*view.sinX;
+    var z2 =  y*view.sinX + z1*view.cosX;
+    var d  = view.camD - z2;
+    if(d < 0.05) d = 0.05;
+    var p  = view.camD / d;
+    return {
+      px: view.cx + x1*view.scale*p*zoom + panX,
+      py: view.cy - y1*view.scale*p*zoom + panY,
+      z:  z2, p:p
+    };
+  }
+
+  /* ---------- scaffolding: sphere, axes, cone, sector ---------- */
+  function strokePath(pts, style, width){
+    if(pts.length<2) return;
+    ctx.strokeStyle = style; ctx.lineWidth = width||1;
+    ctx.beginPath(); ctx.moveTo(pts[0].px, pts[0].py);
+    for(var i=1;i<pts.length;i++) ctx.lineTo(pts[i].px, pts[i].py);
+    ctx.stroke();
+  }
+
+  function drawSphere(R){
+    var i,j,pts,seg=48;
+    ctx.globalAlpha = 0.5;
+    for(j=1;j<6;j++){                       // latitude rings
+      var th = j*Math.PI/6, r = R*Math.sin(th), h = R*Math.cos(th);
+      pts=[];
+      for(i=0;i<=seg;i++){ var a=i/seg*2*Math.PI; pts.push(project(r*Math.cos(a), h, r*Math.sin(a))); }
+      strokePath(pts, '#1e293b', 1);
+    }
+    for(j=0;j<6;j++){                       // longitude rings
+      var b = j*Math.PI/6; pts=[];
+      for(i=0;i<=seg;i++){
+        var t=i/seg*2*Math.PI;
+        pts.push(project(R*Math.sin(t)*Math.cos(b), R*Math.cos(t), R*Math.sin(t)*Math.sin(b)));
+      }
+      strokePath(pts, '#1e293b', 1);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawAxes(R){
+    var L = R*1.16;
+    var axes = [
+      {v:[L,0,0], c:'#ef4444', n:'x'},
+      {v:[0,L,0], c:'#22c55e', n:'y'},
+      {v:[0,0,L], c:'#3b82f6', n:'z'}
+    ];
+    for(var i=0;i<3;i++){
+      var a = axes[i];
+      var o = project(0,0,0), q = project(a.v[0],a.v[1],a.v[2]);
+      var m = project(-a.v[0],-a.v[1],-a.v[2]);
+      ctx.globalAlpha=0.35; strokePath([m,o], a.c, 1); ctx.globalAlpha=0.85;
+      strokePath([o,q], a.c, 1.4); ctx.globalAlpha=1;
+      ctx.fillStyle = a.c; ctx.font = 'bold 12px monospace';
+      ctx.fillText(a.n, q.px+4, q.py-4);
+    }
+  }
+
+  function slerpArc(a, b, R, steps){
+    var out=[], i;
+    var na=Math.hypot(a[0],a[1],a[2]), nb=Math.hypot(b[0],b[1],b[2]);
+    var u=[a[0]/na,a[1]/na,a[2]/na], v=[b[0]/nb,b[1]/nb,b[2]/nb];
+    var dot=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+    dot=Math.max(-1,Math.min(1,dot));
+    var om=Math.acos(dot);
+    for(i=0;i<=steps;i++){
+      var t=i/steps, w1, w2;
+      if(om<1e-6){ w1=1-t; w2=t; }
+      else { w1=Math.sin((1-t)*om)/Math.sin(om); w2=Math.sin(t*om)/Math.sin(om); }
+      out.push(project(R*(w1*u[0]+w2*v[0]), R*(w1*u[1]+w2*v[1]), R*(w1*u[2]+w2*v[2])));
+    }
+    return out;
+  }
+
+  function drawFundamentalCone(R){
+    var V = [[1,0,0],[1,1,0],[1,1,1]];
+    var poly = [];
+    poly = poly.concat(slerpArc(V[0],V[1],R,26));
+    poly = poly.concat(slerpArc(V[1],V[2],R,26));
+    poly = poly.concat(slerpArc(V[2],V[0],R,26));
+    ctx.fillStyle = 'rgba(168,85,247,0.10)';
+    ctx.beginPath(); ctx.moveTo(poly[0].px,poly[0].py);
+    for(var i=1;i<poly.length;i++) ctx.lineTo(poly[i].px,poly[i].py);
+    ctx.closePath(); ctx.fill();
+    strokePath(poly.concat([poly[0]]), 'rgba(168,85,247,0.75)', 1.4);
+    var o = project(0,0,0);
+    for(var k=0;k<3;k++){
+      var n = Math.hypot(V[k][0],V[k][1],V[k][2]);
+      var q = project(R*V[k][0]/n, R*V[k][1]/n, R*V[k][2]/n);
+      ctx.globalAlpha=0.45; strokePath([o,q],'#a855f7',1); ctx.globalAlpha=1;
+    }
+  }
+
+  function drawSectorGuide(R, mode, n){
+    var lo = 1/(n+1), hi = 1/n, i, pts;
+    ctx.globalAlpha = 0.8;
+    if(mode==='wedge'){
+      [lo,hi].forEach(function(m){
+        var dx = 1/Math.sqrt(1+m*m), dy = m/Math.sqrt(1+m*m);
+        // draw the half-plane boundary as a fan of radial lines at several heights
+        for(i=0;i<=8;i++){
+          var t = -1 + 2*i/8, zz = t*R*0.98;
+          var rr = Math.sqrt(Math.max(0, R*R - zz*zz));
+          var o = project(0,0,zz), q = project(dx*rr, dy*rr, zz);
+          strokePath([o,q], 'rgba(236,72,153,0.30)', 1);
+        }
+        pts=[];
+        for(i=0;i<=40;i++){
+          var a=-Math.PI/2 + Math.PI*i/40;
+          var rr2=R*Math.cos(a), zz2=R*Math.sin(a);
+          pts.push(project(dx*rr2, dy*rr2, zz2));
+        }
+        strokePath(pts, 'rgba(236,72,153,0.85)', 1.5);
+      });
+    } else if(mode==='cone'){
+      [lo,hi].forEach(function(s){
+        var rr = R/Math.sqrt(1+s*s), zz = s*R/Math.sqrt(1+s*s);
+        pts=[];
+        for(i=0;i<=64;i++){ var a=i/64*2*Math.PI; pts.push(project(rr*Math.cos(a), rr*Math.sin(a), zz)); }
+        strokePath(pts, 'rgba(236,72,153,0.85)', 1.5);
+        var o=project(0,0,0);
+        for(i=0;i<12;i++){
+          var a2=i/12*2*Math.PI;
+          strokePath([o, project(rr*Math.cos(a2), rr*Math.sin(a2), zz)], 'rgba(236,72,153,0.22)', 1);
+        }
+      });
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* ---------- main draw ---------- */
+  function draw(){
+    var R = currentR();
+    var W = cv.width, H = cv.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#060a12'; ctx.fillRect(0,0,W,H);
+    setView(R);
+
+    var Rdraw = Math.min(R, RENDER_MAX);
+
+    if(showSphere.checked) drawSphere(Rdraw);
+    if(showAxes.checked)   drawAxes(Rdraw);
+
+    var mode = secMode.value, n = currentN();
+    if(mode!=='off') drawSectorGuide(Rdraw, mode, n);
+    if(showCone.checked) drawFundamentalCone(Rdraw);
+
+    if(!cloud){
+      ctx.fillStyle='#64748b'; ctx.font='13px monospace'; ctx.textAlign='center';
+      ctx.fillText('Point cloud not drawn above R = '+RENDER_MAX, W/2, H/2);
+      ctx.fillText('counts below remain exact', W/2, H/2+20);
+      ctx.textAlign='start';
+      proj.count = 0;
+      return;
+    }
+
+    var inSec = sectorTest(mode, n);
+    var showNC = showNon.checked;
+    var cm = colMode.value;
+    var psMul = parseFloat(psSlider.value)||1;
+    var baseR = Math.max(1.0, view.scale*0.30*psMul);
+    var N = cloud.count;
+    var stride = N > MAX_DRAW ? Math.ceil(N/MAX_DRAW) : 1;
+
+    // collect
+    var idx=[], k;
+    for(k=0;k<N;k+=stride){
+      if(!showNC && cloud.g[k]>1) continue;
+      idx.push(k);
+    }
+    var m = idx.length;
+    var pxA = new Float32Array(m), pyA = new Float32Array(m), pzA = new Float32Array(m), ppA = new Float32Array(m);
+    for(var i=0;i<m;i++){
+      k = idx[i];
+      var q = project(cloud.xs[k], cloud.ys[k], cloud.zs[k]);
+      pxA[i]=q.px; pyA[i]=q.py; pzA[i]=q.z; ppA[i]=q.p;
+    }
+    var order = new Int32Array(m);
+    for(i=0;i<m;i++) order[i]=i;
+    if(!fastDraw.checked && m<=120000){
+      order = Array.prototype.slice.call(order).sort(function(a,b){ return pzA[a]-pzA[b]; });
+    }
+
+    var zmin=Infinity, zmax=-Infinity;
+    for(i=0;i<m;i++){ if(pzA[i]<zmin) zmin=pzA[i]; if(pzA[i]>zmax) zmax=pzA[i]; }
+    var zspan = (zmax-zmin)||1;
+
+    for(var oi=0;oi<m;oi++){
+      i = order[oi]; k = idx[i];
+      var x=cloud.xs[k], y=cloud.ys[k], z=cloud.zs[k], g=cloud.g[k];
+      var hit = orbitKeys && orbitKeys.has(x+','+y+','+z);
+      var outside = inSec && !inSec(x,y,z);
+      var r = baseR*ppA[i];
+      if(r<0.5) r=0.5;
+      if(outside && !hit){
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = '#475569';
+        ctx.beginPath(); ctx.arc(pxA[i],pyA[i], Math.max(0.5,r*0.55), 0, 6.283185); ctx.fill();
+        ctx.globalAlpha = 1;
+        continue;
+      }
+      if(hit){
+        ctx.fillStyle = '#ec4899';
+        ctx.beginPath(); ctx.arc(pxA[i],pyA[i], r+2.2, 0, 6.283185); ctx.fill();
+        ctx.strokeStyle = '#fbcfe8'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(pxA[i],pyA[i], r+3.6, 0, 6.283185); ctx.stroke();
+        continue;
+      }
+      var d01 = (pzA[i]-zmin)/zspan;
+      ctx.globalAlpha = 0.35 + 0.65*d01;
+      ctx.fillStyle = colourFor(cm, x, y, z, g, Math.max(1,R), d01, cloud.dep ? cloud.dep[k] : -1);
+      ctx.beginPath(); ctx.arc(pxA[i],pyA[i], r, 0, 6.283185); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    proj = { px:pxA, py:pyA, idx:idx, count:m };
+
+    if(stride>1){
+      ctx.fillStyle='#fbbf24'; ctx.font='11px monospace';
+      ctx.fillText('drawing 1 in '+stride+' points ('+m.toLocaleString()+' of '+N.toLocaleString()+')', 10, H-10);
+    }
+  }
+
+  /* ---------- table ---------- */
+  function renderTable(){
+    var rows = cone.slice().sort(function(a,b){
+      var av=a[sortKey], bv=b[sortKey];
+      if(sortKey==='prim'){ av=av?1:0; bv=bv?1:0; }
+      if(sortKey==='cls'){ av=a.orbit; bv=b.orbit; }
+      if(av<bv) return sortAsc?-1:1;
+      if(av>bv) return sortAsc?1:-1;
+      return 0;
+    });
+    var cap = 500, capped = rows.slice(0,cap);
+    var html = '';
+    for(var i=0;i<capped.length;i++){
+      var p = capped[i];
+      var sel = selected && selected.x===p.x && selected.y===p.y && selected.z===p.z;
+      html += '<tr data-x="'+p.x+'" data-y="'+p.y+'" data-z="'+p.z+'" class="'+(sel?'selected':'')+'">'
+        + '<td>'+p.x+'</td><td>'+p.y+'</td><td>'+p.z+'</td><td>'+p.norm2+'</td>'
+        + '<td style="color:'+classColor(p.orbit)+'">'+p.orbit+'</td>'
+        + '<td style="color:'+classColor(p.orbit)+'">'+className(p.orbit)+'</td>'
+        + '<td>'+p.g+'</td>'
+        + '<td class="'+(p.prim?'true':'false')+'">'+p.prim+'</td></tr>';
+    }
+    tbody.innerHTML = html;
+    tableCount.textContent = rows.length>cap
+      ? 'showing '+cap+' of '+rows.length.toLocaleString()+' representatives (sorted)'
+      : rows.length.toLocaleString()+' representatives';
+  }
+
+  /* ---------- detail ---------- */
+  function showDetail(x,y,z){
+    if(x==null){
+      detail.innerHTML = 'Drag to rotate the ball. Click any point to inspect its coordinates, gcd and orbit class.';
+      return;
+    }
+    var rep = sortedRep(x,y,z);
+    var o = orbitSize(rep.x,rep.y,rep.z);
+    var g = gcd3(x,y,z);
+    var n2 = x*x+y*y+z*z;
+    var nrm = Math.sqrt(n2);
+    var theta = nrm>0 ? Math.acos(z/nrm)*180/Math.PI : 0;
+    var phi = Math.atan2(y,x)*180/Math.PI;
+    var mode = secMode.value, n = currentN(), t = sectorTest(mode,n);
+    var secTxt = t ? String(t(x,y,z)) : '—';
+    detail.innerHTML =
+      '(x, y, z) = <span class="hl">('+x+', '+y+', '+z+')</span> &nbsp; '
+      + 'sorted rep = <span class="hl">('+rep.x+', '+rep.y+', '+rep.z+')</span><br>'
+      + 'x&sup2;+y&sup2;+z&sup2; = <span class="hl">'+n2+'</span> &nbsp; |v| = <span class="hl">'+nrm.toFixed(4)+'</span> &nbsp; '
+      + 'gcd = <span class="hl">'+g+'</span> &nbsp; primitive = <span class="hl">'+(g===1)+'</span><br>'
+      + 'orbit class = <span class="hl" style="color:'+classColor(o)+'">&times;'+o+' &middot; '+className(o)+'</span> &nbsp; '
+      + '&theta; = <span class="hl">'+theta.toFixed(2)+'&deg;</span> &nbsp; &phi; = <span class="hl">'+phi.toFixed(2)+'&deg;</span> &nbsp; '
+      + 'in S<sub>n</sub> = <span class="hl">'+secTxt+'</span><br>'
+      + 'block depth (slide '+slide3.value+') = <span class="hl">'+blockDepthAt(x,y,z)+'</span> &nbsp; '
+      + 'survives block of '+(blockN3()+1)+' = <span class="hl">'+(blockDepthAt(x,y,z) >= blockN3())+'</span><br>'
+      + '<span style="color:#94a3b8">All '+o+' images of this representative are highlighted on the canvas.</span>';
+  }
+
+  function blockDepthAt(x,y,z){
+    var cap = depthCap3(), sl = slide3.value, held, slid;
+    if(sl === 'z')      { held = WGCn.gcd(x, y); slid = z; }
+    else if(sl === 'y') { held = WGCn.gcd(x, z); slid = y; }
+    else                { held = WGCn.gcd(y, z); slid = x; }
+    var d = WGCn.depth(held, slid, cap);
+    return d < 0 ? 'n/a (gcd > 1)' : (d >= cap ? '≥ ' + cap : d);
+  }
+
+  function select(x,y,z){
+    var rep = sortedRep(x,y,z);
+    selected = rep;
+    orbitKeys = orbitOf(rep.x,rep.y,rep.z);
+    showDetail(x,y,z);
+    var trs = tbody.querySelectorAll('tr');
+    for(var i=0;i<trs.length;i++){
+      var t = trs[i];
+      t.classList.toggle('selected',
+        +t.getAttribute('data-x')===rep.x && +t.getAttribute('data-y')===rep.y && +t.getAttribute('data-z')===rep.z);
+    }
+    dirty = true;
+  }
+
+  /* ---------- stats ---------- */
+  function currentR(){
+    var v = parseInt(rNum.value,10);
+    if(isNaN(v)) v = parseInt(rSlider.value,10);
+    return Math.max(1, Math.min(60, v));
+  }
+  function currentN(){
+    var v = parseInt(nNum.value,10);
+    if(isNaN(v)) v = parseInt(nSlider.value,10);
+    return Math.max(1, v);
+  }
+
+  window.jumpSector3d = function(n){
+    var maxN = parseInt(nSlider.max,10) || 24;
+    var v = Math.min(n, maxN);
+    nNum.value = v; nSlider.value = v;
+    if(secMode.value==='off') secMode.value = 'cone';
+    recompute();
+  };
+
+  function recompute(){
+    var R = currentR();
+    el('r3dVal').textContent = R;
+    var n = currentN();
+    el('n3dVal').textContent = n;
+    el('n3dInterval').textContent = '1/'+(n+1)+', 1/'+n;
+
+    var c = buildCone(R);
+    cone = c.pts;
+
+    var brute = bruteCount(R);
+    el('n3Full').textContent  = brute.toLocaleString();
+    el('n3Recon').textContent = c.recon.toLocaleString();
+    var st = el('recon3dStatus');
+    if(brute===c.recon){ st.textContent='PASS'; st.className='val pass'; }
+    else { st.textContent='FAIL'; st.className='val fail'; }
+
+    el('cone3dCount').textContent = cone.length.toLocaleString();
+    el('cls1').textContent  = (c.cls[1] ||0).toLocaleString();
+    el('cls6').textContent  = (c.cls[6] ||0).toLocaleString();
+    el('cls8').textContent  = (c.cls[8] ||0).toLocaleString();
+    el('cls12').textContent = (c.cls[12]||0).toLocaleString();
+    el('cls24').textContent = (c.cls[24]||0).toLocaleString();
+    el('cls48').textContent = (c.cls[48]||0).toLocaleString();
+
+    // primitive count over the whole ball, via the cone with orbit weights
+    var primFull = 0;
+    for(var i=0;i<cone.length;i++) if(cone[i].prim) primFull += cone[i].orbit;
+    var nonOrigin = brute - 1;
+    el('prim3dCount').textContent = primFull.toLocaleString();
+    var dens = nonOrigin>0 ? primFull/nonOrigin : 0;
+    el('prim3dDensity').textContent = dens.toFixed(5)+' / '+ZETA3_INV.toFixed(5);
+
+    // cloud
+    warn.classList.remove('show'); warn.textContent = '';
+    if(R<=RENDER_MAX){
+      cloud = buildCloud(R);
+      if(cloud.count > MAX_DRAW){
+        warn.textContent = 'R = '+R+' puts '+cloud.count.toLocaleString()+' points in the ball; the canvas draws a strided sample. Counts above are exact.';
+        warn.classList.add('show');
+      }
+    } else {
+      cloud = null;
+      warn.textContent = 'Above R = '+RENDER_MAX+' the point cloud is not rendered. The reconstruction check and all counts are still computed exactly.';
+      warn.classList.add('show');
+    }
+
+    // sector census
+    var mode = secMode.value;
+    var box = el('sec3dStatsBox');
+    if(mode==='off'){ box.style.display='none'; }
+    else {
+      box.style.display='';
+      var t = sectorTest(mode,n), tot=0, cop=0;
+      if(cloud){
+        for(var k=0;k<cloud.count;k++){
+          var x=cloud.xs[k], y=cloud.ys[k], z=cloud.zs[k];
+          if(!t(x,y,z)) continue;
+          tot++; if(cloud.g[k]===1) cop++;
+        }
+        el('sec3dTotal').textContent = tot.toLocaleString();
+        el('sec3dCop').textContent   = cop.toLocaleString();
+        el('sec3dNon').textContent   = (tot-cop).toLocaleString();
+        el('sec3dRatio').textContent = tot? (cop/tot).toFixed(5) : '—';
+      } else {
+        el('sec3dTotal').textContent='—'; el('sec3dCop').textContent='—';
+        el('sec3dNon').textContent='—'; el('sec3dRatio').textContent='—';
+      }
+
+      // asymptotic prediction: primitive-density (1/zeta(3)) times the region's
+      // volume fraction of the ball. Wedge = dihedral angular fraction (z free);
+      // cone = solid-angle fraction (scale-invariant in direction).
+      var predicted;
+      if(mode==='wedge'){
+        predicted = ZETA3_INV * (2/3) * Math.pow(R,3) * (Math.atan(1/n) - Math.atan(1/(n+1)));
+      } else { // cone
+        predicted = ZETA3_INV * (2/3) * Math.PI * Math.pow(R,3) *
+          (1/Math.sqrt(1+n*n) - 1/Math.sqrt(1+(n+1)*(n+1)));
+      }
+      el('sec3dAsymp').textContent = predicted.toFixed(1);
+      if(cloud){
+        var absErr = Math.abs(cop - predicted);
+        el('sec3dAbsErr').textContent = absErr.toFixed(1);
+        el('sec3dRelErr').textContent = predicted>0 ? (100*absErr/predicted).toFixed(2)+'%' : '—';
+      } else {
+        el('sec3dAbsErr').textContent = '—'; el('sec3dRelErr').textContent = '—';
+      }
+    }
+
+    ensureDepths();
+    updateCn3();
+
+    renderLegend(colMode.value);
+    renderTable();
+    dirty = true;
+  }
+
+  function updateCn3(){
+    var bn = blockN3();
+    if(linkN3.checked && +bn3Slider.value !== bn && bn <= +bn3Slider.max) bn3Slider.value = bn;
+    el('bn3Val').textContent = bn;
+    el('bl3Val').textContent = bn+1;
+
+    var exact = WGCn.cn(bn, 3);
+    el('cn3Exact').textContent = exact.toFixed(5);
+    el('cn3Dn').textContent = (exact/WGCn.ZETA3).toFixed(5);
+
+    var base = 0, surv = 0;
+    if(cloud && cloud.dep){
+      var onlySector = scope3.value === 'sector';
+      var t = onlySector ? sectorTest(secMode.value, currentN()) : null;
+      for(var i=0;i<cloud.count;i++){
+        if(cloud.g[i] !== 1) continue;
+        if(t && !t(cloud.xs[i], cloud.ys[i], cloud.zs[i])) continue;
+        base++;
+        if(cloud.dep[i] >= bn) surv++;
+      }
+    }
+    var meas = base ? surv/base : NaN;
+    el('cn3Base').textContent = cloud ? base.toLocaleString() : '—';
+    el('cn3Surv').textContent = cloud ? surv.toLocaleString() : '—';
+    el('cn3Meas').textContent = base ? meas.toFixed(5) : '—';
+    var gapEl = el('cn3Gap');
+    if(base){
+      var d = meas - exact;
+      gapEl.textContent = (d>=0?'+':'') + d.toFixed(5);
+      gapEl.className = 'val ' + (Math.abs(d) < 0.01 ? 'pass' : '');
+    } else { gapEl.textContent = '—'; gapEl.className = 'val'; }
+
+    WGCn.drawCurve(cnCurve3, 3, bn, base ? meas : null, 40);
+  }
+
+  /* ---------- render loop ---------- */
+  var spinning = false;
+  function loop(){
+    rafId = requestAnimationFrame(loop);
+    if(spinning){ rotY += 0.006; dirty = true; }
+    if(dirty){ dirty = false; draw(); }
+  }
+
+  /* ---------- interaction ---------- */
+  var pointers = new Map(), dragging=false, moved=0, lastX=0, lastY=0, pinchStart=0, zoomStart=1;
+
+  cv.addEventListener('pointerdown', function(e){
+    cv.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pointers.size===1){ dragging=true; moved=0; lastX=e.clientX; lastY=e.clientY; cv.classList.add('grabbing'); }
+    else if(pointers.size===2){
+      var p = Array.from(pointers.values());
+      pinchStart = Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+      zoomStart = zoom;
+    }
+  });
+
+  cv.addEventListener('pointermove', function(e){
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pointers.size===2){
+      var p = Array.from(pointers.values());
+      var d = Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+      if(pinchStart>0){ zoom = Math.max(0.25, Math.min(8, zoomStart*d/pinchStart)); dirty=true; }
+      return;
+    }
+    if(!dragging) return;
+    var dx = e.clientX-lastX, dy = e.clientY-lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    moved += Math.abs(dx)+Math.abs(dy);
+    if(e.shiftKey){ panX += dx; panY += dy; }
+    else {
+      rotY += dx*0.008;
+      rotX += dy*0.008;
+      rotX = Math.max(-1.55, Math.min(1.55, rotX));
+    }
+    dirty = true;
+  });
+
+  function endPointer(e){
+    if(pointers.has(e.pointerId)) pointers.delete(e.pointerId);
+    if(pointers.size<2) pinchStart = 0;
+    if(pointers.size===0){
+      cv.classList.remove('grabbing');
+      if(dragging && moved < 6) hitTest(e);
+      dragging = false;
+    }
+  }
+  cv.addEventListener('pointerup', endPointer);
+  cv.addEventListener('pointercancel', endPointer);
+  cv.addEventListener('pointerleave', function(e){ if(pointers.size===0) cv.classList.remove('grabbing'); });
+
+  cv.addEventListener('wheel', function(e){
+    e.preventDefault();
+    zoom = Math.max(0.25, Math.min(8, zoom * (e.deltaY<0 ? 1.12 : 1/1.12)));
+    dirty = true;
+  }, {passive:false});
+
+  function hitTest(e){
+    if(!cloud || !proj.count) return;
+    var rect = cv.getBoundingClientRect();
+    var mx = (e.clientX-rect.left)*(cv.width/rect.width);
+    var my = (e.clientY-rect.top)*(cv.height/rect.height);
+    var best=-1, bestD=Infinity;
+    for(var i=0;i<proj.count;i++){
+      var dx=proj.px[i]-mx, dy=proj.py[i]-my, d=dx*dx+dy*dy;
+      if(d<bestD){ bestD=d; best=i; }
+    }
+    if(best>=0 && bestD < 324){
+      var k = proj.idx[best];
+      select(cloud.xs[k], cloud.ys[k], cloud.zs[k]);
+    }
+  }
+
+  tbody.addEventListener('click', function(e){
+    var tr = e.target.closest('tr[data-x]');
+    if(!tr) return;
+    select(+tr.getAttribute('data-x'), +tr.getAttribute('data-y'), +tr.getAttribute('data-z'));
+  });
+
+  var heads = document.querySelectorAll('#pane3d thead th[data-key3]');
+  for(var hi=0; hi<heads.length; hi++){
+    (function(th){
+      th.addEventListener('click', function(){
+        var key = th.getAttribute('data-key3');
+        if(sortKey===key) sortAsc=!sortAsc; else { sortKey=key; sortAsc=true; }
+        for(var j=0;j<heads.length;j++) heads[j].classList.remove('sorted');
+        th.classList.add('sorted');
+        renderTable();
+      });
+    })(heads[hi]);
+  }
+
+  /* ---------- control wiring ---------- */
+  function syncPair(slider, num, after){
+    slider.addEventListener('input', function(){ num.value = slider.value; after(); });
+    num.addEventListener('input', function(){
+      var v = parseInt(num.value,10);
+      if(isNaN(v)) return;
+      v = Math.max(+num.min, Math.min(+num.max, v));
+      if(v <= +slider.max) slider.value = v;
+      after();
+    });
+  }
+  var recomputeTimer = null;
+  function scheduleRecompute(){
+    // update the cheap readouts immediately, defer the O(R^3) rebuild
+    el('r3dVal').textContent = currentR();
+    var nn = currentN();
+    el('n3dVal').textContent = nn;
+    el('n3dInterval').textContent = '1/'+(nn+1)+', 1/'+nn;
+    clearTimeout(recomputeTimer);
+    recomputeTimer = setTimeout(recompute, 110);
+  }
+  syncPair(rSlider, rNum, scheduleRecompute);
+  syncPair(nSlider, nNum, scheduleRecompute);
+
+  [secMode, colMode, slide3, scope3].forEach(function(s){ s.addEventListener('change', recompute); });
+  linkN3.addEventListener('change', recompute);
+  bn3Slider.addEventListener('input', recompute);
+  psSlider.addEventListener('input', function(){
+    el('ps3dVal').textContent = parseFloat(psSlider.value).toFixed(1);
+    dirty = true;
+  });
+  [showNon, showSphere, showAxes, showCone, fastDraw].forEach(function(c){
+    c.addEventListener('change', function(){
+      if(c===showNon) recompute(); else dirty = true;
+    });
+  });
+
+  el('reset3d').addEventListener('click', function(){
+    rotX=-0.42; rotY=0.65; zoom=1; panX=0; panY=0;
+    selected=null; orbitKeys=null; showDetail(null);
+    renderTable(); dirty=true;
+  });
+  el('spin3d').addEventListener('click', function(){
+    spinning=true; el('spin3d').classList.add('playing');
+  });
+  el('spin3dStop').addEventListener('click', function(){
+    spinning=false; el('spin3d').classList.remove('playing');
+  });
+
+  var timers = { r:null, n:null };
+  function stopPlay(t){
+    if(timers[t]){ clearInterval(timers[t]); timers[t]=null; }
+    el(t+'3dPlay').classList.remove('playing');
+  }
+  function startPlay(t){
+    stopPlay(t==='r'?'n':'r'); stopPlay(t);
+    el(t+'3dPlay').classList.add('playing');
+    timers[t] = setInterval(function(){
+      var num = (t==='r')?rNum:nNum, sl = (t==='r')?rSlider:nSlider;
+      var v = parseInt(num.value,10), max = +num.max;
+      v = (v>=max) ? 1 : v+1;
+      num.value = v; if(v<=+sl.max) sl.value = v;
+      recompute();
+    }, t==='r' ? 700 : 500);
+  }
+  el('r3dPlay').addEventListener('click', function(){ startPlay('r'); });
+  el('r3dStop').addEventListener('click', function(){ stopPlay('r'); });
+  el('n3dPlay').addEventListener('click', function(){ startPlay('n'); });
+  el('n3dStop').addEventListener('click', function(){ stopPlay('n'); });
+
+  el('exportBtn3').addEventListener('click', function(){
+    var mult = parseInt(el('exportRes3').value,10) || 1;
+    var baseSize = 640;
+    var plotPx = baseSize * mult;
+    var origW = cv.width, origH = cv.height;
+    cv.width = plotPx; cv.height = plotPx;
+    draw();
+
+    var R = rNum.value, n = nNum.value;
+    var pad = Math.round(plotPx*0.055);
+    var headerH = Math.round(plotPx*0.35);
+    var legendH = Math.round(plotPx*0.14);
+    var compW = plotPx + pad*2;
+    var compH = pad + headerH + plotPx + legendH + pad;
+
+    var out = document.createElement('canvas');
+    out.width = compW; out.height = compH;
+    var octx = out.getContext('2d');
+
+    octx.fillStyle = '#0a0f1a';
+    octx.fillRect(0,0,compW,compH);
+
+    var F = plotPx/640;
+    var y = pad + 26*F;
+
+    octx.fillStyle = '#e2e8f0';
+    octx.font = Math.round(22*F)+"px 'Segoe UI', sans-serif";
+    octx.textAlign = 'left';
+    octx.fillText('Gauss Circle ↔ Wessen Farey Sector Bridge — 3D (Gauss sphere)', pad, y);
+
+    octx.textAlign = 'right';
+    octx.fillStyle = '#94a3b8';
+    octx.font = Math.round(13*F)+'px monospace';
+    var modeLbl = secMode.value==='off' ? 'sector off' : (secMode.value==='wedge' ? 'azimuthal wedge' : 'polar cone');
+    octx.fillText('R = '+R+'  ·  n = '+n+'  ·  '+modeLbl, compW-pad, y);
+    octx.textAlign = 'left';
+
+    y += 22*F;
+    octx.fillStyle = '#d8b4fe';
+    octx.font = Math.round(13*F)+'px monospace';
+    octx.fillText('N₃(R) = 1 + 6·A + 12·E + 8·V + 24·P + 24·M + 48·G', pad, y);
+
+    y += 26*F;
+
+    var stats = [
+      ['N₃(R) brute', el('n3Full').textContent],
+      ['N₃(R) recon', el('n3Recon').textContent],
+      ['Match', el('recon3dStatus').textContent],
+      ['Cone pts', el('cone3dCount').textContent],
+      ['Primitive', el('prim3dCount').textContent],
+      ['Density', el('prim3dDensity').textContent],
+    ];
+    var cardGap = 8*F;
+    var cardW = (compW - pad*2 - cardGap*(stats.length-1)) / stats.length;
+    var cardH = 46*F;
+    stats.forEach(function(s,i){
+      var cx0 = pad + i*(cardW+cardGap);
+      octx.fillStyle = '#1e293b'; octx.strokeStyle = '#334155'; octx.lineWidth = 1;
+      octx.fillRect(cx0, y, cardW, cardH);
+      octx.strokeRect(cx0, y, cardW, cardH);
+      octx.fillStyle = '#64748b';
+      octx.font = Math.round(8*F)+'px monospace';
+      octx.textAlign = 'center';
+      octx.fillText(s[0].toUpperCase(), cx0+cardW/2, y+15*F);
+      var matchColor = s[0]==='Match' ? (s[1]==='PASS' ? '#4ade80' : (s[1]==='FAIL' ? '#f87171' : '#e2e8f0')) : '#e2e8f0';
+      octx.fillStyle = matchColor;
+      octx.font = 'bold '+Math.round(12*F)+'px monospace';
+      octx.fillText(s[1], cx0+cardW/2, y+33*F);
+    });
+    octx.textAlign = 'left';
+
+    // caption (moved above the plot image, was previously a footer)
+    y += cardH + 24*F;
+    octx.fillStyle = '#475569';
+    octx.font = Math.round(10*F)+'px monospace';
+    octx.textAlign = 'center';
+    octx.fillText('gauss circle ↔ wessen farey sector bridge · 3D · R='+R+' n='+n+' · wessengetachew.github.io', compW/2, y);
+    octx.textAlign = 'left';
+
+    var plotY = pad + headerH;
+    octx.strokeStyle = '#334155';
+    octx.strokeRect(pad-1, plotY-1, plotPx+2, plotPx+2);
+    octx.drawImage(cv, pad, plotY, plotPx, plotPx);
+
+    // legend, read live from DOM
+    var ly = plotY + plotPx + 20*F;
+    var lx = pad;
+    octx.font = Math.round(11*F)+'px monospace';
+    Array.prototype.forEach.call(el('legendRow3d').children, function(item){
+      var swatchEl = item.querySelector('.swatch, .grad-swatch');
+      var label = item.textContent.trim();
+      var sw = 10*F;
+      if(swatchEl){
+        if(swatchEl.classList.contains('grad-swatch')){
+          var grad = octx.createLinearGradient(lx, 0, lx+sw*3, 0);
+          var stops = (swatchEl.style.background.match(/hsl\([^)]+\)|#[0-9a-fA-F]{3,6}/g)) || ['#67e8f9','#f59e0b'];
+          grad.addColorStop(0, stops[0]); grad.addColorStop(1, stops[stops.length-1]);
+          octx.fillStyle = grad;
+          octx.fillRect(lx, ly-sw*0.8, sw*3, sw);
+          lx += sw*3 + 5*F;
+        } else {
+          octx.fillStyle = swatchEl.style.background || '#94a3b8';
+          octx.fillRect(lx, ly-sw*0.8, sw, sw);
+          lx += sw + 5*F;
+        }
+      }
+      octx.fillStyle = '#94a3b8';
+      if(lx + octx.measureText(label).width > compW - pad){ lx = pad; ly += 16*F; }
+      octx.fillText(label, lx, ly);
+      lx += octx.measureText(label).width + 16*F;
+    });
+
+    var url = out.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'gauss-wessen-3d-R'+R+'-n'+n+'-'+plotPx+'px.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+    cv.width = origW; cv.height = origH;
+    draw();
+  });
+
+  /* ---------- boot on first tab activation ---------- */
+  window.__boot3d = function(){
+    if(booted) return;
+    booted = true;
+    recompute();
+    loop();
+  };
+})();
+
+/* ---------- tab switching ---------- */
+function showDim(which, btn){
+  var panes = document.querySelectorAll('.tabpane');
+  for(var i=0;i<panes.length;i++) panes[i].classList.remove('active');
+  var btns = document.querySelectorAll('.tabbtn');
+  for(var j=0;j<btns.length;j++) btns[j].classList.remove('active');
+  document.getElementById(which).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(which==='pane3d' && window.__boot3d) window.__boot3d();
+  try { history.replaceState(null,'', which==='pane3d' ? '#3d' : '#2d'); } catch(e){}
 }
+window.addEventListener('DOMContentLoaded', function(){
+  if(location.hash==='#3d'){
+    var b = document.querySelector('.tabbtn[data-pane="pane3d"]');
+    showDim('pane3d', b);
+  }
+});
 
-window.addEventListener('load', function(){ drawSpiral(); });
-window.addEventListener('resize', function(){ drawSpiral(); });
+</script>
 
-function openOpener(){
-  sessionStorage.setItem('wg_open_opener','1');
-  window.open('index.html','_blank');
-}
-function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+<script>
+/* Pinnable / floating canvas panels, shared by both panes. */
+(function(){
+  var SIZES = [0.42, 0.58, 0.78];
+  function attach(panelId, btnId, spacerId, gripId, sizeId){
+    var panel=document.getElementById(panelId), btn=document.getElementById(btnId),
+        spacer=document.getElementById(spacerId), grip=document.getElementById(gripId),
+        sizeBtn=document.getElementById(sizeId);
+    if(!panel||!btn||!spacer||!grip||!sizeBtn) return;
+    var on=false, si=0, pos={x:0,y:0}, drag=false, ox=0, oy=0;
+    function narrow(){ return window.innerWidth<=900; }
+
+    // The page nav is sticky with z-index 9999 and wraps onto several rows on a
+    // phone, so its height is not a constant. Measure it every time rather than
+    // assuming a fixed offset, or the floating panel slides underneath it.
+    function navBottom(){
+      var best = 0;
+      ['wg-pagenav'].forEach(function(id){
+        var n = document.getElementById(id);
+        if(!n) return;
+        var cs = window.getComputedStyle ? window.getComputedStyle(n) : null;
+        if(cs && cs.display === 'none') return;
+        var r = n.getBoundingClientRect();
+        if(r.height > 0 && r.bottom > best) best = r.bottom;
+      });
+      return Math.max(0, Math.min(best, window.innerHeight*0.6));
+    }
+
+    function apply(){
+      if(!on) return;
+      var safe = navBottom() + 6;
+      if(narrow()){
+        panel.style.width=''; panel.style.left='';
+        panel.style.top = safe+'px';
+        panel.style.maxHeight = Math.max(180, window.innerHeight - safe - 10)+'px';
+        return;
+      }
+      var w=Math.round(window.innerWidth*SIZES[si]);
+      panel.style.width=w+'px';
+      pos.x=Math.max(8, Math.min(window.innerWidth-w-8, pos.x));
+      pos.y=Math.max(safe, Math.min(window.innerHeight-140, pos.y));
+      panel.style.left=pos.x+'px'; panel.style.top=pos.y+'px';
+      panel.style.maxHeight = Math.max(200, window.innerHeight - pos.y - 10)+'px';
+    }
+
+    // the nav can change height on rotate, zoom or wrap, so re-measure cheaply
+    var tick=false;
+    function reflow(){
+      if(tick || !on) return;
+      tick=true;
+      requestAnimationFrame(function(){ tick=false; apply(); });
+    }
+    function setOn(v){
+      on=v;
+      if(on){
+        spacer.style.height=panel.offsetHeight+'px'; spacer.classList.add('on');
+        panel.classList.add('floating');
+        if(!pos.x){ pos.x=Math.round(window.innerWidth*(1-SIZES[si]))-16; pos.y=navBottom()+10; }
+        btn.classList.add('on'); btn.innerHTML='\u2715 Dock canvas';
+        grip.style.display=''; sizeBtn.style.display='';
+      } else {
+        panel.classList.remove('floating');
+        panel.style.width=''; panel.style.left=''; panel.style.top=''; panel.style.maxHeight='';
+        spacer.classList.remove('on');
+        btn.classList.remove('on'); btn.innerHTML='\u25CE Float canvas';
+        grip.style.display='none'; sizeBtn.style.display='none';
+      }
+      apply();
+    }
+    btn.addEventListener('click', function(){ setOn(!on); });
+    sizeBtn.addEventListener('click', function(){ si=(si+1)%SIZES.length; apply(); });
+    window.addEventListener('resize', reflow);
+    window.addEventListener('scroll', reflow, {passive:true});
+    window.addEventListener('orientationchange', function(){ setTimeout(apply, 250); });
+    grip.addEventListener('pointerdown', function(e){
+      if(narrow()) return;
+      drag=true; ox=e.clientX-pos.x; oy=e.clientY-pos.y;
+      grip.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    grip.addEventListener('pointermove', function(e){
+      if(!drag) return; pos.x=e.clientX-ox; pos.y=e.clientY-oy; apply();
+    });
+    grip.addEventListener('pointerup', function(){ drag=false; });
+    grip.addEventListener('pointercancel', function(){ drag=false; });
+  }
+  function init(){
+    attach('cpanel2','pin2','spacer2','grip2','size2');
+    attach('cpanel3','pin3','spacer3','grip3','size3');
+  }
+  window.WGFloatInit = init;
+  if(document.readyState === 'loading') window.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+<script>
+/* Collapse every Play/Stop pair into a single toggle.
+   The pane scripts already track state with a 'playing' class on the Play
+   button, so that stays the source of truth. The click is intercepted at the
+   document in CAPTURE phase -- a listener added to the button itself would run
+   after the handlers already bound there, since at the target node listeners
+   fire in registration order regardless of the capture flag. */
+(function(){
+  var PAIRS = [
+    ['rPlay',    'rStop',      '\u25B6 Play R', '\u25A0 Stop R'],
+    ['nPlay',    'nStop',      '\u25B6 Play n', '\u25A0 Stop n'],
+    ['r3dPlay',  'r3dStop',    '\u25B6 Play R', '\u25A0 Stop R'],
+    ['n3dPlay',  'n3dStop',    '\u25B6 Play n', '\u25A0 Stop n'],
+    ['spin3d',   'spin3dStop', '\u25B6 Spin',   '\u25A0 Stop spin']
+  ];
+  function init(){
+    PAIRS.forEach(function(p){
+      var play = document.getElementById(p[0]), stop = document.getElementById(p[1]);
+      if(!play || !stop) return;
+      stop.style.display = 'none';
+      play.setAttribute('data-stop-id', p[1]);
+      play.setAttribute('aria-pressed', 'false');
+      function sync(){
+        var on = play.classList.contains('playing');
+        var want = on ? p[3] : p[2];
+        if(play.innerHTML !== want) play.innerHTML = want;
+        if(play.classList.contains('stop') !== on) play.classList.toggle('stop', on);
+        play.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      if(window.MutationObserver){
+        new MutationObserver(sync).observe(play, {attributes:true, attributeFilter:['class']});
+      }
+      sync();
+    });
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      while(t && t.nodeType === 1 && !t.getAttribute('data-stop-id')) t = t.parentNode;
+      if(!t || t.nodeType !== 1) return;
+      if(!t.classList.contains('playing')) return;   // let the Play handler run
+      e.stopPropagation();
+      e.preventDefault();
+      var s = document.getElementById(t.getAttribute('data-stop-id'));
+      if(s) s.click();
+    }, true);
+  }
+  window.WGToggleInit = init;
+  if(document.readyState === 'loading') window.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
 </script>
 
 </body>
