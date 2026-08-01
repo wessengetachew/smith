@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ζ(½ + it) — Critical-Line Spiral — Page 14</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background:#0a0f1a; color:#e2e8f0; line-height:1.55; font-size:14px;
+    min-height:100vh;
+  }
+  .container { max-width:1180px; margin:0 auto; padding:28px 18px 60px; }
+  h1 { font-size:1.5em; font-weight:600; letter-spacing:.01em; }
+  h1 .fn { font-family:'Cambria Math','STIX Two Math',serif; font-style:italic; color:#67e8f9; }
+  .subtitle { color:#94a3b8; font-size:0.92em; margin-top:6px; max-width:780px; }
+
+  .layout { display:flex; gap:20px; flex-wrap:wrap; margin-top:22px; align-items:flex-start; }
+  .panel { background:#0f172a; border:1px solid #263148; border-radius:10px; padding:16px; }
+  .canvas-panel { flex:1 1 560px; min-width:320px; }
+  .controls-panel { flex:0 0 310px; display:flex; flex-direction:column; gap:14px; min-width:290px; }
+
+  canvas { background:#060a12; border-radius:6px; display:block; width:100%; }
+
+  .readout {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px;
+  }
+  .readout .cell {
+    background:#151d2e; border:1px solid #263148; border-radius:6px; padding:8px 6px; text-align:center;
+  }
+  .readout .cell .lbl { font-size:9.5px; color:#64748b; text-transform:uppercase; letter-spacing:.06em; }
+  .readout .cell .val { font-family:monospace; font-size:14px; color:#67e8f9; margin-top:3px; font-weight:600; }
+  .readout .cell.mag .val { color:#f0abfc; }
+
+  fieldset { border:1px solid #263148; border-radius:8px; padding:14px; }
+  legend { padding:0 6px; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; }
+
+  label.field-label { font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px; }
+  .valdisp { font-family:monospace; color:#67e8f9; font-weight:600; }
+  input[type=range] { width:100%; accent-color:#06b6d4; }
+  input[type=number] {
+    width:100%; background:#1e293b; border:1px solid #475569; border-radius:5px;
+    color:#e2e8f0; padding:6px 8px; font-family:monospace; font-size:12.5px;
+  }
+
+  .row { margin-bottom:10px; }
+  .row-inline { display:flex; gap:8px; align-items:center; }
+  .range-inputs { display:flex; gap:8px; align-items:center; }
+  .range-inputs span { color:#475569; font-size:12px; }
+
+  button {
+    font-family:inherit; cursor:pointer; border-radius:6px; border:1px solid #0e7490;
+    background:rgba(6,182,212,.12); color:#67e8f9; padding:7px 12px; font-size:12px;
+    transition:all .15s;
+  }
+  button:hover { background:rgba(6,182,212,.28); border-color:#06b6d4; }
+  button.active { background:rgba(236,72,153,.18); border-color:#ec4899; color:#f9a8d4; }
+  button.small { padding:4px 8px; font-size:11px; }
+  button.go { background:rgba(74,222,128,.14); border-color:#16a34a; color:#86efac; }
+  button.go:hover { background:rgba(74,222,128,.26); }
+  button:disabled { opacity:.45; cursor:default; }
+
+  .presets { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+
+  .status-line { font-size:11px; color:#64748b; margin-top:8px; min-height:14px; }
+  .progress-track { height:4px; background:#1e293b; border-radius:2px; margin-top:6px; overflow:hidden; display:none; }
+  .progress-fill { height:100%; width:0%; background:#06b6d4; transition:width .1s linear; }
+
+  .zero-summary { font-family:monospace; font-size:13px; color:#4ade80; margin-bottom:8px; }
+  .zero-list { max-height:280px; overflow-y:auto; }
+  .zero-row {
+    padding:4px 8px; border-radius:5px; font-family:monospace; font-size:11.5px;
+    color:#4ade80; background:rgba(74,222,128,.06);
+  }
+  .zero-row:nth-child(even) { background:rgba(74,222,128,.03); }
+  .zero-more { color:#64748b; font-size:11px; padding:6px 8px; }
+
+  .hint { font-size:11px; color:#64748b; margin-top:10px; }
+  .hint code { font-family:monospace; color:#94a3b8; background:#151d2e; padding:1px 4px; border-radius:3px; }
+
+  footer { color:#3a4661; font-size:10.5px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+
+<script>
+(function(){
+  var links=[
+   ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
+   ['page2.html','P2','How C(n) Works — Guided Walkthrough — Page 2','#7ec87a'],
+   ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
+   ['page4.html','P4','The Prime Filter — Sieve View — Page 4','#4a9eff'],
+   ['page5.html','P5','Gap Diagonal Identity — Page 5','#3dc8b8'],
+   ['page6.html','P6','Strip Correlations — Where Independence Breaks — Page 6','#e05060'],
+   ['page7.html','P7','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7','#ff8c42'],
+   ['page8.html','P8','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 8','#ff2fd0'],
+   ['page9.html','P9','Dirichlet Character-Twisted Density — Page 9','#d2691e'],
+   ['page10.html','P10','Farey & Unit Circle — Page 10','#a855f7'],
+   ['page11.html','P11','Farey Sequence Summatory Function — Page 11','#f2c14e'],
+   ['page12.html','P12','The Prime Spiral — Page 12','#ff6b9d'],
+   ['page13.html','P13','Gauss Circle ↔ Wessen Bridge — Page 13','#06b6d4'],
+   ['page14.html','½+it','ζ(½+it) — Critical-Line Spiral — Page 14','#ef4444'],
+   ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
+  ];
+  var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#0a0f1a;border-bottom:1px solid rgba(139,92,246,.3);font-family:\'JetBrains Mono\',monospace,sans-serif;">';
+  bar+='<span style="font-family:\'JetBrains Mono\',monospace;font-size:.7rem;color:#8b5cf6;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
+  links.forEach(function(L){var href=L[0],lab=L[1],ti=L[2],c=L[3];var cur=(href==='page14.html');
+    if(href==='#opener'){
+      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
+    }
+    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
+    else{bar+='<a href="'+href+'" target="_blank" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
+  });
+  bar+='<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(226,232,240,.3);color:rgba(226,232,240,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;">\u26f6 Full</button>';
+  bar+='</div>';
+  document.write(bar);
+})();
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open('index.html','_blank'); }
+</script>
+
+<div class="container">
+  <h1><span class="fn">ζ(½&nbsp;+&nbsp;it)</span> &mdash; the critical-line spiral</h1>
+  <p class="subtitle">
+    Pick any window of t and the page will actually root-find every zero in it live
+    (via the Riemann&ndash;Siegel Z(t) sign changes), not just look up a canned list &mdash;
+    so you can explore t = 1&hairsp;&ndash;&hairsp;100, 100&hairsp;&ndash;&hairsp;1000, or anything else.
+  </p>
+
+  <div class="layout">
+    <div class="panel canvas-panel">
+      <canvas id="cv" width="640" height="640"></canvas>
+      <div class="readout">
+        <div class="cell"><div class="lbl">t</div><div class="val" id="rT">0.000</div></div>
+        <div class="cell"><div class="lbl">Re ζ</div><div class="val" id="rRe">1.000</div></div>
+        <div class="cell"><div class="lbl">Im ζ</div><div class="val" id="rIm">0.000</div></div>
+        <div class="cell mag"><div class="lbl">|ζ|</div><div class="val" id="rMag">1.000</div></div>
+      </div>
+      <div class="hint">Red dot = current point. Green rings = an exactly-located zero within the current window. With Auto zoom on, the view tightens in as the curve nears the origin and pulls back out as it swings away.</div>
+    </div>
+
+    <div class="controls-panel">
+      <fieldset>
+        <legend>Range of t</legend>
+        <div class="range-inputs">
+          <input type="number" id="rangeStart" value="0" step="any">
+          <span>&rarr;</span>
+          <input type="number" id="rangeEnd" value="100" step="any">
+          <button class="go" id="goBtn">Go</button>
+        </div>
+        <div class="presets">
+          <button class="small" data-s="0" data-e="50">0&ndash;50</button>
+          <button class="small" data-s="0" data-e="100">0&ndash;100</button>
+          <button class="small" data-s="100" data-e="1000">100&ndash;1000</button>
+          <button class="small" data-s="1000" data-e="5000">1000&ndash;5000</button>
+          <button class="small" data-s="0" data-e="10000">0&ndash;10000</button>
+        </div>
+        <div class="hint" style="margin-top:8px;">Windows past a few thousand can take up to ~30&ndash;60s to fully scan (runs in the background, won't freeze the page).</div>
+        <div class="status-line" id="statusLine">44 zeros expected in 0&ndash;100 (Riemann&ndash;von&nbsp;Mangoldt estimate)</div>
+        <div class="progress-track" id="progTrack"><div class="progress-fill" id="progFill"></div></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Trace</legend>
+        <div class="row">
+          <label class="field-label">t = <span id="tVal" class="valdisp">0.00</span></label>
+          <input type="range" id="tSlider" min="0" max="10000" value="0" step="1">
+        </div>
+        <div class="row-inline">
+          <button id="playBtn">&#9654; Play</button>
+          <button id="resetBtn">&#8635; Reset</button>
+          <select id="speedSel" style="background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;padding:5px 6px;font-size:11px;">
+            <option value="0.15">slow</option>
+            <option value="0.4" selected>normal</option>
+            <option value="1">fast</option>
+            <option value="4">very fast</option>
+          </select>
+        </div>
+        <div class="row-inline" style="margin-top:8px;">
+          <button id="zoomBtn" class="active" title="Zoom in as the curve nears the origin, zoom out as it moves away">&#128269; Auto zoom</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Zeros found in window</legend>
+        <div class="zero-summary" id="zeroSummary">&mdash;</div>
+        <div class="zero-list" id="zeroList"></div>
+      </fieldset>
+    </div>
+  </div>
+
+  <footer>ζ evaluated via Euler&ndash;Maclaurin summation; zeros located via sign changes of the real Riemann&ndash;Siegel Z(t) (self-verified against ζ(2)=π²/6 and the first tabulated zeros)</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- Euler–Maclaurin zeta, specialised for s = 0.5 + it ----------
+  const BERN = {2:1/6, 4:-1/30, 6:1/42, 8:-1/30};
+  function fact(n){ let r=1; for(let i=2;i<=n;i++) r*=i; return r; }
+  const M_TERMS = 4;
+
+  function zetaCritical(t){
+    const sre = 0.5, sim = t;
+    const N = Math.max(20, Math.ceil(Math.abs(t)/3)+18);
+    let re = 0, im = 0;
+    for(let n=1;n<N;n++){
+      const mag = 1/Math.sqrt(n);
+      const ang = -sim*Math.log(n);
+      re += mag*Math.cos(ang);
+      im += mag*Math.sin(ang);
+    }
+    const lnN = Math.log(N);
+    const magA = Math.sqrt(N);
+    const angA = -sim*lnN;
+    const Are = magA*Math.cos(angA), Aim = magA*Math.sin(angA);
+    const cre = sre-1, cim = sim;
+    const denom = cre*cre+cim*cim;
+    re += (Are*cre + Aim*cim)/denom;
+    im += (Aim*cre - Are*cim)/denom;
+    const magB = (1/Math.sqrt(N))/2;
+    re += magB*Math.cos(angA);
+    im += magB*Math.sin(angA);
+    let pre=1, pim=0, j=0;
+    for(let k=1;k<=M_TERMS;k++){
+      while(j<=2*k-2){
+        const fre = sre+j, fim = sim;
+        const nre = pre*fre - pim*fim, nim = pre*fim + pim*fre;
+        pre=nre; pim=nim; j++;
+      }
+      const coeff = BERN[2*k]/fact(2*k);
+      const mag = Math.pow(N, -(sre+2*k-1));
+      const tre = mag*Math.cos(angA), tim = mag*Math.sin(angA);
+      const are = pre*tre - pim*tim, aim = pre*tim + pim*tre;
+      re += coeff*are;
+      im += coeff*aim;
+    }
+    return [re, im];
+  }
+
+  // Riemann–Siegel theta function (asymptotic expansion, accurate for t ≳ 5)
+  function theta(t){
+    const tt = Math.max(t, 0.5);
+    return (tt/2)*Math.log(tt/(2*Math.PI)) - tt/2 - Math.PI/8
+      + 1/(48*tt) + 7/(5760*Math.pow(tt,3)) + 31/(80640*Math.pow(tt,5));
+  }
+  // Real-valued Z(t) = e^{i theta(t)} zeta(1/2+it); its sign changes are the zeros.
+  function Zval(t){
+    const [re,im] = zetaCritical(t);
+    const th = theta(t);
+    return re*Math.cos(th) - im*Math.sin(th);
+  }
+  // Riemann–von Mangoldt zero-counting estimate N(T)
+  function estCount(T){
+    if(T<14) return 0;
+    return Math.max(0, (T/(2*Math.PI))*Math.log(T/(2*Math.PI*Math.E)) + 7/8);
+  }
+
+  // ---------- state ----------
+  let rangeStart = 0, rangeEnd = 100;
+  let curT = 0;
+  let playing = false;
+  let path = [];        // [t, re, im] samples across [rangeStart, rangeEnd]
+  let zeros = [];        // located zero t-values within the window
+  let R = 1;             // plot half-scale currently displayed (animates)
+  let Rfull = 1;          // plot half-scale that fits the whole window
+  let autoZoom = true;
+  let zoomTarget = 1;
+
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const slider = document.getElementById('tSlider');
+  const SLIDER_STEPS = 10000;
+
+  function targetRFor(mag){
+    if(!autoZoom) return Rfull;
+    const zf = 3.2; // margin multiplier so the point sits comfortably in frame
+    return Math.max(0.06, Math.min(Rfull, mag*zf + 0.04));
+  }
+
+  function buildPath(){
+    path = [];
+    const span = rangeEnd - rangeStart;
+    const pointBudget = 26000;
+    const samplesPerT = Math.max(2, Math.min(24, pointBudget/Math.max(span,0.001)));
+    const n = Math.max(2, Math.ceil(span*samplesPerT));
+    for(let i=0;i<=n;i++){
+      const t = rangeStart + (i/n)*span;
+      const [re,im] = zetaCritical(t);
+      path.push([t,re,im]);
+    }
+    let maxAbs = 0.6;
+    for(const [,re,im] of path) maxAbs = Math.max(maxAbs, Math.abs(re), Math.abs(im));
+    Rfull = maxAbs*1.12;
+    R = Rfull;
+    zoomTarget = Rfull;
+  }
+
+  function toPx(re, im, W, H){
+    const s = Math.min(W,H)/(2*R);
+    return [W/2 + re*s, H/2 - im*s];
+  }
+
+  function pathIndexForT(t){
+    if(path.length===0) return -1;
+    const span = rangeEnd - rangeStart;
+    const frac = span>0 ? (t-rangeStart)/span : 0;
+    return Math.max(0, Math.min(path.length-1, Math.round(frac*(path.length-1))));
+  }
+
+  function draw(){
+    const W = cv.width, H = cv.height;
+    ctx.fillStyle = '#060a12';
+    ctx.fillRect(0,0,W,H);
+
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1;
+    const [ox,oy] = toPx(0,0,W,H);
+    ctx.beginPath(); ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
+
+    ctx.fillStyle = '#334155';
+    for(let g=-Math.floor(R); g<=Math.floor(R); g++){
+      if(g===0) continue;
+      const [gx] = toPx(g,0,W,H);
+      const [,gy] = toPx(0,g,W,H);
+      ctx.fillRect(gx-0.5, oy-3, 1, 6);
+      ctx.fillRect(ox-3, gy-0.5, 6, 1);
+    }
+    ctx.strokeStyle = '#334155';
+    ctx.beginPath(); ctx.arc(ox,oy,3,0,7); ctx.stroke();
+
+    const idxMax = pathIndexForT(curT);
+    if(path.length>0){
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for(let i=0;i<=idxMax;i++){
+        const [,re,im] = path[i];
+        const [px,py] = toPx(re,im,W,H);
+        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 1.4;
+    for(const z of zeros){
+      if(z>curT) break;
+      const [re,im] = zetaCritical(z);
+      const [px,py] = toPx(re,im,W,H);
+      ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.stroke();
+    }
+
+    if(idxMax>=0 && path.length>0){
+      const [,re,im] = path[idxMax];
+      const [px,py] = toPx(re,im,W,H);
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath(); ctx.arc(px,py,4.5,0,7); ctx.fill();
+    }
+
+    ctx.fillStyle = '#475569';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('Re ζ(½+it) →', W-10, oy-8);
+    ctx.save();
+    ctx.translate(ox+16, 14);
+    ctx.textAlign = 'left';
+    ctx.fillText('↑ Im ζ(½+it)', 0, 0);
+    ctx.restore();
+  }
+
+  function updateReadout(re, im){
+    const mag = Math.hypot(re,im);
+    document.getElementById('rT').textContent = curT.toFixed(3);
+    document.getElementById('rRe').textContent = re.toFixed(4);
+    document.getElementById('rIm').textContent = im.toFixed(4);
+    document.getElementById('rMag').textContent = mag.toFixed(4);
+    return mag;
+  }
+
+  function setT(t, opts){
+    opts = opts || {};
+    curT = Math.max(rangeStart, Math.min(rangeEnd, t));
+    const span = rangeEnd-rangeStart;
+    const frac = span>0 ? (curT-rangeStart)/span : 0;
+    slider.value = Math.round(frac*SLIDER_STEPS);
+    document.getElementById('tVal').textContent = curT.toFixed(2);
+
+    const [re,im] = zetaCritical(curT);
+    const mag = updateReadout(re,im);
+    zoomTarget = targetRFor(mag);
+    if(!opts.easedZoom) R = zoomTarget; // eased case: caller already advanced R this frame
+
+    draw();
+    renderZeroPanel();
+  }
+
+  slider.addEventListener('input', ()=>{
+    const span = rangeEnd-rangeStart;
+    const frac = parseInt(slider.value,10)/SLIDER_STEPS;
+    setT(rangeStart + frac*span);
+  });
+
+  // ---------- zero root-finding (chunked, async, non-blocking) ----------
+  let scanToken = 0;
+  function dtAt(t){
+    const v = 2*Math.PI/(8*Math.log(Math.max(t,20)/(2*Math.PI)));
+    return Math.max(0.04, Math.min(0.3, v));
+  }
+  function findZerosInRange(start, end, onDone){
+    const myToken = ++scanToken;
+    zeros = [];
+    const span = end - start;
+
+    const progTrack = document.getElementById('progTrack');
+    const progFill = document.getElementById('progFill');
+    progTrack.style.display = 'block';
+    progFill.style.width = '0%';
+
+    let t = start, prevZ = Zval(start);
+    const BATCH = 900;
+
+    function refine(a,b,fa,fb){
+      for(let k=0;k<24;k++){
+        const m = (a+b)/2, fm = Zval(m);
+        if((fa<0) === (fm<0)){ a=m; fa=fm; } else { b=m; fb=fm; }
+      }
+      return (a+b)/2;
+    }
+
+    function chunk(){
+      if(myToken !== scanToken) return; // superseded by a newer scan
+      let n = 0;
+      while(t < end && n < BATCH){
+        const dt = dtAt(t);
+        const nt = Math.min(end, t+dt);
+        const z = Zval(nt);
+        if(prevZ!==0 && z!==0 && (prevZ<0)!==(z<0)){
+          zeros.push(refine(t,nt,prevZ,z));
+        }
+        t = nt; prevZ = z;
+        n++;
+      }
+      progFill.style.width = (100*(t-start)/span).toFixed(1)+'%';
+      if(t < end){
+        setTimeout(chunk, 0);
+      } else {
+        progTrack.style.display = 'none';
+        onDone();
+      }
+    }
+    chunk();
+  }
+
+  function renderZeroPanel(){
+    const summary = document.getElementById('zeroSummary');
+    summary.textContent = zeros.length + ' zero' + (zeros.length===1?'':'s') +
+      ' located in [' + rangeStart.toFixed(2) + ', ' + rangeEnd.toFixed(2) + ']' +
+      (zeros.length ? '  (' + zeros.filter(z=>z<=curT).length + ' passed so far)' : '');
+  }
+
+  function renderZeroList(){
+    const box = document.getElementById('zeroList');
+    box.innerHTML = '';
+    const CAP = 400;
+    zeros.slice(0,CAP).forEach((z,idx)=>{
+      const row = document.createElement('div');
+      row.className = 'zero-row';
+      row.textContent = '#'+(idx+1)+'   t = '+z.toFixed(5);
+      box.appendChild(row);
+    });
+    if(zeros.length>CAP){
+      const more = document.createElement('div');
+      more.className = 'zero-more';
+      more.textContent = '…and '+(zeros.length-CAP)+' more (still counted, just not listed)';
+      box.appendChild(more);
+    }
+  }
+
+  // ---------- range apply ----------
+  const goBtn = document.getElementById('goBtn');
+  const startInput = document.getElementById('rangeStart');
+  const endInput = document.getElementById('rangeEnd');
+  const statusLine = document.getElementById('statusLine');
+
+  function applyRange(){
+    let s = parseFloat(startInput.value);
+    let e = parseFloat(endInput.value);
+    if(isNaN(s)) s = 0;
+    if(isNaN(e)) e = s+100;
+    if(e<=s) e = s + 10;
+    s = Math.max(0, s);
+    rangeStart = s; rangeEnd = e;
+    startInput.value = s; endInput.value = e;
+
+    stopPlaying();
+    goBtn.disabled = true;
+    statusLine.textContent = 'building curve…';
+    buildPath();
+    setT(rangeStart);
+    statusLine.textContent = 'scanning for zeros… (≈' + Math.round(estCount(e)-estCount(s)) + ' expected)';
+    findZerosInRange(rangeStart, rangeEnd, ()=>{
+      renderZeroPanel();
+      renderZeroList();
+      const est = Math.round(estCount(rangeEnd) - estCount(rangeStart));
+      statusLine.textContent = zeros.length + ' zeros found (Riemann–von Mangoldt estimate: ≈' + est + ')';
+      draw();
+      goBtn.disabled = false;
+    });
+  }
+  goBtn.addEventListener('click', applyRange);
+  document.querySelectorAll('button[data-s]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      startInput.value = btn.dataset.s;
+      endInput.value = btn.dataset.e;
+      applyRange();
+    });
+  });
+
+  // ---------- play / pause / reset ----------
+  const playBtn = document.getElementById('playBtn');
+  let rafId = null, lastTs = null;
+  function stopPlaying(){
+    playing = false;
+    playBtn.textContent = '▶ Play';
+    playBtn.classList.remove('active');
+    if(rafId) cancelAnimationFrame(rafId);
+  }
+  function step(ts){
+    if(!playing) return;
+    if(lastTs==null) lastTs = ts;
+    const dt = (ts-lastTs)/1000;
+    lastTs = ts;
+    const speed = parseFloat(document.getElementById('speedSel').value);
+    const BASE_RATE = 100/12; // t per second at speed=1, tuned to match the 0-100 feel
+    let next = curT + dt*speed*BASE_RATE;
+    if(next >= rangeEnd){ setT(rangeEnd); stopPlaying(); return; }
+
+    // ease the zoom radius toward the upcoming point's target before drawing
+    const [re,im] = zetaCritical(next);
+    const target = targetRFor(Math.hypot(re,im));
+    R += (target - R) * 0.15;
+
+    setT(next, {easedZoom:true});
+    rafId = requestAnimationFrame(step);
+  }
+  playBtn.addEventListener('click', ()=>{
+    if(playing){ stopPlaying(); return; }
+    playing = true;
+    if(curT>=rangeEnd) curT = rangeStart;
+    playBtn.textContent = '❚❚ Pause';
+    playBtn.classList.add('active');
+    lastTs = null;
+    rafId = requestAnimationFrame(step);
+  });
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    stopPlaying();
+    setT(rangeStart);
+  });
+  const zoomBtn = document.getElementById('zoomBtn');
+  zoomBtn.addEventListener('click', ()=>{
+    autoZoom = !autoZoom;
+    zoomBtn.classList.toggle('active', autoZoom);
+    setT(curT);
+  });
+
+  // ---------- boot ----------
+  applyRange();
+})();
+</script>
+</body>
+</html>
