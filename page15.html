@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sector-Graded Farey Discrepancy — Page 15</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background:#0a0f1a; color:#e2e8f0; line-height:1.6; font-size:14px;
+  }
+  .container { max-width:1180px; margin:0 auto; padding:24px 18px 60px; }
+  h1 { font-size:1.5em; font-weight:600; }
+  h1 .fn { font-family:'Cambria Math','STIX Two Math',serif; font-style:italic; color:#67e8f9; }
+  h2 { font-size:1.05em; color:#c4b5fd; margin-bottom:8px; font-weight:600; }
+  .subtitle { color:#94a3b8; font-size:0.92em; margin-top:6px; max-width:820px; }
+  .panel { background:#0f172a; border:1px solid #263148; border-radius:10px; padding:18px; margin-top:20px; }
+  p { margin-bottom:10px; color:#cbd5e1; }
+  code { font-family:monospace; background:#151d2e; padding:1px 5px; border-radius:3px; color:#93e8fb; }
+
+  .row-inline { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  label.field-label { font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px; }
+  input[type=text], input[type=number] {
+    background:#1e293b; border:1px solid #475569; border-radius:5px;
+    color:#e2e8f0; padding:6px 8px; font-family:monospace; font-size:13px;
+  }
+  select {
+    background:#1e293b; border:1px solid #475569; border-radius:5px;
+    color:#e2e8f0; padding:6px 8px; font-family:monospace; font-size:12px;
+  }
+  button {
+    font-family:inherit; cursor:pointer; border-radius:6px; border:1px solid #0e7490;
+    background:rgba(6,182,212,.12); color:#67e8f9; padding:7px 14px; font-size:12px;
+  }
+  button:hover { background:rgba(6,182,212,.28); border-color:#06b6d4; }
+  button.small { padding:4px 10px; font-size:11px; }
+  button:disabled { opacity:.45; cursor:default; }
+
+  canvas { background:#060a12; border-radius:6px; display:block; width:100%; }
+  .readout { font-family:monospace; font-size:12.5px; color:#67e8f9; margin-top:10px; }
+  .readout b { color:#f0abfc; }
+  .status-line { font-size:11px; color:#64748b; margin-top:8px; }
+
+  .demo-result { display:flex; gap:20px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+  .demo-cell { background:#151d2e; border:1px solid #263148; border-radius:6px; padding:10px 14px; }
+  .demo-cell .lbl { font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+  .demo-cell .val { font-family:monospace; color:#4ade80; font-size:15px; margin-top:2px; }
+
+  footer { color:#3a4661; font-size:10.5px; text-align:center; margin-top:36px; }
+</style>
+</head>
+<body>
+
+<script>
+(function(){
+  var links=[
+   ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
+   ['page2.html','P2','How C(n) Works — Guided Walkthrough — Page 2','#7ec87a'],
+   ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
+   ['page4.html','P4','The Prime Filter — Sieve View — Page 4','#4a9eff'],
+   ['page5.html','P5','Gap Diagonal Identity — Page 5','#3dc8b8'],
+   ['page6.html','P6','Strip Correlations — Where Independence Breaks — Page 6','#e05060'],
+   ['page7.html','P7','Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7','#ff8c42'],
+   ['page8.html','P8','k-Block Coprime Density — Prime Constellations & k-Tuples — Page 8','#ff2fd0'],
+   ['page9.html','P9','Dirichlet Character-Twisted Density — Page 9','#d2691e'],
+   ['page10.html','P10','Farey & Unit Circle — Page 10','#a855f7'],
+   ['page11.html','P11','Farey Sequence Summatory Function — Page 11','#f2c14e'],
+   ['page12.html','P12','The Prime Spiral — Page 12','#ff6b9d'],
+   ['page13.html','P13','Gauss Circle ↔ Wessen Bridge — Page 13','#06b6d4'],
+   ['page14.html','½+it','ζ(½+it) — Critical-Line Spiral — Page 14','#ef4444'],
+   ['page15.html','P15','Sector-Graded Farey Discrepancy — Page 15','#4ade80'],
+   ['#opener','Opener','Open the Welcome / Opener Teaser','#f2a84a']
+  ];
+  var bar='<div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#0a0f1a;border-bottom:1px solid rgba(139,92,246,.3);font-family:\'JetBrains Mono\',monospace,sans-serif;">';
+  bar+='<span style="font-family:\'JetBrains Mono\',monospace;font-size:.7rem;color:#8b5cf6;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
+  links.forEach(function(L){var href=L[0],lab=L[1],ti=L[2],c=L[3];var cur=(href==='page15.html');
+    if(href==='#opener'){
+      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
+    }
+    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
+    else{bar+='<a href="'+href+'" target="_blank" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
+  });
+  bar+='<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(226,232,240,.3);color:rgba(226,232,240,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;">\u26f6 Full</button>';
+  bar+='</div>';
+  document.write(bar);
+})();
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
+function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open('index.html','_blank'); }
+</script>
+
+<div class="container">
+  <h1>Sector-Graded Farey Discrepancy <span class="fn">— grading Σ|δ_k| by first CF digit</span></h1>
+  <p class="subtitle">
+    Page 11's Franel&ndash;Landau sum Σ|F_k &minus; k/|F_N|| measures how evenly the Farey fractions sit compared
+    to a perfectly even spacing &mdash; and its growth rate is equivalent to the Riemann Hypothesis. This page
+    grades that same sum by sector, using the fact that a fraction's sector index is exactly its first
+    continued-fraction digit, to see how the discrepancy is distributed across sectors rather than only its
+    total.
+  </p>
+
+  <div class="panel">
+    <h2>1. The sector index is a continued-fraction digit</h2>
+    <p>For a Farey fraction x = a/b in lowest terms, the sector containing it is S_n = (1/(n+1), 1/n] with
+      n = ⌊b/a⌋. Writing out the continued fraction x = [0; a₁, a₂, …], the first partial quotient a₁ is
+      also ⌊b/a⌋ &mdash; the two definitions coincide exactly, for every fraction. Sector membership is
+      literally "what does the continued fraction expansion of x start with?" Try it on any pair:</p>
+    <div class="row-inline">
+      <div>
+        <label class="field-label">a</label>
+        <input type="number" id="demoA" value="2" min="1" style="width:80px;">
+      </div>
+      <div>
+        <label class="field-label">b</label>
+        <input type="number" id="demoB" value="5" min="2" style="width:80px;">
+      </div>
+      <button class="small" id="demoBtn" style="margin-top:16px;">Check</button>
+    </div>
+    <div class="demo-result" id="demoResult"></div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Two different measures on the same partition</h2>
+    <p>C(n,N) ∝ 1/(n(n+1)) is the plain Euclidean width of sector S_n &mdash; how much of the interval (0,1]
+      it occupies. A second, unrelated quantity lives on the same partition: the Gauss&ndash;Kuzmin
+      distribution P(a₁=n) = log₂(1+1/(n(n+2))), the natural invariant measure of the Gauss map (the dynamical
+      system behind continued fractions). Both decay like 1/n² for large n &mdash; the same power law &mdash;
+      but they are not the same measure: their ratio converges to 1/ln 2 ≈ 1.4427, not 1. One counts length,
+      the other counts ergodic frequency under repeated iteration of the Gauss map. Plotted as n²·(value), each
+      curve should flatten to its own horizontal line:</p>
+    <canvas id="gkCanvas" width="1080" height="280"></canvas>
+    <div class="readout" id="gkReadout"></div>
+  </div>
+
+  <div class="panel">
+    <h2>3. The discrepancy sum, graded by sector</h2>
+    <p>Builds the Farey sequence F_N, computes δ_k = F_k &minus; k/|F_N| for each fraction, and buckets |δ_k|
+      by the sector (equivalently, first CF digit) of F_k. Large-n sectors contain very few points at any
+      finite N, so their bars are naturally noisier &mdash; that's a real feature of finite-N sampling, not
+      something to smooth away.</p>
+    <div class="row-inline">
+      <div>
+        <label class="field-label">Farey order N</label>
+        <input type="number" id="nInput" value="500" min="10" max="4000" style="width:100px;">
+      </div>
+      <div>
+        <label class="field-label">view</label>
+        <select id="viewSel">
+          <option value="sum">Σ|δ_k| per sector (raw)</option>
+          <option value="avg">average |δ_k| per fraction in sector</option>
+          <option value="count">fraction count per sector</option>
+        </select>
+      </div>
+      <button id="buildBtn" style="margin-top:16px;">Build</button>
+      <div class="row-inline" style="margin-top:16px;">
+        <button class="small" data-n="200">200</button>
+        <button class="small" data-n="500">500</button>
+        <button class="small" data-n="1500">1500</button>
+        <button class="small" data-n="3000">3000</button>
+      </div>
+    </div>
+    <div class="status-line" id="statusLine"></div>
+    <canvas id="barCanvas" width="1080" height="320" style="margin-top:10px;"></canvas>
+    <div class="readout" id="barReadout"></div>
+  </div>
+
+  <div class="panel">
+    <h2>4. Scope</h2>
+    <p>This page decomposes a known RH-equivalent quantity by an existing structural index; it doesn't argue
+      toward a proof of anything. The continued-fraction / Gauss-map route connects, via the transfer-operator
+      literature (Mayer's theorem), to the <i>Selberg</i> zeta function of the modular surface &mdash; a real
+      and beautiful correspondence, but a different zeta function from ζ(s) itself. For the spectral check
+      against actual zeta-zero heights, see <a href="page11.html" style="color:#67e8f9;">Page 11</a>, which
+      runs that comparison on the unsectored sum.</p>
+  </div>
+
+  <footer>Farey generation via the standard mediant recurrence · all computation runs client-side</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- Section 1: verified identity demo ----------
+  function firstCFDigit(a,b){ return Math.floor(b/a); }
+  function cfExpand(a,b,terms){
+    terms = terms||6;
+    let out=[];
+    let na=a, nb=b;
+    for(let i=0;i<terms;i++){
+      if(na===0) break;
+      const q = Math.floor(nb/na);
+      out.push(q);
+      const r = nb - q*na;
+      nb = na; na = r;
+    }
+    return out;
+  }
+  function runDemo(){
+    const a = Math.max(1, parseInt(document.getElementById('demoA').value,10)||1);
+    const b = Math.max(a+1, parseInt(document.getElementById('demoB').value,10)||a+1);
+    function gcd(x,y){ while(y){ [x,y]=[y,x%y]; } return x; }
+    const g = gcd(a,b);
+    const A = a/g, B = b/g;
+    const n = firstCFDigit(A,B);
+    const cf = cfExpand(A,B,6);
+    const lo = 1/(n+1), hi = 1/n;
+    const inSector = (A/B > lo - 1e-12) && (A/B <= hi + 1e-12);
+    document.getElementById('demoResult').innerHTML =
+      '<div class="demo-cell"><div class="lbl">reduced fraction</div><div class="val">'+A+'/'+B+'</div></div>' +
+      '<div class="demo-cell"><div class="lbl">sector n = ⌊b/a⌋</div><div class="val">'+n+'</div></div>' +
+      '<div class="demo-cell"><div class="lbl">CF digits [0; a₁,a₂,…]</div><div class="val">[0; '+cf.join(', ')+']</div></div>' +
+      '<div class="demo-cell"><div class="lbl">a₁ = n ?</div><div class="val">'+(cf[0]===n ? 'yes ✓' : 'NO — mismatch') +'</div></div>' +
+      '<div class="demo-cell"><div class="lbl">x ∈ S_n = (1/(n+1), 1/n] ?</div><div class="val">'+(inSector?'yes ✓':'NO')+'</div></div>';
+  }
+  document.getElementById('demoBtn').addEventListener('click', runDemo);
+  runDemo();
+
+  // ---------- Section 2: Gauss-Kuzmin vs sector-width chart ----------
+  function gaussKuzmin(n){ return Math.log2(1 + 1/(n*(n+2))); }
+  function sectorWidth(n){ return 1/(n*(n+1)); }
+
+  function drawGK(){
+    const cv = document.getElementById('gkCanvas');
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    ctx.fillStyle = '#060a12'; ctx.fillRect(0,0,W,H);
+    const nMax = 400;
+    const pts = [];
+    for(let n=1;n<=nMax;n++){
+      pts.push([n, n*n*gaussKuzmin(n), n*n*sectorWidth(n)]);
+    }
+    const yMax = 1/Math.LN2 * 1.15;
+    const pad = 40;
+    function toX(n){ return pad + (n-1)/(nMax-1) * (W-2*pad); }
+    function toY(v){ return H-pad - (v/yMax) * (H-2*pad); }
+
+    // axes
+    ctx.strokeStyle = '#1e293b'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
+
+    // 1/ln2 reference line
+    const yref = toY(1/Math.LN2);
+    ctx.strokeStyle = 'rgba(148,163,184,.4)';
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad,yref); ctx.lineTo(W-pad,yref); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#94a3b8'; ctx.font='11px monospace';
+    ctx.fillText('1/ln2 ≈ 1.4427', W-pad-100, yref-6);
+
+    // GK curve
+    ctx.strokeStyle = '#4ade80'; ctx.lineWidth=1.8; ctx.beginPath();
+    pts.forEach((p,i)=>{ const x=toX(p[0]), y=toY(p[1]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke();
+
+    // sector-width curve
+    ctx.strokeStyle = '#67e8f9'; ctx.lineWidth=1.8; ctx.beginPath();
+    pts.forEach((p,i)=>{ const x=toX(p[0]), y=toY(p[2]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke();
+
+    // legend
+    ctx.fillStyle='#4ade80'; ctx.fillRect(pad, 14, 10, 10);
+    ctx.fillStyle='#cbd5e1'; ctx.fillText('n² · Gauss–Kuzmin P(a₁=n)', pad+16, 23);
+    ctx.fillStyle='#67e8f9'; ctx.fillRect(pad+240, 14, 10, 10);
+    ctx.fillStyle='#cbd5e1'; ctx.fillText('n² · 1/(n(n+1))  [your sector width]', pad+256, 23);
+
+    ctx.fillStyle='#475569'; ctx.fillText('n →', W-pad-20, H-pad+20);
+
+    document.getElementById('gkReadout').innerHTML =
+      'At n=400: n²·GK = <b>'+(400*400*gaussKuzmin(400)).toFixed(5)+'</b>, n²·width = <b>'+(400*400*sectorWidth(400)).toFixed(5)+
+      '</b>, ratio → <b>'+(gaussKuzmin(400)/sectorWidth(400)).toFixed(5)+'</b> (converges to 1/ln2 = '+(1/Math.LN2).toFixed(5)+')';
+  }
+  drawGK();
+
+  // ---------- Section 3: sector-graded Franel-Landau ----------
+  function fareySequence(n){
+    let a=0,b=1,c=1,d=n;
+    const seq = new Array(1);
+    seq[0] = [a,b];
+    let idx=1;
+    while(c<=n){
+      const k = Math.floor((n+b)/d);
+      const na=c, nb=d, nc=k*c-a, nd=k*d-b;
+      a=na; b=nb; c=nc; d=nd;
+      seq[idx++] = [a,b];
+    }
+    return seq;
+  }
+
+  function buildAndDraw(){
+    const N = Math.max(10, Math.min(4000, parseInt(document.getElementById('nInput').value,10)||500));
+    document.getElementById('nInput').value = N;
+    const status = document.getElementById('statusLine');
+    status.textContent = 'building F_'+N+'…';
+    const buildBtn = document.getElementById('buildBtn');
+    buildBtn.disabled = true;
+
+    setTimeout(function(){
+      const t0 = performance.now();
+      const F = fareySequence(N);
+      const m = F.length;
+      let D = 0;
+      const sumBucket = {}, countBucket = {};
+      for(let k=1;k<=m;k++){
+        const a = F[k-1][0], b = F[k-1][1];
+        const x = a/b;
+        const delta = Math.abs(x - k/m);
+        D += delta;
+        if(a>0){
+          const n = Math.floor(b/a);
+          sumBucket[n] = (sumBucket[n]||0) + delta;
+          countBucket[n] = (countBucket[n]||0) + 1;
+        }
+      }
+      const elapsed = (performance.now()-t0).toFixed(0);
+
+      const view = document.getElementById('viewSel').value;
+      const nMaxShown = 40;
+      const bars = [];
+      for(let n=1;n<=nMaxShown;n++){
+        const s = sumBucket[n]||0, c = countBucket[n]||0;
+        let v;
+        if(view==='sum') v = s;
+        else if(view==='count') v = c;
+        else v = c>0 ? s/c : 0;
+        bars.push(v);
+      }
+
+      drawBars(bars, view, N);
+
+      const alpha = D>0 ? (Math.log(D)/Math.log(N)) : 0;
+      document.getElementById('barReadout').innerHTML =
+        '|F_'+N+'| = <b>'+m+'</b> fractions &nbsp;·&nbsp; total discrepancy D(N)=Σ|δ_k| = <b>'+D.toFixed(4)+
+        '</b> &nbsp;·&nbsp; implied exponent log D / log N ≈ <b>'+alpha.toFixed(4)+
+        '</b> (RH predicts this should trend toward ≤ 1/2 as N grows) &nbsp;·&nbsp; built in '+elapsed+'ms';
+      status.textContent = '';
+      buildBtn.disabled = false;
+    }, 10);
+  }
+
+  function drawBars(bars, view, N){
+    const cv = document.getElementById('barCanvas');
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    ctx.fillStyle = '#060a12'; ctx.fillRect(0,0,W,H);
+    const pad = 44;
+    const maxV = Math.max(...bars, 1e-9);
+    const bw = (W-2*pad)/bars.length;
+
+    ctx.strokeStyle = '#1e293b'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
+
+    bars.forEach((v,i)=>{
+      const h = (v/maxV) * (H-2*pad-10);
+      const x = pad + i*bw;
+      const y = H-pad-h;
+      ctx.fillStyle = i===0 ? '#4ade80' : 'rgba(103,232,249,.75)';
+      ctx.fillRect(x+1, y, bw-2, h);
+    });
+
+    ctx.fillStyle = '#64748b'; ctx.font='10px monospace';
+    for(let i=0;i<bars.length;i+=5){
+      ctx.fillText(String(i+1), pad + i*bw, H-pad+14);
+    }
+    const labels = {sum:'Σ|δ_k| in sector n', count:'# fractions in sector n', avg:'avg |δ_k| per fraction in sector n'};
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(labels[view] + '   (sectors 1–'+bars.length+', N='+N+')', pad, 16);
+  }
+
+  document.getElementById('buildBtn').addEventListener('click', buildAndDraw);
+  document.getElementById('viewSel').addEventListener('change', buildAndDraw);
+  document.querySelectorAll('button[data-n]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('nInput').value = btn.dataset.n;
+      buildAndDraw();
+    });
+  });
+
+  buildAndDraw();
+})();
+</script>
+
+</body>
+</html>

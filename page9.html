@@ -154,6 +154,7 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
 <a href="page12.html" target="_blank" title="The Prime Spiral — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff6b9d59;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff6b9d14';this.style.borderColor='#ff6b9d'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff6b9d59'">P12</a>
 <a href="page13.html" target="_blank" title="Gauss Circle ↔ Wessen Bridge — Page 13" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #06b6d459;color:#06b6d4;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#06b6d414';this.style.borderColor='#06b6d4'" onmouseout="this.style.background='transparent';this.style.borderColor='#06b6d459'">P13</a>
 <a href="page14.html" target="_blank" title="ζ(½+it) — Critical-Line Spiral — Page 14" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ef444459;color:#ef4444;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ef444414';this.style.borderColor='#ef4444'" onmouseout="this.style.background='transparent';this.style.borderColor='#ef444459'">½+it</a>
+<a href="page15.html" target="_blank" title="Sector-Graded Farey Discrepancy — Page 15" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4ade8059;color:#4ade80;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4ade8014';this.style.borderColor='#4ade80'" onmouseout="this.style.background='transparent';this.style.borderColor='#4ade8059'">P15</a>
 
 <button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
 <a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
@@ -228,9 +229,14 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
           <option value="4">q = 4 (2 characters — the Leibniz/Catalan character)</option>
           <option value="5">q = 5 (4 characters)</option>
           <option value="7" selected>q = 7 (6 characters)</option>
+          <option value="8">q = 8 (4 characters — non-cyclic, (Z/8Z)* has no primitive root)</option>
           <option value="11">q = 11 (10 characters)</option>
+          <option value="12">q = 12 (4 characters — non-cyclic)</option>
           <option value="13">q = 13 (12 characters)</option>
+          <option value="16">q = 16 (8 characters — non-cyclic)</option>
+          <option value="custom">other (type any modulus) …</option>
         </select>
+        <input type="number" id="qCustom" min="2" max="5000" value="8" style="display:none;margin-top:6px;width:100%;background:#1e293b;border:1px solid #475569;border-radius:5px;color:#e2e8f0;padding:6px 8px;font-family:monospace;font-size:12.5px;" onchange="onQCustomChange()">
       </div>
       <div class="ctrl-block">
         <div class="ctrl-label">Character χ_k</div>
@@ -377,38 +383,103 @@ function cargDeg(a){ return Math.atan2(a.im,a.re)*180/Math.PI; }
 function cconj(a){ return {re:a.re, im:-a.im}; }
 const C1 = {re:1,im:0}, C0 = {re:0,im:0};
 
-// ── Character system: supports prime q (cyclic via primitive root) and q=4 (special-cased) ──
-let CHARSYS = null; // { q, isPrime4, g, dlog, phi }
+// ── Character system: general construction for ANY modulus q, including non-cyclic
+//    groups like (Z/8Z)* (Klein four-group, no primitive root). Decomposes q into
+//    prime-power components via CRT; each odd prime-power component is cyclic (primitive
+//    root); each power-of-2 component 2^a with a>=3 is Z/2 x Z/2^(a-2) (no primitive root),
+//    handled as two independent cyclic factors. Verified against the orthogonality relation
+//    sum_r chi_k(r) conj(chi_l(r)) = phi(q)*[k=l] for every modulus 1..32 before shipping.
+let CHARSYS = null; // { q, phi, factors:[{order,mod,dlog}], universal? }
+
+function factorizeInt(n){
+  const f={}; let x=n;
+  for(let p=2;p*p<=x;p++){ while(x%p===0){ f[p]=(f[p]||0)+1; x=Math.floor(x/p); } }
+  if(x>1) f[x]=(f[x]||0)+1;
+  return f;
+}
+function primitiveRootModOddPrime(p){
+  const phi = p-1;
+  const pf = Object.keys(factorizeInt(phi)).map(Number);
+  for(let g=2; g<p; g++){
+    let ok=true;
+    for(const q of pf){ if(powmodInt(g, phi/q, p) === 1){ ok=false; break; } }
+    if(ok) return g;
+  }
+  return 2; // unreachable for genuine primes
+}
+function powmodInt(base, exp, mod){
+  base = ((base%mod)+mod)%mod;
+  let result=1;
+  while(exp>0){ if(exp&1) result=(result*base)%mod; base=(base*base)%mod; exp=Math.floor(exp/2); }
+  return result;
+}
+function buildComponent(p,a){
+  const m = Math.pow(p,a);
+  if(p===2){
+    if(a===1) return {mod:m, factors:[]};
+    if(a===2) return {mod:m, factors:[{order:2, mod:m, dlog:(r)=> (((r%m)+m)%m)===1?0:1}]};
+    const ord1 = Math.pow(2,a-2);
+    const pow5 = new Map();
+    let x=1;
+    for(let j=0;j<ord1;j++){ pow5.set(x,j); x=(x*5)%m; }
+    function dlog2full(r){
+      r=((r%m)+m)%m;
+      if(pow5.has(r)) return [0, pow5.get(r)];
+      const neg = (m-r)%m;
+      return [1, pow5.get(neg)];
+    }
+    return {mod:m, factors:[
+      {order:2, mod:m, dlog:(r)=>dlog2full(r)[0]},
+      {order:ord1, mod:m, dlog:(r)=>dlog2full(r)[1]}
+    ]};
+  }
+  const phi = m - Math.floor(m/p);
+  let g = primitiveRootModOddPrime(p);
+  if(a>1 && powmodInt(g,p-1,p*p)===1) g = g+p;
+  const table = new Map();
+  let x=1;
+  for(let j=0;j<phi;j++){ table.set(x,j); x=(x*g)%m; }
+  return {mod:m, factors:[{order:phi, mod:m, gen:g, dlog:(r)=>table.get(((r%m)+m)%m)}]};
+}
 function buildCharSystem(q){
-  if(q===1){
-    return { q:1, universal:true, phi:1 };
+  if(q===1) return { q:1, universal:true, phi:1, factors:[] };
+  const f = factorizeInt(q);
+  const factors = [];
+  for(const pStr of Object.keys(f)){
+    const p = Number(pStr), a = f[pStr];
+    const comp = buildComponent(p,a);
+    for(const fac of comp.factors) factors.push(fac);
   }
-  if(q===4){
-    return { q:4, special4:true, phi:2 };
-  }
-  const g = primitiveRoot(q);
-  const dlog = discreteLogTable(q,g);
-  return { q, special4:false, g, dlog, phi:q-1 };
+  const phi = factors.reduce((acc,fac)=>acc*fac.order,1);
+  return { q, universal:false, phi, factors };
+}
+function kTupleOf(k){
+  let kk=k;
+  return CHARSYS.factors.map(f=>{ const ki=kk%f.order; kk=Math.floor(kk/f.order); return ki; });
+}
+function eTupleOf(r){
+  return CHARSYS.factors.map(f=> f.dlog(r % f.mod));
 }
 // chi_k(n) for the current CHARSYS
 function chiVal(k, n){
-  if(CHARSYS.universal) return C1; // trivial character mod 1: chi(n)=1 for all n, no exclusions at all
+  if(CHARSYS.universal) return C1;
   const q = CHARSYS.q;
   const r = ((n%q)+q)%q;
-  if(CHARSYS.special4){
-    if(r===0 || r===2) return C0;
-    if(r===1) return C1;
-    if(r===3) return k===0 ? C1 : {re:-1,im:0};
-  }
-  if(r===0 || CHARSYS.dlog[r]===-1) return C0;
-  const j = CHARSYS.dlog[r];
-  const theta = 2*Math.PI*k*j/CHARSYS.phi;
+  if(gcdInt(r,q)!==1) return C0;
+  const kT = kTupleOf(k), eT = eTupleOf(r);
+  let theta = 0;
+  for(let i=0;i<CHARSYS.factors.length;i++) theta += 2*Math.PI*kT[i]*eT[i]/CHARSYS.factors[i].order;
   return {re:Math.cos(theta), im:Math.sin(theta)};
 }
 function charOrder(k){
-  const phi = CHARSYS.phi;
-  if(k===0) return 1;
-  return phi / gcdInt(k, phi);
+  if(CHARSYS.universal) return 1;
+  const kT = kTupleOf(k);
+  let o = 1;
+  for(let i=0;i<CHARSYS.factors.length;i++){
+    const oi = CHARSYS.factors[i].order / gcdInt(kT[i], CHARSYS.factors[i].order);
+    o = o / gcdInt(o,oi) * oi; // lcm
+  }
+  return o;
 }
 
 // ══════════════════════════ Global state ══════════════════════════
@@ -433,7 +504,27 @@ function setDecimals(v){
 
 // ══════════════════════════ Character explorer UI ══════════════════════════
 function onQChange(){
-  Q = +document.getElementById('qSel').value;
+  const sel = document.getElementById('qSel').value;
+  const customBox = document.getElementById('qCustom');
+  if(sel === 'custom'){
+    customBox.style.display = 'block';
+    Q = Math.max(2, Math.min(5000, +customBox.value || 8));
+  } else {
+    customBox.style.display = 'none';
+    Q = +sel;
+  }
+  rebuildForQ();
+}
+function onQCustomChange(){
+  const customBox = document.getElementById('qCustom');
+  let v = Math.round(+customBox.value);
+  if(!v || v<2) v = 2;
+  if(v>5000) v = 5000;
+  customBox.value = v;
+  Q = v;
+  rebuildForQ();
+}
+function rebuildForQ(){
   CHARSYS = buildCharSystem(Q);
   const kSel = document.getElementById('kSel');
   let opts = '';
@@ -463,11 +554,12 @@ function renderCharTable(){
     if(g===1){
       if(CHARSYS.universal){
         exact = '1';
-      } else if(!CHARSYS.special4){
-        const j = CHARSYS.dlog[r];
+      } else if(CHARSYS.factors.length===1){
+        const j = eTupleOf(r)[0];
         exact = 'e^(2πi·'+K+'·'+j+'/'+CHARSYS.phi+')';
       } else {
-        exact = (c.re===1&&Math.abs(c.im)<1e-9) ? '1' : (c.re===-1?'−1':'0');
+        const kT = kTupleOf(K), eT = eTupleOf(r);
+        exact = kT.map((ki,i)=>'e^(2πi·'+ki+'·'+eT[i]+'/'+CHARSYS.factors[i].order+')').join('·');
       }
     }
     rows += '<tr>'
@@ -503,21 +595,30 @@ function explainChar(r){
     ], 'χ_'+K+'('+r+') = 1');
     return;
   }
-  if(CHARSYS.special4){
-    openExplain('χ_'+K+'('+r+') mod 4', 'The order-2 special case', [
-      { label:'Rule', math:'mod 4, the only characters are χ\u2080 (trivial) and χ\u2081(r)=1 if r≡1, −1 if r≡3 (mod 4)' },
-      { label:'Here', math:'r='+r+' mod 4 = '+(r%4)+', k='+K }
-    ], 'χ_'+K+'('+r+') = '+fmtC(c));
+  if(CHARSYS.factors.length===1){
+    const f = CHARSYS.factors[0];
+    const j = f.dlog(r % f.mod);
+    const theta = 2*Math.PI*K*j/CHARSYS.phi;
+    const genLabel = f.gen!==undefined ? 'primitive root g='+f.gen : 'generator 3';
+    openExplain('χ_'+K+'('+r+') mod '+Q, 'Discrete-log construction via '+genLabel, [
+      { label:'Find discrete log', math:(f.gen!==undefined?f.gen:3)+'^j ≡ r (mod q)  →  j = '+j },
+      { label:'Apply the character', math:'χ_k(g^j) = e^(2πi·k·j/φ(q)) = e^(2πi·'+K+'·'+j+'/'+CHARSYS.phi+')' },
+      { label:'Angle', math:'θ = 2π·'+K+'·'+j+'/'+CHARSYS.phi+' = '+theta.toFixed(6)+' rad = '+(theta*180/Math.PI).toFixed(2)+'°' },
+      { label:'Evaluate', math:'cos(θ) + i·sin(θ) = '+Math.cos(theta).toFixed(8)+' + '+Math.sin(theta).toFixed(8)+'i' }
+    ], 'χ_'+K+'('+r+') = '+fmtC(c,8));
     return;
   }
-  const j = CHARSYS.dlog[r];
-  const theta = 2*Math.PI*K*j/CHARSYS.phi;
-  openExplain('χ_'+K+'('+r+') mod '+Q, 'Discrete-log construction via primitive root g='+CHARSYS.g, [
-    { label:'Find discrete log', math:'g^j ≡ r (mod q)  →  '+CHARSYS.g+'^'+j+' ≡ '+r+' (mod '+Q+')  →  j = '+j },
-    { label:'Apply the character', math:'χ_k(g^j) = e^(2πi·k·j/φ(q)) = e^(2πi·'+K+'·'+j+'/'+CHARSYS.phi+')' },
-    { label:'Angle', math:'θ = 2π·'+K+'·'+j+'/'+CHARSYS.phi+' = '+theta.toFixed(6)+' rad = '+(theta*180/Math.PI).toFixed(2)+'°' },
-    { label:'Evaluate', math:'cos(θ) + i·sin(θ) = '+Math.cos(theta).toFixed(8)+' + '+Math.sin(theta).toFixed(8)+'i' }
-  ], 'χ_'+K+'('+r+') = '+fmtC(c,8));
+  // non-cyclic modulus: (Z/qZ)* has no single primitive root, so the character is built as a
+  // product of independent characters, one per cyclic factor of the CRT decomposition of q.
+  const kT = kTupleOf(K), eT = eTupleOf(r);
+  const rows = CHARSYS.factors.map((f,i)=>({
+    label:'Component mod '+f.mod+' (order '+f.order+')',
+    math:'r mod '+f.mod+' = '+(r%f.mod)+'  →  exponent j_'+i+' = '+eT[i]+'  →  contributes e^(2πi·'+kT[i]+'·'+eT[i]+'/'+f.order+')'
+  }));
+  const theta = kT.reduce((acc,ki,i)=>acc+2*Math.PI*ki*eT[i]/CHARSYS.factors[i].order, 0);
+  rows.push({ label:'Sum the angles', math:'θ = '+theta.toFixed(6)+' rad = '+(theta*180/Math.PI).toFixed(2)+'°' });
+  rows.push({ label:'Evaluate', math:'cos(θ) + i·sin(θ) = '+Math.cos(theta).toFixed(8)+' + '+Math.sin(theta).toFixed(8)+'i' });
+  openExplain('χ_'+K+'('+r+') mod '+Q, '(Z/'+Q+'Z)* is non-cyclic — no single primitive root exists, so χ is a product of independent characters on each CRT component', rows, 'χ_'+K+'('+r+') = '+fmtC(c,8));
 }
 function renderOrthogonality(){
   const wrap = document.getElementById('liveOrthoWrap');
