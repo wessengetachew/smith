@@ -352,7 +352,7 @@ function renderTouchTable(){
       + '<td>'+(1-1/e.p).toFixed(6)+'</td>'
       + '<td>'+cum.toFixed(8)+'</td></tr>';
   });
-  tb.innerHTML = rows || '<tr><td colspan="5" style="opacity:.5;">No touching primes (n=0 with a prime-free… actually impossible, p=2 always touches)</td></tr>';
+  tb.innerHTML = rows || '<tr><td colspan="5" style="opacity:.5;">No touching primes — only happens for the trivial block M=1, n=0 (block={1}): every integer is coprime to 1, so density = 1 with nothing to sieve.</td></tr>';
 }
 function renderStats(){
   document.getElementById('rStepCount').textContent = SIEVE.step + ' / ' + SIEVE.primes.length;

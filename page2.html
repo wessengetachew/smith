@@ -361,16 +361,23 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
   <p>A reader on the original post asked about a self‑similar, repeating pattern that seemed to "scale at some
   frequency" in the lattice views. It's not connected to the zeta function's zeros or anything spherical — it's
   much more down‑to‑earth, and it falls straight out of the sieve structure above.</p>
-  <p>Whether a cell <span class="mono">(r, M)</span> lights up depends only on <span class="mono">r</span> and
-  <span class="mono">M</span> <em>modulo small primes</em> — divisibility by 2 repeats every 2 integers, by 3
-  every 3, by 5 every 5, and so on. Once you've accounted for every saturated prime up to
-  <span class="mono">n+1</span>, the whole coprimality pattern repeats exactly with period
-  <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of those primes. That's the "unknown
-  frequency": it isn't unknown at all, it's the product of the small primes below the block length, and it grows
-  <em>combinatorially</em> (2, 6, 30, 210, 2310, …) rather than smoothly, which is exactly what makes the
-  self‑similarity look like it's "scaling" as you zoom — each new saturated prime multiplies the repeat period by
-  that prime. This is the same mechanism behind the classic Sieve of Eratosthenes visualizations and Stern–Brocot /
-  Farey self‑similarity elsewhere on this site (Page 1's Farey and Ford‑circle views included).</p>
+  <p>Whether a cell <span class="mono">(r, M)</span> lights up depends on <span class="mono">r</span> and
+  <span class="mono">M</span> <em>modulo every prime that divides either of them</em> — but the <strong>saturated</strong>
+  primes (<span class="mono">p ≤ n+1</span>) contribute a piece that's exactly periodic: r is unconditionally required
+  to avoid each saturated prime regardless of where <span class="mono">M</span> lands, so that part of the filter
+  repeats with period <span class="mono">2·3·5·7·…</span> — the <strong>primorial</strong> of the saturated primes.
+  That's the "unknown frequency" a reader on the original post asked about, and it isn't unknown at all: it's the
+  product of the small primes below the block length, growing <em>combinatorially</em> (2, 6, 30, 210, 2310, …)
+  rather than smoothly, which is exactly what makes the self‑similarity look like it's "scaling" as you zoom.</p>
+  <p><strong>Important caveat:</strong> this periodic backbone is <em>necessary</em> but not the whole picture —
+  the full pattern also gets thinned by the <strong>active</strong> primes (<span class="mono">p &gt; n+1</span>,
+  including any large prime factors of <span class="mono">r</span> itself), and those don't share the same short
+  period. Numerically: shifting <span class="mono">r</span> or <span class="mono">M</span> by the primorial changes
+  the lit/unlit outcome for roughly 4–25% of cells, with the fraction shrinking as <span class="mono">n</span> grows
+  (around 20–27% at <span class="mono">n=1</span>, down to 4–7% by <span class="mono">n=10</span>) — so the pattern is
+  <em>not</em> exactly periodic at that scale, only its saturated-prime skeleton is. This is the same mechanism
+  behind the classic Sieve of Eratosthenes visualizations and Stern–Brocot / Farey self‑similarity elsewhere on
+  this site (Page 1's Farey and Ford‑circle views included).</p>
 
   <div class="pillnav">
     <a href="index.html">← Page 1 · full explorer</a>
@@ -576,7 +583,7 @@ footer{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:8.5
       shown.push('('+num+'/'+den+')');
     }
     lines.push('Active primes p &gt; 2: each contributes (1 − 2/p²): '+shown.join(' · ')+' · …');
-    lines.push('D(1) ≈ <b style="color:#c8a84a;">'+ (function(){var r=computeCD(1);return r.D.toFixed(6);})() +'</b> — this is the <b>Feller–Tornier constant</b>, the probability two random integers are simultaneously coprime to two consecutive integers.');
+    lines.push('D(1) ≈ <b style="color:#c8a84a;">'+ (function(){var r=computeCD(1);return r.D.toFixed(6);})() +'</b> — the probability two random integers are simultaneously coprime to two consecutive integers. This product is the <b>Feller–Tornier product</b> D<sub>FT</sub> — not the same number as the classical <b>Feller–Tornier constant</b> C<sub>FT</sub> ≈ 0.661317 (= ½(1+D<sub>FT</sub>)), which counts something related but different (density of integers with an even number of non-unitary prime divisors).');
     lines.push('C(1) = D(1)·ζ(2) ≈ <b style="color:#c8a84a;">'+ (function(){var r=computeCD(1);return r.C.toFixed(6);})() +'</b>.');
     document.getElementById('worked-n1').innerHTML=lines.map(function(l){return '<div style="margin:6px 0;">'+l+'</div>';}).join('');
   }

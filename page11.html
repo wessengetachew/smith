@@ -1070,9 +1070,9 @@ function openOpener(){
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <button onclick="toggleAdvancedControls()" class="secondary" style="padding:8px 12px;">Advanced ▼</button>
                 <div style="display:flex;align-items:center;gap:8px;background:#0f172a;padding:6px 12px;border-radius:6px;border:1px solid #334155;">
-                    <label style="font-size:11px;color:#94a3b8;">Canvas Size:</label>
+                    <label id="canvasScaleLabel" style="font-size:11px;color:#94a3b8;" title="Scales the canvas inside the exported screenshot. While the canvas is pinned it also resizes the pinned canvas live.">Canvas Size:</label>
                     <input type="range" id="screenshotCanvasScale" min="30" max="100" value="75" step="5" style="width:100px;" oninput="updateCanvasScaleDisplay(this.value)">
-                    <span id="canvasScaleDisplay" style="color:#8b5cf6;font-size:11px;font-weight:600;min-width:40px;">70%</span>
+                    <span id="canvasScaleDisplay" style="color:#8b5cf6;font-size:11px;font-weight:600;min-width:40px;">75%</span>
                 </div>
                 <button onclick="screenshotMainCanvas()" class="secondary" style="padding:8px 12px;">Screenshot</button>
             </div>
@@ -1551,6 +1551,8 @@ function openOpener(){
                     <div style="background:rgba(217,119,6,0.9);padding:6px 12px;border-radius:6px;border:1px solid #d97706;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <button onclick="playErrorBySector('error')" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;" title="Play the relative-error sweep, following the ring">▶ Play All (Error)</button>
                         <button onclick="stopAllPlayback()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
+                        <select id="errorPlayDirA" onchange="setErrorPlayDir(this.value)" title="Sweep direction for Play All" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #8b5cf6;border-radius:3px;color:#c4b5fd;"><option value="forward">▶ Fwd</option><option value="backward">◀ Back</option><option value="pingpong">◀▶ Ping-pong</option></select>
+                        <select id="errorPlayScopeA" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at n*</option><option value="green">Green band</option></select><input id="errorTrapKA" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of n*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;">
                         <label style="font-size:10px;color:#fff;display:flex;align-items:center;gap:4px;">
                             Speed
                             <input type="range" id="errorPlaySpeedSlider" min="1" max="360" step="1" value="25"
@@ -1576,7 +1578,17 @@ function openOpener(){
                     <button id="pinCanvasBtn" onclick="toggleCanvasPin()" style="padding:4px 10px;font-size:11px;font-weight:600;background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;cursor:pointer;" title="Lock the canvas at the top of the screen so you can scroll to reach every control below it">📌 Pin Canvas</button>
                 </div>
             </div>
-            
+
+            <!-- gcd mode: coprime / non-coprime / both. Mirrors Page 10's
+                 combined view (blue = gcd 1, red = gcd > 1). -->
+            <div style="display:flex;justify-content:center;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+                <span style="font-size:11px;color:#94a3b8;letter-spacing:.06em;">POINTS:</span>
+                <button id="gcdmode-coprime"   onclick="setGcdMode('coprime')"   style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #4a90d9;border-radius:4px;cursor:pointer;background:#4a90d9;color:#fff;">gcd = 1</button>
+                <button id="gcdmode-noncoprime" onclick="setGcdMode('noncoprime')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #c94040;border-radius:4px;cursor:pointer;background:#1e293b;color:#c94040;">gcd &gt; 1</button>
+                <button id="gcdmode-both"      onclick="setGcdMode('both')"      style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #f59e0b;border-radius:4px;cursor:pointer;background:#1e293b;color:#f59e0b;">Both</button>
+                <span id="gcdModeNote" style="font-size:10px;color:#64748b;"></span>
+            </div>
+
             <!-- Pan hint -->
             <div id="panHint" style="display:none;position:absolute;top:10px;left:10px;background:rgba(139,92,246,0.9);padding:4px 10px;border-radius:4px;font-size:11px;color:white;z-index:10;">
                 Drag to pan • Scroll to zoom
@@ -1985,6 +1997,8 @@ function openOpener(){
             <div class="chart-box chart-wrapper">
                 <h4>Relative Error % 
                     <button class="secondary" onclick="playErrorBySector('error')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play All</button>
+                    <select id="errorPlayDirB" onchange="setErrorPlayDir(this.value)" title="Sweep direction for Play All" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #8b5cf6;border-radius:3px;color:#c4b5fd;"><option value="forward">▶ Fwd</option><option value="backward">◀ Back</option><option value="pingpong">◀▶ Ping-pong</option></select>
+                    <select id="errorPlayScopeB" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at n*</option><option value="green">Green band</option></select><input id="errorTrapKB" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of n*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><span id="errorScopeNote" style="font-size:10px;color:#86efac;"></span>
                     <button class="secondary" onclick="exportErrorChart()" style="font-size:10px;padding:3px 8px;">Export</button>
                     <button id="playSelectedRangeBtn" class="secondary" onclick="playSelectedErrorRange()" style="font-size:10px;padding:3px 8px;display:none;">▶ Play Selection</button>
                     <button class="secondary" onclick="clearErrorSelection()" style="font-size:10px;padding:3px 8px;">Clear</button>
@@ -2332,7 +2346,7 @@ function openOpener(){
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px;margin-bottom:20px;">
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #22c55e;">
                     <h5 style="color:#22c55e;margin:0 0 8px 0;">RH Connection (Exploratory)</h5>
-                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The Franel-Landau theorem (1924) established that RH ⟺ Σ|F_N - k/|F_N|| = O(N^(1/2+ε)). Interval decomposition may offer computational perspective on which ranges contribute to this classical sum.</p>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The Franel-Landau theorem (1924) established that RH ⟺ Σ|F_k − k/(|F_N|−1)| = O(N^(1/2+ε)). Interval decomposition may offer computational perspective on which ranges contribute to this classical sum.</p>
                 </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #8b5cf6;">
                     <h5 style="color:#8b5cf6;margin:0 0 8px 0;">Spectral Analysis</h5>
@@ -2610,7 +2624,7 @@ function openOpener(){
                 </div>
             </div>
             
-            <h3 style="margin-top:20px;">7. The Sector Boundary: A Phase Transition in Number Theory</h3>
+            <h3 style="margin-top:20px;">7. The Sector Boundary: Where the Predicted Count Drops Below 1</h3>
             <div class="derivation-box" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-left-color: #38bdf8;">
                 <strong style="color:#7dd3fc; font-size:1.1em;">The Discreteness Threshold of the Farey Sequence</strong>
                 <p style="margin:12px 0 0 0;">Computational analysis shows that for any fixed N, there exists a transition point n* ≈ (√3/π)N ≈ 0.5513N where the asymptotic formula transitions from useful density estimation to sparse discrete counting. This computational boundary represents where expected counts drop below 1, entering a regime where relative error becomes unstable.</p>
@@ -2675,14 +2689,14 @@ function openOpener(){
                 <p style="margin:10px 0 0 0; font-size:0.9em;">The Prime/Composite identities (PP + PC + CP + CC = Total) hold <em>exactly</em> in all regimes, including at and beyond the boundary. This persistence demonstrates that while density estimates fail, the underlying arithmetic structure remains inviolate. The boundary thus separates where we can <em>predict</em> counts from where we can only <em>verify</em> identities.</p>
             </div>
             
-            <h3 style="margin-top:20px;">8. Involution Pairing: φ(r/m) = (m−r)/m</h3>
+            <h3 style="margin-top:20px;">8. Involution Pairing: ι(r/m) = (m−r)/m</h3>
             <div class="theorem-box" style="background: linear-gradient(135deg, #422006 0%, #5a3a1a 100%); border-left-color: #d4a057; margin-top:15px;">
                 <strong style="color:#d4a057; font-size:1em;">Theorem (Involution)</strong>
-                <p style="margin:10px 0 0 0; font-size:0.9em;">The map φ: r/m ↦ (m−r)/m is an involution on the Farey fractions with the following properties:</p>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">The map ι: r/m ↦ (m−r)/m is an involution on the Farey fractions with the following properties. <span style="color:#94a3b8;">(Written ι, not φ — throughout this page φ is reserved for Euler's totient.)</span></p>
                 <ul style="margin:8px 0 0 15px; font-size:0.9em;">
-                    <li><strong>Self-inverse:</strong> φ(φ(r/m)) = r/m (applying twice returns the original)</li>
+                    <li><strong>Self-inverse:</strong> ι(ι(r/m)) = r/m (applying twice returns the original)</li>
                     <li><strong>Sum identity:</strong> r/m + (m−r)/m = m/m = 1 (exactly, not approximately)</li>
-                    <li><strong>Fixed point:</strong> φ(1/2) = 1/2 is the unique fixed point (r = m−r ⟺ m = 2r ⟺ r/m = 1/2)</li>
+                    <li><strong>Fixed point:</strong> ι(1/2) = 1/2 is the unique fixed point (r = m−r ⟺ m = 2r ⟺ r/m = 1/2)</li>
                     <li><strong>Coprimality preserved:</strong> If gcd(r,m) = 1 then gcd(m−r,m) = 1</li>
                 </ul>
             </div>
@@ -2707,11 +2721,11 @@ function openOpener(){
             
             <h4 style="margin-top:15px; color:#22c55e;">9.1 Why the Identity Holds Exactly for gcd Pairs</h4>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #22c55e; margin:10px 0;">
-                <p style="margin:0 0 10px 0;">The involution φ(r/m) = (m−r)/m pairs S₁ with the rest almost perfectly, and the two leftover points cancel exactly:</p>
+                <p style="margin:0 0 10px 0;">The involution ι(r/m) = (m−r)/m pairs S₁ with the rest almost perfectly, and the two leftover points cancel exactly:</p>
                 <ul style="margin:0 0 0 15px; font-size:0.9em;">
                     <li>φ maps (1/2, 1) bijectively onto (0, 1/2), pairing every fraction in S₁ (other than the endpoint 1) with a fraction somewhere in S₂∪S₃∪⋯</li>
-                    <li>The endpoint <strong>1 = 1/1 ∈ S₁</strong> has no partner: φ(1) = 0, which isn't a valid fraction in this range. That leaves S₁ with one unpaired element.</li>
-                    <li>The fixed point <strong>φ(1/2) = 1/2</strong> maps to itself. Since S₁ = (1/2, 1] is <em>open</em> at 1/2, the fraction 1/2 itself belongs to S₂ = (1/3, 1/2], not S₁. That leaves the rest (S₂∪S₃∪⋯) with one unpaired element too.</li>
+                    <li>The endpoint <strong>1 = 1/1 ∈ S₁</strong> has no partner: ι(1) = 0, which isn't a valid fraction in this range. That leaves S₁ with one unpaired element.</li>
+                    <li>The fixed point <strong>ι(1/2) = 1/2</strong> maps to itself. Since S₁ = (1/2, 1] is <em>open</em> at 1/2, the fraction 1/2 itself belongs to S₂ = (1/3, 1/2], not S₁. That leaves the rest (S₂∪S₃∪⋯) with one unpaired element too.</li>
                     <li>Both sides have exactly one leftover point — S₁'s unpaired "1" and the rest's unpaired "1/2" — so they cancel and the sizes come out exactly equal, with no net offset.</li>
                 </ul>
                 <div style="background:rgba(245,158,11,0.15);border-left:4px solid #f59e0b;padding:12px;margin:10px 0;border-radius:4px;">
@@ -2895,7 +2909,7 @@ function openOpener(){
         <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #06b6d4;margin-bottom:20px;">
             <h3 style="color:#a78bfa;margin-top:0;">Franel-Landau Theorem</h3>
             <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.1em;text-align:center;color:#06b6d4;">Σ|δ_k| = O(N^(1/2+ε)) ⟺ Riemann Hypothesis</div>
-            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Define δ_k = F_k - k/|F_N| as the k-th Farey fraction deviation. The growth rate of Σ|δ_k| is directly equivalent to the Riemann Hypothesis. If RH is true, the sum grows slower than N^(1/2+ε) for any ε > 0. This provides a concrete computational test for RH properties through Farey sequence analysis. <strong style="color:#f87171;">Note: These computations illustrate known equivalences but do not constitute a proof or disproof of RH.</strong></p>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Define δ_k = F_k − k/(|F_N|−1) as the k-th Farey fraction deviation, with k = 0,…,|F_N|−1 over F_N including both endpoints 0/1 and 1/1. This is the convention used by the computation below; Franel’s original statement indexes k = 1,…,|F_N| over (0,1] and divides by |F_N|. The two differ by one unit in the denominator, which is why the signed sum Σδ_k vanishes identically here (by the symmetry r ↔ 1−r) but not in the classical indexing. The growth rate of Σ|δ_k| is unaffected. The growth rate of Σ|δ_k| is directly equivalent to the Riemann Hypothesis. If RH is true, the sum grows slower than N^(1/2+ε) for any ε > 0. This provides a concrete computational test for RH properties through Farey sequence analysis. <strong style="color:#f87171;">Note: These computations illustrate known equivalences but do not constitute a proof or disproof of RH.</strong></p>
         </div>
         <div class="stat-grid" id="franelStats" style="margin-top:12px;"></div>
         <div class="control-panel" style="margin-top:15px;">
@@ -3603,7 +3617,7 @@ function openOpener(){
                 </div>
                 <div style="background:rgba(34,197,94,0.2);padding:10px 15px;border-radius:6px;border:1px solid #22c55e;">
                     <div style="color:#86efac;font-size:0.75em;">Unified Formula</div>
-                    <div style="color:#f1f5f9;font-size:1.1em;font-family:monospace;">C(n,N,a,k) = 3N²/(π²n(n+1)φ(k))</div>
+                    <div style="color:#f1f5f9;font-size:1.05em;font-family:monospace;">C(n,N,a,k) = [3N²/(π²n(n+1))] · (1/φ(k)) · ∏<sub>p|k</sub> p/(p+1)</div>
                 </div>
                 <div style="background:rgba(245,158,11,0.2);padding:10px 15px;border-radius:6px;border:1px solid #f59e0b;">
                     <div style="color:#fcd34d;font-size:0.75em;">30×2ⁿ Density</div>
@@ -3682,7 +3696,7 @@ function openOpener(){
                     <label><input type="checkbox" id="unifiedShowAll" onchange="drawUnifiedFormulaChart()"> All classes</label>
                 </div>
                 <canvas id="unifiedFormulaCanvas" width="550" height="400"></canvas>
-                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Actual C(n,N,a,k)</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted 3N²/(π²n(n+1)φ(k))</div></div>
+                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Actual C(n,N,a,k) — exact count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted [3N²/(π²n(n+1))]·(1/φ(k))·∏<sub>p|k</sub>p/(p+1)</div></div>
             </div>
         </div>
         
@@ -3703,7 +3717,7 @@ function openOpener(){
                     <label><input type="checkbox" id="uniformityShowChiSq" checked onchange="drawUniformityTest()"> χ² stat</label>
                 </div>
                 <canvas id="uniformityTestCanvas" width="550" height="400"></canvas>
-                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Actual per class</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Expected C(n,N)/φ(k)</div></div>
+                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Actual per class</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Expected (corrected per-class prediction)</div></div>
             </div>
         </div>
         
@@ -3727,14 +3741,27 @@ function openOpener(){
             <h4>Sector × Residue Data Table</h4>
             <div class="table-scroll" style="max-height:300px;">
                 <table id="sectorResidueTable">
-                    <thead><tr><th>Sector</th><th>Total</th><th>Per Class Avg</th><th>χ² Stat</th><th>Uniform?</th></tr></thead>
+                    <thead><tr><th>Sector</th><th>Total (exact)</th><th>Per Class Avg</th><th>χ² / χ²₀.₉₅</th><th>Uniform?</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
         
         <div class="derivation-box" style="margin-top:15px;">
-            <strong>Key Insight:</strong> The unified formula C(n,N,a,k) = 3N²/(π²n(n+1)φ(k)) combines Farey sector distribution with primorial residue filtering. This shows that coprimes distribute uniformly across residue classes within each sector, and the density φ(30×2ⁿ)/(30×2ⁿ) = 4/15 remains constant under power-of-2 scaling.
+            <strong>Key Insight:</strong> The unified formula
+            <span style="font-family:monospace;">C(n,N,a,k) = [3N²/(π²n(n+1))] · (1/φ(k)) · ∏<sub>p|k</sub> p/(p+1)</span>
+            combines Farey sector distribution with primorial residue filtering. Within each sector the numerators
+            <em>r</em> distribute uniformly across the φ(k) residue classes <em>coprime to k</em> — but not across all k
+            classes, and not with weight C(n,N)/φ(k). Two corrections are needed and both are visible in the charts above.
+            First, only a fraction ∏<sub>p|k</sub> p/(p+1) of numerators are coprime to k at all: conditioning on
+            gcd(r,m)=1 already biases r away from divisibility, since P(p∤r | gcd(r,m)=1) = (1−1/p)/(1−1/p²) = p/(p+1).
+            For k = 30 that factor is (2/3)(3/4)(5/6) = 5/12, so the naive C(n,N)/φ(k) overshoots by 2.4×.
+            Second, the classes <em>not</em> coprime to k are neither empty nor uniform — their counts depend on gcd(a,k).
+            The density φ(30×2ⁿ)/(30×2ⁿ) = 4/15 does remain constant under power-of-2 scaling, independently of the above.
+            <div style="margin-top:10px;font-size:0.85em;color:#94a3b8;">
+              Every count on this tab is an exact enumeration over 2 ≤ m ≤ N; the χ² column tests uniformity against the
+              observed mean, so it cannot be satisfied by the prediction merely being correct.
+            </div>
         </div>
         
         <div style="margin-top:15px; padding:15px; background:#1e293b; border-radius:8px; border:1px solid #334155; text-align:center;">
@@ -3863,7 +3890,7 @@ function openOpener(){
                 </div>
                 where phi(x,a) counts numbers up to x not divisible by the first a primes, and P_k counts contributions from products of exactly k primes.
                 <br><br>
-                <strong style="color:#f59e0b;">This implementation uses Lucy_Hedgehog</strong> - a simpler O(x^(2/3)) approach that maintains running counts V[i] and V[n/i] during a modified sieve process.
+                <strong style="color:#f59e0b;">This implementation uses Lucy_Hedgehog</strong> - a simpler O(x^(3/4)) approach (slower than the full Meissel-Lehmer/LMO method above, which achieves O(x^(2/3))) that maintains running counts V[i] and V[n/i] during a modified sieve process.
             </div>
         </div>
     </div>
@@ -4349,7 +4376,7 @@ function openOpener(){
                     <h4 style="color:#a78bfa;margin:0 0 8px 0;">Sum Identity</h4>
                     <ul style="color:#e9d5ff;margin-left:20px;line-height:1.8;">
                         <li><strong>Formula:</strong> Σ(r/m + (m-r)/m) = Total × 1.0</li>
-                        <li><strong>Meaning:</strong> Each coprime fraction pairs with its complement under involution φ(r/m) = (m-r)/m</li>
+                        <li><strong>Meaning:</strong> Each coprime fraction pairs with its complement under involution ι(r/m) = (m-r)/m</li>
                         <li><strong>Status indicator:</strong> Shows PASS (green) if sum = 1.0 within tolerance, FAIL (red) otherwise</li>
                         <li><strong>Note:</strong> Only exact in floating-point if all sectors included (boundary = 1)</li>
                     </ul>
@@ -4563,6 +4590,9 @@ const state = {
     mode: 'exact', nMin: 1, nMax: 500, sectorMin: 1, sectorMax: 275,
     sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
     computing: false, charts: {}, ringPoints: [], animationId: null,
+    // gcd(r,m)>1 support: 'coprime' | 'noncoprime' | 'both'
+    gcdMode: 'coprime', includeNonCoprime: false,
+    nonCoprimeBySector: {}, allNonCoprime: [],
     sectorBoundConstant: Math.sqrt(3) / Math.PI, // Default √3/π
     tablePage: 0, // current page of the Sector Data table (0-indexed)
     // Bounded window data for P/C analysis in large N mode
@@ -4626,7 +4656,9 @@ function closeScreenshotOverlay() {
 }
 
 function openSectorModal(n) {
-    const res = state.residuesBySector[n] || [];
+    // Follows the canvas mode so the modal, the ring and the CSV agree.
+    const res = sectorPointsForMode(n);
+    const _c = sectorCountsForMode(n);
     const primes = res.filter(r => r.isPrime);
     const composites = res.filter(r => !r.isPrime);
     const sector = state.sectors.find(s => s.n === n);
@@ -4646,7 +4678,8 @@ function openSectorModal(n) {
     }
     
     let html = '<div class="stat-grid" style="margin-bottom:15px;">' +
-        '<div class="stat-card"><div class="stat-value">' + res.length + '</div><div class="stat-label">Total Pairs</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + res.length + '</div><div class="stat-label">Total Pairs (' + gcdModeLabel() + ')</div></div>' +
+        '<div class="stat-card"><div class="stat-value" style="color:#c94040">' + _c.nonCoprime + '</div><div class="stat-label">gcd &gt; 1 in range</div></div>' +
         '<div class="stat-card"><div class="stat-value" style="color:#f59e0b">' + primes.length + '</div><div class="stat-label">Prime Moduli</div></div>' +
         '<div class="stat-card"><div class="stat-value" style="color:#6366f1">' + composites.length + '</div><div class="stat-label">Composite Moduli</div></div>' +
         '<div class="stat-card"><div class="stat-value">' + (sector ? fmt(sector.predicted) : '-') + '</div><div class="stat-label">Predicted</div></div>' +
@@ -4674,10 +4707,17 @@ function closeSectorModal() {
 }
 
 function exportSectorData(n) {
-    const res = state.residuesBySector[n] || [];
-    let csv = 'r,m,value,isPrime\n';
-    res.forEach(r => {
-        csv += r.r + ',' + r.m + ',' + r.value + ',' + r.isPrime + '\n';
+    // Exports whatever the canvas is showing, and always names the mode.
+    // gcd and reduced form are included so gcd>1 rows are unambiguous.
+    const res = sectorPointsForMode(n);
+    const c = sectorCountsForMode(n);
+    let csv = '# sector ' + n + ' | mode ' + gcdModeLabel() +
+              ' | coprime ' + c.coprime + ' | non-coprime ' + c.nonCoprime +
+              ' | total ' + c.total + ' | N ' + state.nMin + '..' + state.nMax + '\n';
+    csv += 'r,m,value,gcd,reduced_r,reduced_m,coprime,isPrimeDenominator\n';
+    res.forEach(x => {
+        const g = x.gcdVal || 1;
+        csv += [x.r, x.m, x.value, g, x.r / g, x.m / g, (x.coprime !== false), x.isPrime].join(',') + '\n';
     });
     const blob = new Blob([csv], {type:'text/csv'});
     const a = document.createElement('a');
@@ -4694,9 +4734,34 @@ function viewSectorOnRing(n) {
     drawMainRing();
 }
 
-// Update canvas scale display
+// Update canvas scale display.
+// Two jobs: it has always scaled the canvas inside the exported screenshot,
+// and while the canvas is pinned it now also resizes the pinned square live,
+// as a percentage of the largest square that fits under the page-links bar.
 function updateCanvasScaleDisplay(value) {
-    document.getElementById('canvasScaleDisplay').textContent = value + '%';
+    var span = document.getElementById('canvasScaleDisplay');
+    if (span) span.textContent = value + '%';
+
+    var wrap = document.getElementById('ringContainer');
+    if (wrap && wrap.classList.contains('wg-pinned') && typeof wgPinBounds === 'function') {
+        var b = wgPinBounds();
+        wgPinSide = Math.max(b.min, b.max * (parseFloat(value) / 100));
+        wgRepositionPinnedCanvas();
+    }
+}
+
+// Push the current pinned size back onto the slider so the corner handle and
+// the slider never disagree.
+function wgSyncPinSlider() {
+    var wrap = document.getElementById('ringContainer');
+    if (!wrap || !wrap.classList.contains('wg-pinned')) return;
+    var sl = document.getElementById('screenshotCanvasScale');
+    var span = document.getElementById('canvasScaleDisplay');
+    if (!sl) return;
+    var b = wgPinBounds();
+    var pct = Math.round(Math.max(+sl.min, Math.min(+sl.max, (wgPinSide / b.max) * 100)));
+    sl.value = pct;
+    if (span) span.textContent = pct + '%';
 }
 
 // Simple canvas-only screenshot
@@ -5012,12 +5077,21 @@ function screenshotMainCanvas() {
         // Theorem 1 counts S₁ = (1/2, 1]: the endpoint 1/1 belongs to S₁ but is
         // stored as a cusp (sector:null), so it must be added back here.
         // Without it the check fails by exactly 1 even at full boundary.
-        const lastRes = state.allResidues[state.allResidues.length - 1];
-        const endpt = (lastRes && lastRes.value === 1) ? 1 : 0;
-        const s1c  = (state.residuesBySector[1] || []).length + endpt;
-        let   src  = 0;
-        for (let ss = 2; ss <= (state.sectorMax || 275); ss++) src += (state.residuesBySector[ss] || []).length;
-        const ok   = (s1c === src);
+        //
+        // IMPORTANT: count over state.allResidues, NOT state.residuesBySector.
+        // residuesBySector is filtered by [sectorMin, sectorMax], so at the
+        // shipped defaults (N=500, sectorMax=275) every fraction 1/m with
+        // m = 276…500 has sector m > sectorMax and is never stored — the panel
+        // then reports a deficit of 225 and renders red, even though the
+        // theorem holds. allResidues is unfiltered, so the check is now a test
+        // of the identity rather than of the sector-window settings.
+        const all = state.allResidues || [];
+        let s1c = 0, src = 0;
+        for (const p of all) {
+            if (p.value > 0.5) s1c++;        // S₁ = (1/2, 1], includes the 1/1 cusp
+            else if (p.value > 0) src++;     // S_rest = (0, 1/2], includes 1/2
+        }
+        const ok = (s1c === src) && (s1c > 0);
 
         ctx.fillStyle = ok ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)';
         ctx.fillRect(legendX + 10, ly - 5, legendWidth - 20, 58);
@@ -5032,7 +5106,7 @@ function screenshotMainCanvas() {
 
         ctx.font = '11px monospace';
         ctx.fillStyle = '#e2e8f0';
-        ctx.fillText('|S\u2081| = ' + s1c + (endpt ? ' (incl. 1/1)' : '') + '    |S_rest| = ' + src, legendX + 20, ly + 32);
+        ctx.fillText('|S\u2081| = ' + s1c + ' (incl. 1/1)    |S_rest| = ' + src + ' (incl. 1/2)', legendX + 20, ly + 32);
         ctx.fillStyle = ok ? '#22c55e' : '#ef4444';
         ctx.font = 'bold 11px monospace';
         ctx.fillText('|S\u2081| = |S_rest|  ' + (ok ? '\u2713' : '\u2717'), legendX + 20, ly + 48);
@@ -6930,7 +7004,15 @@ const NumberTheory = (function() {
 function gcd(a, b) { while(b) { [a,b] = [b, a%b]; } return a; }
 function isPrime(n) { return NumberTheory.isPrime(n); }
 function mobius(n) { return NumberTheory.mobius(n); }
-function getSector(r,m) { const f=r/m; if(f<=0||f>1) return null; return Math.floor(1/f); }
+function getSector(r,m) {
+    // Integer division, not Math.floor(1/(r/m)). The double reciprocal is not
+    // exact in binary floating point: 1/(1/372) evaluates to 371.99999999999994,
+    // so 1/372 was being filed under sector 371. At N=500 that misplaced 60
+    // fractions, and left 17 large sectors reporting Exact = 0 when they each
+    // contain exactly one fraction (1/n is always in sector n for n <= N).
+    if (r <= 0 || r > m) return null;
+    return Math.floor(m / r);
+}
 function formula(n,N) { return (3*N*N)/(Math.PI*Math.PI*n*(n+1)); }
 function fmt(x) { if(x>=1e9) return (x/1e9).toFixed(1)+'B'; if(x>=1e6) return (x/1e6).toFixed(1)+'M'; if(x>=1e3) return (x/1e3).toFixed(1)+'K'; return x.toFixed(x<10?2:0); }
 
@@ -7224,6 +7306,7 @@ async function computeAll() {
         document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing...</span>';
         
         state.sectors = []; state.residuesBySector = {}; state.allResidues = []; state.gaps = []; state.farey = [];
+        state.nonCoprimeBySector = {}; state.allNonCoprime = [];
         state.tablePage = 0;
         state.boundedResiduesBySector = {};
         
@@ -7291,11 +7374,34 @@ async function computeExact(N) {
     for(let m=startM; m<=N; m++) {
         const isPrimeM = NumberTheory.isPrime(m);  // O(1) lookup
         for(let r=1; r<m; r++) {
-            if(gcd(r,m)===1) {
+            const g = gcd(r,m);
+            if(g!==1) {
+                // --- gcd(r,m) > 1: the zero divisors of Z/mZ. Kept in a
+                // parallel store so the coprime statistics, the Franel sum and
+                // the bisection identity are all untouched by this addition.
+                // Only enumerated when the user asks for them, since it is
+                // roughly another 0.4·N² objects. ---
+                if(state.includeNonCoprime) {
+                    const s2 = getSector(r,m);
+                    const nc = {
+                        r, m, sector:s2, gcdVal:g, coprime:false,
+                        isPrime: isPrimeM, isPrimeNum: NumberTheory.isPrime(r),
+                        redR: r/g, redM: m/g,
+                        category:'ZD', value: r/m
+                    };
+                    state.allNonCoprime.push(nc);
+                    if(s2 && s2>=state.sectorMin && s2<=state.sectorMax) {
+                        if(!state.nonCoprimeBySector[s2]) state.nonCoprimeBySector[s2] = [];
+                        state.nonCoprimeBySector[s2].push(nc);
+                    }
+                }
+                continue;
+            }
+            {
                 const s = getSector(r,m);
                 const isPrimeR = NumberTheory.isPrime(r);  // O(1) lookup
                 const res = {
-                    r, m, sector:s, 
+                    r, m, sector:s, coprime:true, gcdVal:1,
                     isPrime: isPrimeM,      // Denominator is prime
                     isPrimeNum: isPrimeR,   // Numerator is prime
                     category: isPrimeR && isPrimeM ? 'PP' :
@@ -7840,6 +7946,7 @@ function updateMainChartsFormulaOnly() {
                     )
                 }]
             },
+            plugins:[nStarMarkerPlugin, scanLinePlugin],
             options:{
                 responsive:true,
                 plugins:{
@@ -8479,15 +8586,29 @@ function drawConvergenceAnalysis() {
     const plotW = W - margin.l - margin.r;
     const plotH = H - margin.t - margin.b;
     
-    // Generate convergence data for multiple N values
+    // Exact convergence data. For each N we enumerate every coprime pair
+    // (r,m) with 2 <= m <= N and bucket it by sector, then compare the true
+    // count against the asymptotic. Nothing here is simulated.
+    const _exact = {};
+    for (let N = 20; N <= 200; N += 10) {
+        const c = new Float64Array(6);
+        for (let m = 2; m <= N; m++) {
+            for (let r = 1; r < m; r++) {
+                if (gcd(r, m) !== 1) continue;
+                const s = Math.floor(m / r);
+                if (s >= 1 && s <= 5) c[s]++;
+            }
+        }
+        _exact[N] = c;
+    }
+
     const data = [];
     for (let N = 20; N <= 200; N += 10) {
         const sectorData = [];
         for (let n = 1; n <= 5; n++) {
-            // Simulate exact count based on formula with random error
             const predicted = formula(n, N);
-            const exactEstimate = predicted + (Math.random() - 0.5) * Math.sqrt(N) * 2;
-            
+            const exactEstimate = _exact[N][n];
+
             let value;
             if (analysisType === 'relative') {
                 value = ((exactEstimate - predicted) / predicted) * 100;
@@ -8811,7 +8932,7 @@ function updateMainCharts() {
     if(hasExact) {
         state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{
             type:'bar',
-            plugins:[nStarMarkerPlugin],
+            plugins:[nStarMarkerPlugin, scanLinePlugin],
             data:{
                 labels,
                 datasets:[{
@@ -9106,7 +9227,9 @@ function jumpToSectorInTable() {
 }
 
 function openSectorModal(n) {
-    const res = state.residuesBySector[n] || [];
+    // Follows the canvas mode so the modal, the ring and the CSV agree.
+    const res = sectorPointsForMode(n);
+    const _c = sectorCountsForMode(n);
     const primes = res.filter(r => r.isPrime);
     const composites = res.filter(r => !r.isPrime);
     const sector = state.sectors.find(s => s.n === n);
@@ -9152,10 +9275,17 @@ function closeSectorModal() {
 }
 
 function exportSectorData(n) {
-    const res = state.residuesBySector[n] || [];
-    let csv = 'r,m,value,isPrime\n';
-    res.forEach(r => {
-        csv += `${r.r},${r.m},${r.value},${r.isPrime}\n`;
+    // Exports whatever the canvas is showing, and always names the mode.
+    // gcd and reduced form are included so gcd>1 rows are unambiguous.
+    const res = sectorPointsForMode(n);
+    const c = sectorCountsForMode(n);
+    let csv = '# sector ' + n + ' | mode ' + gcdModeLabel() +
+              ' | coprime ' + c.coprime + ' | non-coprime ' + c.nonCoprime +
+              ' | total ' + c.total + ' | N ' + state.nMin + '..' + state.nMax + '\n';
+    csv += 'r,m,value,gcd,reduced_r,reduced_m,coprime,isPrimeDenominator\n';
+    res.forEach(x => {
+        const g = x.gcdVal || 1;
+        csv += [x.r, x.m, x.value, g, x.r / g, x.m / g, (x.coprime !== false), x.isPrime].join(',') + '\n';
     });
     const blob = new Blob([csv], {type:'text/csv'});
     const a = document.createElement('a');
@@ -9481,7 +9611,9 @@ function exportSectorCSV(n) {
                (f.isPrime ? 'Prime' : 'Composite') + ',' +
                (f.isPrimeNum ? 'Prime' : 'Composite') + ',' +
                (f.category || '-') + ',' +
-               freq.toFixed(2) + '\n';
+               freq.toFixed(2) + ',' +
+               (f.gcdVal || 1) + ',' +
+               (f.coprime !== false) + '\n';
     });
     
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -9503,15 +9635,24 @@ function exportAllSectorsCSV() {
     let csv = 'All Sectors Data Export\n';
     csv += 'N Range,' + state.nMin + ' to ' + state.nMax + '\n';
     csv += 'Sectors,' + state.sectorMin + ' to ' + state.sectorMax + '\n';
-    csv += 'Total Fractions,' + state.allResidues.length + '\n';
+    csv += 'Total Fractions (gcd=1),' + state.allResidues.length + '\n';
+    csv += 'Total Zero Divisors (gcd>1),' + (state.allNonCoprime || []).length + '\n';
+    csv += 'Grand Total,' + (state.allResidues.length + (state.allNonCoprime || []).length) + '\n';
+    csv += 'Canvas Mode,' + gcdModeLabel() + '\n';
+    if (!state.includeNonCoprime) {
+        csv += 'Note,gcd>1 points not enumerated - select "gcd > 1" or "Both" on the ring to include them\n';
+    }
     if (hasBoundedData) {
         csv += 'Bounded Window N,' + state.boundedN + '\n';
     }
     csv += '\n';
-    
-    // Add sector summary with P/C ratios and categories
+
+    // Add sector summary with P/C ratios and categories.
+    // NonCoprime is the count of gcd(r,m)>1 points in the same sector and the
+    // same N range; Exact stays the coprime count so the C(n,N) comparison
+    // against Predicted is unchanged.
     csv += 'SECTOR SUMMARY\n';
-    csv += 'Sector,Interval,Exact,Predicted,Error%,P(m),C(m),P/C Ratio,P(r),PP,PC,CP,CC\n';
+    csv += 'Sector,Interval,Exact,Predicted,Error%,P(m),C(m),P/C Ratio,P(r),PP,PC,CP,CC,NonCoprime,SectorTotal\n';
     state.sectors.forEach(s => {
         // Use actual residues if available, otherwise use bounded data
         let res = state.residuesBySector[s.n] || [];
@@ -9527,6 +9668,8 @@ function exportAllSectorsCSV() {
         const cpCount = res.filter(r => r.category === 'CP').length;
         const ccCount = res.filter(r => r.category === 'CC').length;
         const pcRatio = compositeCount > 0 ? (primeCount / compositeCount).toFixed(10) : (primeCount > 0 ? 'Infinity' : 'N/A');
+        // gcd(r,m)>1 count for this sector over the same N range
+        const ncCount = ((state.nonCoprimeBySector || {})[s.n] || []).length;
         
         csv += s.n + ',' +
                '(1/' + (s.n+1) + ' - 1/' + s.n + '],' +
@@ -9540,18 +9683,24 @@ function exportAllSectorsCSV() {
                ppCount + ',' +
                pcCount + ',' +
                cpCount + ',' +
-               ccCount + '\n';
+               ccCount + ',' +
+               ncCount + ',' +
+               (res.length + ncCount) + '\n';
     });
     
     csv += '\nFRACTION DETAILS\n';
-    csv += 'Sector,Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Denom Type,Num Type,Category,Frequency (Hz)\n';
-    
+    csv += 'Sector,Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Denom Type,Num Type,Category,Frequency (Hz),gcd,Coprime\n';
+
     for (let s = state.sectorMin; s <= state.sectorMax; s++) {
         // Use actual residues if available, otherwise use bounded data
         let res = state.residuesBySector[s] || [];
         if (res.length === 0 && state.boundedResiduesBySector[s]) {
             res = state.boundedResiduesBySector[s];
         }
+        // Append the zero divisors for this sector when they have been
+        // enumerated. Category 'ZD' distinguishes them from PP/PC/CP/CC.
+        const _nc = (state.nonCoprimeBySector || {})[s] || [];
+        if (_nc.length) res = res.concat(_nc);
         
         res.sort((a, b) => a.r/a.m - b.r/b.m).forEach(f => {
             const val = f.r / f.m;
@@ -9666,16 +9815,36 @@ function toggleCanvasPin() {
         wrap.style.borderRadius = '';
         wrap.style.maxWidth = '';
         wrap.style.width = '';
+        wrap.style.height = '';
+        wrap.style.boxSizing = '';
+        wrap.style.display = '';
         canvas.style.maxHeight = '';
+        canvas.style.maxWidth = '';
+        canvas.style.width = '';
+        canvas.style.height = '';
+        canvas.style.display = '';
+        wgPinSide = null;
+        wgApplyPinStickyOffsets(null);   // put PROJECTS / harmonics back at 44px / 82px
+        var sl0 = document.getElementById('screenshotCanvasScale');
+        if (sl0 && wgPinPrevScale != null) {
+            sl0.value = wgPinPrevScale;
+            var sp0 = document.getElementById('canvasScaleDisplay');
+            if (sp0) sp0.textContent = wgPinPrevScale + '%';
+            wgPinPrevScale = null;
+        }
+        var lab0 = document.getElementById('canvasScaleLabel');
+        if (lab0) { lab0.textContent = 'Canvas Size:'; lab0.style.color = '#94a3b8'; }
+        var handle = document.getElementById('wgPinResize');
+        if (handle) handle.remove();
         var spacer = document.getElementById('wgPinSpacer');
         if (spacer) spacer.remove();
         window.removeEventListener('resize', wgRepositionPinnedCanvas);
         btn.textContent = '📌 Pin Canvas';
         btn.style.background = '#1e293b';
     } else {
-        // --- Pin: fix canvas below the sticky header bars, add a spacer so
-        // the rest of the page doesn't jump, and shrink the canvas so it
-        // leaves room to scroll to the controls beneath it. ---
+        // --- Pin: fix the canvas below every sticky bar, add a spacer so the
+        // rest of the page doesn't jump, and render it as a full-bleed square
+        // that the user can drag smaller from the bottom-right corner. ---
         var rect = wrap.getBoundingClientRect();
         var spacer = document.createElement('div');
         spacer.id = 'wgPinSpacer';
@@ -9686,15 +9855,31 @@ function toggleCanvasPin() {
         wrap.style.position = 'fixed';
         wrap.style.left = '50%';
         wrap.style.transform = 'translateX(-50%)';
-        wrap.style.zIndex = '400';
+        // Sticky bars on this page sit at z-index 500 (.nav-links and
+        // .harmonic-toolbar). The pinned canvas used to be 400, so scrolling to
+        // the top slid it behind them. 600 puts it above both while staying
+        // under #wg-pagenav (9999) and the modal/screenshot overlays (1000+).
+        wrap.style.zIndex = '600';
         wrap.style.boxShadow = '0 10px 30px rgba(0,0,0,0.7)';
-        wrap.style.padding = '6px';
+        wrap.style.padding = '0';
         wrap.style.borderRadius = '8px';
-        wrap.style.maxWidth = '96vw';
-        canvas.style.maxHeight = '38vh';
-        canvas.style.width = 'auto';
+        wrap.style.boxSizing = 'border-box';
+        wrap.style.display = 'block';
+        wrap.style.maxWidth = 'none';
+        canvas.style.maxWidth = 'none';
+        canvas.style.maxHeight = 'none';
+        canvas.style.display = 'block';
 
+        wgPinSide = null;               // recomputed from the viewport below
+        wgAddPinResizeHandle(wrap);
         wgRepositionPinnedCanvas();
+        // Hand the slider over to the pinned canvas, saving the screenshot
+        // setting so it comes back untouched on unpin.
+        var sl = document.getElementById('screenshotCanvasScale');
+        if (sl) { wgPinPrevScale = sl.value; sl.value = 100; }
+        wgSyncPinSlider();
+        var lab = document.getElementById('canvasScaleLabel');
+        if (lab) { lab.textContent = 'Pinned Size:'; lab.style.color = '#f59e0b'; }
         window.addEventListener('resize', wgRepositionPinnedCanvas);
 
         btn.textContent = '📌 Unpin Canvas';
@@ -9702,15 +9887,187 @@ function toggleCanvasPin() {
     }
 }
 
+// Side length in px of the pinned square. null = use the default (full width,
+// capped by the space left under the sticky bars).
+var wgPinSide = null;
+var wgPinPrevScale = null;   // slider value to restore when unpinned
+
+// Largest sticky bar bottom edge, so the pinned canvas clears all of them.
+// Previously this only measured .nav-links, which left the canvas tucked under
+// the taller .harmonic-toolbar sitting below it.
+// Bottom edge of the page-links bar only. When pinned, the canvas sits
+// directly beneath it, and the remaining sticky bars (PROJECTS / harmonics)
+// are pushed down to stack *below* the canvas rather than being covered by it.
+function wgPinTopOffset() {
+    var el = document.getElementById('wg-pagenav');
+    if (!el) return 0;
+    var st = window.getComputedStyle(el);
+    if (st.display === 'none' || st.visibility === 'hidden') return 0;
+    return Math.max(0, el.getBoundingClientRect().bottom);
+}
+
+// While pinned, re-stack the sticky bars underneath the canvas:
+//   [page links] -> [pinned canvas] -> [PROJECTS] -> [harmonics] -> page
+// Passing null restores the stylesheet values (44px / 82px) on unpin.
+function wgApplyPinStickyOffsets(side) {
+    var nav  = document.querySelector('.nav-links');
+    var harm = document.querySelector('.harmonic-toolbar');
+    if (side == null) {
+        if (nav)  nav.style.top  = '';
+        if (harm) harm.style.top = '';
+        return;
+    }
+    var base = wgPinTopOffset() + side;
+    if (nav) nav.style.top = base + 'px';
+    var navH = nav ? nav.getBoundingClientRect().height : 0;
+    if (harm) harm.style.top = (base + navH) + 'px';
+}
+
+function wgPinBounds() {
+    var topOffset = wgPinTopOffset();
+    // Full bleed left-to-right and square, but never so tall that the PROJECTS
+    // and harmonic bars get pushed off screen beneath it. 0.62 of the space
+    // under the page-links bar leaves both of them visible.
+    var maxW = window.innerWidth;
+    var maxH = (window.innerHeight - topOffset) * 0.62;
+    return { topOffset: topOffset, min: 180, max: Math.max(180, Math.min(maxW, maxH)) };
+}
+
 function wgRepositionPinnedCanvas() {
     var wrap = document.getElementById('ringContainer');
-    if (!wrap || !wrap.classList.contains('wg-pinned')) return;
-    var navLinks = document.querySelector('.nav-links');
-    var pageNav = document.getElementById('wg-pagenav');
-    var topOffset = 0;
-    if (navLinks) topOffset = navLinks.getBoundingClientRect().bottom;
-    else if (pageNav) topOffset = pageNav.getBoundingClientRect().bottom;
-    wrap.style.top = Math.max(0, topOffset) + 'px';
+    if (!wrap || !wrap.classList.contains('wg-pinned')) { wgApplyPinStickyOffsets(null); return; }
+    var canvas = document.getElementById('mainRing');
+    var b = wgPinBounds();
+
+    if (wgPinSide == null) wgPinSide = b.max;          // default: edge to edge
+    var side = Math.max(b.min, Math.min(b.max, wgPinSide));
+
+    wrap.style.top = b.topOffset + 'px';
+    wrap.style.width = side + 'px';
+    wrap.style.height = side + 'px';
+    if (canvas) { canvas.style.width = side + 'px'; canvas.style.height = side + 'px'; }
+
+    // Keep the bars below the canvas as it is resized.
+    wgApplyPinStickyOffsets(side);
+}
+
+// Bottom-right drag handle. Pointer events cover mouse and touch alike.
+function wgAddPinResizeHandle(wrap) {
+    if (document.getElementById('wgPinResize')) return;
+    var h = document.createElement('div');
+    h.id = 'wgPinResize';
+    h.title = 'Drag to resize';
+    h.style.cssText = 'position:absolute;right:0;bottom:0;width:26px;height:26px;' +
+        'cursor:nwse-resize;z-index:120;touch-action:none;' +
+        'background:linear-gradient(135deg,transparent 45%,#f59e0b 45%,#f59e0b 55%,transparent 55%,transparent 70%,#f59e0b 70%,#f59e0b 80%,transparent 80%);' +
+        'border-bottom-right-radius:8px;opacity:.85;';
+    wrap.appendChild(h);
+
+    var startX = 0, startY = 0, startSide = 0, dragging = false;
+    h.addEventListener('pointerdown', function (e) {
+        dragging = true;
+        startX = e.clientX; startY = e.clientY;
+        startSide = wrap.getBoundingClientRect().width;
+        h.setPointerCapture(e.pointerId);
+        e.preventDefault(); e.stopPropagation();
+    });
+    h.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        // Square: follow whichever axis the user moved further.
+        var d = Math.abs(e.clientX - startX) >= Math.abs(e.clientY - startY)
+            ? (e.clientX - startX) * 2   // x2 because the box is centred
+            : (e.clientY - startY);
+        var b = wgPinBounds();
+        wgPinSide = Math.max(b.min, Math.min(b.max, startSide + d));
+        wgRepositionPinnedCanvas();
+        wgSyncPinSlider();
+        e.preventDefault();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (ev) {
+        h.addEventListener(ev, function (e) {
+            dragging = false;
+            try { h.releasePointerCapture(e.pointerId); } catch (_) {}
+        });
+    });
+    // Double-tap the handle to snap back to full width.
+    h.addEventListener('dblclick', function (e) {
+        wgPinSide = null; wgRepositionPinnedCanvas(); wgSyncPinSlider();
+        e.preventDefault(); e.stopPropagation();
+    });
+}
+
+// --- gcd mode switch -------------------------------------------------------
+// 'coprime' (default, the historical behaviour), 'noncoprime', or 'both'.
+// The zero divisors are enumerated lazily: the first time a mode needs them we
+// set the flag and re-run the exact computation, so a user who never opens the
+// non-coprime view pays nothing.
+function setGcdMode(mode) {
+    if (!['coprime','noncoprime','both'].includes(mode)) return;
+    state.gcdMode = mode;
+
+    const defs = { coprime:'#4a90d9', noncoprime:'#c94040', both:'#f59e0b' };
+    Object.keys(defs).forEach(k => {
+        const b = document.getElementById('gcdmode-'+k);
+        if (!b) return;
+        const on = (k === mode);
+        b.style.background = on ? defs[k] : '#1e293b';
+        b.style.color      = on ? '#ffffff' : defs[k];
+    });
+
+    const note = document.getElementById('gcdModeNote');
+    const needNC = (mode !== 'coprime');
+
+    if (needNC && !state.includeNonCoprime) {
+        state.includeNonCoprime = true;
+        if (note) note.textContent = 'enumerating zero divisors…';
+        // Re-run the enumeration to pick up the gcd>1 points.
+        if (typeof computeAll === 'function') {
+            Promise.resolve(computeAll()).then(() => {
+                if (note) note.textContent = wgGcdModeCount();
+                drawMainRing();
+            });
+            return;
+        }
+    }
+    if (note) note.textContent = wgGcdModeCount();
+    drawMainRing();
+    if (typeof updateSectorPointCount === 'function') updateSectorPointCount();
+}
+
+// --- Single source of truth for "which points are live right now" ----------
+// Anything that used state.residuesBySector[n] directly for audio, counts,
+// statistics or export should go through these, so every readout agrees with
+// what is actually drawn on the canvas.
+function sectorPointsForMode(sectorNum, mode) {
+    mode = mode || state.gcdMode || 'coprime';
+    const cp = state.residuesBySector[sectorNum] || [];
+    const nc = (state.nonCoprimeBySector || {})[sectorNum] || [];
+    if (mode === 'coprime') return cp;
+    if (mode === 'noncoprime') return nc;
+    return cp.concat(nc);
+}
+
+function sectorCountsForMode(sectorNum) {
+    const cp = (state.residuesBySector[sectorNum] || []).length;
+    const nc = ((state.nonCoprimeBySector || {})[sectorNum] || []).length;
+    return { coprime: cp, nonCoprime: nc, total: cp + nc };
+}
+
+// Label for the gcd mode, used in status lines and CSV headers.
+function gcdModeLabel(mode) {
+    mode = mode || state.gcdMode || 'coprime';
+    return mode === 'coprime' ? 'gcd=1'
+         : mode === 'noncoprime' ? 'gcd>1'
+         : 'gcd=1 + gcd>1';
+}
+
+function wgGcdModeCount() {
+    const mode = state.gcdMode || 'coprime';
+    const nc = (state.allNonCoprime || []).length;
+    const cp = (state.allResidues || []).length;
+    if (mode === 'coprime')    return cp ? cp.toLocaleString() + ' coprime' : '';
+    if (mode === 'noncoprime') return nc ? nc.toLocaleString() + ' zero divisors' : '';
+    return (cp + nc) ? (cp + nc).toLocaleString() + ' total' : '';
 }
 
 function toggleCornerLegend() {
@@ -10832,8 +11189,142 @@ const nStarMarkerPlugin = {
     }
 };
 
+// --- Playback scan line -----------------------------------------------------
+// A moving vertical playhead that tracks Play All across the error chart, so
+// you can see which sector is sounding. errorScanState.idx is an index into
+// chart.data.labels; null means idle and nothing is drawn.
+var errorScanState = { idx: null, dir: 1, from: null, to: null };
+
+const scanLinePlugin = {
+    id: 'scanLine',
+    afterDatasetsDraw(chart){
+        try{
+            if (errorScanState.idx === null) return;
+            const labels = chart.data.labels || []; if (!labels.length) return;
+            const i = Math.max(0, Math.min(labels.length - 1, errorScanState.idx));
+            const xs = chart.scales.x, ys = chart.scales.y;
+            const x = xs.getPixelForValue(i);
+            const ctx = chart.ctx;
+            ctx.save();
+
+            // Faint wash over the span already swept on this pass.
+            if (errorScanState.from !== null) {
+                const x0 = xs.getPixelForValue(Math.max(0, Math.min(labels.length - 1, errorScanState.from)));
+                ctx.fillStyle = 'rgba(139,92,246,0.10)';
+                ctx.fillRect(Math.min(x0, x), ys.top, Math.abs(x - x0), ys.bottom - ys.top);
+            }
+
+            // The playhead itself, with a soft leading glow.
+            const grad = ctx.createLinearGradient(x - 14 * errorScanState.dir, 0, x, 0);
+            grad.addColorStop(0, 'rgba(139,92,246,0)');
+            grad.addColorStop(1, 'rgba(139,92,246,0.45)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(Math.min(x, x - 14 * errorScanState.dir), ys.top, 14, ys.bottom - ys.top);
+
+            ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2;
+            ctx.shadowColor = '#8b5cf6'; ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.moveTo(x, ys.top); ctx.lineTo(x, ys.bottom); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Direction arrowhead riding the top of the line.
+            const d = errorScanState.dir >= 0 ? 1 : -1;
+            ctx.fillStyle = '#a78bfa';
+            ctx.beginPath();
+            ctx.moveTo(x + d * 9, ys.top + 7);
+            ctx.lineTo(x, ys.top + 2);
+            ctx.lineTo(x, ys.top + 12);
+            ctx.closePath(); ctx.fill();
+
+            ctx.fillStyle = '#c4b5fd'; ctx.font = 'bold 10px system-ui';
+            const lbl = 'n = ' + labels[i];
+            const tw = ctx.measureText(lbl).width;
+            ctx.fillText(lbl, Math.min(Math.max(x + d * 12, xs.left + 2), xs.right - tw - 2), ys.bottom - 6);
+            ctx.restore();
+        }catch(e){ /* cosmetic only */ }
+    }
+};
+
+// Move the playhead and repaint without re-running chart animations.
+function setErrorScan(idx, dir, from){
+    errorScanState.idx = idx;
+    if (dir !== undefined) errorScanState.dir = dir;
+    if (from !== undefined) errorScanState.from = from;
+    const ch = state.charts && state.charts.mainError;
+    if (ch) { try { ch.render(); } catch(e){} }
+}
+function clearErrorScan(){
+    errorScanState.idx = null; errorScanState.from = null;
+    const ch = state.charts && state.charts.mainError;
+    if (ch) { try { ch.render(); } catch(e){} }
+}
+
+// Playback direction, shared by the chart's Play All and the ring's
+// Play All (Error) — they call the same function.
+var errorPlayDir = 'forward';   // 'forward' | 'backward' | 'pingpong'
+function setErrorPlayDir(v){
+    errorPlayDir = v;
+    ['errorPlayDirA','errorPlayDirB'].forEach(function(id){
+        const el = document.getElementById(id); if (el && el.value !== v) el.value = v;
+    });
+}
+
+// Which stretch of sectors Play All covers:
+//   'all'   - every sector, as before
+//   'trap'  - only the band straddling n*, looping forever until Stop
+//   'green' - only the shaded region past n*, where pred < 1
+var errorPlayScope = 'all';
+var errorTrapK = 1;               // sectors either side of n*
+
+function setErrorPlayScope(v){
+    errorPlayScope = v;
+    ['errorPlayScopeA','errorPlayScopeB'].forEach(function(id){
+        const el = document.getElementById(id); if (el && el.value !== v) el.value = v;
+    });
+    // The trap is only meaningful as an oscillation, so snap direction to
+    // ping-pong when it is selected.
+    if (v === 'trap' && errorPlayDir !== 'pingpong') setErrorPlayDir('pingpong');
+    ['errorTrapKA','errorTrapKB'].forEach(function(id){
+        const el = document.getElementById(id);
+        if (el) el.style.display = (v === 'trap') ? '' : 'none';
+    });
+    updateErrorScopeNote();
+}
+
+function setErrorTrapK(v){
+    errorTrapK = Math.max(1, Math.min(50, parseInt(v, 10) || 1));
+    ['errorTrapKA','errorTrapKB'].forEach(function(id){
+        const el = document.getElementById(id);
+        if (el && +el.value !== errorTrapK) el.value = errorTrapK;
+    });
+    updateErrorScopeNote();
+}
+
+// The band of sectors the trap oscillates over. k = 1 gives exactly the two
+// whole sectors straddling n* — floor(n*) and floor(n*)+1.
+function errorTrapBand(N){
+    const ns = nStarSector(N);
+    const f = Math.floor(ns);
+    return { lo: Math.max(1, f - errorTrapK + 1), hi: Math.min(N, f + errorTrapK), nStar: ns };
+}
+
+function updateErrorScopeNote(){
+    const el = document.getElementById('errorScopeNote'); if (!el) return;
+    const N = state.nMax;
+    if (!N) { el.textContent = ''; return; }
+    if (errorPlayScope === 'trap') {
+        const b = errorTrapBand(N);
+        el.textContent = 'trap: n = ' + b.lo + '\u2026' + b.hi + '  (n* = ' + b.nStar.toFixed(2) + ', loops until Stop)';
+    } else if (errorPlayScope === 'green') {
+        const lo = Math.floor(nStarSector(N)) + 1;
+        el.textContent = 'green band: n = ' + lo + '\u2026' + N + '  (pred < 1)';
+    } else {
+        el.textContent = '';
+    }
+}
+
 // Report where the last flip actually landed versus the bound.
 function updateNStarNote(){
+    if (typeof updateErrorScopeNote === 'function') updateErrorScopeNote();
     const el = document.getElementById('nStarNote'); if(!el) return;
     const N = state.nMax;
     if(!N || !state.sectors || !state.sectors.length){ el.textContent = ''; return; }
@@ -10974,6 +11465,20 @@ function drawMainRing() {
         // Note: bounded data only goes up to boundedN, not full N
     } else {
         residues = [];
+    }
+
+    // --- gcd mode: fold in the zero divisors (gcd(r,m) > 1) on request. ---
+    // These carry coprime:false and gcdVal, which getRingPointColor and
+    // openPointModal both read. Because they land in state.ringPoints exactly
+    // like coprime points, every downstream consumer — click, highlight,
+    // corner labels, tree, harmonic audio, solver — picks them up unchanged.
+    const gcdMode = state.gcdMode || 'coprime';
+    if (gcdMode !== 'coprime') {
+        const ncFull = showAll
+            ? Object.values(state.nonCoprimeBySector || {}).flat()
+            : (state.nonCoprimeBySector?.[sector] || []);
+        if (gcdMode === 'noncoprime') residues = ncFull;
+        else residues = residues.concat(ncFull);
     }
     
     // Build-up playback: only show points enumerated at m <= ringBuildMaxM so far
@@ -11236,7 +11741,8 @@ function drawMainRing() {
         ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,2*Math.PI); ctx.fill();
         ctx.globalAlpha = 1;
         
-        state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color,angle,rad});
+        state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color,angle,rad,
+                               coprime: res.coprime !== false, gcdVal: res.gcdVal || 1});
         
         // Track residue (with mod filter support)
         if (trackerOn && trackedResidues.includes(r)) {
@@ -11423,7 +11929,7 @@ function drawMainRing() {
     if (involutionOn && highlightedRingPoint) {
         const selR = highlightedRingPoint.r;
         const selM = highlightedRingPoint.m;
-        const mirR = selM - selR;  // φ(r/m) = (m-r)/m
+        const mirR = selM - selR;  // ι(r/m) = (m-r)/m
         const isFP = (selR === mirR); // fixed point: r = m-r iff m = 2r iff r/m = 1/2
         
         const selPt = state.ringPoints.find(p => p.r === selR && p.m === selM);
@@ -12021,16 +12527,26 @@ function updateTrackerConnectionsPanel(trackerPoints, enabled) {
 }
 
 function updateSectorStats(sector, residues) {
-    const sectorRes = residues.filter(r => r.sector === sector);
+    // Coprime count drives the C(n,N) comparison and must stay the coprime
+    // count regardless of canvas mode — the asymptotic 3N^2/(pi^2 n(n+1))
+    // predicts Farey fractions, not zero divisors. The gcd>1 count is shown
+    // alongside it rather than folded into it.
+    const sectorRes = (residues || []).filter(r => r.sector === sector && r.coprime !== false);
     const coprime = sectorRes.length;
+    const nonCoprime = ((state.nonCoprimeBySector || {})[sector] || []).length;
     const N = state.nMax;
     const predicted = (3 * N * N) / (Math.PI * Math.PI * sector * (sector + 1));
     const error = coprime > 0 ? ((coprime - predicted) / predicted * 100).toFixed(1) : '—';
-    
+
     const statC = document.getElementById('statCoprime');
     const statP = document.getElementById('statPredicted');
     const statE = document.getElementById('statError');
-    if (statC) statC.textContent = coprime;
+    if (statC) {
+        statC.textContent = (state.gcdMode === 'coprime' || !nonCoprime)
+            ? coprime
+            : coprime + ' + ' + nonCoprime;
+        statC.title = coprime + ' coprime, ' + nonCoprime + ' zero divisors in sector ' + sector;
+    }
     if (statP) statP.textContent = predicted.toFixed(1);
     if (statE) statE.textContent = error + '%';
 }
@@ -12630,6 +13146,14 @@ function updateTrackerSizeDisplay() {
 }
 
 function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
+    // Zero divisors get the Page 10 red family, graded by gcd size, so that
+    // in 'both' mode the two populations stay visually separable no matter
+    // which coprime colour mode is active.
+    if (res && res.coprime === false) {
+        const g = res.gcdVal || 2;
+        const light = Math.max(28, 58 - Math.min(6, Math.log2(g)) * 4);
+        return `hsl(0,58%,${light}%)`;
+    }
     const cf = toCF(r, m);
     const sbDepth = cf.length;
     const phi = eulerPhi(m);
@@ -13068,7 +13592,13 @@ document.getElementById('mainRing').addEventListener('mousemove', function(e) {
 });
 
 function openPointModal(p) {
-    document.getElementById('pointModalTitle').textContent = `${p.r}/${p.m}`;
+    // Zero divisors (gcd(r,m) > 1) reach this modal too. Their fraction is not
+    // in lowest terms, so title and cards carry the gcd and the reduced form
+    // rather than silently presenting r/m as a Farey fraction.
+    const _g = p.gcdVal || gcd(p.r, p.m);
+    const _isZD = _g > 1;
+    document.getElementById('pointModalTitle').textContent =
+        _isZD ? `${p.r}/${p.m}  =  ${p.r/_g}/${p.m/_g}` : `${p.r}/${p.m}`;
     const cf = toCF(p.r, p.m);
     const mirR = p.m - p.r;
     const isFP = (p.r === mirR);
@@ -13093,6 +13623,7 @@ function openPointModal(p) {
             <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
             <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div><div class="sub">(1/${p.sector+1}, 1/${p.sector}]</div></div>
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
+            <div class="detail-card" style="border-color:${_isZD?'#c94040':'#4a90d9'};"><h5 style="color:${_isZD?'#c94040':'#4a90d9'};">gcd(r, m)</h5><div class="value" style="color:${_isZD?'#c94040':'#4a90d9'};">${_g}</div><div class="sub">${_isZD?'zero divisor of Z/'+p.m+'Z · reduces to '+(p.r/_g)+'/'+(p.m/_g):'coprime · character support'}</div></div>
             ${invCard}
         </div>
         <div class="theorem-box">
@@ -19429,6 +19960,13 @@ function toggleHarmonicDropdown() {
     dropdown.classList.toggle('expanded');
     arrow.classList.toggle('rotated');
     header.classList.toggle('expanded');
+
+    // The harmonic bar changes height when it opens; if the canvas is pinned,
+    // re-measure so the bars stay stacked directly beneath it.
+    if (typeof wgRepositionPinnedCanvas === 'function') {
+        requestAnimationFrame(wgRepositionPinnedCanvas);
+        setTimeout(wgRepositionPinnedCanvas, 260);   // after the CSS transition
+    }
 }
 
 function toggleHarmonicPanel() {
@@ -19694,7 +20232,7 @@ function playHarmonicScale(direction) {
         for (let r = 1; r < m; r++) {
             if (gcd(r, m) === 1) {
                 const val = r / m;
-                const s = Math.floor(1 / val);
+                const s = Math.floor(m / r);   // integer division; see getSector
                 if (s === sector) {
                     fractions.push({ r, m, val });
                 }
@@ -19724,7 +20262,7 @@ function playHarmonicChord() {
         for (let r = 1; r < m; r++) {
             if (gcd(r, m) === 1) {
                 const val = r / m;
-                const s = Math.floor(1 / val);
+                const s = Math.floor(m / r);   // integer division; see getSector
                 if (s === sector) {
                     fractions.push({ r, m, val });
                 }
@@ -19747,7 +20285,7 @@ function playConsonantOnly() {
         for (let r = 1; r < m; r++) {
             if (gcd(r, m) === 1) {
                 const val = r / m;
-                const s = Math.floor(1 / val);
+                const s = Math.floor(m / r);   // integer division; see getSector
                 if (s === sector) {
                     fractions.push({ r, m, val });
                 }
@@ -20119,7 +20657,7 @@ function updateHarmonicTab() {
         for(let r = 1; r < m; r++) {
             if(gcd(r, m) === 1) {
                 const val = r / m;
-                const s = Math.floor(1 / val);
+                const s = Math.floor(m / r);   // integer division; see getSector
                 if(s === sector) {
                     fractions.push({ r, m, val, freq: baseFreq * r / m });
                 }
@@ -21210,6 +21748,71 @@ function updatePrimorialSieve() {
     updateSectorResidueTable();
 }
 
+// =============================================
+// REAL ENUMERATION FOR THE PRIMORIAL TAB
+// Every count below is an exact enumeration of coprime pairs.
+// Nothing on this tab is simulated or fitted.
+// =============================================
+
+// Cached exact counts of coprime fractions r/m, 2 <= m <= maxN, gcd(r,m)=1,
+// bucketed by sector n = floor(m/r) and by residue class of r (and of m) mod k.
+let _primorialCountCache = null;
+function primorialCounts(maxN, modulus, numSectors) {
+    const key = maxN + '|' + modulus + '|' + numSectors;
+    if (_primorialCountCache && _primorialCountCache.key === key) return _primorialCountCache;
+
+    const total  = new Float64Array(numSectors + 1);
+    const byR = [], byM = [];
+    for (let n = 0; n <= numSectors; n++) {
+        byR.push(new Float64Array(modulus));
+        byM.push(new Float64Array(modulus));
+    }
+    for (let m = 2; m <= maxN; m++) {
+        const mc = m % modulus;
+        for (let r = 1; r < m; r++) {
+            if (gcd(r, m) !== 1) continue;
+            const n = Math.floor(m / r);
+            if (n < 1 || n > numSectors) continue;
+            total[n]++;
+            byR[n][r % modulus]++;
+            byM[n][mc]++;
+        }
+    }
+    const out = { key, maxN, modulus, numSectors, total, byR, byM };
+    _primorialCountCache = out;
+    return out;
+}
+
+// Conditioning on gcd(r,m)=1 already biases r away from divisibility by p:
+//   P(p does not divide r | gcd(r,m)=1) = (1-1/p)/(1-1/p^2) = p/(p+1).
+// So the per-class prediction carries this factor. Verified against exact
+// enumeration for k = 7, 8, 12, 30, 105 across sectors n = 1..4 (agreement ~0.1%).
+function coprimeBiasFactor(k) {
+    let f = 1, t = k;
+    for (let p = 2; p * p <= t; p++) {
+        if (t % p === 0) { f *= p / (p + 1); while (t % p === 0) t /= p; }
+    }
+    if (t > 1) f *= t / (t + 1);
+    return f;
+}
+
+// C(n,N,a,k) = [3N^2 / (pi^2 n(n+1))] * (1/phi(k)) * prod_{p|k} p/(p+1)
+function unifiedPrediction(n, N, k, phiMod) {
+    return formula(n, N) * coprimeBiasFactor(k) / phiMod;
+}
+
+// Pearson chi-square of the observed counts across the phi(k) classes
+// coprime to k, against a uniform expectation. df = phi(k) - 1.
+function chiSquareAcrossClasses(counts, coprimeClasses) {
+    let obs = 0;
+    coprimeClasses.forEach(a => { obs += counts[a]; });
+    const exp = obs / coprimeClasses.length;
+    if (exp <= 0) return { chiSq: 0, df: Math.max(0, coprimeClasses.length - 1), obs: 0, exp: 0 };
+    let chiSq = 0;
+    coprimeClasses.forEach(a => { const d = counts[a] - exp; chiSq += d * d / exp; });
+    return { chiSq, df: coprimeClasses.length - 1, obs, exp };
+}
+
 function drawSectorResidueHeatmap() {
     const canvas = document.getElementById('sectorResidueHeatmap');
     if (!canvas || !window.primorialData) return;
@@ -21238,28 +21841,25 @@ function drawSectorResidueHeatmap() {
     const counts = [];
     let maxCount = 0;
     
+    // Exact counts, bucketed by m mod k. No estimation, no fallback.
+    const _pc = primorialCounts(maxN, modulus, numSectors);
     for (let n = 1; n <= numSectors; n++) {
         const row = [];
         displayClasses.forEach(a => {
-            let count = 0;
-            for (let m = 2; m <= maxN; m++) {
-                if (m % modulus === a % modulus || (modulus > maxN && gcd(m, modulus) === 1)) {
-                    for (let r = 1; r < m; r++) {
-                        if (gcd(r, m) === 1) {
-                            const sector = getSector(r, m);
-                            if (sector === n) count++;
-                        }
-                    }
-                }
-            }
-            // Simplified estimate for large moduli
-            if (modulus > maxN) {
-                count = Math.round(formula(n, maxN) / phiMod);
-            }
+            const count = _pc.byM[n][a % modulus];
             row.push(count);
             if (count > maxCount) maxCount = count;
         });
         counts.push(row);
+    }
+    if (maxCount === 0) {
+        ctx.fillStyle = '#f87171';
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No denominators m \u2264 ' + maxN + ' fall in these classes mod ' + modulus + '.', W / 2, H / 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('Raise Max N above the modulus, or choose a smaller primorial base.', W / 2, H / 2 + 18);
+        return;
     }
     
     // Color function
@@ -21550,12 +22150,21 @@ function drawUnifiedFormulaChart() {
     const plotW = W - margin.l - margin.r;
     const plotH = H - margin.t - margin.b;
     
-    // For each sector, compute actual and predicted count
+    // For each sector, compare EXACT enumeration against the prediction.
+    const _pc = primorialCounts(maxN, modulus, numSectors);
+    const _cc = window.primorialData.coprimeClasses;
     const data = [];
     for (let n = 1; n <= numSectors; n++) {
-        const predicted = formula(n, maxN) / phiMod;
-        // Simplified actual calculation
-        const actual = predicted * (0.9 + Math.random() * 0.2); // Simulated with noise
+        const predicted = unifiedPrediction(n, maxN, modulus, phiMod);
+        let actual;
+        if (showAll) {
+            // mean over the phi(k) classes coprime to k
+            let s = 0;
+            _cc.forEach(a => { s += _pc.byR[n][a]; });
+            actual = s / _cc.length;
+        } else {
+            actual = _pc.byR[n][selectedClass % modulus];
+        }
         data.push({ n, actual, predicted });
     }
     
@@ -21616,7 +22225,7 @@ function drawUnifiedFormulaChart() {
     
     ctx.fillStyle = '#cbd5e1';
     ctx.font = 'bold 11px system-ui';
-    ctx.fillText(`C(n,N,${selectedClass},${modulus}) vs 3N²/(π²n(n+1)φ(k))`, margin.l + plotW / 2, 18);
+    ctx.fillText(`C(n,N,${selectedClass},${modulus}) — exact count of r ≡ ${selectedClass} (mod ${modulus}) vs prediction`, margin.l + plotW / 2, 18);
 }
 
 function drawPrimeDistribution() {
@@ -21716,14 +22325,13 @@ function drawUniformityTest() {
     const plotW = W - margin.l - margin.r;
     const plotH = H - margin.t - margin.b;
     
-    // Simulate counts per class in selected sector
+    // Exact counts per residue class of r in the selected sector.
     const displayClasses = coprimeClasses.slice(0, Math.min(12, coprimeClasses.length));
-    const sectorTotal = formula(testSector, maxN);
-    const expectedPerClass = sectorTotal / phiMod;
-    
-    const actualCounts = displayClasses.map(() => {
-        return expectedPerClass * (0.8 + Math.random() * 0.4); // Simulated
-    });
+    const _pc = primorialCounts(maxN, modulus, Math.max(testSector, numSectors));
+    const expectedPerClass = unifiedPrediction(testSector, maxN, modulus, phiMod);
+
+    const actualCounts = displayClasses.map(a => _pc.byR[testSector][a % modulus]);
+    const _chi = chiSquareAcrossClasses(_pc.byR[testSector], coprimeClasses);
     
     const maxY = Math.max(...actualCounts, expectedPerClass) * 1.2;
     const barWidth = plotW / displayClasses.length;
@@ -21747,20 +22355,21 @@ function drawUniformityTest() {
     ctx.stroke();
     ctx.setLineDash([]);
     
-    // Chi-square calculation
+    // Pearson chi-square over all phi(k) classes coprime to k, against the
+    // observed mean. This tests uniformity only — it does not test the model,
+    // so a good fit here cannot be manufactured by the prediction being right.
     if (showChiSq) {
-        let chiSq = 0;
-        actualCounts.forEach(obs => {
-            chiSq += Math.pow(obs - expectedPerClass, 2) / expectedPerClass;
-        });
-        
+        const chiSq = _chi.chiSq, df = _chi.df;
+        // 95% upper critical value, Wilson-Hilferty approximation
+        const crit = df > 0 ? df * Math.pow(1 - 2 / (9 * df) + 1.644854 * Math.sqrt(2 / (9 * df)), 3) : 0;
+        const ok = chiSq <= crit;
         ctx.fillStyle = '#f59e0b';
         ctx.font = 'bold 11px system-ui';
         ctx.textAlign = 'right';
-        ctx.fillText(`χ² = ${chiSq.toFixed(2)}`, W - margin.r - 5, margin.t + 15);
+        ctx.fillText(`χ² = ${chiSq.toFixed(2)} (df ${df})`, W - margin.r - 5, margin.t + 15);
         ctx.font = '9px system-ui';
-        ctx.fillStyle = chiSq < displayClasses.length * 2 ? '#22c55e' : '#ef4444';
-        ctx.fillText(chiSq < displayClasses.length * 2 ? 'Uniform' : 'Non-uniform', W - margin.r - 5, margin.t + 30);
+        ctx.fillStyle = ok ? '#22c55e' : '#ef4444';
+        ctx.fillText(ok ? `uniform (χ²₀.₉₅ = ${crit.toFixed(1)})` : `non-uniform (χ²₀.₉₅ = ${crit.toFixed(1)})`, W - margin.r - 5, margin.t + 30);
     }
     
     // Axes
@@ -21923,21 +22532,24 @@ function updateSectorResidueTable() {
     const tbody = document.querySelector('#sectorResidueTable tbody');
     if (!tbody || !window.primorialData) return;
     
-    const { numSectors, maxN, phiMod } = window.primorialData;
-    
+    const { numSectors, maxN, phiMod, modulus, coprimeClasses } = window.primorialData;
+    const _pc = primorialCounts(maxN, modulus, numSectors);
+
     let html = '';
     for (let n = 1; n <= numSectors; n++) {
-        const total = state.residuesBySector[n]?.length || Math.round(formula(n, maxN));
-        const perClassAvg = total / phiMod;
-        const chiSq = Math.random() * phiMod; // Simulated
-        const uniform = chiSq < phiMod * 1.5;
-        
+        const total = _pc.total[n];                       // exact, at this tab's own maxN
+        const _chi = chiSquareAcrossClasses(_pc.byR[n], coprimeClasses);
+        const perClassAvg = _chi.exp;                     // mean over the phi(k) coprime classes
+        const df = _chi.df;
+        const crit = df > 0 ? df * Math.pow(1 - 2 / (9 * df) + 1.644854 * Math.sqrt(2 / (9 * df)), 3) : 0;
+        const uniform = _chi.obs > 0 && _chi.chiSq <= crit;
+
         html += `<tr>
             <td>S${n}</td>
             <td>${total}</td>
             <td>${perClassAvg.toFixed(2)}</td>
-            <td>${chiSq.toFixed(2)}</td>
-            <td style="color:${uniform ? '#22c55e' : '#ef4444'}">${uniform ? 'Yes' : 'No'}</td>
+            <td>${_chi.chiSq.toFixed(2)} / ${crit.toFixed(1)}</td>
+            <td style="color:${uniform ? '#22c55e' : '#ef4444'}">${_chi.obs > 0 ? (uniform ? 'Yes' : 'No') : '—'}</td>
         </tr>`;
     }
     tbody.innerHTML = html;
@@ -22178,9 +22790,10 @@ function cnAudioSurvivorFilter(list, statusPrefix) {
 
 function playSectorAudio(sectorNum, direction = 'forward') {
     if (window.sectorInspectorSetPlaying) window.sectorInspectorSetPlaying(sectorNum);
-    const residues = state.residuesBySector[sectorNum] || [];
+    // Follow the canvas: gcd=1, gcd>1, or both.
+    const residues = sectorPointsForMode(sectorNum);
     if (residues.length === 0) {
-        showPlaybackStatus('No fractions in sector ' + sectorNum);
+        showPlaybackStatus('No ' + gcdModeLabel() + ' fractions in sector ' + sectorNum);
         return;
     }
     
@@ -22269,12 +22882,17 @@ function updateSectorRangeInputs() {
 // Update sector point count display
 function updateSectorPointCount() {
     const sectorNum = parseInt(document.getElementById('viewSector')?.value || 1);
-    const residues = state.residuesBySector[sectorNum] || [];
+    const residues = sectorPointsForMode(sectorNum);
+    const c = sectorCountsForMode(sectorNum);
     const countEl = document.getElementById('sectorPointCount');
     if (countEl) {
-        countEl.textContent = residues.length.toLocaleString();
+        // Show the split when both populations are live, so the number on
+        // screen always explains itself.
+        countEl.textContent = (state.gcdMode === 'both')
+            ? c.total.toLocaleString() + ' (' + c.coprime.toLocaleString() + ' + ' + c.nonCoprime.toLocaleString() + ')'
+            : residues.length.toLocaleString();
     }
-    
+
     // Update range end default
     const rangeEnd = document.getElementById('sectorRangeEnd');
     if (rangeEnd && !rangeEnd.value) {
@@ -23317,7 +23935,7 @@ function stepRingAnimation(delta) {
 // =============================================
 
 function playSectorPrimes(sectorNum) {
-    const residues = state.residuesBySector[sectorNum] || [];
+    const residues = sectorPointsForMode(sectorNum);
     const primes = residues.filter(r => r.isPrime);
     
     if (primes.length === 0) {
@@ -23400,6 +24018,26 @@ function playErrorBySector(mode = 'error') {
         const maxIdx = Math.max(errorChartSelection.start, errorChartSelection.end);
         sectorsToPlay = state.sectors.slice(minIdx, maxIdx + 1);
     }
+
+    // --- Scope: whole chart, the band straddling n*, or the green region. ---
+    const _N = state.nMax;
+    let trapLoop = false;
+    if (mode === 'error' && _N && errorPlayScope !== 'all') {
+        if (errorPlayScope === 'trap') {
+            const band = errorTrapBand(_N);
+            sectorsToPlay = state.sectors.filter(x => x.n >= band.lo && x.n <= band.hi);
+            trapLoop = true;            // oscillate until Stop
+        } else if (errorPlayScope === 'green') {
+            // pred < 1 exactly when n > n*, so the first green sector is
+            // floor(n*) + 1. This is the shaded region on the chart.
+            const lo = Math.floor(nStarSector(_N)) + 1;
+            sectorsToPlay = state.sectors.filter(x => x.n >= lo);
+        }
+        if (!sectorsToPlay.length) {
+            showPlaybackStatus('No sectors in that range - widen it or raise N');
+            return;
+        }
+    }
     
     // Fresh trail for this run
     ringPlaybackTrail = [];
@@ -23422,15 +24060,64 @@ function playErrorBySector(mode = 'error') {
     });
     
     playbackState.isPlaying = true;
-    let idx = 0;
     const speed = +(document.getElementById('playbackSpeed')?.value || 25);
-    
+
+    // --- Direction: forward, backward, or ping-pong (sweep out and back). ---
+    // The order is precomputed as a list of indices into `data`, so the same
+    // loop body serves all three and the scan line just follows it.
+    const dir = (typeof errorPlayDir !== 'undefined') ? errorPlayDir : 'forward';
+    let order = [];
+    for (let i = 0; i < data.length; i++) order.push(i);
+    if (dir === 'backward') order.reverse();
+    else if (dir === 'pingpong') {
+        const back = order.slice(0, -1).reverse();   // drop the shared endpoint
+        order = order.concat(back);
+    }
+
+    // Map each data entry back to its index in the chart's label array, since
+    // a drag selection means data[] can be a slice of the full chart.
+    const chartLabels = (state.charts && state.charts.mainError)
+        ? (state.charts.mainError.data.labels || []) : [];
+    const labelIndexOf = (n) => {
+        const k = chartLabels.indexOf(n);
+        return k >= 0 ? k : null;
+    };
+
+    let step = 0, lap = 0;
+    const scanStart = labelIndexOf(data[order[0]].n);
+
     function playNext() {
-        if (!playbackState.isPlaying || idx >= data.length) {
-            stopAllPlayback();
-            if (displayElement) displayElement.style.display = 'none';
-            showPlaybackStatus(`${mode === 'error' ? 'Error' : 'Count'} sonification complete`);
+        if (!playbackState.isPlaying) {
+            if (typeof clearErrorScan === 'function') clearErrorScan();
             return;
+        }
+        if (step >= order.length) {
+            if (trapLoop) {
+                // Caught in the trap: restart the sweep instead of finishing.
+                step = 0;
+                lap++;
+            } else {
+                stopAllPlayback();
+                if (typeof clearErrorScan === 'function') clearErrorScan();
+                if (displayElement) displayElement.style.display = 'none';
+                showPlaybackStatus(`${mode === 'error' ? 'Error' : 'Count'} sonification complete`);
+                return;
+            }
+        }
+        const idx = order[step];
+
+        // Drive the playhead. Direction is taken from the actual step so the
+        // arrow flips at the turn in ping-pong mode.
+        if (typeof setErrorScan === 'function') {
+            const li = labelIndexOf(data[idx].n);
+            if (li !== null) {
+                // On the very first step there is no previous index, so take
+                // the arrow from the mode instead of defaulting to forward.
+                const d = (step === 0)
+                    ? (dir === 'backward' ? -1 : 1)
+                    : (idx >= order[step - 1] ? 1 : -1);
+                setErrorScan(li, d, scanStart);
+            }
         }
         
         const d = data[idx];
@@ -23527,17 +24214,25 @@ function playErrorBySector(mode = 'error') {
         
         // Update display
         const label = mode === 'error' ? `Err: ${d.value.toFixed(1)}%` : `Count: ${Math.round(d.value)}`;
-        showPlaybackStatus(`Sector ${d.n}: ${label} → ${d.freq.toFixed(0)} Hz`);
+        showPlaybackStatus(`Sector ${d.n}: ${label} → ${d.freq.toFixed(0)} Hz`
+            + (trapLoop ? `   \u00b7 lap ${lap + 1}` : ''));
         
         // Highlight sector on ring if visible
         document.getElementById('viewSector').value = d.n;
         drawMainRing();
         
-        idx++;
+        step++;
         playbackState.intervalId = setTimeout(playNext, speed);
     }
-    
-    showPlaybackStatus(`Playing ${mode === 'error' ? 'relative error' : 'counts'} across ${data.length} sectors`);
+
+    const dirLabel = dir === 'backward' ? '\u25c0 backward'
+                   : dir === 'pingpong' ? '\u25c0\u25b6 ping-pong'
+                   : '\u25b6 forward';
+    const scopeLabel = (mode === 'error' && errorPlayScope === 'trap')
+        ? `  \u00b7  trapped at n* (n = ${sectorsToPlay[0].n}\u2026${sectorsToPlay[sectorsToPlay.length-1].n}, looping)`
+        : (mode === 'error' && errorPlayScope === 'green')
+        ? '  \u00b7  green band (pred < 1)' : '';
+    showPlaybackStatus(`Playing ${mode === 'error' ? 'relative error' : 'counts'} across ${data.length} sectors  \u00b7  ${dirLabel}${scopeLabel}`);
     playNext();
 }
 
@@ -24080,7 +24775,7 @@ function playAllFractionsMode(minIdx, maxIdx) {
         const s = state.sectors[i];
         if (!s) continue;
         
-        const residues = state.residuesBySector[s.n] || [];
+        const residues = sectorPointsForMode(s.n);
         const sorted = [...residues].sort((a, b) => a.value - b.value);
         
         sorted.forEach(frac => {
@@ -24149,7 +24844,7 @@ function playRepresentativeMode(minIdx, maxIdx) {
         const s = state.sectors[i];
         if (!s) continue;
         
-        const residues = state.residuesBySector[s.n] || [];
+        const residues = sectorPointsForMode(s.n);
         if (residues.length === 0) continue;
         
         const sorted = [...residues].sort((a, b) => a.value - b.value);
@@ -24226,7 +24921,7 @@ function playAllSectorsSequentially() {
     const sortedSectors = [...state.sectors].sort((a, b) => a.n - b.n);
     
     sortedSectors.forEach(s => {
-        const residues = state.residuesBySector[s.n] || [];
+        const residues = sectorPointsForMode(s.n);
         // Sort fractions within sector by value (ascending)
         const sorted = [...residues].sort((a, b) => a.r/a.m - b.r/b.m);
         sorted.forEach(f => {
