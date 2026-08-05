@@ -820,7 +820,7 @@ function openOpener(){
             <div class="control-group highlight">
                 <label>Sectors:</label>
                 <input type="number" id="sectorMin" value="1" min="1" onchange="computeAll()"> to
-                <input type="number" id="sectorMax" value="275" min="1" onchange="computeAll()">
+                <input type="number" id="sectorMax" value="500" min="1" onchange="computeAll()">
             </div>
             <button onclick="computeAll()">Compute</button>
             <button id="ringBuildPlayBtn" onclick="playMainRingBuildUp()" title="Animate drawing the ring from m=1 up to N" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:8px 14px;cursor:pointer;">▶ Play</button>
@@ -837,24 +837,24 @@ function openOpener(){
             <div class="control-row" onclick="toggleSectorBoundPanel()" style="cursor:pointer;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;user-select:none;">
                 <span id="sectorBoundChevron" style="display:inline-block;color:#94a3b8;font-size:10px;margin-right:6px;transition:transform 0.15s;">▶</span>
                 <label style="color:#94a3b8;font-size:11px;margin-right:8px;cursor:pointer;">Sector Bound</label>
-                <span id="sectorBoundSummary" style="color:#f59e0b;font-size:11px;">√3/π ≈ 0.5513 → Max sector: 275</span>
+                <span id="sectorBoundSummary" style="color:#f59e0b;font-size:11px;">1.0000 = 1.0000 → Max sector: 500</span>
             </div>
             <div id="sectorBoundPanel" class="control-row" style="display:none;background:#0f172a;padding:8px 12px;border-radius:0 0 6px 6px;border:1px solid #334155;border-top:none;">
                 <label style="font-size:11px;"><input type="checkbox" id="useSectorBound" checked onchange="updateSectorBound()"> Auto-bound</label>
                 <label style="margin-left:12px;font-size:11px;">Constant:</label>
                 <select id="sectorBoundPreset" onchange="applySectorBoundPreset()" style="font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
-                    <option value="sqrt3pi" selected>√3/π ≈ 0.5513</option>
+                    <option value="sqrt3pi">√3/π ≈ 0.5513</option>
                     <option value="sqrt6pi">√6/π ≈ 0.7797</option>
                     <option value="1pi">1/π ≈ 0.3183</option>
                     <option value="2pi">2/π ≈ 0.6366</option>
                     <option value="sqrt2pi">√2/π ≈ 0.4502</option>
-                    <option value="1">1.0000</option>
+                    <option value="1" selected>1.0000</option>
                     <option value="custom">Custom...</option>
                 </select>
                 <label style="margin-left:8px;font-size:11px;">or enter:</label>
-                <input type="text" id="customSectorBound" value="sqrt(3)/pi" placeholder="e.g. sqrt(6)/pi" style="width:100px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-family:monospace;" onchange="applyCustomSectorBound()">
-                <span id="sectorBoundValue" style="color:#22c55e;font-size:11px;font-family:monospace;margin-left:8px;">= 0.5513</span>
-                <span id="sectorBoundResult" style="color:#f59e0b;font-size:11px;margin-left:8px;">→ Max sector: 275</span>
+                <input type="text" id="customSectorBound" value="1" placeholder="e.g. sqrt(6)/pi" style="width:100px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-family:monospace;" onchange="applyCustomSectorBound()">
+                <span id="sectorBoundValue" style="color:#22c55e;font-size:11px;font-family:monospace;margin-left:8px;">= 1.0000</span>
+                <span id="sectorBoundResult" style="color:#f59e0b;font-size:11px;margin-left:8px;">→ Max sector: 500</span>
             </div>
         </div>
         
@@ -1551,6 +1551,7 @@ function openOpener(){
                     <div style="background:rgba(217,119,6,0.9);padding:6px 12px;border-radius:6px;border:1px solid #d97706;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <button onclick="playErrorBySector('error')" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;" title="Play the relative-error sweep, following the ring">▶ Play All (Error)</button>
                         <button onclick="stopAllPlayback()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
+                        <button onclick="clearPlaybackLabels()" title="Clear the labels a stopped sweep leaves behind: ring corner readouts, chart fraction readouts, and the highlighted point label. Does not touch the ring trail or the computed data." style="padding:3px 8px;font-size:10px;background:#475569;border:none;border-radius:3px;color:#e2e8f0;cursor:pointer;font-weight:600;">Clear Labels</button>
                         <select id="errorPlayDirA" onchange="setErrorPlayDir(this.value)" title="Sweep direction for Play All" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #8b5cf6;border-radius:3px;color:#c4b5fd;"><option value="forward">▶ Fwd</option><option value="backward">◀ Back</option><option value="pingpong">◀▶ Ping-pong</option></select>
                         <select id="errorPlayScopeA" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at n*</option><option value="green">Green band</option></select><input id="errorTrapKA" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of n*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;">
                         <label style="font-size:10px;color:#fff;display:flex;align-items:center;gap:4px;">
@@ -1586,6 +1587,15 @@ function openOpener(){
                 <button id="gcdmode-coprime"   onclick="setGcdMode('coprime')"   style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #4a90d9;border-radius:4px;cursor:pointer;background:#4a90d9;color:#fff;">gcd = 1</button>
                 <button id="gcdmode-noncoprime" onclick="setGcdMode('noncoprime')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #c94040;border-radius:4px;cursor:pointer;background:#1e293b;color:#c94040;">gcd &gt; 1</button>
                 <button id="gcdmode-both"      onclick="setGcdMode('both')"      style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #f59e0b;border-radius:4px;cursor:pointer;background:#1e293b;color:#f59e0b;">Both</button>
+                <button id="reopenPointBtn" onclick="reopenPointModal()" title="Reopen the details popup for the currently selected point. The popup closes when you pick an action from it; this brings it back without hunting for the point again." style="display:none;padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #8b5cf6;border-radius:4px;cursor:pointer;background:#1e293b;color:#a78bfa;">&#8857; Details</button>
+                <span id="pointQueueBar" style="display:none;align-items:center;gap:4px;">
+                    <span id="pointQueueCount" style="font-size:11px;color:#10b981;font-weight:600;"></span>
+                    <button onclick="playPointQueue('forward')"  title="Play the queued points in the order added" style="padding:4px 9px;font-size:11px;border:1px solid #10b981;border-radius:4px;cursor:pointer;background:#1e293b;color:#10b981;">&#9654;</button>
+                    <button onclick="playPointQueue('backward')" title="Play the queue in reverse" style="padding:4px 9px;font-size:11px;border:1px solid #10b981;border-radius:4px;cursor:pointer;background:#1e293b;color:#10b981;">&#9664;</button>
+                    <button onclick="stopPointQueue()" title="Stop queue playback" style="padding:4px 9px;font-size:11px;border:1px solid #64748b;border-radius:4px;cursor:pointer;background:#1e293b;color:#94a3b8;">&#9632;</button>
+                    <button onclick="clearPointQueue()" title="Empty the queue" style="padding:4px 9px;font-size:11px;border:1px solid #7f1d1d;border-radius:4px;cursor:pointer;background:#1e293b;color:#fca5a5;">&#10005;</button>
+                    <button id="pointQueueLoopBtn" onclick="togglePointQueueLoop()" title="Loop: repeat the queue until you press stop. Direction is kept, so a backward loop stays backward." style="padding:4px 9px;font-size:11px;border:1px solid #64748b;border-radius:4px;cursor:pointer;background:#1e293b;color:#94a3b8;">&#8635; Loop</button>
+                </span>
                 <span id="gcdModeNote" style="font-size:10px;color:#64748b;"></span>
             </div>
 
@@ -1972,6 +1982,7 @@ function openOpener(){
             <div class="chart-box chart-wrapper">
                 <h4>Exact vs Predicted 
                     <button class="secondary" onclick="playErrorBySector('count')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                    <button class="secondary" onclick="clearPlaybackLabels()" title="Clear the labels a stopped sweep leaves behind: the ring corner readouts, the chart fraction readouts, and the highlighted point label. Does not touch the ring trail (use Clear Ring Trail) or the computed data." style="font-size:10px;padding:3px 8px;">Clear Labels</button>
                     <button class="secondary" onclick="exportCountChart()" style="font-size:10px;padding:3px 8px;">Export</button>
                     <button class="secondary" onclick="resetCountChartZoom()" style="font-size:10px;padding:3px 8px;" title="Reset zoom">Reset Zoom</button>
                     <button class="secondary" onclick="zoomCountChart('in')" style="font-size:10px;padding:3px 6px;" title="Zoom in">+</button>
@@ -2350,7 +2361,7 @@ function openOpener(){
                 </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #8b5cf6;">
                     <h5 style="color:#8b5cf6;margin:0 0 8px 0;">Spectral Analysis</h5>
-                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The FFT of the error sequence is checked for peaks at the imaginary parts of the zeta zeros (14.13, 21.02, 25.01, …); peaks there would reflect explicit-formula structure.</p>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">Periodicity diagnostic for the sector-residual sequence. Note this spectrum is indexed in cycles per sector index (range 0 to 0.5); it is <em>not</em> comparable to the imaginary parts of the zeta zeros, which are frequencies conjugate to log x. Detecting those would require log-spaced sampling, which this panel does not perform.</p>
                 </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #f59e0b;">
                     <h5 style="color:#f59e0b;margin:0 0 8px 0;">Möbius Function</h5>
@@ -2389,7 +2400,7 @@ function openOpener(){
                 <!-- Power Spectrum -->
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
                     <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Power Spectrum (FFT)
-                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">peaks → zeta zeros?</span>
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">cycles per sector index</span>
                     </h5>
                     <canvas id="fftChart" height="120"></canvas>
                 </div>
@@ -2418,7 +2429,7 @@ function openOpener(){
             <!-- Spectral Peaks Table -->
             <div style="margin-top:15px;background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
                 <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Dominant Spectral Peaks
-                    <span style="font-weight:normal;color:#64748b;font-size:11px;margin-left:10px;">Compare with Im(ρ_k): 14.135, 21.022, 25.011, 30.425, 32.935, 37.586, 40.919, 43.327</span>
+                    
                 </h5>
                 <div id="spectralPeaksTable" style="font-family:monospace;font-size:12px;color:#94a3b8;"></div>
             </div>
@@ -2679,8 +2690,8 @@ function openOpener(){
                 <p style="margin:0 0 10px 0;">The boundary constant provides a "resolution limit" for prime distribution analysis:</p>
                 <ul style="margin:0 0 0 15px; font-size:0.9em;">
                     <li><strong>Zooming In:</strong> Increasing N allows the asymptotic formula to penetrate deeper into higher-numbered sectors before encountering empty regions.</li>
-                    <li><strong>Information Limit:</strong> At n ≈ 0.55N, we reach the maximum "resolution" where statistical methods remain valid.</li>
-                    <li><strong>Prime Chaos:</strong> Beyond this limit, individual prime locations dominate over statistical patterns.</li>
+                    <li><strong>Exhaustion Point:</strong> For n &gt; N/2 every sector contains <em>exactly one</em> fraction, namely 1/n — any numerator a ≥ 2 would need denominator b ≥ 2n &gt; N. The predicted count crosses 1 near n ≈ 0.5513N and drifts slowly downward past this constant.</li>
+                    <li><strong>Not an accuracy guarantee:</strong> This is a resolution limit only. Relative error of the asymptotic is O(n²/N) and exceeds 15% well before n ≈ 0.55N; agreement <em>at</em> 0.55N looks better than the formula deserves because the exact count is pinned at 1 across that whole range. Note also that the high-n regime is fully deterministic and prime-independent — 1/n is present whether n is prime or composite.</li>
                 </ul>
             </div>
             
@@ -2890,7 +2901,7 @@ function openOpener(){
             </div>
         </div>
         <div class="connection-box" style="margin-top:15px;">
-            <strong>Key Insight:</strong> Every gap exactly equals 1/(bd) where b and d are the denominators of consecutive Farey fractions. This is a consequence of the mediant property: for neighbors a/b and c/d, we have |ad - bc| = 1.
+            <strong>Key Insight:</strong> Every gap exactly equals 1/(bd) where b and d are the denominators of consecutive Farey fractions. This is a consequence of <strong>unimodularity</strong> (the Farey neighbor property): for neighbors a/b and c/d we have |ad - bc| = 1. Distinct from the <em>mediant</em> property, which concerns (a+c)/(b+d).
         </div>
         <div class="derivation-box" style="margin-top:15px;">
             <strong>Ford Circles Connection:</strong> Each Farey fraction a/b corresponds to a Ford circle of radius 1/(2b²) tangent to the real line at x = a/b. Two Ford circles are tangent if and only if their fractions are Farey neighbors. The gap formula 1/(bd) emerges from the geometry of tangent Ford circles, connecting number theory to hyperbolic geometry.
@@ -2971,7 +2982,7 @@ function openOpener(){
     <div id="tab-cf" class="tab-content">
         <div class="panel">
             <h3>Continued Fractions</h3>
-            <div class="theorem-box"><strong>Stern-Brocot Encoding:</strong> Path L^a R^b L^c... encodes CF [0; a, b, c, ...]. Every rational r/m has a unique finite CF expansion. The convergents p_k/q_k satisfy |r/m - p_k/q_k| < 1/(q_k * q_{k+1}), giving best rational approximations.</div>
+            <div class="theorem-box"><strong>Stern-Brocot Encoding:</strong> With the walk used here (root 1/1, boundaries 0/1 and 1/0), a path with run-lengths L^{a₁} R^{a₂} L^{a₃}… encodes the CF [0; a₁, a₂, …, aₖ<strong>+1</strong>] — the <em>last</em> exponent is one short, because the walk halts on arrival. E.g. 2/5 → LLR → [0;2,2]; 7/10 → LRRLL → [0;1,2,3]. Every rational r/m has exactly two finite CF expansions ([…,aₖ] and […,aₖ−1,1]); it is unique once the last term is required to be ≥ 2. The convergents p_k/q_k satisfy |r/m - p_k/q_k| < 1/(q_k * q_{k+1}), giving best rational approximations.</div>
             <div class="control-row" style="margin:12px 0;">
                 <label>Sector: <input type="number" id="cfSector" value="2" min="1" onchange="updateCFDisplay()"></label>
                 <label>Max terms: <input type="number" id="cfMaxTerms" value="50" onchange="updateCFDisplay()"></label>
@@ -3000,7 +3011,7 @@ function openOpener(){
                 <div class="chart-box"><h4>Max Partial Quotient</h4><canvas id="cfMaxChart"></canvas></div>
             </div>
             <div class="derivation-box" style="margin-top:15px;">
-                <strong>Gauss-Kuzmin Distribution:</strong> For almost all real numbers, the probability that a partial quotient a_k equals n approaches −log₂(1 − 1/(n+1)²) = log₂(1 + 1/(n(n+2))) as k → ∞. For n=1, this is about 41.5%; for n=2, about 17.0%; for n=3, about 9.3%.
+                <strong>Gauss-Kuzmin Distribution:</strong> For almost all real numbers, the probability that a partial quotient a_k equals n approaches −log₂(1 − 1/(n+1)²) = log₂(1 + 1/(n(n+2))) as k → ∞. For n=1, this is about 41.5%; for n=2, about 17.0%; for n=3, about 9.3%. <em>Caveat:</em> Farey fractions do approach this distribution, but convergence is logarithmic in N and visibly incomplete at usable sizes — at N=1000 the observed share of aₖ=2 is about 20.5% against the limiting 17.0%. A histogram that does not match is expected, not a bug.
             </div>
             <div class="connection-box" style="margin-top:12px;">
                 <strong>Golden Ratio Connection:</strong> The golden ratio φ = [1; 1, 1, 1, ...] has all partial quotients equal to 1, making it the "most irrational" number - hardest to approximate by rationals. Fractions with small partial quotients are harmonically simple.
@@ -3029,7 +3040,7 @@ function openOpener(){
                 <div class="chart-box"><h4>Circle Radius Distribution</h4><canvas id="fordRadiusChart"></canvas></div>
             </div>
             <div class="derivation-box" style="margin-top:15px;">
-                <strong>Ford Circle Geometry:</strong> Each fraction a/b corresponds to a Ford circle of radius 1/(2b²) tangent to the real line at x=a/b. Two Ford circles are tangent if and only if their fractions are Farey neighbors. The hyperbolic area between tangent circles relates to the Dedekind eta function.
+                <strong>Ford Circle Geometry:</strong> Each fraction a/b corresponds to a Ford circle of radius 1/(2b²) tangent to the real line at x=a/b. Two Ford circles are tangent if and only if |ad − bc| = 1, i.e. their fractions are Farey neighbors in Fₘ for m = max(b,d); otherwise the circles are disjoint.
             </div>
             <div class="connection-box" style="margin-top:12px;">
                 <strong>Modular Group Action:</strong> PSL(2,ℤ) acts on the upper half-plane by Möbius transformations: z → (az+b)/(cz+d). The fundamental domain is the "keyhole" region, and Ford circles visualize the orbit structure of this action on ℚ ∪ {∞}.
@@ -3773,10 +3784,10 @@ function openOpener(){
     <!-- NUMBER THEORY TAB - Meissel-Lehmer Optimized Functions -->
     <div id="tab-numtheory" class="tab-content">
         <div class="panel">
-            <h3 style="color:#8b5cf6;">Meissel-Lehmer Number Theory Engine</h3>
+            <h3 style="color:#8b5cf6;">Prime-Counting Engine (Lucy_Hedgehog)</h3>
             <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">
                 <strong>Overview:</strong> This module implements sublinear algorithms for prime counting and totient summation. 
-                The Meissel-Lehmer algorithm computes pi(x) in O(x^(2/3)) time instead of O(x), enabling analysis of much larger ranges.
+                Sublinear prime counting. The Lucy_Hedgehog method used here runs in O(x^(3/4)); the O(x^(2/3)) bound belongs to Lagarias–Miller–Odlyzko (1985), a later refinement of Meissel (1870) and Lehmer (1959), and is not implemented on this page.
                 All primality tests use a precomputed sieve for O(1) lookup.
             </p>
             
@@ -4151,7 +4162,7 @@ function openOpener(){
                     <li>HTML5 Canvas for ring, tree, and chart rendering</li>
                     <li>Web Audio API for harmonic sonification</li>
                     <li>Chart.js for statistical visualizations</li>
-                    <li>Custom implementations of Meissel-Lehmer algorithm, Stern-Brocot tree traversal, and Farey sequence generation</li>
+                    <li>Custom implementations of Lucy_Hedgehog prime counting, Stern-Brocot tree traversal, and Farey sequence generation</li>
                 </ul>
             </div>
             
@@ -4587,13 +4598,13 @@ function openOpener(){
 
 <script>
 const state = {
-    mode: 'exact', nMin: 1, nMax: 500, sectorMin: 1, sectorMax: 275,
+    mode: 'exact', nMin: 1, nMax: 500, sectorMin: 1, sectorMax: 500,
     sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
     computing: false, charts: {}, ringPoints: [], animationId: null,
     // gcd(r,m)>1 support: 'coprime' | 'noncoprime' | 'both'
     gcdMode: 'coprime', includeNonCoprime: false,
     nonCoprimeBySector: {}, allNonCoprime: [],
-    sectorBoundConstant: Math.sqrt(3) / Math.PI, // Default √3/π
+    sectorBoundConstant: 1, // Default 1.0000 (no bound: max sector = N)
     tablePage: 0, // current page of the Sector Data table (0-indexed)
     // Bounded window data for P/C analysis in large N mode
     boundedResiduesBySector: {},
@@ -6085,7 +6096,7 @@ function generateScreenshotWithSelection(tabName) {
             description: 'Statistical analysis of formula deviation - connection to RH',
             params: [
                 'Franel-Landau: RH ⟺ O(N^(1/2+ε))',
-                'FFT → zeta zero frequencies',
+                'FFT → sector-residual periodicity',
                 'Möbius correlation',
                 'Prime vs composite sector behavior'
             ]
@@ -6106,7 +6117,7 @@ function generateScreenshotWithSelection(tabName) {
             title: 'Farey Gap Analysis',
             formula: 'gap(a/b, c/d) = 1/(b·d)',
             description: 'For consecutive Farey fractions, gap = 1/(b·d)',
-            params: ['Mediant property: |ad - bc| = 1', 'Gap decreases with denominator', 'Uniform distribution']
+            params: ['Unimodularity (Farey neighbor property): |ad - bc| = 1', 'Gap decreases with denominator', 'Uniform distribution']
         },
         'franel': {
             title: 'Franel-Landau Theorem',
@@ -7272,15 +7283,19 @@ async function computeAll() {
         // --- Memory pre-flight ---------------------------------------------
         // There is no hard cap on N anywhere in this page; the wall is
         // state.sectors, one object per sector at ~224 bytes measured. With the
-        // sqrt(3)/pi sector bound, sectorMax ~ 0.5513*N, so N=1e6 costs ~121 MB
-        // and N=1e7 costs ~1.2 GB (plus ~124 MB of sieve arrays). Past the hard
+        // default sector bound of 1, sectorMax ~ N, so N=1e6 costs ~214 MB and
+        // N=1e7 costs ~2.1 GB (plus ~124 MB of sieve arrays). Past the hard
         // limit the tab dies mid-run, which used to leave the old numbers on
         // screen with the new N in state -- so refuse up front and say why.
         const sectorCount = Math.max(0, state.sectorMax - state.sectorMin + 1);
         const estMB = Math.round(sectorCount * 224 / 1048576) + Math.round(state.nMax * 13 / 1048576);
         const SECTOR_HARD = 2000000, SECTOR_WARN = 600000;
         if (sectorCount > SECTOR_HARD) {
-            const suggestN = Math.floor(SECTOR_HARD / (Math.sqrt(3)/Math.PI));
+            // Use the bound actually in force, not a hardcoded constant -- the
+            // default is now 1, and a stale 0.5513 here suggests an N that is
+            // still over the cap.
+            const _bc = (state.sectorBoundConstant > 0) ? state.sectorBoundConstant : 1;
+            const suggestN = Math.floor(SECTOR_HARD / _bc);
             document.getElementById('statusArea').innerHTML =
                 '<span class="info-badge" style="background:#ef4444;">Too large: ' + sectorCount.toLocaleString()
                 + ' sectors would need roughly ' + (estMB/1024).toFixed(1) + ' GB. '
@@ -11193,12 +11208,28 @@ const nStarMarkerPlugin = {
 // A moving vertical playhead that tracks Play All across the error chart, so
 // you can see which sector is sounding. errorScanState.idx is an index into
 // chart.data.labels; null means idle and nothing is drawn.
-var errorScanState = { idx: null, dir: 1, from: null, to: null };
+// One scan state PER CHART. Previously a single shared object was read by the
+// plugin, which is registered on both the count and error charts -- so a sweep
+// driven from either Play painted a playhead on BOTH. Keyed by canvas id now.
+var scanStates = {
+    mainError: { idx: null, dir: 1, from: null, to: null },
+    mainCount: { idx: null, dir: 1, from: null, to: null }
+};
+function scanKeyForChart(chart){
+    const id = chart && chart.canvas && chart.canvas.id;
+    if (id === 'mainCountChart') return 'mainCount';
+    if (id === 'mainErrorChart') return 'mainError';
+    return null;
+}
+// Kept as an alias so any other caller referring to errorScanState still works.
+var errorScanState = scanStates.mainError;
 
 const scanLinePlugin = {
     id: 'scanLine',
     afterDatasetsDraw(chart){
         try{
+            const _k = scanKeyForChart(chart); if (!_k) return;
+            const errorScanState = scanStates[_k];
             if (errorScanState.idx === null) return;
             const labels = chart.data.labels || []; if (!labels.length) return;
             const i = Math.max(0, Math.min(labels.length - 1, errorScanState.idx));
@@ -11245,17 +11276,57 @@ const scanLinePlugin = {
 };
 
 // Move the playhead and repaint without re-running chart animations.
-function setErrorScan(idx, dir, from){
-    errorScanState.idx = idx;
-    if (dir !== undefined) errorScanState.dir = dir;
-    if (from !== undefined) errorScanState.from = from;
-    const ch = state.charts && state.charts.mainError;
+function setErrorScan(idx, dir, from, target){
+    const key = target || 'mainError';
+    const st = scanStates[key]; if (!st) return;
+    st.idx = idx;
+    if (dir !== undefined) st.dir = dir;
+    if (from !== undefined) st.from = from;
+    const ch = state.charts && state.charts[key];
     if (ch) { try { ch.render(); } catch(e){} }
 }
-function clearErrorScan(){
-    errorScanState.idx = null; errorScanState.from = null;
-    const ch = state.charts && state.charts.mainError;
-    if (ch) { try { ch.render(); } catch(e){} }
+function clearErrorScan(target){
+    // No target => clear both, so Stop always leaves a clean pair of charts.
+    const keys = target ? [target] : ['mainError','mainCount'];
+    keys.forEach(function(key){
+        const st = scanStates[key]; if (!st) return;
+        st.idx = null; st.from = null;
+        const ch = state.charts && state.charts[key];
+        if (ch) { try { ch.render(); } catch(e){} }
+    });
+}
+
+// Independent transports: 'count' and 'error' each own a flag and a timer, so
+// one Play no longer cancels or drives the other.
+var sonifyTransport = { error:{playing:false,timer:null}, count:{playing:false,timer:null} };
+function stopSonify(mode){
+    const t = sonifyTransport[mode]; if (!t) return;
+    // Only reset the camera if THIS sweep was genuinely running. stopAllPlayback
+    // routes through here for both modes, and it is also used by the ring loop,
+    // word art and sector sequence -- none of which should snap the zoom back.
+    const wasPlaying = t.playing;
+    t.playing = false;
+    if (t.timer) { clearTimeout(t.timer); t.timer = null; }
+    clearErrorScan(mode === 'error' ? 'mainError' : 'mainCount');
+    const disp = document.getElementById(mode === 'error' ? 'errorChartFractionDisplay' : 'countChartFractionDisplay');
+    if (disp) disp.style.display = 'none';
+    if (!sonifyTransport.error.playing && !sonifyTransport.count.playing) {
+        playbackState.isPlaying = false;
+        if (typeof stopAudio === 'function') stopAudio();
+    }
+    // Auto Zoom Tracker leaves the ring parked on the last point it followed.
+    // Return it to 100% so the next thing you look at is the whole ring.
+    if (wasPlaying) {
+        if (typeof ringAutoZoomTimeout !== 'undefined' && ringAutoZoomTimeout) {
+            clearTimeout(ringAutoZoomTimeout); ringAutoZoomTimeout = null;
+        }
+        if (typeof resetRingFollowCamera === 'function') {
+            try { resetRingFollowCamera(); } catch(e){}
+        } else if (typeof resetRingZoom === 'function') {
+            try { resetRingZoom(); } catch(e){}
+        }
+        if (typeof drawMainRing === 'function') { try { drawMainRing(); } catch(e){} }
+    }
 }
 
 // Playback direction, shared by the chart's Play All and the ring's
@@ -13604,6 +13675,21 @@ function openPointModal(p) {
     const isFP = (p.r === mirR);
     const mirPt = state.ringPoints.find(pt => pt.r === mirR && pt.m === p.m);
     
+    // Queue card -- fills the empty sixth grid slot. Lets you collect points
+    // across several clicks and then play them as one sequence.
+    const _inQ = pointQueueHas(p.r, p.m);
+    const _qPrev = pointQueue.slice(-3).map(function(q){ return q.r + '/' + q.m; }).join(', ');
+    const queueCard = `<div class="detail-card" style="border-color:#10b981;">`
+        + `<h5 style="color:#10b981;">Queue</h5>`
+        + `<div class="value" style="color:#10b981;">${pointQueue.length}</div>`
+        + `<div class="sub">${pointQueue.length ? (pointQueue.length > 3 ? '&hellip;, ' : '') + _qPrev : 'no points yet'}</div>`
+        + `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">`
+        + `<button onclick="togglePointInQueue(${p.r},${p.m},${p.sector||0})" style="padding:4px 10px;font-size:11px;background:${_inQ ? '#475569' : 'linear-gradient(135deg,#10b981,#059669)'};border:none;border-radius:3px;color:#fff;cursor:pointer;font-weight:600;">${_inQ ? '\u2713 Remove' : '+ Add'}</button>`
+        + (pointQueue.length ? `<button onclick="clearPointQueue()" style="padding:4px 10px;font-size:11px;background:#7f1d1d;border:none;border-radius:3px;color:#fecaca;cursor:pointer;">Clear</button>` : '')
+        + `</div>`
+        + `<div class="sub" style="margin-top:6px;color:#64748b;">Modal stays open &mdash; close it, click another point, add again.</div>`
+        + `</div>`;
+
     // Involution card
     let invCard = '';
     if (isFP) {
@@ -13625,6 +13711,7 @@ function openPointModal(p) {
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
             <div class="detail-card" style="border-color:${_isZD?'#c94040':'#4a90d9'};"><h5 style="color:${_isZD?'#c94040':'#4a90d9'};">gcd(r, m)</h5><div class="value" style="color:${_isZD?'#c94040':'#4a90d9'};">${_g}</div><div class="sub">${_isZD?'zero divisor of Z/'+p.m+'Z · reduces to '+(p.r/_g)+'/'+(p.m/_g):'coprime · character support'}</div></div>
             ${invCard}
+            ${queueCard}
         </div>
         <div class="theorem-box">
             <strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}
@@ -13637,6 +13724,8 @@ function openPointModal(p) {
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
             <button onclick="closePointModal();playFraction(${p.r},${p.m},1.0)" style="background:linear-gradient(135deg,#22c55e,#16a34a);">&#9654; Play</button>
             <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">&#9654; Path</button>
+            <button onclick="closePointModal();playPointQueue('forward')" title="Play every queued point in the order added" style="background:linear-gradient(135deg,#10b981,#047857);">&#9654; Queue</button>
+            <button onclick="closePointModal();playPointQueue('backward')" title="Play the queue in reverse" style="background:linear-gradient(135deg,#047857,#065f46);">&#9664; Queue</button>
             ${mirBtn}
             <button onclick="closePointModal();viewPointOnAll(${p.r},${p.m},${p.sector})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">View on All</button>
             <button onclick="closePointModal();scrollToSectorTree()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">See on Tree</button>
@@ -13646,6 +13735,44 @@ function openPointModal(p) {
     document.getElementById('pointModal').classList.add('active');
 }
 function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
+
+// ── Reopen the point popup for the current selection ──────────────────────
+// Every action button in the modal closes it (Play, Path, Mirror, View on All,
+// See on Tree, Add to Solver), so after using one there was no way back except
+// finding the point on the canvas again. This restores it from
+// highlightedRingPoint, which those actions leave intact.
+function reopenPointModal(){
+    const h = (typeof highlightedRingPoint !== 'undefined') ? highlightedRingPoint : null;
+    if (!h || !h.m) return;
+    // Prefer the full ring point (carries sector, isPrime, gcdVal); fall back to
+    // a minimal record so the modal still opens if the ring was rebuilt.
+    let full = null;
+    if (state.ringPoints && state.ringPoints.find) {
+        full = state.ringPoints.find(function(q){ return q.r === h.r && q.m === h.m; });
+    }
+    if (!full) {
+        full = { r:h.r, m:h.m, sector:(h.sector || 0), isPrime:!!h.isPrime };
+    }
+    // openPointModal reads state.ringPoints for the mirror card; guard it.
+    if (!state.ringPoints) state.ringPoints = [];
+    try { openPointModal(full); } catch(e){ /* stale selection */ }
+}
+
+// Keep the button labelled with the live selection. highlightedRingPoint is
+// assigned from seven different places (canvas click, a/b Go box, tree, solver,
+// mirror hop, ...), so a cheap poll is more reliable here than hooking each one.
+function syncReopenPointBtn(){
+    const btn = document.getElementById('reopenPointBtn'); if (!btn) return;
+    const h = (typeof highlightedRingPoint !== 'undefined') ? highlightedRingPoint : null;
+    if (h && h.m) {
+        const lbl = '\u2299 ' + h.r + '/' + h.m;
+        if (btn.textContent !== lbl) btn.textContent = lbl;
+        if (btn.style.display === 'none') btn.style.display = '';
+    } else if (btn.style.display !== 'none') {
+        btn.style.display = 'none';
+    }
+}
+setInterval(syncReopenPointBtn, 400);
 
 // ── Full continued-fraction breakdown for the clicked point ───────────────
 // Nested form, convergent path (successive rational approximations), the
@@ -19091,8 +19218,21 @@ document.addEventListener('click', e => {
 document.addEventListener('click', e => { if(e.target.classList.contains('modal-overlay')) closePointModal(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closePointModal(); });
 
+// Chart boxes that must NOT get the floating 4K Export overlay. It is
+// absolutely positioned (top:8px; right:90px) and on these two panels the
+// control row wraps underneath it, so the button lands on top of Reset Zoom /
+// the sector dropdown. Both panels already carry their own inline Export
+// button, so nothing is lost by suppressing the overlay here.
+const NO_4K_OVERLAY = ['mainCountChart', 'mainErrorChart'];
+
 function addExportButtons() {
     document.querySelectorAll('.chart-box').forEach(box => {
+        if (NO_4K_OVERLAY.some(id => box.querySelector('#' + id))) {
+            // Drop one that a previous pass may already have added.
+            const stale = box.querySelector('.export-4k-btn');
+            if (stale) stale.remove();
+            return;
+        }
         if (!box.querySelector('.export-4k-btn')) {
             const btn = document.createElement('button');
             btn.className = 'export-4k-btn';
@@ -19117,6 +19257,12 @@ window.switchTab = function(name) {
 
 document.addEventListener('DOMContentLoaded', addExportButtons);
 setTimeout(addExportButtons, 500);
+
+// Apply the Sector Bound before the first compute. updateSectorBound() only ran
+// from onchange handlers, so on a fresh load the Sectors max input kept whatever
+// was hardcoded in the markup rather than N x the bound constant -- which is why
+// the numbers only became correct after clicking Compute.
+if (typeof updateSectorBound === 'function') { try { updateSectorBound(); } catch(e){} }
 
 computeAll();
 
@@ -23168,6 +23314,17 @@ function startPlaybackLoop() {
 }
 
 function stopAllPlayback() {
+    // Halt both sonification transports as well as the shared playback state.
+    if (typeof sonifyTransport !== 'undefined') {
+        // Via stopSonify so a running sweep also gets its camera reset; that
+        // function no-ops the reset for modes that were not playing.
+        ['error','count'].forEach(function(m){
+            if (typeof stopSonify === 'function') { try { stopSonify(m); } catch(e){} }
+            const t = sonifyTransport[m];
+            if (t) { t.playing = false; if (t.timer) { clearTimeout(t.timer); t.timer = null; } }
+        });
+    }
+    if (typeof clearErrorScan === 'function') { try { clearErrorScan(); } catch(e){} }
     playbackState.isPlaying = false;
     if (window.sectorInspectorSetPlaying) window.sectorInspectorSetPlaying(null);
     if (playbackState.intervalId) {
@@ -24001,7 +24158,9 @@ function playErrorBySector(mode = 'error') {
     }
     
     initAudioContext();
-    stopAllPlayback();
+    // Stop only THIS mode. The other chart's sweep keeps running.
+    stopSonify(mode);
+    const chartKey = (mode === 'error') ? 'mainError' : 'mainCount';
     
     // Get the appropriate display element
     const displayElement = mode === 'error' ? 
@@ -24060,6 +24219,7 @@ function playErrorBySector(mode = 'error') {
     });
     
     playbackState.isPlaying = true;
+    sonifyTransport[mode].playing = true;
     const speed = +(document.getElementById('playbackSpeed')?.value || 25);
 
     // --- Direction: forward, backward, or ping-pong (sweep out and back). ---
@@ -24076,8 +24236,11 @@ function playErrorBySector(mode = 'error') {
 
     // Map each data entry back to its index in the chart's label array, since
     // a drag selection means data[] can be a slice of the full chart.
-    const chartLabels = (state.charts && state.charts.mainError)
-        ? (state.charts.mainError.data.labels || []) : [];
+    // Index against the chart being swept. This used to read mainError's labels
+    // unconditionally, so in 'count' mode the playhead was placed using the
+    // WRONG label array -- the source of the counter/highlight mismatch.
+    const chartLabels = (state.charts && state.charts[chartKey])
+        ? (state.charts[chartKey].data.labels || []) : [];
     const labelIndexOf = (n) => {
         const k = chartLabels.indexOf(n);
         return k >= 0 ? k : null;
@@ -24087,8 +24250,8 @@ function playErrorBySector(mode = 'error') {
     const scanStart = labelIndexOf(data[order[0]].n);
 
     function playNext() {
-        if (!playbackState.isPlaying) {
-            if (typeof clearErrorScan === 'function') clearErrorScan();
+        if (!sonifyTransport[mode].playing) {
+            if (typeof clearErrorScan === 'function') clearErrorScan(chartKey);
             return;
         }
         if (step >= order.length) {
@@ -24097,8 +24260,8 @@ function playErrorBySector(mode = 'error') {
                 step = 0;
                 lap++;
             } else {
-                stopAllPlayback();
-                if (typeof clearErrorScan === 'function') clearErrorScan();
+                stopSonify(mode);
+                if (typeof clearErrorScan === 'function') clearErrorScan(chartKey);
                 if (displayElement) displayElement.style.display = 'none';
                 showPlaybackStatus(`${mode === 'error' ? 'Error' : 'Count'} sonification complete`);
                 return;
@@ -24116,7 +24279,7 @@ function playErrorBySector(mode = 'error') {
                 const d = (step === 0)
                     ? (dir === 'backward' ? -1 : 1)
                     : (idx >= order[step - 1] ? 1 : -1);
-                setErrorScan(li, d, scanStart);
+                setErrorScan(li, d, scanStart, chartKey);
             }
         }
         
@@ -24222,7 +24385,7 @@ function playErrorBySector(mode = 'error') {
         drawMainRing();
         
         step++;
-        playbackState.intervalId = setTimeout(playNext, speed);
+        sonifyTransport[mode].timer = setTimeout(playNext, speed);
     }
 
     const dirLabel = dir === 'backward' ? '\u25c0 backward'
@@ -24247,6 +24410,123 @@ let errorChartSelection = { start: null, end: null, isDragging: false };
 // fractions as they play during Play All / Play Selection)
 // =============================================
 let ringPlaybackTrail = []; // array of {r, m} in play order
+
+// ── Point queue ──────────────────────────────────────────────────────────
+// Collect points across several clicks, then play them as one sequence in
+// either direction. Kept module-level so it survives the modal closing, which
+// every action button does.
+var pointQueue = [];
+var pointQueueTimer = null;
+var pointQueueLoop = false;
+
+function togglePointQueueLoop(){
+    pointQueueLoop = !pointQueueLoop;
+    const b = document.getElementById('pointQueueLoopBtn');
+    if (b) {
+        b.style.background = pointQueueLoop ? '#10b981' : '#1e293b';
+        b.style.color      = pointQueueLoop ? '#06281d' : '#94a3b8';
+        b.style.borderColor= pointQueueLoop ? '#10b981' : '#64748b';
+        b.style.fontWeight = pointQueueLoop ? '700' : '400';
+    }
+}
+
+function pointQueueHas(r, m){
+    return pointQueue.some(function(q){ return q.r === r && q.m === m; });
+}
+function togglePointInQueue(r, m, sector){
+    const i = pointQueue.findIndex(function(q){ return q.r === r && q.m === m; });
+    if (i >= 0) pointQueue.splice(i, 1);
+    else pointQueue.push({ r:r, m:m, sector:sector || 0 });
+    syncPointQueueUI();
+    // Redraw the card in place so the count updates without closing the modal.
+    if (typeof openPointModal === 'function') {
+        const full = (state.ringPoints && state.ringPoints.find)
+            ? state.ringPoints.find(function(q){ return q.r === r && q.m === m; }) : null;
+        try { openPointModal(full || { r:r, m:m, sector:sector||0, isPrime:false }); } catch(e){}
+    }
+}
+function clearPointQueue(){
+    stopPointQueue();
+    pointQueue = [];
+    if (pointQueueLoop) togglePointQueueLoop();   // reset the toggle's look too
+    syncPointQueueUI();
+    const modal = document.getElementById('pointModal');
+    if (modal && modal.classList.contains('active')) closePointModal();
+}
+function stopPointQueue(){
+    if (pointQueueTimer) { clearTimeout(pointQueueTimer); pointQueueTimer = null; }
+}
+function playPointQueue(dir){
+    if (!pointQueue.length) {
+        if (typeof showPlaybackStatus === 'function') showPlaybackStatus('Queue is empty - open a point and press + Add');
+        return;
+    }
+    stopPointQueue();
+    if (typeof initAudioContext === 'function') { try { initAudioContext(); } catch(e){} }
+    const order = (dir === 'backward') ? pointQueue.slice().reverse() : pointQueue.slice();
+    // playbackSpeed is tuned for dense sector sweeps (25ms); that is too fast to
+    // hear individual queued points, so floor it.
+    const raw = +(document.getElementById('playbackSpeed')?.value || 400);
+    const speed = Math.max(260, raw);
+    let i = 0, lap = 0;
+    (function step(){
+        if (i >= order.length) {
+            if (pointQueueLoop) {
+                // Same direction each lap; press stop (or toggle Loop off) to end.
+                lap++;
+                i = 0;
+                if (typeof showPlaybackStatus === 'function') showPlaybackStatus('Queue loop ' + (lap + 1) + ' (' + order.length + ' points, ' + dir + ')');
+            } else {
+                pointQueueTimer = null;
+                if (typeof showPlaybackStatus === 'function') showPlaybackStatus('Queue complete (' + order.length + ' points, ' + dir + ')');
+                return;
+            }
+        }
+        const pt = order[i];
+        if (typeof highlightedRingPoint !== 'undefined') highlightedRingPoint = { r:pt.r, m:pt.m };
+        if (typeof syncReopenPointBtn === 'function') { try { syncReopenPointBtn(); } catch(e){} }
+        if (typeof drawMainRing === 'function') { try { drawMainRing(); } catch(e){} }
+        if (typeof playFraction === 'function') { try { playFraction(pt.r, pt.m, 0.5); } catch(e){} }
+        if (typeof showPlaybackStatus === 'function') showPlaybackStatus('Queue ' + (i+1) + '/' + order.length + ' - ' + pt.r + '/' + pt.m);
+        i++;
+        pointQueueTimer = setTimeout(step, speed);
+    })();
+}
+function syncPointQueueUI(){
+    const wrap = document.getElementById('pointQueueBar');
+    const cnt  = document.getElementById('pointQueueCount');
+    if (!wrap) return;
+    if (pointQueue.length) {
+        wrap.style.display = '';
+        if (cnt) cnt.textContent = 'Queue ' + pointQueue.length;
+    } else {
+        wrap.style.display = 'none';
+    }
+}
+
+// Wipe what a stopped sweep leaves on screen. stopAllPlayback deliberately
+// keeps the ring's corner readouts showing the last played fraction so it can
+// still be exported; that is useful at the END of a sweep but is just clutter
+// when you stop halfway. This clears those, the two chart fraction readouts,
+// and the highlighted point label. The ring trail is left alone -- it has its
+// own button -- and no computed data is touched.
+function clearPlaybackLabels() {
+    ['ringFractionDisplay','ringDecimalDisplay','ringHzDisplay','ringSectorDisplay',
+     'countChartFractionDisplay','errorChartFractionDisplay'].forEach(function(id){
+        const el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.style.display = 'none'; el.style.opacity = '1'; }
+    });
+    if (typeof clearBlinkHighlight === 'function') { try { clearBlinkHighlight(); } catch(e){} }
+    if (typeof clearAllPlaybackHighlights === 'function') { try { clearAllPlaybackHighlights(); } catch(e){} }
+    if (typeof ringFollowCurrent !== 'undefined') ringFollowCurrent = null;
+    if (typeof trackedPlaySetOverlay !== 'undefined') trackedPlaySetOverlay = null;
+    // Drop the point label drawn on the ring canvas. This also hides the
+    // "Details" reopen button, which is correct -- there is no selection left.
+    if (typeof highlightedRingPoint !== 'undefined') highlightedRingPoint = null;
+    if (typeof syncReopenPointBtn === 'function') { try { syncReopenPointBtn(); } catch(e){} }
+    if (typeof clearErrorScan === 'function') { try { clearErrorScan(); } catch(e){} }
+    if (typeof drawMainRing === 'function') { try { drawMainRing(); } catch(e){} }
+}
 
 function clearRingPlaybackTrail() {
     ringPlaybackTrail = [];
@@ -26137,25 +26417,15 @@ function findSpectralPeaks(spectrum, dataLen) {
     peaks.sort((a, b) => b.power - a.power);
     const topPeaks = peaks.slice(0, 8);
     
-    // Known zeta zeros (imaginary parts)
-    const zetaZeros = [14.135, 21.022, 25.011, 30.425, 32.935, 37.586, 40.919, 43.327];
-    
-    let html = '<table style="width:100%;"><tr><th style="text-align:left;">Rank</th><th>Freq</th><th>Period</th><th>Power</th><th>Near zeta zero?</th></tr>';
+    // NOTE: a 'near zeta zero?' column was removed here. It compared the peak
+    // PERIOD (in sector indices) against Im(rho), which are frequencies conjugate
+    // to log x -- dimensionally unrelated quantities. With +/-10% windows over 8
+    // zeros, plus a 2*pi-rescaled second test, the accept region covered ~76% of
+    // the plausible period range: pure white noise flagged >=1 'hit' in 100% of
+    // trials, averaging 5.6 of 8 peaks. It was a coincidence generator, not a test.
+    let html = '<table style="width:100%;"><tr><th style="text-align:left;">Rank</th><th>Freq</th><th>Period</th><th>Power</th></tr>';
     topPeaks.forEach((p, i) => {
-        // Check if period is near any zeta zero (within 10%)
-        let nearZeta = '-';
-        for (const z of zetaZeros) {
-            if (Math.abs(p.period - z) / z < 0.1) {
-                nearZeta = `~${z.toFixed(2)}`;
-                break;
-            }
-            if (Math.abs(p.period * 2 * Math.PI - z) / z < 0.1) {
-                nearZeta = `~${z.toFixed(2)} (2pi scaled)`;
-                break;
-            }
-        }
-        const highlight = nearZeta !== '-' ? 'color:#22c55e;' : '';
-        html += `<tr style="${highlight}"><td>${i+1}</td><td>${p.freq.toFixed(4)}</td><td>${p.period.toFixed(2)}</td><td>${p.power.toFixed(4)}</td><td>${nearZeta}</td></tr>`;
+        html += `<tr><td>${i+1}</td><td>${p.freq.toFixed(4)}</td><td>${p.period.toFixed(2)}</td><td>${p.power.toFixed(4)}</td></tr>`;
     });
     html += '</table>';
     document.getElementById('spectralPeaksTable').innerHTML = html;
