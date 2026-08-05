@@ -1938,6 +1938,7 @@ function openOpener(){
                     <button onclick="playWordArt('forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">▶ Loop</button>
                     <button onclick="playWordArt('backward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">◀ Loop</button>
                     <button onclick="stopWordArtPlayback()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">■ Stop</button>
+                    <button onclick="sendWordArtToQueue()" title="Copy every word art point into the point queue, in the order the letters were laid out. The queue has its own forward, backward and loop controls in the POINTS row." style="background:linear-gradient(135deg,#10b981,#047857);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:600;">&rarr; Queue</button>
                     <button onclick="clearWordArt()" style="background:#475569;border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">Clear</button>
                 </div>
                 <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -14503,6 +14504,37 @@ function drawPrimeResidueHighlight(ctx) {
     ctx.restore();
 }
 
+
+// Copy the word art layout into the point queue. Order is preserved, so
+// playing the queue forward traces the letters in the order they were drawn
+// and backward retraces them. Points already queued are skipped rather than
+// duplicated, so this can be called after adding more letters.
+function sendWordArtToQueue() {
+    if (typeof pointQueue === 'undefined') return;
+    if (!wordArtPoints.length) {
+        if (typeof showPlaybackStatus === 'function') showPlaybackStatus('No word art points - type text and press Generate first');
+        return;
+    }
+    let added = 0, skipped = 0;
+    wordArtPoints.forEach(function(wp){
+        if (pointQueueHas(wp.r, wp.m)) { skipped++; return; }
+        // Recover the sector from the ring point when it is available; the word
+        // art record only carries r, m and canvas coordinates.
+        let sector = 0;
+        if (state.ringPoints && state.ringPoints.find) {
+            const full = state.ringPoints.find(function(q){ return q.r === wp.r && q.m === wp.m; });
+            if (full) sector = full.sector || 0;
+        }
+        pointQueue.push({ r: wp.r, m: wp.m, sector: sector });
+        added++;
+    });
+    if (typeof syncPointQueueUI === 'function') syncPointQueueUI();
+    if (typeof showPlaybackStatus === 'function') {
+        showPlaybackStatus('Queued ' + added + ' word art point' + (added === 1 ? '' : 's')
+            + (skipped ? ' (' + skipped + ' already queued)' : '')
+            + ' - use the queue controls in the POINTS row');
+    }
+}
 
 function clearWordArt() {
     wordArtPoints = [];
