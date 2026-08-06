@@ -101,6 +101,30 @@
             gap: 6px;
             margin-left: auto;
         }
+        /* The header is a single flex row with gap:20px and no wrap control, so on
+           a narrow screen the four readouts each claimed their own line and the
+           sticky toolbar ate ~200px of vertical space. Keep it to one row: drop the
+           labels (1/2, 440.0 Hz and A4 read fine unlabelled), hide the wavelength
+           (it stays in the dropdown), and tighten every gap. */
+        @media (max-width: 900px) {
+            .harmonic-toolbar-header { padding: 4px 8px; gap: 6px; flex-wrap: nowrap; }
+            .harmonic-toolbar-toggle { padding: 3px 8px; font-size: 10px; gap: 4px; white-space: nowrap; }
+            .harmonic-quick-display { gap: 9px; margin-left: 6px; flex-wrap: nowrap; overflow: hidden; min-width: 0; }
+            .harmonic-quick-item { gap: 3px; font-size: 11px; white-space: nowrap; }
+            .harmonic-quick-item label { display: none; }
+            #quickWaveItem { display: none; }
+            .harmonic-quick-item .value,
+            .harmonic-quick-item .note { font-size: 12px; }
+            .harmonic-quick-btns { gap: 4px; }
+            .harmonic-quick-btn { padding: 3px 7px; font-size: 10px; }
+        }
+        @media (max-width: 520px) {
+            /* Drop the wordmark but keep the note icon and the chevron, so the
+               control still reads as an expandable menu. */
+            .harmonic-toolbar-label { display: none; }
+            #harmonicArrow { margin-left: 4px !important; }
+            #quickNoteItem { display: none; }
+        }
         .harmonic-quick-btn {
             padding: 5px 10px;
             font-size: 11px;
@@ -272,6 +296,14 @@
         .chart-box { background: #0f172a; border-radius: 6px; padding: 12px; border: 1px solid #334155; }
         .chart-box h4 { margin-top: 0; }
         canvas { max-width: 100%; }
+        /* Harmonic tab charts are fixed-size canvases in a 2-up grid; without
+           height:auto they keep their 400px attribute height while max-width
+           shrinks them, leaving dead space in each column. */
+        #tab-harmonic .chart-box canvas { width: 100%; height: auto; display: block; }
+        #tab-harmonic .grid-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+        #tab-harmonic .chart-box { padding: 10px; }
+        #tab-harmonic .chart-box h4 { margin: 0 0 6px 0; font-size: 13px; }
+        #tab-harmonic .color-legend { margin-top: 6px; font-size: 10px; }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
         thead { background: #334155; }
@@ -572,24 +604,6 @@ function openOpener(){
 }
 </script>
 
-<div class="nav-links">
-    <span class="nav-links-label">Projects:</span>
-    <a href="https://wessengetachew.github.io/Transform/" target="_blank">Transform</a>
-    <a href="https://wessengetachew.github.io/finite/" target="_blank">Finite</a>
-    <a href="https://wessengetachew.github.io/Primes/" target="_blank">Primes</a>
-    <a href="https://wessengetachew.github.io/Farey/" target="_blank">Farey</a>
-    <a href="https://wessengetachew.github.io/Composite/" target="_blank">Composite</a>
-    <a href="https://wessengetachew.github.io/Ethiopian/" target="_blank">Ethiopian</a>
-    <a href="https://wessengetachew.github.io/2pir/" target="_blank">2πr</a>
-    <a href="https://wessengetachew.github.io/1-2/" target="_blank">1-2</a>
-    <a href="https://wessengetachew.github.io/Rational-/" target="_blank">Rational</a>
-    <a href="https://wessengetachew.github.io/Infinitemoduli/" target="_blank">Infinite Moduli</a>
-    <a href="https://wessengetachew.github.io/Pythagorean-/" target="_blank">Pythagorean</a>
-    <a href="https://wessengetachew.github.io/Phase/" target="_blank">Phase</a>
-    <a href="https://wessengetachew.github.io/Gemini/" target="_blank">Gemini</a>
-    <a href="https://wessengetachew.github.io/Rebuild/" target="_blank">Rebuild</a>
-    <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
-</div>
 
 <!-- GLOBAL HARMONIC ANALYSIS PANEL - COMPLETE -->
 <!-- HARMONIC TOOLBAR - COLLAPSED BY DEFAULT -->
@@ -597,7 +611,7 @@ function openOpener(){
     <div class="harmonic-toolbar-header" onclick="toggleHarmonicDropdown()">
         <button class="harmonic-toolbar-toggle" id="harmonicToggle">
             <span class="icon">♪</span>
-            HARMONIC ANALYSIS
+            <span class="harmonic-toolbar-label">HARMONIC ANALYSIS</span>
             <span id="harmonicArrow" style="margin-left:8px;transition:transform 0.3s;">▼</span>
         </button>
         <div class="harmonic-quick-display">
@@ -609,11 +623,11 @@ function openOpener(){
                 <label>Freq:</label>
                 <span class="value" id="quickFreq">110 Hz</span>
             </div>
-            <div class="harmonic-quick-item">
+            <div class="harmonic-quick-item" id="quickWaveItem">
                 <label>λ:</label>
                 <span class="value" id="quickWave" style="color:#f59e0b;">3.12 m</span>
             </div>
-            <div class="harmonic-quick-item">
+            <div class="harmonic-quick-item" id="quickNoteItem">
                 <label>Note:</label>
                 <span class="note" id="quickNote">A2</span>
             </div>
@@ -792,7 +806,7 @@ function openOpener(){
     </div>
 </div>
 <div class="container">
-    <h1>Farey Sequence Interval Analysis - Exploration Platform</h1>
+    <h1>Farey Sequence Summatory Function</h1>
     <p class="subtitle">Computational exploration of coprime pair distributions using classical summatory totient estimates</p>
     
     <div class="formula-box">
@@ -858,10 +872,19 @@ function openOpener(){
             </div>
         </div>
         
+        <!-- Analysis & Display Options (collapsible, collapsed by default) -->
+        <div style="margin-top:8px;">
+            <div class="control-row" onclick="toggleAnalysisOptionsPanel()" style="cursor:pointer;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;user-select:none;">
+                <span id="analysisOptionsChevron" style="display:inline-block;color:#94a3b8;font-size:10px;margin-right:6px;transition:transform 0.15s;">&#9654;</span>
+                <label style="color:#94a3b8;font-size:11px;margin-right:8px;cursor:pointer;">Analysis &amp; Display</label>
+                <span id="analysisOptionsSummary" style="color:#f59e0b;font-size:11px;"></span>
+            </div>
+            <div id="analysisOptionsPanel" style="display:none;">
+
         <!-- Bounded P/C Analysis for Large N -->
         <div class="control-row" style="background:#1e1b4b;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #6366f1;">
             <label style="color:#a5b4fc;font-size:11px;font-weight:bold;margin-right:8px;">Large N P/C Analysis:</label>
-            <label style="font-size:11px;"><input type="checkbox" id="computeBoundedPC"> Compute bounded window for P/C ratios</label>
+            <label style="font-size:11px;"><input type="checkbox" id="computeBoundedPC" onchange="syncAnalysisOptionsSummary()"> Compute bounded window for P/C ratios</label>
             <label style="margin-left:12px;font-size:11px;">Window N:</label>
             <input type="number" id="boundedWindowN" value="2000" min="100" max="5000" style="width:70px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
             <span style="color:#64748b;font-size:10px;margin-left:8px;">(exact data computed up to this N for P/C ratios)</span>
@@ -871,14 +894,14 @@ function openOpener(){
         <!-- Exact Category Counts (fast r-block algorithm) for Formula Mode -->
         <div class="control-row" style="background:#0f2418;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #16a34a;">
             <label style="color:#86efac;font-size:11px;font-weight:bold;margin-right:8px;">Exact Categories (Formula Mode):</label>
-            <label style="font-size:11px;"><input type="checkbox" id="computeExactCategories" checked> Compute exact P(m)/C(m)/PP/PC/CP/CC for every sector</label>
+            <label style="font-size:11px;"><input type="checkbox" id="computeExactCategories" checked onchange="syncAnalysisOptionsSummary()"> Compute exact P(m)/C(m)/PP/PC/CP/CC for every sector</label>
             <span style="color:#64748b;font-size:10px;margin-left:8px;" title="Groups by r; each r contributes a block of phi(r) coprime m's, with primes counted via a cumulative pi(x) array. O(N log S) total, not O(N^2) -- exact, not a bounded estimate.">(fast r-block method -- exact, no brute force, O(N log S))</span>
         </div>
         
         <!-- Global Display Format Controls -->
         <div class="control-row" style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:10px 15px;border-radius:6px;margin-top:10px;">
             <label style="color:#a5b4fc;font-weight:600;">Global Display:</label>
-            <select id="globalDisplayFormat" onchange="updateGlobalDisplayFormat()" style="padding:5px 10px;background:#0f172a;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+            <select id="globalDisplayFormat" onchange="updateGlobalDisplayFormat();syncAnalysisOptionsSummary()" style="padding:5px 10px;background:#0f172a;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
                 <option value="fraction">Fraction (r/m)</option>
                 <option value="decimal">Decimal</option>
                 <option value="degree">Degrees (0-360°)</option>
@@ -886,7 +909,7 @@ function openOpener(){
                 <option value="pi">π-fraction (×π)</option>
             </select>
             <label style="color:#a5b4fc;margin-left:15px;">Precision:</label>
-            <select id="globalPrecision" onchange="updateGlobalDisplayFormat()" style="padding:5px 10px;background:#0f172a;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+            <select id="globalPrecision" onchange="updateGlobalDisplayFormat();syncAnalysisOptionsSummary()" style="padding:5px 10px;background:#0f172a;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
                 <option value="2">2 decimals</option>
                 <option value="4" selected>4 decimals</option>
                 <option value="6">6 decimals</option>
@@ -896,7 +919,10 @@ function openOpener(){
             </select>
             <span id="globalFormatPreview" style="color:#22c55e;margin-left:15px;font-family:monospace;">1/2 = 0.5000</span>
         </div>
-        
+
+            </div>
+        </div>
+
         <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
         <div id="statusArea"></div>
     </div>
@@ -1536,8 +1562,8 @@ function openOpener(){
                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
                     <div style="background:rgba(15,23,42,0.9);padding:6px 12px;border-radius:6px;border:1px solid #334155;">
                         <label style="font-size:12px;color:#94a3b8;cursor:pointer;">
-                            <input type="checkbox" id="showCornerLegend" checked onchange="toggleCornerLegend()" style="margin-right:6px;">
-                            Show Corner Labels
+                            <input type="checkbox" id="showCornerLegend" checked onchange="toggleCornerLegend()" style="margin-right:6px;" title="Show the four readouts (fraction, decimal, Hz, sector) in the corners of the canvas on screen. Separate from the export option of the same name.">
+                            Corner readouts on screen
                         </label>
                     </div>
                     <div style="background:rgba(139,92,246,0.9);padding:6px 12px;border-radius:6px;border:1px solid #8b5cf6;display:flex;align-items:center;gap:8px;">
@@ -1622,10 +1648,10 @@ function openOpener(){
                 </div>
                 <button style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;" onclick="playSectorSequence('forward')">▶ Play Sector</button>
                 <button class="secondary" onclick="stopAllPlayback()" style="padding:6px 12px;">■ Stop</button>
-                <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)" style="padding:6px 12px;">View Details</button>
+                <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)" title="Open the detail panel for the sector currently chosen in the Sector dropdown below: its interval, exact and predicted counts, and the fractions it contains." style="padding:6px 12px;">Sector Details</button>
                 <button class="secondary" onclick="exportRingHiRes()" style="padding:6px 12px;">Export Ring</button>
-                <label style="font-size:10px;color:#94a3b8;" title="Export the whole ring instead of just the zoomed view"><input type="checkbox" id="exportFullRing"> Full ring</label>
-                <label style="font-size:10px;color:#94a3b8;" title="Burn the four corner readouts into the exported image"><input type="checkbox" id="exportWithLabels" checked> Corner labels</label>
+                <label style="font-size:10px;color:#94a3b8;" title="Export the entire ring, ignoring the current zoom and pan. Unchecked exports only the part of the ring you can currently see."><input type="checkbox" id="exportFullRing"> Full ring</label>
+                <label style="font-size:10px;color:#94a3b8;" title="Frame the export with a title, the formula, stat cards and a footer legend. Unchecked exports the bare plot."><input type="checkbox" id="exportWithPoster" checked onchange="syncPosterOption()"> Poster frame</label>
             </div>
             
             <!-- Sector Selector (moved here from Ring Display Controls) -->
@@ -2307,7 +2333,7 @@ function openOpener(){
             <p style="margin:0;font-size:0.9em;color:#c4b5fd;"><strong>📸 Screenshot Legend Information</strong></p>
             <p style="margin:8px 0 0 0;font-size:0.85em;color:#e9d5ff;">
                 The screenshot includes a comprehensive legend showing all visualization elements, statistics, and the <strong>Bisection Identity (Theorem 1)</strong> verification box. 
-                <span style="color:#fbbf24;">WARNING Note:</span> The bisection identity will show <span style="color:#ef4444;">FAIL</span> (fail) when the boundary slider is enabled (< 1), as it requires <strong>all sectors included</strong> (boundary = 1) to hold. Set boundary to 1 for <span style="color:#22c55e;">PASS</span> verification.
+                <span style="color:#fbbf24;">Note:</span> The bisection identity requires <strong>all sectors included</strong>, i.e. Sector Bound constant = 1. That is the default, so this verifies <span style="color:#22c55e;">PASS</span> on load. Narrowing the bound (&lt; 1) truncates the right hand side and the check will report <span style="color:#ef4444;">FAIL</span>.
             </p>
         </div>
         
@@ -3896,7 +3922,7 @@ function openOpener(){
             <div class="derivation-box" style="margin-top:15px;">
                 <strong style="color:#8b5cf6;">Meissel-Lehmer Algorithm</strong><br><br>
                 The classic prime counting function pi(x) counts primes up to x. While naive sieving takes O(x) time and space, 
-                the Meissel-Lehmer algorithm achieves O(x^(2/3)) time complexity using the identity:<br><br>
+                the Meissel–Lehmer method is sublinear, and the Lagarias–Miller–Odlyzko refinement (1985) achieves O(x^(2/3+ε)) time. Both rest on the identity:<br><br>
                 <div style="text-align:center;font-family:monospace;color:#22c55e;font-size:1.1em;margin:10px 0;">
                     pi(x) = phi(x, a) + a - 1 - P2(x,a) - P3(x,a) - ...
                 </div>
@@ -4089,7 +4115,7 @@ function openOpener(){
             
             <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
                 <strong style="color:#c4b5fd;">Cauchy, Augustin-Louis (1816)</strong>
-                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">First rigorous proof of the Farey sequence mediant property, establishing that between any two adjacent Farey fractions a/b and c/d, we have |ad - bc| = 1.</p>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">First rigorous proof of the Farey sequence <strong>unimodularity</strong> (neighbour) property, establishing that between any two adjacent Farey fractions a/b and c/d we have |ad &minus; bc| = 1. Distinct from the <em>mediant</em> property, which concerns (a+c)/(b+d).</p>
             </div>
             
             <h3 style="color:#22c55e; border-bottom:2px solid #22c55e; padding-bottom:8px; margin-top:25px;">Connections to the Riemann Hypothesis</h3>
@@ -4147,8 +4173,11 @@ function openOpener(){
                 <p style="margin:12px 0 0 0; font-size:0.95em; color:#e2e8f0;"><strong>Exploratory work and visualizations:</strong></p>
                 <ul style="margin:10px 0 0 15px; font-size:0.9em; color:#c7d2fe;">
                     <li><strong>Interval-Based Analysis:</strong> Application of classical summatory function results C(n,N) ~ (3/π²)N²/(n(n+1)) to Farey sequence intervals, building on Mertens' totient summation.</li>
-                    <li><strong>Boundary Transition Point:</strong> Observation of n* ≈ (√3/π)N ≈ 0.5513N as transition between analytic approximation and discrete counting regimes.</li>
-                    <li><strong>Prime/Composite Categorization:</strong> Four-way decomposition (PP, PC, CP, CC) with computational analysis of distributions across intervals.</li>
+                    <li><strong>Boundary Transition Point:</strong> Observation of n* ≈ (√3/π)N ≈ 0.5513N as the point where the predicted count per sector falls below one fraction. This is a resolution limit, not an accuracy boundary: relative error of the asymptotic is O(n²/N) and grows well before n*.</li>
+                    <li><strong>Involution Symmetry:</strong> The map &iota;(r/m) = (m&minus;r)/m as a self-inverse pairing on Farey fractions fixing only 1/2, and the sector correspondence it induces.</li>
+                        <li><strong>Bisection Identity:</strong> |S&#8321;| = |S&#8322;| + |S&#8323;| + &hellip; &mdash; the first sector contains exactly as many coprime fractions as all remaining sectors combined. An exact integer identity at every N, following from the involution.</li>
+                        <li><strong>Exhaustion Structure:</strong> For n &gt; N/2 every sector contains exactly one fraction, 1/n, since any numerator a &ge; 2 requires denominator b &ge; 2n &gt; N.</li>
+                        <li><strong>Prime/Composite Categorization:</strong> Four-way decomposition (PP, PC, CP, CC) with computational analysis of distributions across intervals.</li>
                     <li><strong>Interactive Visualization Framework:</strong> Comprehensive tools for exploring interval structure, including ring visualization, tree paths, and harmonic sonification.</li>
                     <li><strong>Computational Verification:</strong> Direct enumeration and comparison with classical asymptotic predictions across multiple interval ranges.</li>
                 </ul>
@@ -4435,137 +4464,6 @@ function openOpener(){
         </div>
     </div>
     
-    <!-- TOOLS OVERVIEW TAB -->
-    <div id="tab-toolsoverview" class="tab-content">
-        <div class="panel">
-            <h2 style="color:#6366f1;text-align:center;margin-bottom:2px;">Other Projects by This Author</h2>
-            <p style="text-align:center;color:#f472b6;font-size:0.8em;margin-bottom:6px;">External sibling tools — not part of this submission's scope</p>
-            <p style="text-align:center;color:#94a3b8;margin-bottom:25px;">Explore the complete suite of number theory visualization tools by @7dview</p>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;">
-                
-                <!-- Primes Tool -->
-                <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:20px;border-radius:12px;border:2px solid #8b5cf6;">
-                    <h3 style="color:#c7d2fe;margin:0 0 10px 0;">Interactive Modular Lifting Rings</h3>
-                    <a href="https://wessengetachew.github.io/Primes/" target="_blank" style="color:#22c55e;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/Primes →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Enhanced Riemann Hypothesis verification with cosmic-scale testing, prime sieves, L-function analysis, and conjecture testing. Features modular rings, gap analysis, and zeta zero connections.</p>
-                    <div style="background:rgba(139,92,246,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#a78bfa;font-size:0.85em;">Features:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Prime sieve with equidistribution testing</li>
-                            <li>Dirichlet character support visualization</li>
-                            <li>Phase coherence analysis (zeta zeros)</li>
-                            <li>Hardy-Littlewood conjecture verification</li>
-                            <li>Multiple color schemes & animations</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Ethiopian Tool -->
-                <div style="background:linear-gradient(135deg,#064e3b,#065f46);padding:20px;border-radius:12px;border:2px solid #22c55e;">
-                    <h3 style="color:#d1fae5;margin:0 0 10px 0;">Prime & Composite Channels</h3>
-                    <a href="https://wessengetachew.github.io/Ethiopian/" target="_blank" style="color:#fbbf24;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/Ethiopian →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Geometric visualization of prime channel avoidance and composite projection. Demonstrates how prime moduli avoid Farey reduction channels while composites project onto them.</p>
-                    <div style="background:rgba(34,197,94,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#6ee7b7;font-size:0.85em;">Key Insights:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Prime channel avoidance visualization</li>
-                            <li>Composite channel projection with multiplicity</li>
-                            <li>Farey flow lines & reduction patterns</li>
-                            <li>40+ visualization tabs</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Composite Tool -->
-                <div style="background:linear-gradient(135deg,#78350f,#92400e);padding:20px;border-radius:12px;border:2px solid #f59e0b;">
-                    <h3 style="color:#fef3c7;margin:0 0 10px 0;">Modular Reduction Projection</h3>
-                    <a href="https://wessengetachew.github.io/Composite/" target="_blank" style="color:#22c55e;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/Composite →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Interactive visualization of number-theoretic structures in ℤ/Mℤ. Shows coprime residues, reduction channels, and divisor lattices for composite moduli.</p>
-                    <div style="background:rgba(245,158,11,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#fcd34d;font-size:0.85em;">Highlights:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Farey channel projection analysis</li>
-                            <li>Coprime vs non-coprime visualization</li>
-                            <li>Divisor lattice structure</li>
-                            <li>Custom moduli sequences</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Farey Tool -->
-                <div style="background:linear-gradient(135deg,#1e40af,#1e3a8a);padding:20px;border-radius:12px;border:2px solid #3b82f6;">
-                    <h3 style="color:#dbeafe;margin:0 0 10px 0;">GCD Channels & Farey Sequences</h3>
-                    <a href="https://wessengetachew.github.io/Farey/" target="_blank" style="color:#22c55e;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/Farey →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Comprehensive Farey sequence explorer with GCD analysis, primitive roots, quadratic residues, and modular arithmetic visualizations across 20+ tabs.</p>
-                    <div style="background:rgba(59,130,246,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#93c5fd;font-size:0.85em;">Topics:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Visualization, Theory, Composite, Quadratic modes</li>
-                            <li>Primitive roots & Dirichlet characters</li>
-                            <li>Zero divisors & idempotents</li>
-                            <li>Multiplication tables & CRT</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- GCD Tool -->
-                <div style="background:linear-gradient(135deg,#701a75,#86198f);padding:20px;border-radius:12px;border:2px solid #a855f7;">
-                    <h3 style="color:#f3e8ff;margin:0 0 10px 0;">Farey Triangle & Cayley Transform</h3>
-                    <a href="https://wessengetachew.github.io/GCD/" target="_blank" style="color:#22c55e;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/GCD →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Hyperbolic geometry meets number theory. Farey fractions on unit circle with Cayley transforms, Möbius transformations, Smith charts, and prime distribution analysis.</p>
-                    <div style="background:rgba(168,85,247,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#d8b4fe;font-size:0.85em;">Advanced Topics:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Poincaré disk model</li>
-                            <li>PSL(2,ℤ) modular group</li>
-                            <li>Ford circles & geodesics</li>
-                            <li>Prime distribution mod m</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Transform Tool -->
-                <div style="background:linear-gradient(135deg,#831843,#9f1239);padding:20px;border-radius:12px;border:2px solid #f43f5e;">
-                    <h3 style="color:#fecdd3;margin:0 0 10px 0;">Enhanced Modular Rings & Music</h3>
-                    <a href="https://wessengetachew.github.io/Transform/" target="_blank" style="color:#22c55e;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/Transform →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Integrates music theory with number theory. Audio playback, consonance analysis, Stern-Brocot tree with musical intervals, and harmonic color modes.</p>
-                    <div style="background:rgba(244,63,94,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#fda4af;font-size:0.85em;">Musical Features:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Click fractions to play musical intervals</li>
-                            <li>Consonance/dissonance coloring</li>
-                            <li>Chord building mode</li>
-                            <li>Harmonic analysis & cents deviation</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Infinitemoduli Tool -->
-                <div style="background:linear-gradient(135deg,#0c4a6e,#075985);padding:20px;border-radius:12px;border:2px solid #0ea5e9;">
-                    <h3 style="color:#e0f2fe;margin:0 0 10px 0;">Modular Arithmetic Multi-Canvas</h3>
-                    <a href="https://wessengetachew.github.io/Infinitemoduli/" target="_blank" style="color:#22c55e;font-size:0.9em;text-decoration:none;">wessengetachew.github.io/Infinitemoduli →</a>
-                    <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">12-canvas visualization suite for modular arithmetic. Connection modes, dyadic cardioids, distance tools, and comprehensive number theory analysis.</p>
-                    <div style="background:rgba(14,165,233,0.1);padding:10px;border-radius:6px;margin-top:12px;">
-                        <strong style="color:#7dd3fc;font-size:0.85em;">Connection Modes:</strong>
-                        <ul style="color:#cbd5e1;font-size:0.85em;margin:8px 0 0 20px;line-height:1.6;">
-                            <li>Dyadic powers (cardioid patterns)</li>
-                            <li>Same residue connections</li>
-                            <li>Arc vs straight line modes</li>
-                            <li>Distance measurement (3 metrics)</li>
-                        </ul>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <div style="margin-top:30px;padding:20px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;text-align:center;border:2px solid #6366f1;">
-                <h3 style="color:#c7d2fe;margin:0 0 15px 0;">🌐 All Tools & Source Code</h3>
-                <p style="color:#94a3b8;margin-bottom:15px;">GitHub Repository: <a href="https://github.com/wessengetachew" target="_blank" style="color:#22c55e;text-decoration:none;font-weight:bold;">github.com/wessengetachew</a></p>
-                <p style="color:#94a3b8;margin:0;">Twitter: <a href="https://twitter.com/7dview" target="_blank" style="color:#22c55e;text-decoration:none;font-weight:bold;">@7dview</a></p>
-            </div>
-        </div>
-    </div>
 
 <div class="screenshot-overlay" id="screenshotOverlay">
     <h3 style="color:#f1f5f9; margin-bottom:20px;">Screenshot Preview (with Legend)</h3>
@@ -7168,6 +7066,38 @@ function toggleSectorBoundPanel() {
     const isOpen = panel.style.display !== 'none';
     panel.style.display = isOpen ? 'none' : 'flex';
     if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
+// Expand/collapse the Analysis & Display options. Collapsed on load: these are
+// set-once options, and leaving them open pushed the tab bar off screen on
+// mobile. The collapsed header carries a summary so the current state is
+// visible without expanding.
+function toggleAnalysisOptionsPanel() {
+    const panel = document.getElementById('analysisOptionsPanel');
+    const chevron = document.getElementById('analysisOptionsChevron');
+    if (!panel) return;
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+    if (isOpen) syncAnalysisOptionsSummary();   // refresh the header as it closes
+}
+
+function syncAnalysisOptionsSummary() {
+    const el = document.getElementById('analysisOptionsSummary');
+    if (!el) return;
+    const bpc  = document.getElementById('computeBoundedPC');
+    const cec  = document.getElementById('computeExactCategories');
+    const fmt  = document.getElementById('globalDisplayFormat');
+    const prec = document.getElementById('globalPrecision');
+    const bits = [];
+    if (bpc && bpc.checked) {
+        const w = document.getElementById('boundedWindowN');
+        bits.push('bounded P/C to N=' + (w ? w.value : '?'));
+    }
+    bits.push('exact categories ' + (cec && cec.checked ? 'on' : 'off'));
+    if (fmt) bits.push(fmt.options[fmt.selectedIndex].text.toLowerCase());
+    if (prec) bits.push(prec.value + ' dp');
+    el.textContent = bits.join(' \u00b7 ');
 }
 
 // Expand/collapse the Ring Display Controls panel (Sector/Color/Size/Spacing/Canvas)
@@ -11326,6 +11256,7 @@ function stopSonify(mode){
         } else if (typeof resetRingZoom === 'function') {
             try { resetRingZoom(); } catch(e){}
         }
+        if (typeof restoreAllSectorsView === 'function') { try { restoreAllSectorsView(); } catch(e){} }
         if (typeof drawMainRing === 'function') { try { drawMainRing(); } catch(e){} }
     }
 }
@@ -13529,12 +13460,212 @@ function drawCornerLabelsOnExport(ctx, w, h) {
     ctx.restore();
 }
 
+// Wrap the bare ring render in poster chrome: title, formula, stat cards and a
+// footer legend. The ring itself is untouched -- it is drawn into a taller
+// canvas with margins, so nothing about the plot geometry changes.
+function composeRingPoster(ring) {
+    const S = ring.width / 2048;              // scale everything off a 2048 baseline
+    const px = v => Math.round(v * S);
+    const M  = px(80);                        // side margin
+    const HEAD = px(300);                     // header block
+    const ROWS = 7;                           // sector rows drawn in the footer table
+    const FOOT = px(320 + (ROWS + 1) * 46);   // header + ROWS data rows + abbreviation key
+    const W = ring.width + M * 2;
+    const H = ring.height + HEAD + FOOT;
+
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+
+    x.fillStyle = '#0b1120'; x.fillRect(0, 0, W, H);
+
+    const mono = w => `${w} ${px(30)}px 'JetBrains Mono', ui-monospace, monospace`;
+    const nMin = state.nMin, nMax = state.nMax;
+    const pts  = (state.ringPoints || []);
+    const nCo  = pts.filter(p => p.gcdVal === 1 || (p.gcdVal === undefined && gcd(p.r, p.m) === 1)).length;
+    const pct  = pts.length ? (100 * nCo / pts.length).toFixed(2) : '0.00';
+    const nStar = Math.sqrt(3) * nMax / Math.PI;
+    const gcdLbl = { coprime:'gcd = 1', noncoprime:'gcd > 1', both:'gcd = 1 & gcd > 1' }[state.gcdMode] || 'all';
+    const cMode = document.getElementById('colorMode');
+    const cLbl  = cMode ? cMode.options[cMode.selectedIndex].text : 'default';
+
+    // ---- header ----
+    x.textAlign = 'center';
+    x.fillStyle = '#64748b'; x.font = `${px(20)}px 'JetBrains Mono', monospace`;
+    x.fillText('FAREY SEQUENCE SUMMATORY FUNCTION  \u00b7  WESSEN GETACHEW  \u00b7  PAGE 11', W/2, px(52));
+    x.textAlign = 'left';
+    x.fillStyle = '#e2e8f0'; x.font = mono('700').replace(px(30)+'px', px(74)+'px');
+    x.font = `700 ${px(74)}px 'JetBrains Mono', ui-monospace, monospace`;
+    x.fillText('Farey Sector Ring', M, px(140));
+    x.fillStyle = '#818cf8'; x.font = `${px(30)}px 'JetBrains Mono', ui-monospace, monospace`;
+    x.fillText('C(n, N) = 3N\u00b2 / (\u03c0\u00b2 n(n+1))     S_n = (1/(n+1), 1/n]', M, px(190));
+
+    // ---- stat cards ----
+    const cards = [
+        ['N',          nMin + '\u2013' + nMax,                     '#e2e8f0'],
+        ['Sectors',    state.sectorMin + '\u2013' + state.sectorMax, '#f59e0b'],
+        ['Points',     pts.length.toLocaleString(),                '#818cf8'],
+        ['gcd = 1',    nCo.toLocaleString() + '  (' + pct + '%)',  '#22c55e']
+    ];
+    const cw = (W - M*2 - px(30)*3) / 4, ch = px(76), cy = px(216);
+    cards.forEach((cd, i) => {
+        const cx = M + i * (cw + px(30));
+        x.fillStyle = '#0f172a'; x.fillRect(cx, cy, cw, ch);
+        x.strokeStyle = '#1f2d4d'; x.lineWidth = Math.max(1, px(2)); x.strokeRect(cx, cy, cw, ch);
+        x.textAlign = 'center';
+        x.fillStyle = cd[2]; x.font = `700 ${px(30)}px 'JetBrains Mono', monospace`;
+        x.fillText(cd[1], cx + cw/2, cy + px(38));
+        x.fillStyle = '#64748b'; x.font = `${px(18)}px 'JetBrains Mono', monospace`;
+        x.fillText(cd[0], cx + cw/2, cy + px(62));
+        x.textAlign = 'left';
+    });
+
+    // ---- the ring ----
+    x.drawImage(ring, M, HEAD);
+    x.strokeStyle = '#1f2d4d'; x.lineWidth = Math.max(1, px(2));
+    x.strokeRect(M, HEAD, ring.width, ring.height);
+
+    // ---- footer: sector data table ----
+    let ty = HEAD + ring.height + px(56);
+    const secs = (state.sectors || []).filter(v => v && v.n >= 1 && v.n <= ROWS)
+                                      .sort((a, b) => a.n - b.n);
+
+    // Same column set as the composite "Export All + 4K" table, plus P/C and P(r).
+    // colour: n / Err% / P(m) / C(m) / P/C / P(r) / PP / PC / CP / CC
+    const cols = [
+        ['n',        0.040, 'right', '#f59e0b'],
+        ['Interval', 0.135, 'left',  '#94a3b8'],
+        ['Exact',    0.090, 'right', '#e2e8f0'],
+        ['Pred',     0.095, 'right', '#94a3b8'],
+        ['Err%',     0.070, 'right', '#22c55e'],
+        ['P(m)',     0.075, 'right', '#f59e0b'],
+        ['C(m)',     0.080, 'right', '#60a5fa'],
+        ['P/C',      0.055, 'right', '#60a5fa'],
+        ['P(r)',     0.075, 'right', '#a5b4fc'],
+        ['PP',       0.070, 'right', '#22c55e'],
+        ['PC',       0.070, 'right', '#f59e0b'],
+        ['CP',       0.070, 'right', '#6366f1'],
+        ['CC',       0.075, 'right', '#94a3b8']
+    ];
+    const tw = W - M * 2;
+    const xs = []; let acc = M;
+    cols.forEach(c => { xs.push(acc); acc += c[1] * tw; });
+
+    x.fillStyle = '#94a3b8'; x.font = `700 ${px(24)}px 'JetBrains Mono', monospace`;
+    x.fillText('Sector Data', M, ty);
+    x.fillStyle = '#475569'; x.font = `${px(19)}px 'JetBrains Mono', monospace`;
+    x.fillText('Points: ' + gcdLbl + '   Colour: ' + cLbl +
+               '   Bound: ' + (state.sectorBoundConstant || 1).toFixed(4) +
+               '   n* = ' + nStar.toFixed(2), M + px(190), ty);
+    ty += px(30);
+
+    x.strokeStyle = '#1f2d4d'; x.lineWidth = Math.max(1, px(2));
+    x.beginPath(); x.moveTo(M, ty); x.lineTo(W - M, ty); x.stroke();
+    ty += px(32);
+    x.fillStyle = '#64748b'; x.font = `${px(21)}px 'JetBrains Mono', monospace`;
+    cols.forEach((c, i) => {
+        x.textAlign = c[2];
+        x.fillText(c[0], c[2] === 'right' ? xs[i] + c[1] * tw - px(12) : xs[i], ty);
+    });
+    x.textAlign = 'left';
+    ty += px(12);
+    x.beginPath(); x.moveTo(M, ty); x.lineTo(W - M, ty); x.stroke();
+
+    const fmt = v => (v == null ? '\u2014' : v.toLocaleString());
+    x.font = `${px(21)}px 'JetBrains Mono', monospace`;
+    for (let k = 0; k < ROWS; k++) {
+        const sec = secs[k];
+        ty += px(40);
+        if (k % 2 === 1) { x.fillStyle = 'rgba(30,45,77,0.35)'; x.fillRect(M, ty - px(29), tw, px(40)); }
+        const n = sec ? sec.n : (k + 1);
+        const comp = sec ? (sec.exactCompositeCount != null ? sec.exactCompositeCount
+                          : (sec.exact != null && sec.primeCount != null ? sec.exact - sec.primeCount : null)) : null;
+        const pr = sec && sec.ppCount != null && sec.pcCount != null ? sec.ppCount + sec.pcCount
+                 : (sec && sec.primeNumCount != null ? sec.primeNumCount : null);
+        const vals = [
+            String(n),
+            '(1/' + (n + 1) + ', 1/' + n + ']',
+            sec && sec.exact != null ? Math.round(sec.exact).toLocaleString() : '\u2014',
+            sec ? sec.predicted.toFixed(2) : '\u2014',
+            sec && sec.relError != null ? sec.relError.toFixed(2) + '%' : '\u2014',
+            fmt(sec ? sec.primeCount : null),
+            fmt(comp),
+            (sec && comp) ? ((sec.primeCount || 0) / comp).toFixed(2) : '\u2014',
+            fmt(pr),
+            fmt(sec ? sec.ppCount : null),
+            fmt(sec ? sec.pcCount : null),
+            fmt(sec ? sec.cpCount : null),
+            fmt(sec ? sec.ccCount : null)
+        ];
+        vals.forEach((v, i) => {
+            x.fillStyle = cols[i][3];
+            x.textAlign = cols[i][2];
+            x.fillText(v, cols[i][2] === 'right' ? xs[i] + cols[i][1] * tw - px(12) : xs[i], ty);
+        });
+        x.textAlign = 'left';
+    }
+
+    // ---- abbreviation key ----
+    ty += px(52);
+    x.strokeStyle = '#1f2d4d'; x.lineWidth = Math.max(1, px(2));
+    x.beginPath(); x.moveTo(M, ty - px(26)); x.lineTo(W - M, ty - px(26)); x.stroke();
+
+    x.fillStyle = '#94a3b8'; x.font = `700 ${px(21)}px 'JetBrains Mono', monospace`;
+    x.fillText('Key', M, ty);
+    ty += px(30);
+
+    // r = numerator, m = denominator throughout
+    const key = [
+        [['Exact', '#e2e8f0'], 'coprime pairs (r,m) counted directly, r/m in S_n'],
+        [['Pred',  '#94a3b8'], 'asymptotic C(n,N) = 3N\u00b2 / (\u03c0\u00b2 n(n+1))'],
+        [['Err%',  '#22c55e'], '100 \u00b7 (Exact \u2212 Pred) / Pred'],
+        [['P(m)',  '#f59e0b'], 'prime denominator count'],
+        [['C(m)',  '#60a5fa'], 'composite denominator count'],
+        [['P/C',   '#60a5fa'], 'ratio P(m) / C(m)'],
+        [['P(r)',  '#a5b4fc'], 'prime numerator count, = PP + PC'],
+        [['PP',    '#22c55e'], 'r prime, m prime'],
+        [['PC',    '#f59e0b'], 'r prime, m composite'],
+        [['CP',    '#6366f1'], 'r composite, m prime'],
+        [['CC',    '#94a3b8'], 'r composite, m composite']
+    ];
+
+    // three columns so the key stays two rows deep rather than eleven
+    const KCOLS = 3;
+    const kw = (W - M * 2) / KCOLS;
+    const perCol = Math.ceil(key.length / KCOLS);
+    key.forEach((entry, i) => {
+        const col = Math.floor(i / perCol), row = i % perCol;
+        const kx = M + col * kw, ky = ty + row * px(32);
+        x.font = `700 ${px(20)}px 'JetBrains Mono', monospace`;
+        x.fillStyle = entry[0][1];
+        x.fillText(entry[0][0], kx, ky);
+        x.font = `${px(20)}px 'JetBrains Mono', monospace`;
+        x.fillStyle = '#64748b';
+        x.fillText(entry[1], kx + px(90), ky);
+    });
+    ty += perCol * px(32) + px(16);
+
+    x.fillStyle = '#475569'; x.font = `${px(19)}px 'JetBrains Mono', monospace`;
+    x.fillText('r = numerator, m = denominator.  S_n = (1/(n+1), 1/n].  ' +
+               'Identities: PP+PC+CP+CC = Exact,  P(m)+C(m) = Exact,  P(r) = PP+PC', M, ty);
+    ty += px(30);
+    x.fillText(new Date().toISOString().slice(0, 10), M, ty);
+
+    return c;
+}
+
 function exportRingHiRes() {
     const src = document.getElementById('mainRing');
     if (!src) return;
     const full = document.getElementById('exportFullRing')?.checked || false;
-    const labels = document.getElementById('exportWithLabels')?.checked ?? true;
-    const out = renderRingViewToCanvas({ useZoom: !full, withLabels: labels }) || src;
+
+    // The exported canvas is always clean. Poster frame reports the selected
+    // fraction in its footer; without it you get the bare plot.
+    const poster = document.getElementById('exportWithPoster')?.checked !== false;
+    let out = renderRingViewToCanvas({ useZoom: !full, withLabels: false }) || src;
+    if (poster) {
+        try { out = composeRingPoster(out) || out; } catch(e){ console.warn('poster chrome failed, exporting bare ring', e); }
+    }
     
     const link = document.createElement('a');
     const tag = full ? 'full' : `view${(ringView.zoom || 1).toFixed(2)}x`;
@@ -19295,6 +19426,7 @@ setTimeout(addExportButtons, 500);
 // was hardcoded in the markup rather than N x the bound constant -- which is why
 // the numbers only became correct after clicking Compute.
 if (typeof updateSectorBound === 'function') { try { updateSectorBound(); } catch(e){} }
+if (typeof syncAnalysisOptionsSummary === 'function') { try { syncAnalysisOptionsSummary(); } catch(e){} }
 
 computeAll();
 
@@ -23357,6 +23489,7 @@ function stopAllPlayback() {
         });
     }
     if (typeof clearErrorScan === 'function') { try { clearErrorScan(); } catch(e){} }
+    if (typeof restoreAllSectorsView === 'function') { try { restoreAllSectorsView(); } catch(e){} }
     playbackState.isPlaying = false;
     if (window.sectorInspectorSetPlaying) window.sectorInspectorSetPlaying(null);
     if (playbackState.intervalId) {
@@ -24487,6 +24620,7 @@ function clearPointQueue(){
 }
 function stopPointQueue(){
     if (pointQueueTimer) { clearTimeout(pointQueueTimer); pointQueueTimer = null; }
+    if (typeof restoreAllSectorsView === 'function') { try { restoreAllSectorsView(); } catch(e){} }
 }
 function playPointQueue(dir){
     if (!pointQueue.length) {
@@ -24536,6 +24670,24 @@ function syncPointQueueUI(){
     }
 }
 
+// Drop any view restriction so the whole ring is visible again. Solo mode
+// hides every sector but one, which is useful while a sweep is running and
+// confusing once it has stopped -- the canvas looks empty or truncated with no
+// obvious cause. Called from every stop path.
+function restoreAllSectorsView() {
+    const solo = document.getElementById('viewSectorSoloMode');
+    if (solo && solo.checked) {
+        solo.checked = false;
+        if (typeof applyViewSectorSolo === 'function') { try { applyViewSectorSolo(); } catch(e){} }
+    }
+    const allBox = document.getElementById('showAllSectors');
+    if (allBox && !allBox.checked) {
+        allBox.checked = true;
+        if (typeof drawMainRing === 'function') { try { drawMainRing(); } catch(e){} }
+    }
+    if (typeof state !== 'undefined') state.highlightSectorOnly = null;
+}
+
 // Wipe what a stopped sweep leaves on screen. stopAllPlayback deliberately
 // keeps the ring's corner readouts showing the last played fraction so it can
 // still be exported; that is useful at the END of a sweep but is just clutter
@@ -24557,6 +24709,7 @@ function clearPlaybackLabels() {
     if (typeof highlightedRingPoint !== 'undefined') highlightedRingPoint = null;
     if (typeof syncReopenPointBtn === 'function') { try { syncReopenPointBtn(); } catch(e){} }
     if (typeof clearErrorScan === 'function') { try { clearErrorScan(); } catch(e){} }
+    if (typeof restoreAllSectorsView === 'function') { try { restoreAllSectorsView(); } catch(e){} }
     if (typeof drawMainRing === 'function') { try { drawMainRing(); } catch(e){} }
 }
 
