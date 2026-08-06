@@ -828,15 +828,15 @@ function openOpener(){
         <div class="control-row">
             <div class="control-group highlight">
                 <label>N:</label>
-                <input type="number" id="nMin" value="1" min="1" onchange="computeAll()"> to
-                <input type="number" id="nMax" value="500" min="2" onchange="computeAll()">
+                <input type="number" id="nMin" value="1" min="1" oninput="markComputeDirty()" onkeydown="if(event.key==='Enter')computeAll()"> to
+                <input type="number" id="nMax" value="500" min="2" oninput="markComputeDirty()" onkeydown="if(event.key==='Enter')computeAll()">
             </div>
             <div class="control-group highlight">
                 <label>Sectors:</label>
-                <input type="number" id="sectorMin" value="1" min="1" onchange="computeAll()"> to
-                <input type="number" id="sectorMax" value="500" min="1" onchange="computeAll()">
+                <input type="number" id="sectorMin" value="1" min="1" oninput="markComputeDirty()" onkeydown="if(event.key==='Enter')computeAll()"> to
+                <input type="number" id="sectorMax" value="500" min="1" oninput="markComputeDirty()" onkeydown="if(event.key==='Enter')computeAll()">
             </div>
-            <button onclick="computeAll()">Compute</button>
+            <button id="computeBtn" onclick="computeAll()" title="Apply the current N, Sector and Sector Bound settings. Changing those boxes no longer recomputes on its own, so you can adjust several before running once.">Compute</button>
             <button id="ringBuildPlayBtn" onclick="playMainRingBuildUp()" title="Animate drawing the ring from m=1 up to N" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:8px 14px;cursor:pointer;">▶ Play</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
             <button class="secondary" onclick="exportAllWithCharts()" title="Export CSV + 4K charts">Export All + 4K</button>
@@ -1560,20 +1560,6 @@ function openOpener(){
             <!-- Zoom Controls - moved above canvas to avoid blocking corner data -->
             <div style="display:flex;gap:12px;justify-content:space-between;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                    <div style="background:rgba(15,23,42,0.9);padding:6px 12px;border-radius:6px;border:1px solid #334155;">
-                        <label style="font-size:12px;color:#94a3b8;cursor:pointer;">
-                            <input type="checkbox" id="showCornerLegend" checked onchange="toggleCornerLegend()" style="margin-right:6px;" title="Show the four readouts (fraction, decimal, Hz, sector) in the corners of the canvas on screen. Separate from the export option of the same name.">
-                            Corner readouts on screen
-                        </label>
-                    </div>
-                    <div style="background:rgba(139,92,246,0.9);padding:6px 12px;border-radius:6px;border:1px solid #8b5cf6;display:flex;align-items:center;gap:8px;">
-                        <label style="font-size:12px;color:#fff;cursor:pointer;" title="Click a point to see its involution pairing animation">
-                            <input type="checkbox" id="enableInvolutionMode" style="margin-right:6px;">
-                            Involution Pairing
-                        </label>
-                        <button onclick="playInvolutionAnimation()" id="involutionPlayBtn" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">▶ Play</button>
-                        <button onclick="stopInvolutionAnimation()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
-                    </div>
                     <div style="background:rgba(217,119,6,0.9);padding:6px 12px;border-radius:6px;border:1px solid #d97706;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <button onclick="playErrorBySector('error')" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;" title="Play the relative-error sweep, following the ring">▶ Play All (Error)</button>
                         <button onclick="stopAllPlayback()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
@@ -7037,6 +7023,9 @@ function parseMathExpression(expr) {
 }
 
 function updateSectorBound() {
+    if (typeof markComputeDirty === 'function' && typeof state !== 'undefined' && state.sectors && state.sectors.length) {
+        try { markComputeDirty(); } catch(e){}
+    }
     const useBound = document.getElementById('useSectorBound').checked;
     if (useBound) {
         const N = +document.getElementById('nMax').value || 500;
@@ -7056,6 +7045,31 @@ function updateSectorBoundSummary() {
     const preset = document.getElementById('sectorBoundPreset');
     const presetLabel = preset ? preset.options[preset.selectedIndex]?.text || '' : '';
     summary.textContent = `${presetLabel} ${valueText} ${resultText}`.trim();
+}
+
+// The four range boxes used to carry onchange="computeAll()", so editing N fired
+// a full run immediately and adjusting anything else afterwards fired a second.
+// They now only flag the run as stale; Compute (or Enter in any box) applies it.
+var computeDirty = false;
+function markComputeDirty() {
+    computeDirty = true;
+    const b = document.getElementById('computeBtn');
+    if (b) {
+        b.textContent = 'Compute \u2022';
+        b.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+        b.style.boxShadow = '0 0 10px rgba(245,158,11,0.45)';
+        b.title = 'Settings changed since the last run \u2014 click to apply.';
+    }
+}
+function clearComputeDirty() {
+    computeDirty = false;
+    const b = document.getElementById('computeBtn');
+    if (b) {
+        b.textContent = 'Compute';
+        b.style.background = '';
+        b.style.boxShadow = '';
+        b.title = 'Apply the current N, Sector and Sector Bound settings.';
+    }
 }
 
 // Expand/collapse the Sector Bound Controls panel
@@ -7197,6 +7211,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function computeAll() {
+    if (typeof clearComputeDirty === 'function') { try { clearComputeDirty(); } catch(e){} }
     if(state.computing) return;
     state.computing = true;
     
@@ -13469,7 +13484,10 @@ function composeRingPoster(ring) {
     const M  = px(80);                        // side margin
     const HEAD = px(300);                     // header block
     const ROWS = 7;                           // sector rows drawn in the footer table
-    const FOOT = px(320 + (ROWS + 1) * 46);   // header + ROWS data rows + abbreviation key
+    // C(n) canvas filter and/or prime spiral engaged: reserve room for the
+    // live-value & survival-ratios panel (mirrors the on-screen C(n) block)
+    const cnActive = !!(state.cnCanvasOn || state.liftSpiralOn);
+    const FOOT = px(320 + (ROWS + 1) * 46 + (cnActive ? 170 : 0));   // header + ROWS data rows + abbreviation key
     const W = ring.width + M * 2;
     const H = ring.height + HEAD + FOOT;
 
@@ -13501,11 +13519,21 @@ function composeRingPoster(ring) {
     x.fillText('C(n, N) = 3N\u00b2 / (\u03c0\u00b2 n(n+1))     S_n = (1/(n+1), 1/n]', M, px(190));
 
     // ---- stat cards ----
+    // Total ordered pairs (r,m) with 1 <= r <= m and nMin <= m <= nMax: the sum
+    // of the integers in that range, i.e. a difference of triangular numbers.
+    // That is the right denominator -- against it the coprime share converges to
+    // 6/pi^2. Reporting gcd=1 over the plotted points instead just returns 100%
+    // whenever the gcd=1 filter is active.
+    const totalPairs = (nMax * (nMax + 1) - (nMin - 1) * nMin) / 2;
+    const coPct = totalPairs ? (100 * nCo / totalPairs) : 0;
+    const targetPct = 600 / (Math.PI * Math.PI);   // 6/pi^2 as a percentage
+
     const cards = [
-        ['N',          nMin + '\u2013' + nMax,                     '#e2e8f0'],
-        ['Sectors',    state.sectorMin + '\u2013' + state.sectorMax, '#f59e0b'],
-        ['Points',     pts.length.toLocaleString(),                '#818cf8'],
-        ['gcd = 1',    nCo.toLocaleString() + '  (' + pct + '%)',  '#22c55e']
+        ['N',                    nMin + '\u2013' + nMax,                       '#e2e8f0'],
+        ['Sectors',              state.sectorMin + '\u2013' + state.sectorMax, '#f59e0b'],
+        ['pairs r \u2264 m \u2264 N',   totalPairs.toLocaleString(),                   '#818cf8'],
+        ['gcd = 1  \u2192 6/\u03c0\u00b2 = ' + targetPct.toFixed(2) + '%',
+                                 nCo.toLocaleString() + '  (' + coPct.toFixed(2) + '%)', '#22c55e']
     ];
     const cw = (W - M*2 - px(30)*3) / 4, ch = px(76), cy = px(216);
     cards.forEach((cd, i) => {
@@ -13556,8 +13584,50 @@ function composeRingPoster(ring) {
     x.fillStyle = '#475569'; x.font = `${px(19)}px 'JetBrains Mono', monospace`;
     x.fillText('Points: ' + gcdLbl + '   Colour: ' + cLbl +
                '   Bound: ' + (state.sectorBoundConstant || 1).toFixed(4) +
-               '   n* = ' + nStar.toFixed(2), M + px(190), ty);
+               '   n* = ' + nStar.toFixed(2) +
+               '   Plotted: ' + pts.length.toLocaleString(), M + px(190), ty);
     ty += px(30);
+
+    // C(n) canvas filter / prime spiral — live value & survival ratios,
+    // mirrored from the on-screen C(n) panel (population / lift / lift-over-gcd)
+    if (cnActive) {
+        const getTxt = id => document.getElementById(id)?.textContent || '\u2014';
+        const cnN = document.getElementById('cnDepthN')?.value || '0';
+        const panelH = px(150);
+        const panelY = ty;
+        x.fillStyle = '#0f172a'; x.fillRect(M, panelY, W - M * 2, panelH);
+        x.strokeStyle = '#c8a84a'; x.lineWidth = Math.max(1, px(2));
+        x.strokeRect(M, panelY, W - M * 2, panelH);
+
+        let cnTitle = 'C(n) \u2014 Live Value & Survival Ratios';
+        if (state.cnCanvasOn) cnTitle += '   \u00b7   filter depth n=' + cnN + (state.cnCanvasInclNC ? ' (incl. gcd>1)' : '');
+        if (state.liftSpiralOn) cnTitle += '   \u00b7   spiral p=' + state.liftSpiralP + (state.liftSpiralLock ? ' (locked to n)' : '');
+        x.textAlign = 'left';
+        x.fillStyle = '#c8a84a'; x.font = `700 ${px(21)}px 'JetBrains Mono', monospace`;
+        x.fillText(cnTitle, M + px(15), panelY + px(26));
+
+        x.fillStyle = '#94a3b8'; x.font = `${px(18)}px 'JetBrains Mono', monospace`;
+        x.fillText('C(' + cnN + ') = \u03b6(2)\u00b7\u03a0p(1 \u2212 min(n+1,p)/p\u00b2) = ' + getTxt('cnLiveValue') +
+                   '     D(' + cnN + ') = C(n)/\u03b6(2) = ' + getTxt('cnLiveD'), M + px(15), panelY + px(50));
+
+        const cnCols = [
+            ['gcd(r,m)=1 \u2014 population', getTxt('cnPopLine'), getTxt('cnPopNote'), '#4a90d9'],
+            [getTxt('cnLiftTitle'), getTxt('cnLiftLine'), getTxt('cnLiftNote'), '#4ecdc4'],
+            ['lift / gcd', getTxt('cnCondLine'), getTxt('cnCondNote'), '#c8a84a']
+        ];
+        const cnColW = (W - M * 2 - px(30)) / 3;
+        cnCols.forEach((cCol, i) => {
+            const cx = M + px(15) + i * cnColW;
+            x.fillStyle = '#94a3b8'; x.font = `${px(15)}px 'JetBrains Mono', monospace`;
+            x.fillText(cCol[0], cx, panelY + px(86));
+            x.fillStyle = cCol[3]; x.font = `700 ${px(20)}px 'JetBrains Mono', monospace`;
+            x.fillText(cCol[1], cx, panelY + px(112));
+            x.fillStyle = '#64748b'; x.font = `${px(15)}px 'JetBrains Mono', monospace`;
+            x.fillText(cCol[2], cx, panelY + px(132));
+        });
+
+        ty = panelY + panelH + px(20);
+    }
 
     x.strokeStyle = '#1f2d4d'; x.lineWidth = Math.max(1, px(2));
     x.beginPath(); x.moveTo(M, ty); x.lineTo(W - M, ty); x.stroke();
