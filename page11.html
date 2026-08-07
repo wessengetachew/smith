@@ -325,7 +325,6 @@
         
         .theorem-box { background: #1e1b4b; border-left: 3px solid #6366f1; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
         .derivation-box { background: #422006; border-left: 3px solid #f59e0b; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
-        .rh-box { background: #450a0a; border-left: 3px solid #ef4444; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
         .connection-box { background: #14532d; border-left: 3px solid #22c55e; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
         
         .ring-canvas { background: #0f172a; border-radius: 6px; border: 1px solid #334155; cursor: crosshair; }
@@ -962,8 +961,7 @@ function openOpener(){
         <span class="subtab" onclick="switchSubTab('smith')">Cayley View</span>
     </div>
     <div id="subtabs-connections" class="subtabs" style="display:none;">
-        <span class="subtab active" onclick="switchSubTab('franel')">Franel-Landau</span>
-        <span class="subtab" onclick="switchSubTab('dedekind')">Dedekind</span>
+        <span class="subtab active" onclick="switchSubTab('dedekind')">Dedekind</span>
         <span class="subtab" onclick="switchSubTab('cf')">Cont. Fractions</span>
         <span class="subtab" onclick="switchSubTab('euler')">Euler Product</span>
         <span class="subtab" onclick="switchSubTab('harmonic')">Harmonic</span>
@@ -2348,7 +2346,7 @@ function openOpener(){
     <div id="tab-erroranalysis" class="tab-content">
         <div class="panel">
             <h2 style="color:#a78bfa;margin-bottom:5px;">Error Analysis</h2>
-            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula C(n,N) = 3N²/(π²n(n+1)) applied to intervals. The error patterns give a computational window on classical results such as the Franel–Landau connection to RH.</p>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula C(n,N) = 3N²/(π²n(n+1)) applied to intervals.</p>
             
             <!-- Range Controls -->
             <div style="background:#1e1b4b;border-radius:8px;padding:15px;margin-bottom:20px;border:1px solid #6366f1;">
@@ -2368,10 +2366,6 @@ function openOpener(){
             
             <!-- Description Cards -->
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px;margin-bottom:20px;">
-                <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #22c55e;">
-                    <h5 style="color:#22c55e;margin:0 0 8px 0;">RH Connection (Exploratory)</h5>
-                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The Franel-Landau theorem (1924) established that RH ⟺ Σ|F_k − k/(|F_N|−1)| = O(N^(1/2+ε)). Interval decomposition may offer computational perspective on which ranges contribute to this classical sum.</p>
-                </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #8b5cf6;">
                     <h5 style="color:#8b5cf6;margin:0 0 8px 0;">Spectral Analysis</h5>
                     <p style="color:#94a3b8;font-size:0.85em;margin:0;">Periodicity diagnostic for the sector-residual sequence. Note this spectrum is indexed in cycles per sector index (range 0 to 0.5); it is <em>not</em> comparable to the imaginary parts of the zeta zeros, which are frequencies conjugate to log x. Detecting those would require log-spaced sampling, which this panel does not perform.</p>
@@ -2433,7 +2427,7 @@ function openOpener(){
                 <!-- Cumulative Error -->
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
                     <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Cumulative |Error|
-                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">growth rate → RH bound</span>
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">growth rate (cf. classical O(N log N) totient-sum error)</span>
                     </h5>
                     <canvas id="cumulativeErrorChart" height="120"></canvas>
                 </div>
@@ -2641,10 +2635,6 @@ function openOpener(){
                 <div class="connection-box" style="margin:0;">
                     <strong style="color:#4ade80;">Euler and Coprime Density</strong>
                     <p style="margin:8px 0 0 0; font-size:0.9em;">Global density 1/zeta(2) = 6/pi^2 emerges as sum of sectoral contributions.</p>
-                </div>
-                <div class="connection-box" style="margin:0;">
-                    <strong style="color:#4ade80;">Franel-Landau Connection</strong>
-                    <p style="margin:8px 0 0 0; font-size:0.9em;">Farey gap distribution relates to RH via: Sum|F_k - k/|F_N|| = O(N^(1/2+epsilon)) iff RH</p>
                 </div>
             </div>
             
@@ -2926,41 +2916,6 @@ function openOpener(){
             <button onclick="stopAllPlayback()" style="padding:8px 14px;background:#ef4444;border:none;border-radius:5px;color:white;cursor:pointer;">■ Stop</button>
         </div>
         <div style="margin-top:15px;"><button onclick="screenshotFullTab('gaps')">Screenshot Full Gaps Tab</button></div>
-    </div>
-    
-    <!-- FRANEL-LANDAU TAB -->
-    <div id="tab-franel" class="tab-content">
-        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #06b6d4;margin-bottom:20px;">
-            <h3 style="color:#a78bfa;margin-top:0;">Franel-Landau Theorem</h3>
-            <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.1em;text-align:center;color:#06b6d4;">Σ|δ_k| = O(N^(1/2+ε)) ⟺ Riemann Hypothesis</div>
-            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Define δ_k = F_k − k/(|F_N|−1) as the k-th Farey fraction deviation, with k = 0,…,|F_N|−1 over F_N including both endpoints 0/1 and 1/1. This is the convention used by the computation below; Franel’s original statement indexes k = 1,…,|F_N| over (0,1] and divides by |F_N|. The two differ by one unit in the denominator, which is why the signed sum Σδ_k vanishes identically here (by the symmetry r ↔ 1−r) but not in the classical indexing. The growth rate of Σ|δ_k| is unaffected. The growth rate of Σ|δ_k| is directly equivalent to the Riemann Hypothesis. If RH is true, the sum grows slower than N^(1/2+ε) for any ε > 0. This provides a concrete computational test for RH properties through Farey sequence analysis. <strong style="color:#f87171;">Note: These computations illustrate known equivalences but do not constitute a proof or disproof of RH.</strong></p>
-        </div>
-        <div class="stat-grid" id="franelStats" style="margin-top:12px;"></div>
-        <div class="control-panel" style="margin-top:15px;">
-            <div class="control-row">
-                <label>Test Alpha: <input type="range" id="franelAlphaSlider" min="0.3" max="0.7" step="0.01" value="0.5" onchange="updateFranelAlpha()"><span id="franelAlphaValue" style="margin-left:8px;color:#06b6d4;">0.50</span></label>
-                <span id="franelAlphaResult" style="margin-left:15px;padding:4px 10px;border-radius:4px;font-size:12px;"></span>
-            </div>
-        </div>
-            <div class="grid-2" style="margin-top:15px;">
-                <div class="chart-box"><h4>Deviation δ_k vs k</h4><canvas id="franelDeviationChart"></canvas></div>
-                <div class="chart-box"><h4>Cumulative |δ| / N^α</h4><canvas id="franelCumulativeChart"></canvas></div>
-            </div>
-            <div class="grid-2" style="margin-top:15px;">
-                <div class="chart-box"><h4>Σ|δ| / N^α for various α</h4><canvas id="franelAlphaChart"></canvas></div>
-                <div class="chart-box"><h4>Log-Log: log(Σ|δ|) vs log(N)</h4><canvas id="franelLogLogChart"></canvas></div>
-            </div>
-            <div class="derivation-box" style="margin-top:15px;"><strong>Interpretation:</strong> If RH is true, the normalized sum Σ|δ|/N^α should stay bounded for α > 1/2. Divergence for α ≤ 1/2 would contradict RH. The log-log plot slope indicates the actual growth exponent.</div>
-            <div class="connection-box" style="margin-top:15px;">
-                <strong>Mertens Function Connection:</strong> The Mertens function M(n) = Σμ(k) for k≤n satisfies M(n) = O(n^(1/2+ε)) ⟺ RH. The Franel-Landau sum and Mertens function encode equivalent information about zero distribution of ζ(s). Both provide computational windows into the Riemann Hypothesis.
-            </div>
-            <div style="margin-top:15px; padding:12px; background:#1e293b; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <span style="color:#94a3b8; font-size:12px;">Hear the Farey sequence:</span>
-                <button onclick="playFareySequence('forward')" style="padding:8px 14px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:5px;color:white;cursor:pointer;">▶ Forward (0→1)</button>
-                <button onclick="playFareySequence('backward')" style="padding:8px 14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:5px;color:white;cursor:pointer;">◀ Backward (1→0)</button>
-                <button onclick="stopAllPlayback()" style="padding:8px 14px;background:#ef4444;border:none;border-radius:5px;color:white;cursor:pointer;">■ Stop</button>
-            </div>
-            <div style="margin-top:15px;"><button onclick="screenshotFullTab('franel')">Screenshot Full Franel Tab</button></div>
     </div>
     
     <!-- DEDEKIND TAB -->
@@ -4104,18 +4059,6 @@ function openOpener(){
                 <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">First rigorous proof of the Farey sequence <strong>unimodularity</strong> (neighbour) property, establishing that between any two adjacent Farey fractions a/b and c/d we have |ad &minus; bc| = 1. Distinct from the <em>mediant</em> property, which concerns (a+c)/(b+d).</p>
             </div>
             
-            <h3 style="color:#22c55e; border-bottom:2px solid #22c55e; padding-bottom:8px; margin-top:25px;">Connections to the Riemann Hypothesis</h3>
-            
-            <div class="theorem-box" style="background:#064e3b; margin:15px 0;">
-                <strong style="color:#6ee7b7;">Franel, Jérôme (1924)</strong>
-                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Les suites de Farey et le problème des nombres premiers" - Demonstrated that RH is equivalent to: Σ|F_k - k/|F_N|| = O(N^(1/2+ε)) for any ε > 0.</p>
-            </div>
-            
-            <div class="theorem-box" style="background:#064e3b; margin:15px 0;">
-                <strong style="color:#6ee7b7;">Landau, Edmund (1924)</strong>
-                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Companion 1924 paper clarifying and completing Franel's argument, cementing the Farey-sequence formulation as a rigorous equivalent of the Riemann Hypothesis.</p>
-            </div>
-            
             <h3 style="color:#f59e0b; border-bottom:2px solid #f59e0b; padding-bottom:8px; margin-top:25px;">Computational Number Theory</h3>
             
             <div class="theorem-box" style="background:#422006; margin:15px 0;">
@@ -4658,17 +4601,6 @@ function wgSyncPinSlider() {
     var pct = Math.round(Math.max(+sl.min, Math.min(+sl.max, (wgPinSide / b.max) * 100)));
     sl.value = pct;
     if (span) span.textContent = pct + '%';
-}
-
-// Simple canvas-only screenshot
-function screenshotCanvas(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) { alert('Canvas not found'); return; }
-    
-    const link = document.createElement('a');
-    link.download = `${canvasId}_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
 }
 
 function screenshotMainCanvas() {
@@ -5978,9 +5910,9 @@ function generateScreenshotWithSelection(tabName) {
         'erroranalysis': {
             title: 'Error Analysis',
             formula: 'Σ|Exact - Predicted| growth rate',
-            description: 'Statistical analysis of formula deviation - connection to RH',
+            description: 'Statistical analysis of sector formula deviation',
             params: [
-                'Franel-Landau: RH ⟺ O(N^(1/2+ε))',
+                'cf. classical O(N log N) totient-sum error',
                 'FFT → sector-residual periodicity',
                 'Möbius correlation',
                 'Prime vs composite sector behavior'
@@ -6003,12 +5935,6 @@ function generateScreenshotWithSelection(tabName) {
             formula: 'gap(a/b, c/d) = 1/(b·d)',
             description: 'For consecutive Farey fractions, gap = 1/(b·d)',
             params: ['Unimodularity (Farey neighbor property): |ad - bc| = 1', 'Gap decreases with denominator', 'Uniform distribution']
-        },
-        'franel': {
-            title: 'Franel-Landau Theorem',
-            formula: 'Σ|δk| = O(N^(1/2+ε)) ⟺ RH',
-            description: 'Equivalence with Riemann Hypothesis',
-            params: ['δk = Fk - k/|Fn|', 'RH implies bounded Σ|δ|/√N', 'Computational verification']
         },
         'dedekind': {
             title: 'Dedekind Sums',
@@ -7328,7 +7254,7 @@ async function computeExact(N) {
     
     // --- Cusp 0/1: the mod-1 basepoint. All n/n ≡ 0 here. ---
     // Not in any sector (getSector returns null for value=0).
-    // Included in allResidues and farey for correct gap / Franel computation.
+    // Included in allResidues and farey for correct gap computation.
     state.allResidues.push({ r:0, m:1, sector:null, isPrime:false, isPrimeNum:false,
         category:'CC', value:0, isCusp:true });
     
@@ -7338,7 +7264,7 @@ async function computeExact(N) {
             const g = gcd(r,m);
             if(g!==1) {
                 // --- gcd(r,m) > 1: the zero divisors of Z/mZ. Kept in a
-                // parallel store so the coprime statistics, the Franel sum and
+                // parallel store so the coprime statistics and
                 // the bisection identity are all untouched by this addition.
                 // Only enumerated when the user asks for them, since it is
                 // roughly another 0.4·N² objects. ---
@@ -7804,7 +7730,7 @@ function updateFormulaOnlyDisplays() {
     updateMainTable();
     stampComputed();
     // Skip: drawMainRing, drawSectorTree, drawTheoryViz, updateGapAnalysis, 
-    // computeFranel, computeDedekind, updateCFDisplay, computePSL, 
+    // computeDedekind, updateCFDisplay, computePSL, 
     // computeEulerProduct, updateModularAnalysis, draw3D, drawHyperbolic, 
     // drawSmithChart, updateStatistics, updatePrimeAnalysis
     // These require actual residue data which formula mode doesn't compute
@@ -7969,7 +7895,7 @@ function updateAllDisplays() {
         drawHyperbolic(); drawSmithChart();
     }
     
-    updateGapAnalysis(); computeFranel(); computeDedekind(); updateCFDisplay();
+    updateGapAnalysis(); computeDedekind(); updateCFDisplay();
     computePSL(); computeEulerProduct(); updateModularAnalysis();
     updateStatistics(); updatePrimeAnalysis();
 }
@@ -9314,15 +9240,6 @@ function formatValueGlobal(r, m) {
     }
 }
 
-function formatFractionGlobal(f) {
-    if (f.r !== undefined && f.m !== undefined) {
-        return formatValueGlobal(f.r, f.m);
-    } else if (f.p !== undefined && f.q !== undefined) {
-        return formatValueGlobal(f.p, f.q);
-    }
-    return '?/?';
-}
-
 // =============================================
 // SECTOR DATA DETAIL FUNCTIONS
 // =============================================
@@ -9684,17 +9601,6 @@ function exportAllSectorsCSV() {
     a.click();
 }
 
-function boostPointSize() {
-    const slider = document.getElementById('ringPointSize');
-    if (slider) {
-        let val = parseFloat(slider.value) || 0;
-        if (val === 0) val = 3; // Start from 3 if on auto
-        else val = Math.min(20, val + 2);
-        slider.value = val;
-        drawMainRing();
-    }
-}
-
 function setPointSize(size) {
     const slider = document.getElementById('ringPointSize');
     if (slider) {
@@ -10031,23 +9937,6 @@ function wgGcdModeCount() {
     return (cp + nc) ? (cp + nc).toLocaleString() + ' total' : '';
 }
 
-function toggleCornerLegend() {
-    const showLegend = document.getElementById('showCornerLegend')?.checked ?? true;
-    const displays = [
-        'ringFractionDisplay',
-        'ringDecimalDisplay', 
-        'ringHzDisplay',
-        'ringSectorDisplay'
-    ];
-    
-    displays.forEach(id => {
-        const elem = document.getElementById(id);
-        if (!elem) return;
-        if (!showLegend) elem.style.display = 'none';
-        else if ((elem.textContent || '').trim()) { elem.style.display = 'block'; elem.style.opacity = '1'; }
-    });
-}
-
 // Fill the four corner readouts for a given fraction. Called on point click
 // as well as during playback, so an exported still always carries the labels
 // for whatever is currently selected — they're HTML overlays, so the export
@@ -10091,21 +9980,6 @@ function stopInvolutionAnimation() {
     
     const playBtn = document.getElementById('involutionPlayBtn');
     if (playBtn) playBtn.textContent = '▶ Play';
-}
-
-function playInvolutionAnimation() {
-    if (!involutionState.lastClickedPoint) {
-        alert('Please click a point on the canvas first to select a ring for involution pairing animation.');
-        return;
-    }
-    
-    const { r, m } = involutionState.lastClickedPoint;
-    involutionState.isPlaying = true;
-    
-    const playBtn = document.getElementById('involutionPlayBtn');
-    if (playBtn) playBtn.textContent = '⏸ Playing';
-    
-    animateInvolutionPairing(r, m, true);
 }
 
 function animateInvolutionPairing(startR, startM, autoPlay = false) {
@@ -10566,35 +10440,6 @@ function initRingZoomPan() {
 
 // Initialize zoom/pan on load
 document.addEventListener('DOMContentLoaded', initRingZoomPan);
-
-function zoomToSector(sectorNum) {
-    // Calculate angle range for sector
-    const canvas = document.getElementById('mainRing');
-    if (!canvas) return;
-    
-    const W = canvas.width, H = canvas.height;
-    const cx = W / 2, cy = H / 2;
-    
-    // Sector n spans (1/(n+1), 1/n]
-    const angleStart = (1 / (sectorNum + 1)) * 2 * Math.PI;
-    const angleEnd = (1 / sectorNum) * 2 * Math.PI;
-    const angleMid = (angleStart + angleEnd) / 2;
-    
-    // Zoom to 3x and pan to center the sector
-    ringView.zoom = 3;
-    
-    // Calculate pan to center the sector midpoint
-    // The sector midpoint in canvas coords (at max radius)
-    const maxR = Math.min(W, H) / 2 - 35;
-    const targetX = cx + maxR * 0.7 * Math.cos(angleMid);
-    const targetY = cy - maxR * 0.7 * Math.sin(angleMid);
-    
-    // Pan so target is at center
-    ringView.panX = (cx - targetX) / ringView.zoom;
-    ringView.panY = (cy - targetY) / ringView.zoom;
-    
-    updateRingTransform();
-}
 
 // ===== AUDIO PLAYBACK =====
 let audioContext = null;
@@ -12617,83 +12462,6 @@ function getMultOrder(a, n) {
     return order;
 }
 
-function setTrackerPreset(preset) {
-    const input = document.getElementById('trackResidues');
-    switch(preset) {
-        case 'phi12': input.value = '1,5,7,11'; break;
-        case 'phi30': input.value = '1,7,11,13,17,19,23,29'; break;
-        case 'phi60': input.value = '1,7,11,13,17,19,23,29,31,37,41,43,47,49,53,59'; break;
-        case 'primes': input.value = '2,3,5,7,11,13'; break;
-        case 'twins': input.value = '1,11,13,17,19,29'; break;
-    }
-    document.getElementById('enableResidueTracker').checked = true;
-    toggleRingSection('secTracker', true);
-    drawMainRing();
-}
-
-function showSectorStats() {
-    const sector = +document.getElementById('viewSector').value;
-    const res = state.residuesBySector[sector] || [];
-    const primeCount = res.filter(r => r.isPrime).length;
-    const N = state.nMax;
-    const pred = (3*N*N)/(Math.PI*Math.PI*sector*(sector+1));
-    const err = ((res.length-pred)/pred*100).toFixed(2);
-    const density = (res.length / (N*N) * 100).toFixed(4);
-    const zetaDensity = (6/(Math.PI*Math.PI)*100).toFixed(4);
-    
-    // Update stats panel
-    document.getElementById('statCoprime').textContent = res.length;
-    document.getElementById('statPredicted').textContent = pred.toFixed(1);
-    document.getElementById('statError').textContent = err + '%';
-    document.getElementById('statError').style.color = Math.abs(parseFloat(err)) < 5 ? '#00ff88' : '#ff6496';
-    
-    alert(`Sector ${sector} Full Statistics
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Range: (1/${sector+1}, 1/${sector}]
-Angular: ${(360/(sector+1)).toFixed(1)}° – ${(360/sector).toFixed(1)}°
-
-Counts:
-  Total Coprimes: ${res.length}
-  Prime m: ${primeCount} (${(primeCount/res.length*100).toFixed(1)}%)
-  Composite m: ${res.length - primeCount}
-
-Formula Analysis:
-  Predicted: ${pred.toFixed(2)}
-  Absolute Error: ${(res.length - pred).toFixed(2)}
-  Relative Error: ${err}%
-  
-Density:
-  Observed: ${density}%
-  1/ζ(2): ${zetaDensity}%`);
-}
-
-function compareSectors() {
-    const maxSector = Math.min(10, state.sectorMax);
-    let report = `Sector Comparison (N=${state.nMax})\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    report += 'Sect │ Count │ Pred  │ Error%\n';
-    report += '─────┼───────┼───────┼───────\n';
-    
-    for (let s = 1; s <= maxSector; s++) {
-        const res = state.residuesBySector[s] || [];
-        const count = res.length;
-        const pred = (3 * state.nMax * state.nMax) / (Math.PI * Math.PI * s * (s + 1));
-        const errPct = ((count - pred) / pred * 100).toFixed(1);
-        report += `  ${s}  │ ${count.toString().padStart(5)} │ ${pred.toFixed(0).padStart(5)} │ ${errPct.padStart(5)}%\n`;
-    }
-    alert(report);
-}
-
-function resetRingAnimation() {
-    stopRingAnimation();
-    stopSectorSweep();
-    document.getElementById('nMax').value = 50;
-    document.getElementById('sectorMin').value = 1;
-    document.getElementById('sectorMax').value = 10;
-    document.getElementById('viewSector').value = 2;
-    document.getElementById('ringAnimStatus').textContent = 'Reset to defaults';
-    computeFareySectors();
-}
-
 // Collapsible section toggle
 function toggleRingSection(sectionId, forceOpen) {
     const section = document.getElementById(sectionId);
@@ -12713,14 +12481,6 @@ function toggleAdvancedControls() {
         const isHidden = panel.style.display === 'none';
         panel.style.display = isHidden ? 'block' : 'none';
     }
-}
-
-function expandAllRingSections() {
-    ['secRotation', 'secFarey', 'secTracker', 'secLabels'].forEach(id => toggleRingSection(id, true));
-}
-
-function collapseAllRingSections() {
-    ['secRotation', 'secFarey', 'secTracker', 'secLabels'].forEach(id => toggleRingSection(id, false));
 }
 
 // Rotation controls
@@ -12791,11 +12551,6 @@ function setRotationPreset(degrees, fracLabel) {
     document.getElementById('enableRingRotation').checked = true;
     toggleRingSection('secRotation', true);
     drawMainRing();
-}
-
-function updatePhaseDisplay() {
-    const val = document.getElementById('ringGlobalPhase').value;
-    document.getElementById('globalPhaseV').textContent = val + '°';
 }
 
 // Advanced controls helper functions
@@ -13102,36 +12857,7 @@ function stopRingAnimation() {
     document.getElementById('ringAnimBtn').textContent = '▶ Animate';
 }
 
-function applyRotationFraction() {
-    const frac = document.getElementById('ringRotationFrac').value.trim();
-    if (!frac) return;
-    
-    let degrees = 0;
-    if (frac.includes('/')) {
-        const [num, den] = frac.split('/').map(Number);
-        if (den && !isNaN(num) && !isNaN(den)) {
-            degrees = (num / den) * 360;
-        }
-    } else {
-        degrees = parseFloat(frac);
-    }
-    
-    if (!isNaN(degrees)) {
-        document.getElementById('ringRotationAmount').value = degrees % 360;
-        updateRotationDisplay();
-        document.getElementById('enableRingRotation').checked = true;
-        drawMainRing();
-    }
-}
-
 // Sector quick select
-function setQuickSector(s) {
-    document.getElementById('viewSector').value = s;
-    drawMainRing();
-    updateFormulaDisplay();
-    updateSectorAnalysis();
-}
-
 function updateSectorAnalysis() {
     const sector = +document.getElementById('viewSector').value;
     const res = state.residuesBySector[sector] || [];
@@ -13142,25 +12868,6 @@ function updateSectorAnalysis() {
     document.getElementById('statCoprime').textContent = res.length;
     document.getElementById('statPredicted').textContent = pred.toFixed(1);
     document.getElementById('statError').textContent = err + '%';
-}
-
-// Tracker mode
-function updateTrackerMode() {
-    const mode = document.getElementById('trackerMode').value;
-    document.getElementById('trackerManualControls').style.display = mode === 'manual' ? 'block' : 'none';
-    document.getElementById('trackerSliderControls').style.display = mode === 'slider' ? 'block' : 'none';
-    drawMainRing();
-}
-
-function updateTrackerSlider() {
-    const val = document.getElementById('trackerSliderR').value;
-    document.getElementById('trackerSliderV').textContent = val;
-}
-
-function updateTrackerSizeDisplay() {
-    const val = document.getElementById('trackerSize').value;
-    const disp = document.getElementById('trackerSizeV');
-    if (disp) disp.textContent = val;
 }
 
 function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
@@ -16600,133 +16307,6 @@ function updateGapAnalysis() {
     }).join('');
 }
 
-// FRANEL-LANDAU
-function computeFranel() {
-    if(state.farey.length===0) { document.getElementById('franelStats').innerHTML='<div class="stat-card"><div class="stat-label">No data</div></div>'; return; }
-    const n = state.farey.length;
-    const deviations = state.farey.map((f,k) => ({ k, delta: f.value - k/(n-1) }));
-    const sumAbsDelta = deviations.reduce((s,d)=>s+Math.abs(d.delta),0);
-    const N = state.nMax;
-    
-    // Store for alpha slider
-    state.franelSumAbsDelta = sumAbsDelta;
-    state.franelN = N;
-    
-    // Additional statistics
-    const deltas = deviations.map(d => d.delta);
-    const absDeltas = deltas.map(d => Math.abs(d));
-    const sumDelta = deltas.reduce((a,b) => a+b, 0);  // Signed sum
-    const sumDeltaSq = deltas.reduce((a,d) => a + d*d, 0);
-    const meanAbsDelta = sumAbsDelta / n;
-    const maxAbsDelta = absDeltas.reduce((max, v) => v > max ? v : max, 0);
-    const minAbsDelta = absDeltas.reduce((min, v) => v < min ? v : min, Infinity);
-    const maxDelta = deltas.reduce((max, v) => v > max ? v : max, -Infinity);
-    const minDelta = deltas.reduce((min, v) => v < min ? v : min, Infinity);
-    
-    // Variance and std dev of deviations
-    const varianceDelta = sumDeltaSq / n;
-    const stdDevDelta = Math.sqrt(varianceDelta);
-    
-    // Expected |F_N| from asymptotic formula (interior only: 3N²/π²; +2 for 0/1 and 1/1 endpoints)
-    const expectedFN = 3 * N * N / (Math.PI * Math.PI) + 2;
-    const fnError = ((n - expectedFN) / expectedFN * 100).toFixed(2);
-    
-    // Effective exponent estimate
-    const effectiveExponent = Math.log(sumAbsDelta) / Math.log(N);
-    
-    // RH consistency check
-    const rhBound = Math.pow(N, 0.5 + 0.01);
-    const rhConsistent = sumAbsDelta < rhBound * 10;  // Some slack for finite N
-    
-    document.getElementById('franelStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${n}</div><div class="stat-label">|F_N| (actual)</div></div>
-        <div class="stat-card"><div class="stat-value">${Math.round(expectedFN)}</div><div class="stat-label">|F_N| (expected)</div></div>
-        <div class="stat-card"><div class="stat-value">${fnError}%</div><div class="stat-label">|F_N| Error</div></div>
-        <div class="stat-card"><div class="stat-value">${sumAbsDelta.toFixed(4)}</div><div class="stat-label">Σ|δ|</div></div>
-        <div class="stat-card"><div class="stat-value">${sumDelta.toExponential(2)}</div><div class="stat-label">Σδ (signed)</div></div>
-        <div class="stat-card"><div class="stat-value">${sumDeltaSq.toExponential(3)}</div><div class="stat-label">Σδ²</div></div>
-        <div class="stat-card"><div class="stat-value">${meanAbsDelta.toExponential(3)}</div><div class="stat-label">Mean |δ|</div></div>
-        <div class="stat-card"><div class="stat-value">${stdDevDelta.toExponential(3)}</div><div class="stat-label">Std Dev δ</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${maxAbsDelta.toExponential(3)}</div><div class="stat-label">Max |δ|</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${minAbsDelta.toExponential(3)}</div><div class="stat-label">Min |δ|</div></div>
-        <div class="stat-card"><div class="stat-value">${maxDelta.toExponential(3)}</div><div class="stat-label">Max δ (signed)</div></div>
-        <div class="stat-card"><div class="stat-value">${minDelta.toExponential(3)}</div><div class="stat-label">Min δ (signed)</div></div>
-        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.sqrt(N)).toFixed(4)}</div><div class="stat-label">Σ|δ|/√N</div></div>
-        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.pow(N,0.5+0.01)).toFixed(4)}</div><div class="stat-label">Σ|δ|/N^0.51</div></div>
-        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/N).toFixed(6)}</div><div class="stat-label">Σ|δ|/N</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#06b6d4">${effectiveExponent.toFixed(4)}</div><div class="stat-label">Eff. Exponent</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:${rhConsistent ? '#22c55e' : '#ef4444'}">${rhConsistent ? 'Yes' : 'No'}</div><div class="stat-label">RH Consistent</div></div>
-    `;
-    
-    // Update alpha slider display
-    updateFranelAlpha();
-    
-    const sampleRate = Math.max(1, Math.floor(n/200));
-    const sampled = deviations.filter((_,i)=>i%sampleRate===0);
-    
-    if(state.charts.franelDeviation) state.charts.franelDeviation.destroy();
-    state.charts.franelDeviation = new Chart(document.getElementById('franelDeviationChart'),{type:'line',data:{labels:sampled.map(d=>d.k),datasets:[{label:'δ_k',data:sampled.map(d=>d.delta),borderColor:'#6366f1',fill:false,pointRadius:0}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
-    
-    let cumSum = 0;
-    const cumData = sampled.map(d => { cumSum += Math.abs(d.delta)*sampleRate; return cumSum/Math.sqrt(d.k+1); });
-    if(state.charts.franelCumulative) state.charts.franelCumulative.destroy();
-    state.charts.franelCumulative = new Chart(document.getElementById('franelCumulativeChart'),{type:'line',data:{labels:sampled.map(d=>d.k),datasets:[{label:'Cum|δ|/√k',data:cumData,borderColor:'#8b5cf6',fill:false,pointRadius:0}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
-    
-    const alphas = [0.35, 0.4, 0.45, 0.5, 0.52, 0.55, 0.6, 0.65];
-    const alphaData = alphas.map(a => sumAbsDelta / Math.pow(N, a));
-    if(state.charts.franelAlpha) state.charts.franelAlpha.destroy();
-    state.charts.franelAlpha = new Chart(document.getElementById('franelAlphaChart'),{type:'bar',data:{labels:alphas.map(a=>`α=${a}`),datasets:[{label:'Σ|δ|/N^α',data:alphaData,backgroundColor:alphas.map(a=>a<=0.5?'rgba(239,68,68,0.7)':'rgba(34,197,94,0.7)')}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
-    
-    // Log-Log chart - shows growth exponent
-    const logLogData = [];
-    let runningSum = 0;
-    for (let i = 0; i < deviations.length; i++) {
-        runningSum += Math.abs(deviations[i].delta);
-        if (i > 0 && i % Math.max(1, Math.floor(n/50)) === 0) {
-            const effN = Math.ceil((i+1) * N / n);
-            logLogData.push({ x: Math.log10(effN), y: Math.log10(runningSum) });
-        }
-    }
-    
-    // Theoretical lines for comparison
-    const xMin = logLogData[0]?.x || 1;
-    const xMax = logLogData[logLogData.length-1]?.x || 2;
-    const yIntercept = logLogData[0]?.y || 0;
-    const theoreticalHalf = logLogData.map(d => ({ x: d.x, y: yIntercept + 0.5 * (d.x - xMin) }));
-    const theoreticalOne = logLogData.map(d => ({ x: d.x, y: yIntercept + 1.0 * (d.x - xMin) }));
-    
-    if(state.charts.franelLogLog) state.charts.franelLogLog.destroy();
-    state.charts.franelLogLog = new Chart(document.getElementById('franelLogLogChart'),{
-        type:'scatter',
-        data:{
-            datasets:[
-                {label:'Actual log(Σ|δ|)',data:logLogData,borderColor:'#06b6d4',backgroundColor:'#06b6d4',pointRadius:3,showLine:true,fill:false},
-                {label:'Slope 0.5 (RH bound)',data:theoreticalHalf,borderColor:'#22c55e',borderDash:[5,5],pointRadius:0,showLine:true,fill:false},
-                {label:'Slope 1.0',data:theoreticalOne,borderColor:'#ef4444',borderDash:[3,3],pointRadius:0,showLine:true,fill:false}
-            ]
-        },
-        options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}},scales:{x:{title:{display:true,text:'log₁₀(N)',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'log₁₀(Σ|δ|)',color:'#94a3b8'},ticks:{color:'#94a3b8'}}}}
-    });
-}
-
-function updateFranelAlpha() {
-    const slider = document.getElementById('franelAlphaSlider');
-    const valueSpan = document.getElementById('franelAlphaValue');
-    const resultSpan = document.getElementById('franelAlphaResult');
-    if (!slider || !valueSpan || !resultSpan) return;
-    
-    const alpha = parseFloat(slider.value);
-    valueSpan.textContent = alpha.toFixed(2);
-    
-    if (state.franelSumAbsDelta && state.franelN) {
-        const normalized = state.franelSumAbsDelta / Math.pow(state.franelN, alpha);
-        const bounded = alpha > 0.5;
-        resultSpan.textContent = `Σ|δ|/N^${alpha.toFixed(2)} = ${normalized.toFixed(4)}`;
-        resultSpan.style.background = bounded ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)';
-        resultSpan.style.color = bounded ? '#22c55e' : '#ef4444';
-    }
-}
-
 // DEDEKIND
 function computeDedekind() {
     const maxK = +document.getElementById('dedekindMaxK').value;
@@ -18006,14 +17586,6 @@ function applyCustomPhasePreset() {
     drawSmithChart();
 }
 
-function updateSmithPhaseLabel() {
-    const phase = document.getElementById('smithPhase')?.value || 90;
-    const display = document.getElementById('smithPhaseDisplay');
-    const input = document.getElementById('smithPhaseInput');
-    if (display) display.textContent = phase;
-    if (input) input.value = phase;
-}
-
 function setSmithPreset(sector, phase, radiusMode, scale) {
     document.getElementById('smithSector').value = sector;
     document.getElementById('smithPhase').value = phase;
@@ -18664,34 +18236,6 @@ function playTwinPrimePair(r1, m1, r2, m2) {
     showPlaybackStatus(`Twin prime pair: ${r1}/${m1} → ${r2}/${m2}`);
 }
 
-// Play twin prime sequence
-function playTwinPrimeSequence() {
-    const gaps = window.twinPrimeGapsCache || [];
-    if (gaps.length === 0) {
-        showPlaybackStatus('No twin prime gaps found');
-        return;
-    }
-    
-    initAudioContext();
-    stopAllPlayback();
-    
-    // Convert to flat list of fractions
-    const fracs = [];
-    gaps.slice(0, 30).forEach(g => {
-        fracs.push({ r: g.left.r, m: g.left.m });
-        fracs.push({ r: g.right.r, m: g.right.m });
-    });
-    
-    playbackState.queue = fracs;
-    playbackState.direction = 'forward';
-    playbackState.mode = 'twin-primes';
-    playbackState.currentIndex = 0;
-    playbackState.isPlaying = true;
-    
-    showPlaybackStatus(`Playing ${gaps.length} twin prime pairs`);
-    startPlaybackLoop();
-}
-
 // Play all twin prime gaps
 function playTwinPrimeGaps() {
     const gaps = window.twinPrimeGapsCache || [];
@@ -18794,12 +18338,6 @@ $n$ & Exact & Predicted & Rel. Error \\\\
 ${state.sectors.slice(0,10).map(s=>`${s.n} & ${s.exact??'-'} & ${s.predicted.toFixed(1)} & ${s.relError?s.relError.toFixed(2)+'\\%':'-'}`).join(' \\\\\n')} \\\\
 \\hline
 \\end{tabular}
-
-\\section{Franel-Landau Connection}
-For the Farey sequence $F_N$:
-\\begin{equation}
-\\sum_{k=1}^{|F_N|} \\left| F_k - \\frac{k}{|F_N|} \\right| = O(N^{1/2+\\varepsilon}) \\iff \\text{RH}
-\\end{equation}
 
 \\end{document}`;
     document.getElementById('latexFigures').textContent = latex;
@@ -19134,8 +18672,6 @@ async function exportFocused4K() {
     link.click();
 }
 
-function exportAllData() { exportCSVAll(); }
-
 function exportMainTabData() {
     let csv = 'Type,Data\n';
     csv += 'Parameters,"N=' + state.nMax + ', Sectors=' + state.sectorMin + '-' + state.sectorMax + '"\n\n';
@@ -19205,7 +18741,7 @@ const tabGroups = {
     analysis: { subtabs: 'subtabs-analysis', default: 'stats', tabs: ['stats', 'primes', 'gaps'] },
     theory: { subtabs: 'subtabs-theory', default: 'theory', tabs: ['theory', 'theoryviz'] },
     geometry: { subtabs: 'subtabs-geometry', default: '3d', tabs: ['3d', 'hyperbolic', 'smith'] },
-    connections: { subtabs: 'subtabs-connections', default: 'franel', tabs: ['franel', 'dedekind', 'cf', 'euler', 'harmonic'] },
+    connections: { subtabs: 'subtabs-connections', default: 'dedekind', tabs: ['dedekind', 'cf', 'euler', 'harmonic'] },
     advanced: { subtabs: 'subtabs-advanced', default: 'modular', tabs: ['modular', 'psl', 'primorial', 'numtheory', 'horizon', 'animation', 'research'] },
     references: { subtabs: null, default: 'references' }
 };
@@ -19292,149 +18828,6 @@ function exportCanvas4K(canvasElement, title) {
         link.click();
     };
     img.src = canvas.toDataURL('image/png');
-}
-
-async function exportCompositeTab() {
-    const tabContent = document.querySelector('.tab-content.active');
-    if (!tabContent) { alert('No tab active'); return; }
-    
-    const baseWidth = 7680;
-    const baseHeight = 4320;
-    const compositeCanvas = document.createElement('canvas');
-    compositeCanvas.width = baseWidth;
-    compositeCanvas.height = baseHeight;
-    const ctx = compositeCanvas.getContext('2d');
-    
-    ctx.fillStyle = '#0a0f1a';
-    ctx.fillRect(0, 0, baseWidth, baseHeight);
-    
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 120px Arial';
-    ctx.textAlign = 'center';
-    const activeTab = document.querySelector('.tab.active');
-    const tabName = activeTab ? activeTab.textContent.trim() : 'Export';
-    ctx.fillText(tabName + ' - 4K Composite Export', baseWidth / 2, 200);
-    
-    ctx.font = '60px Arial';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText(`Generated: ${new Date().toLocaleString()}`, baseWidth / 2, 300);
-    
-    const canvases = tabContent.querySelectorAll('canvas');
-    const chartBoxes = tabContent.querySelectorAll('.chart-box');
-    
-    if (canvases.length === 0) { alert('No canvases found in this tab'); return; }
-    
-    let yPos = 450;
-    let xPos = 100;
-    let columnWidth = baseWidth / 2 - 150;
-    let maxHeight = 1500;
-    let colIndex = 0;
-    
-    for (let i = 0; i < canvases.length; i++) {
-        const canvas = canvases[i];
-        const chartBox = chartBoxes[i];
-        
-        if (yPos + maxHeight + 200 > baseHeight) {
-            colIndex++;
-            yPos = 450;
-            if (colIndex >= 2) {
-                alert('Too many charts for one 4K page. Consider exporting individual tabs.');
-                break;
-            }
-        }
-        
-        xPos = colIndex === 0 ? 100 : baseWidth / 2 + 50;
-        
-        const title = chartBox ? chartBox.querySelector('h4')?.textContent || 'Chart' : 'Chart';
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '50px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(title, xPos, yPos);
-        yPos += 80;
-        
-        const img = new Image();
-        img.src = canvas.toDataURL('image/png');
-        await new Promise(resolve => {
-            img.onload = function() {
-                const scaleFactor = columnWidth / canvas.width;
-                const scaledHeight = canvas.height * scaleFactor;
-                ctx.drawImage(img, xPos, yPos, columnWidth, scaledHeight);
-                yPos += scaledHeight + 150;
-                resolve();
-            };
-            img.onerror = () => resolve();
-        });
-    }
-    
-    yPos = baseHeight - 600;
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(50, yPos - 50, baseWidth - 100, 550);
-    
-    ctx.fillStyle = '#f1f5f9';
-    ctx.font = 'bold 50px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('Parameters & Legend', 100, yPos + 20);
-    
-    ctx.font = '40px Arial';
-    ctx.fillStyle = '#cbd5e1';
-    let legendY = yPos + 90;
-    
-    // Formula with computed values
-    const N = state.nMax;
-    const viewSector = parseInt(document.getElementById('viewSector')?.value || 1);
-    const pi2 = Math.PI * Math.PI;
-    const formulaResult = (3 * N * N) / (pi2 * viewSector * (viewSector + 1));
-    
-    const legendItems = [
-        `N = ${N.toLocaleString()}, Sectors: ${state.sectorMin} to ${state.sectorMax}, Mode: ${state.mode}`,
-        `Formula: C(n, N) = 3N² / (π² n(n+1))`,
-        `Example: C(${viewSector}, ${N.toLocaleString()}) = 3×${N.toLocaleString()}² / (π²×${viewSector}×${viewSector+1}) = ${formulaResult.toFixed(4)}`,
-        '',
-        'Column Definitions:',
-        '  P(m) = Prime denominator count (m ∈ {2,3,5,7,11,...})',
-        '  C(m) = Composite denominator count (m ∈ {4,6,8,9,10,...})',
-        '  P/C = P(m)/C(m) ratio',
-        '  P(r) = Prime numerator count'
-    ];
-    
-    // Add category definitions if categories are shown
-    const showCategories = document.getElementById('showCategoryColumns')?.checked;
-    if (showCategories) {
-        legendItems.push('');
-        legendItems.push('Category Definitions:');
-        legendItems.push('  PP = Both prime (r prime AND m prime)');
-        legendItems.push('  PC = Prime numerator, Composite denominator');
-        legendItems.push('  CP = Composite numerator, Prime denominator');
-        legendItems.push('  CC = Both composite (r composite AND m composite)');
-    }
-    
-    legendItems.forEach((item, idx) => {
-        if (item.startsWith('Column') || item.startsWith('Category')) {
-            ctx.fillStyle = '#a5b4fc';
-            ctx.font = 'bold 38px Arial';
-        } else if (item.startsWith('  ')) {
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '36px Arial';
-        } else {
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = '40px Arial';
-        }
-        ctx.fillText(item, 120, legendY + (idx * 50));
-    });
-    
-    // Add timestamp
-    ctx.fillStyle = '#64748b';
-    ctx.font = '32px Arial';
-    ctx.fillText('Generated: ' + new Date().toISOString(), baseWidth - 800, baseHeight - 80);
-    
-    compositeCanvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `farey_${tabName.toLowerCase().replace(/\\s+/g,'_')}_4k_composite.png`;
-        link.click();
-        URL.revokeObjectURL(url);
-    });
 }
 
 document.addEventListener('click', e => {
@@ -20297,18 +19690,6 @@ function setupHorizonCanvasClick() {
     });
 }
 
-// Initialize horizon canvas when tab is shown
-const origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
-function initHorizonOnTabSwitch(tabId) {
-    if (tabId === 'horizon') {
-        setTimeout(() => {
-            setupHorizonCanvasClick();
-            if (horizonData.fractions.length === 0) {
-                generateHorizon();
-            }
-        }, 100);
-    }
-}
 
 // GLOBAL HARMONIC ANALYSIS SYSTEM
 // =============================================
@@ -20347,10 +19728,6 @@ function toggleHarmonicDropdown() {
         requestAnimationFrame(wgRepositionPinnedCanvas);
         setTimeout(wgRepositionPinnedCanvas, 260);   // after the CSS transition
     }
-}
-
-function toggleHarmonicPanel() {
-    toggleHarmonicDropdown();
 }
 
 function updateBaseFreq() {
@@ -20693,21 +20070,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Legacy function kept for compatibility
-function playHarmonicScaleLegacy() {
-    initAudioContext();
-    const sector = +(document.getElementById('harmonicSector')?.value || 2);
-    const fractions = (state.residuesBySector[sector] || []).slice(0, 12);
-    if (fractions.length === 0) return;
-    
-    fractions.sort((a, b) => a.r / a.m - b.r / b.m);
-    let delay = 0;
-    fractions.forEach((f, i) => {
-        setTimeout(() => playFraction(f.r, f.m, 0.35), delay);
-        delay += 250;
-    });
-}
-
 function stopAudio() {
     if (currentOscillator) {
         try { currentOscillator.stop(); } catch(e) {}
@@ -20975,29 +20337,6 @@ function drawArnoldMini() {
     ctx.fillText('0', 2, H - 3);
     ctx.fillText('1', W - 10, H - 3);
     ctx.fillText('K=' + K.toFixed(2), W - 40, 12);
-}
-
-function drawHarmonicSpectrum() {
-    const canvas = document.getElementById('harmonicSpectrum');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const sector = +document.getElementById('viewSector')?.value || 2;
-    const fractions = (state.residuesBySector[sector] || []).slice(0, 20);
-    if (fractions.length === 0) return;
-    
-    const barWidth = W / fractions.length;
-    fractions.forEach((f, i) => {
-        const mode = getHarmonicMode(f.m);
-        const height = (1 - f.m / 50) * H * 0.8 + H * 0.1;
-        
-        ctx.fillStyle = mode.color + '80';
-        ctx.fillRect(i * barWidth + 1, H - height, barWidth - 2, height);
-    });
 }
 
 function resetHarmonicDefaults() {
@@ -21796,65 +21135,6 @@ function triggerGlobalHarmonic(r, m, extraData = null) {
     console.log(`Harmonic: ${r}/${m} = ${(r/m).toFixed(6)}, freq = ${(harmonicSettings.baseFreq * r / m).toFixed(2)} Hz`);
 }
 
-// Build mini keyboard
-function buildMiniKeyboard() {
-    const keyboard = document.getElementById('miniKeyboard');
-    if (!keyboard) return;
-    
-    const notes = [
-        { note: 'C', black: false, ratio: 1 },
-        { note: 'C#', black: true, ratio: 16/15 },
-        { note: 'D', black: false, ratio: 9/8 },
-        { note: 'D#', black: true, ratio: 6/5 },
-        { note: 'E', black: false, ratio: 5/4 },
-        { note: 'F', black: false, ratio: 4/3 },
-        { note: 'F#', black: true, ratio: 45/32 },
-        { note: 'G', black: false, ratio: 3/2 },
-        { note: 'G#', black: true, ratio: 8/5 },
-        { note: 'A', black: false, ratio: 5/3 },
-        { note: 'A#', black: true, ratio: 9/5 },
-        { note: 'B', black: false, ratio: 15/8 },
-        { note: 'C2', black: false, ratio: 2 }
-    ];
-    
-    keyboard.innerHTML = '';
-    notes.forEach(n => {
-        const key = document.createElement('div');
-        key.className = n.black ? 'black-key' : 'white-key';
-        key.title = n.note;
-        key.onclick = () => {
-            // Convert ratio to fraction
-            const [num, den] = ratioToFraction(n.ratio);
-            triggerGlobalHarmonic(num, den);
-            
-            // Visual feedback
-            key.classList.add('active');
-            setTimeout(() => key.classList.remove('active'), 200);
-        };
-        keyboard.appendChild(key);
-    });
-}
-
-function ratioToFraction(ratio) {
-    // Convert decimal ratio to simplified fraction
-    const tolerance = 1e-6;
-    let bestNum = 1, bestDen = 1, bestErr = Math.abs(ratio - 1);
-    
-    for (let den = 1; den <= 32; den++) {
-        const num = Math.round(ratio * den);
-        const err = Math.abs(ratio - num / den);
-        if (err < bestErr) {
-            bestErr = err;
-            bestNum = num;
-            bestDen = den;
-        }
-        if (err < tolerance) break;
-    }
-    
-    const g = gcd(bestNum, bestDen);
-    return [bestNum / g, bestDen / g];
-}
-
 // Draw harmonic series visualization
 function drawHarmonicSeriesViz() {
     const canvas = document.getElementById('harmonicSeriesCanvas');
@@ -21958,81 +21238,6 @@ function playChord() {
     playTone(baseFreq * 5 / 4, 1.0, harmonicSettings.volume * 0.8); // Major third
     playTone(baseFreq * 3 / 2, 1.0, harmonicSettings.volume * 0.8); // Perfect fifth
     playTone(baseFreq * r / m, 1.0, harmonicSettings.volume); // Selected fraction
-}
-
-function updateBeatFrequency() {
-    const f1 = harmonicSettings.baseFreq * selectedHarmonicFraction.r / selectedHarmonicFraction.m;
-    const f2 = +(document.getElementById('beatFreq2')?.value || 330);
-    const beat = Math.abs(f1 - f2);
-    document.getElementById('beatFreqResult').textContent = beat.toFixed(2);
-}
-
-function playBeatDemo() {
-    initAudioContext();
-    const f1 = harmonicSettings.baseFreq * selectedHarmonicFraction.r / selectedHarmonicFraction.m;
-    const f2 = +(document.getElementById('beatFreq2')?.value || 330);
-    
-    // Play both frequencies simultaneously to hear beats
-    playTone(f1, 2.0, harmonicSettings.volume * 0.5);
-    playTone(f2, 2.0, harmonicSettings.volume * 0.5);
-}
-
-function updateADSR() {
-    // Store ADSR values for envelope shaping
-    harmonicSettings.adsr = {
-        attack: (document.getElementById('adsrA')?.value || 10) / 100,
-        decay: (document.getElementById('adsrD')?.value || 20) / 100,
-        sustain: (document.getElementById('adsrS')?.value || 70) / 100,
-        release: (document.getElementById('adsrR')?.value || 30) / 100
-    };
-}
-
-function updateTuningSystem() {
-    harmonicSettings.tuning = document.getElementById('tuningSystem')?.value || 'just';
-}
-
-function drawWaveformDisplay() {
-    const canvas = document.getElementById('waveformDisplay');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    // Draw waveform based on selected type
-    ctx.strokeStyle = '#8b5cf6';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    
-    const waveform = harmonicSettings.waveform;
-    const cycles = 3;
-    
-    for (let x = 0; x < W; x++) {
-        const t = (x / W) * cycles * 2 * Math.PI;
-        let y;
-        
-        switch (waveform) {
-            case 'sine':
-                y = Math.sin(t);
-                break;
-            case 'triangle':
-                y = 2 * Math.abs(2 * (t / (2 * Math.PI) - Math.floor(t / (2 * Math.PI) + 0.5))) - 1;
-                break;
-            case 'square':
-                y = Math.sin(t) >= 0 ? 1 : -1;
-                break;
-            case 'sawtooth':
-                y = 2 * (t / (2 * Math.PI) - Math.floor(t / (2 * Math.PI) + 0.5));
-                break;
-            default:
-                y = Math.sin(t);
-        }
-        
-        const screenY = H / 2 - y * (H / 2 - 4);
-        x === 0 ? ctx.moveTo(x, screenY) : ctx.lineTo(x, screenY);
-    }
-    ctx.stroke();
 }
 
 setTimeout(addZoomControlsToCharts, 500);
@@ -22992,18 +22197,7 @@ window.switchTab = function(name) {
     }
 };
 
-// Sector playback functions
-let sectorPlaybackInterval = null;
 
-function stopSectorPlayback() {
-    if (sectorPlaybackInterval) {
-        clearInterval(sectorPlaybackInterval);
-        sectorPlaybackInterval = null;
-    }
-    document.getElementById('sectorPlayBtn').textContent = '▶ Play Sector';
-    document.getElementById('sectorPlayBtn').style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
-    stopAudio();
-}
 
 // Blinking highlight state
 let blinkHighlightState = {
@@ -24138,11 +23332,6 @@ document.getElementById('gapDistChart')?.addEventListener('click', function() {
     if (state.gaps.length > 0) {
         playGapsAsIntervals('forward');
     }
-});
-
-// Franel tab - click to play Farey sequence
-document.getElementById('franelDeviationChart')?.addEventListener('click', function() {
-    playFareySequence('forward');
 });
 
 // =============================================
@@ -26771,8 +25960,8 @@ function drawCumulativeErrorChart(absErrors, sectorNs) {
         cumulative.push(sum);
     });
     
-    // RH bound comparison: O(sqrt(n) * log(n))
-    const rhBound = sectorNs.map((_, i) => {
+    // Reference bound comparison: O(sqrt(n) * log(n)), the classical totient-sum error rate
+    const referenceBound = sectorNs.map((_, i) => {
         const n = i + 1;
         return Math.sqrt(n) * Math.log(n + 1) * (cumulative[cumulative.length-1] / (Math.sqrt(sectorNs.length) * Math.log(sectorNs.length + 1)));
     });
@@ -26783,7 +25972,7 @@ function drawCumulativeErrorChart(absErrors, sectorNs) {
             labels: sectorNs,
             datasets: [
                 { label: 'Cumulative |Error|', data: cumulative, borderColor: '#f59e0b', fill: false, pointRadius: 0 },
-                { label: 'sqrt(n)log(n) bound', data: rhBound, borderColor: '#ef4444', borderDash: [5,5], fill: false, pointRadius: 0 }
+                { label: 'sqrt(n)log(n) bound', data: referenceBound, borderColor: '#ef4444', borderDash: [5,5], fill: false, pointRadius: 0 }
             ]
         },
         options: {
