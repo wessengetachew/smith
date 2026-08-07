@@ -843,6 +843,20 @@ function openOpener(){
                 <input type="checkbox" id="autoPlayOnClick" checked>
                 <span>Auto-play audio</span>
             </label>
+            <!-- Formula target n. Same value as the "Sector:" selector under the
+                 ring (one source of truth, kept in sync both ways); this copy just
+                 saves scrolling when all you want is to retarget the C(n,N) line
+                 in the header. -->
+            <div class="control-group highlight" style="border-color:#c8a84a;" title="n in the header formula C(n, N) = 3N² / (π² n(n+1)). This is the same n as the Sector selector under the ring — changing either updates both.">
+                <label style="color:#c8a84a;">n:</label>
+                <button type="button" onclick="stepHeaderFormulaN(-1)" class="secondary" style="padding:2px 8px;font-size:12px;" title="n − 1">&#9664;</button>
+                <input type="number" id="headerFormulaN" value="2" min="1" step="1" style="width:64px;text-align:center;"
+                       oninput="onHeaderFormulaNInput(this)"
+                       onchange="setHeaderFormulaN(this.value,true)"
+                       onkeydown="if(event.key==='Enter')setHeaderFormulaN(this.value,true)">
+                <button type="button" onclick="stepHeaderFormulaN(1)" class="secondary" style="padding:2px 8px;font-size:12px;" title="n + 1">&#9654;</button>
+                <span id="headerFormulaNRange" style="color:#fbbf24;font-family:monospace;font-size:10px;margin-left:2px;">-</span>
+            </div>
         </div>
         
         <!-- Sector Bound Controls (collapsible) -->
@@ -1102,9 +1116,10 @@ function openOpener(){
             </div>
         </div>
 
-        <!-- ══ C(n) — LIVE VALUE & SURVIVAL RATIOS — sectorMin/sectorMax here play the
-             role of the opener's G: each sector n IS a ring at modulus m=n, so the
-             range below is exactly the same (r,M) lattice the opener's ring view uses. ══ -->
+        <!-- ══ C(n) — LIVE VALUE & SURVIVAL RATIOS — the m axis is bounded by the N
+             boxes (nMin/nMax), never by the Sector boxes: each sector n IS a ring at
+             modulus m=n, so the lattice here is exactly the (r,M) lattice the opener's
+             ring view uses, over the same N range the header cards report. ══ -->
         <div id="cn-ratio-panel" style="background:#0f172a;border-radius:8px;padding:12px 16px;margin-bottom:15px;border:1px solid #334155;border-left:4px solid #c8a84a;">
             <div onclick="cnTogglePanel()" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;">
                 <span id="cnChevron" style="display:inline-block;transition:transform .15s;color:#c8a84a;font-size:11px;transform:rotate(-90deg);">&#9662;</span>
@@ -1113,7 +1128,7 @@ function openOpener(){
                 <span style="font-size:11px;color:#94a3b8;">depth n:</span>
                 <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:3px;">
                     <button onclick="cnDepthStep(-1)" title="n − 1" style="background:#1e293b;border:1px solid #475569;color:#22c55e;font-size:11px;width:20px;height:22px;cursor:pointer;padding:0;line-height:1;border-radius:3px;">&minus;</button>
-                    <input type="number" id="cnDepthN" min="0" max="60" value="0" style="width:40px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;padding:2px 4px;text-align:center;" oninput="if(window.cnDepthRetarget)cnDepthRetarget();if(window.cnSetLockSetRefresh)cnSetLockSetRefresh();if(window.cnUpdatePanel)cnUpdatePanel();if(window.cnSpiralSyncLock)cnSpiralSyncLock();if(window.state&&(state.cnCanvasOn||(state.liftSpiralOn&&state.liftSpiralLock))&&window.drawMainRing)drawMainRing();">
+                    <input type="number" id="cnDepthN" min="0" max="60" value="0" style="width:40px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;padding:2px 4px;text-align:center;" oninput="if(window.cnDepthRetarget)cnDepthRetarget();if(window.cnSetLockSetRefresh)cnSetLockSetRefresh();if(window.cnUpdatePanel)cnUpdatePanel();if(window.cnSpiralSyncLock)cnSpiralSyncLock();if((state.cnCanvasOn||(state.liftSpiralOn&&state.liftSpiralLock))&&window.drawMainRing)drawMainRing();">
                     <button onclick="cnDepthStep(1)" title="n + 1" style="background:#1e293b;border:1px solid #475569;color:#22c55e;font-size:11px;width:20px;height:22px;cursor:pointer;padding:0;line-height:1;border-radius:3px;">+</button>
                     <button id="cnPlayBtn" onclick="cnDepthPlayToggle()" title="Animate C(n) DEPTH only: n ramps 0 → (the number in the box). Independent of the prime-spiral ▶ in Lift dynamics — both can run at once." style="background:rgba(200,168,74,0.12);border:1px solid #c8a84a;color:#c8a84a;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;margin-left:3px;">&#9654;</button>
                     <select id="cnPlaySpeedSel" onchange="if(window.cnSetDepthSpeed)cnSetDepthSpeed(this.value)" title="C(n) depth play speed" style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#94a3b8;font-size:9.5px;padding:2px 3px;margin-left:2px;">
@@ -1130,9 +1145,9 @@ function openOpener(){
                 <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
                 <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;">
                     <span style="font-size:10.5px;color:#94a3b8;">Scope:</span>
-                    <select id="cnScopeSel" onchange="if(window.cnUpdatePanel)cnUpdatePanel();" title="This Sector: population/lift computed only for the currently-selected Sector above. All Sectors: full m-range below." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:10px;padding:2px 4px;">
+                    <select id="cnScopeSel" onchange="if(window.cnUpdatePanel)cnUpdatePanel();" title="This sector: population/lift for the currently-selected Sector only. All sectors: the whole Farey triangle 1&#8804;r&lt;m over the N range in the N boxes above -- matches the header&apos;s pairs / gcd=1 cards exactly." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:10px;padding:2px 4px;">
                         <option value="sector" selected>This sector</option>
-                        <option value="all">All sectors (m-range)</option>
+                        <option value="all">All sectors (N range)</option>
                     </select>
                 </span>
                 <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
@@ -1145,6 +1160,9 @@ function openOpener(){
                     <input type="range" id="cnCanvasDimSl" min="0" max="80" step="5" value="12" style="width:50px;" oninput="cnSetCanvasDimAmt(this.value)" title="Brightness of non-surviving points in Dim mode">
                     <span id="cnCanvasDimLbl" style="color:#64748b;font-size:10px;min-width:26px;">12%</span>
                     <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10px;cursor:pointer;" title="Also dim/remove gcd(r,m)&gt;1 points. Off by default — they fail the lift trivially, so including them turns the C(n) link into a plain coprime filter."><input type="checkbox" id="cnCanvasNCChk" onchange="cnSetCanvasInclNC(this.checked)"> gcd&gt;1 too</label>
+                    <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#c8a84a;font-size:10.5px;cursor:pointer;font-weight:600;" title="Also remove the filtered-out points from the SECTOR COUNTS. Exact, P(m), C(m), P(r) and PP/PC/CP/CC are recounted over the surviving set, and Pred is scaled by C(n) — the limit of lift/gcd — so Err% still measures something. Filtered cells are shown in gold with a dagger."><input type="checkbox" id="cnCountsApplyChk" onchange="cnSetCountsApply(this.checked)"> Apply to counts</label>
+                    <span id="cnCountsApplyNote" style="color:#c8a84a;font-size:10px;"></span>
                 </span>
                 <span id="cnRangeNote" style="font-size:10.5px;color:#64748b;margin-left:auto;"></span>
             </div>
@@ -1169,6 +1187,25 @@ function openOpener(){
                     </select>
                     <label style="display:inline-flex;align-items:center;gap:4px;color:#9b7fe8;font-size:10.5px;cursor:pointer;" title="Mirror σ(r)=m−r"><input type="checkbox" id="cnSpMirrorChk" checked onchange="cnSpiralSetMirror(this.checked)"> Mirror</label>
                     <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10.5px;cursor:pointer;" title="Lock the spiral prime to depth n — p becomes the n-th prime, so stepping C(n) also steps the spiral. Also switches ▶ Play to animate C(n) depth instead of the spiral."><input type="checkbox" id="cnSpLockChk" onchange="cnSpiralSetLock(this.checked)"> &#128279; Lock to n</label>
+                    <span style="flex-basis:100%;height:0;"></span>
+                    <!-- Spiral PATH walk: start at the 1/2 line (m = 2p, where
+                         p/m = 1/2 exactly) and step outward or inward along the
+                         arm, labelling r/m as it goes. Distinct from the p-sweep
+                         &#9654; above, which changes which prime is drawn. -->
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border:1px solid rgba(200,168,74,.45);border-radius:4px;background:rgba(200,168,74,.06);">
+                        <span style="color:#c8a84a;font-size:10px;letter-spacing:.05em;">PATH from 1/2:</span>
+                        <select id="cnSpPathDirSel" title="Where the walk goes from the 1/2 crossing at m = 2p. Upper: m increases, p/m falls below 1/2 (upper half of the ring). Lower: m decreases toward p+1, p/m climbs above 1/2 (lower half). Both: m increases and each step lights p/m and its mirror (m-p)/m together, so the two arms grow symmetrically." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:9.5px;padding:2px 3px;">
+                            <option value="upper" selected>&#9651; Upper (m&#8593;)</option>
+                            <option value="lower">&#9661; Lower (m&#8595;)</option>
+                            <option value="both">&#8646; Both (mirror)</option>
+                        </select>
+                        <button id="cnSpPathPlayBtn" onclick="cnSpiralPathToggle()" title="Walk the spiral arm from the 1/2 line, labelling r/m at each step" style="background:rgba(200,168,74,0.16);border:1px solid #c8a84a;color:#c8a84a;font-size:10px;padding:3px 9px;cursor:pointer;border-radius:3px;font-weight:600;">&#9654; Path</button>
+                        <button onclick="cnSpiralPathStop()" title="Stop the walk (keeps the trail)" style="background:#1e293b;border:1px solid #64748b;color:#94a3b8;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;">&#9632;</button>
+                        <button onclick="cnSpiralPathClear()" title="Stop and erase the walked trail and its labels" style="background:#1e293b;border:1px solid #7f1d1d;color:#fca5a5;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:3px;">&#10005; Clear</button>
+                        <label style="display:inline-flex;align-items:center;gap:3px;color:#94a3b8;font-size:10px;cursor:pointer;" title="Keep every visited point labelled. Off = only the moving head is labelled."><input type="checkbox" id="cnSpPathLabelAll" checked> labels</label>
+                        <label style="display:inline-flex;align-items:center;gap:3px;color:#94a3b8;font-size:10px;cursor:pointer;" title="Sound a note per step, pitched by r/m"><input type="checkbox" id="cnSpPathAudio"> audio</label>
+                        <span id="cnSpPathReadout" style="color:#fbbf24;font-size:10px;font-family:monospace;min-width:74px;"></span>
+                    </span>
                     <span id="cnSpLockSetWrap" style="display:none;align-items:center;gap:3px;">
                       <span style="color:#e05060;font-size:10px;">sweep</span>
                       <select id="cnSpLockSetSel" onchange="if(window.cnSetLockSet)cnSetLockSet(this.value)" title="Which primes the spiral sweeps while locked to n. first n: p₁…pₙ (the n-th prime is where the old lock parked). p ≤ n+1: the primes whose local factor has saturated to 1−1/p at this depth. all: every prime in the N range." style="background:#1e293b;border:1px solid #475569;border-radius:3px;color:#94a3b8;font-size:9.5px;padding:2px 3px;">
@@ -1562,6 +1599,7 @@ function openOpener(){
                         <button onclick="playErrorBySector('error')" style="padding:3px 8px;font-size:10px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;" title="Play the relative-error sweep, following the ring">▶ Play All (Error)</button>
                         <button onclick="stopAllPlayback()" style="padding:3px 8px;font-size:10px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;font-weight:600;">■ Stop</button>
                         <button onclick="clearPlaybackLabels()" title="Clear the labels a stopped sweep leaves behind: ring corner readouts, chart fraction readouts, and the highlighted point label. Does not touch the ring trail or the computed data." style="padding:3px 8px;font-size:10px;background:#475569;border:none;border-radius:3px;color:#e2e8f0;cursor:pointer;font-weight:600;">Clear Labels</button>
+                        <button onclick="clearMainCanvas()" title="Wipe every overlay on the ring canvas: the playback trail a stopped sweep leaves behind, the corner readouts and point label, the ring-loop highlight and the spiral path walk. Does not touch the computed data." style="padding:3px 8px;font-size:10px;background:#7f1d1d;border:none;border-radius:3px;color:#fecaca;cursor:pointer;font-weight:600;">&#10005; Clear Canvas</button>
                         <select id="errorPlayDirA" onchange="setErrorPlayDir(this.value)" title="Sweep direction for Play All" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #8b5cf6;border-radius:3px;color:#c4b5fd;"><option value="forward">▶ Fwd</option><option value="backward">◀ Back</option><option value="pingpong">◀▶ Ping-pong</option></select>
                         <select id="errorPlayScopeA" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at n*</option><option value="green">Green band</option></select><input id="errorTrapKA" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of n*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;">
                         <label style="font-size:10px;color:#fff;display:flex;align-items:center;gap:4px;">
@@ -1642,12 +1680,13 @@ function openOpener(){
             <div style="margin-top:8px;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#1e1b4b;border-radius:6px;border:1px solid #8b5cf6;">
                 <span style="color:#c4b5fd;font-size:11px;font-weight:600;">Sector:</span>
                 <button onclick="stepViewSector(-1)" class="secondary" style="padding:4px 9px;font-size:11px;" title="Previous sector">&#9664;</button>
-                <select id="viewSector" style="padding:4px 8px;font-size:12px;background:#0f172a;border:1px solid #8b5cf6;border-radius:4px;color:#e2e8f0;min-width:70px;" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount();updateViewSectorRangeLabel();if(window.cnUpdatePanel)cnUpdatePanel();">
+                <select id="viewSector" style="padding:4px 8px;font-size:12px;background:#0f172a;border:1px solid #8b5cf6;border-radius:4px;color:#e2e8f0;min-width:70px;" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount();updateViewSectorRangeLabel();updateFormulaDisplay();if(window.cnUpdatePanel)cnUpdatePanel();">
                     <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
                 </select>
                 <button onclick="stepViewSector(1)" class="secondary" style="padding:4px 9px;font-size:11px;" title="Next sector">&#9654;</button>
                 <span style="color:#a5b4fc;font-size:10px;margin-left:6px;">range <span id="viewSectorRangeLabel" style="color:#fbbf24;font-family:monospace;">-</span></span>
                 <label style="color:#a5b4fc;font-size:10px;margin-left:8px;"><input type="checkbox" id="viewSectorSoloMode" onchange="applyViewSectorSolo()"> Solo this sector</label>
+                <label style="color:#a5b4fc;font-size:10px;margin-left:8px;" title="Shade the wedge S_n = (1/(n+1), 1/n] on the ring and outline its two rays, so the selected n is visible even with All Sectors on."><input type="checkbox" id="highlightCurrentSector" checked onchange="drawMainRing()"> Highlight wedge</label>
             </div>
             
             <!-- Sector Range Playback Controls -->
@@ -1993,6 +2032,8 @@ function openOpener(){
             <div class="chart-box chart-wrapper">
                 <h4>Exact vs Predicted 
                     <button class="secondary" onclick="playErrorBySector('count')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                    <button class="secondary" onclick="stopAllPlayback()" title="Stop this sweep" style="font-size:10px;padding:3px 8px;">■ Stop</button>
+                    <button class="secondary" onclick="clearMainCanvas()" title="Stop and wipe every ring-canvas overlay this sweep left behind" style="font-size:10px;padding:3px 8px;">&#10005; Clear Canvas</button>
                     <button class="secondary" onclick="clearPlaybackLabels()" title="Clear the labels a stopped sweep leaves behind: the ring corner readouts, the chart fraction readouts, and the highlighted point label. Does not touch the ring trail (use Clear Ring Trail) or the computed data." style="font-size:10px;padding:3px 8px;">Clear Labels</button>
                     <button class="secondary" onclick="exportCountChart()" style="font-size:10px;padding:3px 8px;">Export</button>
                     <button class="secondary" onclick="resetCountChartZoom()" style="font-size:10px;padding:3px 8px;" title="Reset zoom">Reset Zoom</button>
@@ -2033,6 +2074,7 @@ function openOpener(){
                 </h4>
                 <div style="margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                     <button class="secondary" onclick="clearRingPlaybackTrail()" style="font-size:10px;padding:3px 8px;">Clear Ring Trail</button>
+                    <button class="secondary" onclick="clearMainCanvas()" title="Trail + labels + highlights + spiral path, all at once" style="font-size:10px;padding:3px 8px;">&#10005; Clear Canvas</button>
                     <span style="border-left:1px solid #475569;margin:0 8px;height:20px;"></span>
                     <label style="color:#94a3b8;font-size:11px;">Click/Selection Mode:</label>
                     <select id="errorPlaybackMode" onchange="updateErrorModeHint()" style="font-size:11px;padding:3px 8px;background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
@@ -2108,6 +2150,7 @@ function openOpener(){
                     <span style="color:#e2e8f0;">P(r) = PP + PC</span>
                 </div>
             </div>
+            <div id="cnCountsTableBanner" style="display:none;background:rgba(200,168,74,0.08);border:1px solid #c8a84a;border-left:4px solid #c8a84a;border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#e2e8f0;line-height:1.5;"></div>
             <div class="table-scroll">
                 <div id="mainTablePager" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#94a3b8;">
                     <button class="secondary" onclick="gotoTablePage(-1)" style="padding:3px 10px;">‹ Prev</button>
@@ -4443,6 +4486,10 @@ const state = {
     // C(n) depth-lift canvas dynamic: as depth n climbs, points failing
     // gcd(r,m+j)=1 for j=0..n get dimmed or removed from the ring canvas.
     cnCanvasOn: true, cnCanvasMode: 'dim', cnCanvasDimAmt: 0.12, cnCanvasInclNC: false,
+    // When true the depth-n lift filter is applied to the SECTOR COUNTS too,
+    // not just to what the canvas draws: Exact, P(m), C(m), P(r), PP/PC/CP/CC
+    // are all recounted over the surviving points, and Pred is scaled by C(n).
+    cnCountsApply: false,
     // Prime spiral overlay, lockable to C(n) depth n (p = n-th prime).
     liftSpiralOn: false, liftSpiralP: 2, liftSpiralMirror: true, liftSpiralLock: false,
     // Main ring build-up playback: when set, drawMainRing only shows points with m <= this value.
@@ -7918,6 +7965,7 @@ function updateViewSectorDropdown() {
         updateSectorPointCount();
     }
     updateViewSectorRangeLabel();
+    if (typeof updateFormulaDisplay === 'function') updateFormulaDisplay();
 }
 
 // ── Sector selector helpers (selector lives directly under the ring) ──────
@@ -7946,6 +7994,7 @@ function setViewSectorValue(n, redraw) {
     }
     select.value = String(n);
     updateViewSectorRangeLabel();
+    if (typeof updateFormulaDisplay === 'function') updateFormulaDisplay();
     if (typeof updateSectorStats === 'function') updateSectorStats(n, state.residuesBySector[n] || []);
     if (typeof updateSectorPointCount === 'function') updateSectorPointCount();
     if (window.cnUpdatePanel) window.cnUpdatePanel();
@@ -8791,6 +8840,44 @@ function updateFormulaDisplay() {
         `C(${nVal}, ${N.toLocaleString()}) = 3×${N.toLocaleString()}² / (π²×${nVal}×${nVal+1}) = ` +
         `<span style="color:#22c55e;font-weight:bold;">${result.toFixed(4)}</span>`;
     formulaComputed.style.display = 'block';
+
+    // Mirror n back into the header box (unless the user is mid-edit) so the
+    // two controls never disagree.
+    const hdr = document.getElementById('headerFormulaN');
+    if (hdr && document.activeElement !== hdr && hdr.value !== String(nVal)) hdr.value = nVal;
+    const hdrRange = document.getElementById('headerFormulaNRange');
+    if (hdrRange) hdrRange.textContent = `S_n = (1/${nVal + 1}, 1/${nVal}]`;
+}
+
+// ── Header formula "n" box ────────────────────────────────────────────────
+// The header box and the "Sector:" selector under the ring are two views of
+// one number. viewSector stays the single source of truth: the box writes
+// through setViewSectorValue() and reads back in updateFormulaDisplay().
+var _headerFormulaNTimer = null;
+function setHeaderFormulaN(v, redraw) {
+    var n = parseInt(v, 10);
+    if (!isFinite(n) || n < 1) return;          // ignore blank / mid-typing states
+    if (n > 1000000) n = 1000000;
+    if (typeof setViewSectorValue === 'function') setViewSectorValue(n, redraw !== false);
+    updateFormulaDisplay();
+}
+function onHeaderFormulaNInput(el) {
+    // Update the formula text on every keystroke, but defer the ring redraw
+    // until typing settles — a full redraw per character is far too slow at
+    // large N.
+    var n = parseInt(el.value, 10);
+    if (!isFinite(n) || n < 1) return;
+    setHeaderFormulaN(n, false);
+    clearTimeout(_headerFormulaNTimer);
+    _headerFormulaNTimer = setTimeout(function () {
+        if (typeof drawMainRing === 'function') drawMainRing();
+    }, 300);
+}
+function stepHeaderFormulaN(delta) {
+    var el = document.getElementById('headerFormulaN');
+    var cur = parseInt(el && el.value, 10);
+    if (!isFinite(cur) || cur < 1) cur = 1;
+    setHeaderFormulaN(Math.max(1, cur + delta), true);
 }
 
 function updateMainCharts() {
@@ -8894,10 +8981,40 @@ function updateMainTable() {
     // Show/hide legend
     if (categoryLegend) categoryLegend.style.display = showCategories ? 'block' : 'none';
     
+    // Depth-n lift filter applied to the counts? Then every count column is
+    // over the SURVIVING set and Pred is scaled by C(n) (the limit of
+    // lift/gcd), so the header has to say so -- a silently filtered table
+    // that still says "Exact" would be the worst possible outcome here.
+    const cnFilterOn = (typeof cnCountsActive === 'function') && cnCountsActive();
+    const cnDepth = cnFilterOn ? cnGetDepthN() : 0;
+    const cnCn = cnFilterOn && window.cnGetCn ? cnGetCn(cnDepth) : 1;
+    const DAG = '\u2020';
+    const cnTitleAttr = cnFilterOn
+        ? ' title="Depth-' + cnDepth + ' lift filter applied: only pairs with gcd(r, m+j) = 1 for j = 0..' + cnDepth + ' are counted"'
+        : '';
+    const exactHdr = cnFilterOn ? 'Exact' + DAG : 'Exact';
+    const predHdr  = cnFilterOn ? 'Pred\u00b7C(n)' : 'Pred';
+    const hdrColor = cnFilterOn ? ' style="color:#c8a84a;"' : '';
+
+    // Banner above the table so the marker is never unexplained.
+    const cnBanner = document.getElementById('cnCountsTableBanner');
+    if (cnBanner) {
+        if (cnFilterOn) {
+            cnBanner.style.display = 'block';
+            cnBanner.innerHTML = DAG + ' <strong>Counts filtered at depth n = ' + cnDepth + '</strong>' +
+                ' \u2014 a pair (r,m) is counted only if gcd(r, m+j) = 1 for every j = 0\u2026' + cnDepth + '.' +
+                ' Every count column is over the surviving set. Pred is the unfiltered asymptotic scaled by' +
+                ' C(' + cnDepth + ') = ' + cnCn.toFixed(6) + ', the limit of lift/gcd, so Err% still tests that limit.' +
+                ' <span style="color:#64748b;">Gold cells are filtered; \u2026 marks a sector skipped for size.</span>';
+        } else {
+            cnBanner.style.display = 'none';
+        }
+    }
+
     // Update header based on category toggle
     if (theadRow) {
         if (showCategories) {
-            theadRow.innerHTML = '<th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th>' +
+            theadRow.innerHTML = '<th>n</th><th>Interval</th><th' + hdrColor + cnTitleAttr + '>' + exactHdr + '</th><th' + hdrColor + '>' + predHdr + '</th><th>Err%</th>' +
                 '<th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)" style="color:#f59e0b;">P(m)</th>' +
                 '<th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)" style="color:#6366f1;">C(m)</th>' +
                 '<th title="P/C = P(m)/C(m) ratio">P/C</th>' +
@@ -8907,7 +9024,7 @@ function updateMainTable() {
                 '<th title="CP = Composite numerator, Prime denominator" style="color:#6366f1;">CP</th>' +
                 '<th title="CC = Both composite (r composite AND m composite)" style="color:#94a3b8;">CC</th>';
         } else {
-            theadRow.innerHTML = '<th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th>' +
+            theadRow.innerHTML = '<th>n</th><th>Interval</th><th' + hdrColor + cnTitleAttr + '>' + exactHdr + '</th><th' + hdrColor + '>' + predHdr + '</th><th>Err%</th>' +
                 '<th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th>' +
                 '<th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th>' +
                 '<th title="P/C = P(m)/C(m) ratio">P/C</th>';
@@ -8958,6 +9075,12 @@ function updateMainTable() {
     const usesBoundedData = state.nMax > 3000 || state.mode === 'formula';
     const hasBoundedData = Object.keys(state.boundedResiduesBySector).length > 0;
     
+    // Pair budget for the filtered recount, shared across this page of rows.
+    // Sector 1 alone is ~N^2/4 pairs, so at large N a whole page cannot be
+    // recounted inside a frame; rows past the budget keep their unfiltered
+    // value and are marked with an ellipsis instead of freezing the page.
+    let cnBudgetLeft = 2.5e7;
+
     pageSectors.forEach((s, idx) => {
         // Use actual residues if available, otherwise use bounded data
         let res = state.residuesBySector[s.n] || [];
@@ -8997,14 +9120,44 @@ function updateMainTable() {
             primeNumCount = 0;
             ppCount = 0; pcCount = 0; cpCount = 0; ccCount = 0;
         }
-        
+
+        // --- Depth-n lift filter applied to the counts -----------------------
+        // Recount every column over the surviving set. Mode-independent: the
+        // sieve gives the same integers enumeration would, so this works in
+        // Formula mode too, where residuesBySector is empty.
+        let cnRow = null, cnSkipped = false, cnUnfilteredExact = null;
+        if (cnFilterOn) {
+            const est = window.cnSectorPairEstimate(s.n, state.nMax || 0);
+            cnRow = window.cnSectorFiltered(s.n, cnDepth, cnBudgetLeft, state.nMin, state.nMax);
+            if (cnRow) {
+                cnBudgetLeft -= est;
+                cnUnfilteredExact = (s.exact != null) ? s.exact : cnRow.gcd1;
+                primeCount = cnRow.pm;
+                compositeCount = cnRow.cm;
+                primeNumCount = cnRow.pr;
+                ppCount = cnRow.pp; pcCount = cnRow.pc; cpCount = cnRow.cp; ccCount = cnRow.cc;
+                dataSource = '';
+            } else {
+                cnSkipped = true;
+            }
+        }
+
         const errColor = s.relError !== null && Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80';
         
         // Calculate P/C ratio (use bounded if available)
         let pcRatio = '-';
         let pcColor = '#94a3b8';
         const hasExactFast = s.ppCount !== null && s.ppCount !== undefined;
-        if (!hasExactFast && s.boundedPCRatio !== undefined && s.boundedPCRatio !== null) {
+        if (cnRow) {
+            // Filtered P/C: recomputed from the surviving counts below, never
+            // from the cached unfiltered boundedPCRatio.
+            if (compositeCount > 0) {
+                const ratio = primeCount / compositeCount;
+                pcRatio = ratio.toFixed(decimals);
+                pcColor = ratio > 1 ? '#f59e0b' : ratio < 1 ? '#6366f1' : '#22c55e';
+            } else if (primeCount > 0) { pcRatio = '\u221e'; pcColor = '#f59e0b'; }
+            else { pcRatio = '0'; pcColor = '#94a3b8'; }
+        } else if (!hasExactFast && s.boundedPCRatio !== undefined && s.boundedPCRatio !== null) {
             pcRatio = s.boundedPCRatio.toFixed(decimals);
             pcColor = s.boundedPCRatio > 1 ? '#f59e0b' : s.boundedPCRatio < 1 ? '#6366f1' : '#22c55e';
         } else if (compositeCount > 0) {
@@ -9016,13 +9169,21 @@ function updateMainTable() {
             pcColor = '#f59e0b';
         }
         
-        // Format predicted with configurable precision
-        const predStr = s.predicted !== null ? s.predicted.toFixed(decimals) : '-';
+        // Format predicted with configurable precision. Under the filter the
+        // right comparison is the unfiltered asymptotic times C(n): among the
+        // gcd(r,m)=1 points, the share also surviving the depth-n lift tends
+        // to C(n) (this is exactly the panel's lift/gcd ratio), so Pred*C(n)
+        // keeps Err% meaningful instead of guaranteeing a large negative.
+        const predVal = (cnRow && s.predicted !== null) ? s.predicted * cnCn : s.predicted;
+        const predStr = predVal !== null && predVal !== undefined ? predVal.toFixed(decimals) : '-';
         
         // Show bounded error if available, otherwise regular error
         let errStr = '-';
         let errValue = null;
-        if (s.relError !== null) {
+        if (cnRow) {
+            errValue = predVal ? (100 * (cnRow.exact - predVal) / predVal) : null;
+            errStr = errValue !== null ? errValue.toFixed(decimals) + '%' : '-';
+        } else if (s.relError !== null) {
             errStr = s.relError.toFixed(decimals) + '%';
             errValue = s.relError;
         } else if (s.boundedRelError !== null) {
@@ -9033,22 +9194,38 @@ function updateMainTable() {
         
         // Show exact count or bounded exact
         let exactDisplay = '-';
-        if (s.exact !== null) {
+        let exactStyle = '';
+        if (cnRow) {
+            exactDisplay = cnRow.exact.toLocaleString() + '\u2020';
+            exactStyle = ' style="color:#c8a84a;font-weight:600;"';
+        } else if (cnSkipped) {
+            exactDisplay = (s.exact !== null ? s.exact : (s.boundedExact !== null ? s.boundedExact : '-')) + '\u2026';
+            exactStyle = ' style="color:#64748b;"';
+        } else if (s.exact !== null) {
             exactDisplay = s.exact;
         } else if (s.boundedExact !== null) {
             exactDisplay = s.boundedExact + '*';
         }
+        const cellTitle = cnRow
+            ? ' title="Depth-' + cnDepth + ' lift: ' + cnUnfilteredExact.toLocaleString() +
+              ' coprime \u2192 ' + cnRow.exact.toLocaleString() + ' survive (' +
+              (cnUnfilteredExact ? (100*cnRow.exact/cnUnfilteredExact).toFixed(2) : '0.00') +
+              '%, C(' + cnDepth + ') = ' + cnCn.toFixed(5) + ')"'
+            : (cnSkipped ? ' title="Sector too large to recount inside one frame \u2014 unfiltered value shown. Narrow the N range or page to fewer rows."' : '');
         
         // Prime/composite display
-        const primeDisplay = primeCount > 0 ? primeCount + dataSource : '-';
-        const compositeDisplay = compositeCount > 0 ? compositeCount + dataSource : '-';
-        const primeNumDisplay = primeNumCount > 0 ? primeNumCount + dataSource : '-';
+        // Under the filter a genuine 0 is information (the whole sector was
+        // struck out), so it must print as 0 rather than collapse to '-'.
+        const cnCell = v => (cnRow ? v.toLocaleString() : (v > 0 ? v + dataSource : '-'));
+        const primeDisplay = cnCell(primeCount);
+        const compositeDisplay = cnCell(compositeCount);
+        const primeNumDisplay = cnCell(primeNumCount);
         
         html += '<tr data-sector="' + s.n + '" data-idx="' + (pageStart + idx) + '" onclick="showSectorDataDetail(' + s.n + '); openSectorInspector(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
             '<td><strong>' + s.n + '</strong></td>' +
             '<td>(1/' + (s.n+1) + ', 1/' + s.n + ']</td>' +
-            '<td>' + exactDisplay + '</td>' +
-            '<td style="font-family:monospace;font-size:11px;">' + predStr + '</td>' +
+            '<td' + exactStyle + cellTitle + '>' + exactDisplay + '</td>' +
+            '<td style="font-family:monospace;font-size:11px;' + (cnRow ? 'color:#c8a84a;' : '') + '">' + predStr + '</td>' +
             '<td style="color:' + displayErrColor + ';font-family:monospace;font-size:11px;">' + errStr + '</td>' +
             '<td style="color:#f59e0b;font-size:11px;">' + primeDisplay + '</td>' +
             '<td style="color:#6366f1;font-size:11px;">' + compositeDisplay + '</td>' +
@@ -9057,10 +9234,10 @@ function updateMainTable() {
         // Add category columns if enabled
         if (showCategories) {
             html += '<td style="color:#a5b4fc;font-size:11px;">' + primeNumDisplay + '</td>' +
-                    '<td style="color:#22c55e;font-size:11px;">' + (ppCount > 0 ? ppCount + dataSource : '-') + '</td>' +
-                    '<td style="color:#f59e0b;font-size:11px;">' + (pcCount > 0 ? pcCount + dataSource : '-') + '</td>' +
-                    '<td style="color:#6366f1;font-size:11px;">' + (cpCount > 0 ? cpCount + dataSource : '-') + '</td>' +
-                    '<td style="color:#94a3b8;font-size:11px;">' + (ccCount > 0 ? ccCount + dataSource : '-') + '</td>';
+                    '<td style="color:#22c55e;font-size:11px;">' + cnCell(ppCount) + '</td>' +
+                    '<td style="color:#f59e0b;font-size:11px;">' + cnCell(pcCount) + '</td>' +
+                    '<td style="color:#6366f1;font-size:11px;">' + cnCell(cpCount) + '</td>' +
+                    '<td style="color:#94a3b8;font-size:11px;">' + cnCell(ccCount) + '</td>';
         }
         
         html += '</tr>';
@@ -9686,7 +9863,13 @@ function toggleCanvasPin() {
         wrap.style.boxSizing = '';
         wrap.style.display = '';
         canvas.style.maxHeight = '';
-        canvas.style.maxWidth = '';
+        // Restore the author-set cap, NOT ''. The canvas carries an inline
+        // max-width:100% and .ring-canvas has none, so clearing it left the
+        // canvas locked at its 800px backing width. On any viewport narrower
+        // than that the canvas overflowed #ringContainer, whose corner labels
+        // are positioned against the container box -- which is why the four
+        // readouts landed off-square (or off-screen) after unpinning.
+        canvas.style.maxWidth = '100%';
         canvas.style.width = '';
         canvas.style.height = '';
         canvas.style.display = '';
@@ -9708,6 +9891,9 @@ function toggleCanvasPin() {
         window.removeEventListener('resize', wgRepositionPinnedCanvas);
         btn.textContent = '📌 Pin Canvas';
         btn.style.background = '#1e293b';
+        // The container is back to its flow width; re-measure so the corner
+        // readouts go back to their full-size inset.
+        requestAnimationFrame(wgSyncRingLabelScale);
     } else {
         // --- Pin: fix the canvas below every sticky bar, add a spacer so the
         // rest of the page doesn't jump, and render it as a full-bleed square
@@ -9816,7 +10002,43 @@ function wgRepositionPinnedCanvas() {
 
     // Keep the bars below the canvas as it is resized.
     wgApplyPinStickyOffsets(side);
+    wgSyncRingLabelScale();
 }
+
+// --- Corner readouts (fraction / decimal / Hz / sector) -------------------
+// These are HTML overlays inside #ringContainer, so they do NOT scale with the
+// canvas the way the drawn content does. At the design size (800px) 18px and a
+// 10px inset are right; on a small pinned square four 18px labels collide in
+// the middle and spill over the edges. Scale the type and the inset with the
+// container's actual width, and clamp each label to its own quadrant.
+var WG_RING_LABELS = [
+    ['ringFractionDisplay', 'bottom', 'left'],
+    ['ringDecimalDisplay',  'bottom', 'right'],
+    ['ringHzDisplay',       'top',    'left'],
+    ['ringSectorDisplay',   'top',    'right']
+];
+function wgSyncRingLabelScale() {
+    var wrap = document.getElementById('ringContainer');
+    if (!wrap) return;
+    var w = wrap.getBoundingClientRect().width || 800;
+    var fs  = Math.max(10, Math.min(18, Math.round(w / 800 * 18)));
+    var pad = Math.max(4,  Math.round(fs * 0.56));
+    WG_RING_LABELS.forEach(function (spec) {
+        var el = document.getElementById(spec[0]);
+        if (!el) return;
+        el.style.fontSize     = fs + 'px';
+        el.style.lineHeight   = '1.15';
+        el.style.whiteSpace   = 'nowrap';
+        el.style.overflow     = 'hidden';
+        el.style.textOverflow = 'ellipsis';
+        el.style.maxWidth     = 'calc(50% - ' + (pad + 4) + 'px)';
+        el.style[spec[1]]     = pad + 'px';
+        el.style[spec[2]]     = pad + 'px';
+    });
+}
+window.addEventListener('resize', wgSyncRingLabelScale);
+window.addEventListener('DOMContentLoaded', wgSyncRingLabelScale);
+setTimeout(function () { try { wgSyncRingLabelScale(); } catch (e) {} }, 300);
 
 // Bottom-right drag handle. Pointer events cover mouse and touch alike.
 function wgAddPinResizeHandle(wrap) {
@@ -10539,22 +10761,50 @@ function displayDistance(p1, p2) {
 }
 
 // ===== RADIUS CALCULATION HELPER =====
+// ===== RING RADIUS: ONE MAPPING FOR THE WHOLE CANVAS =====
+// The innermost ring actually plotted. computeExact() stores max(2, nMin) as
+// state.startM; Formula mode never writes it. This used to be spelled two
+// different ways -- the point loop read `state.startM || 2`, calculateRadius()
+// read `state.nMin || 1` -- so at any spacing != 1 the connections, tracker and
+// blink highlight sat on slightly different radii from the points they marked.
+function ringStartM() {
+    // NB: `state` is a top-level `const`, so it is NOT a property of `window`.
+    // Guarding with `window.state &&` makes every read collapse to undefined.
+    return state.startM || Math.max(2, state.nMin || 1);
+}
+
+// Radius floor. In the power modes radNorm is (m-startM)/(nMax-startM), which
+// is exactly 0 at the innermost ring, so a floor is needed to keep it off the
+// origin. At ringSpacing = 1 the mapping is meant to be literally proportional
+// -- m=1 innermost, m=2 at twice that radius, m=3 at three times -- and the
+// floor broke it: every m <= 0.05*nMax was clamped onto the SAME circle
+// (m = 1..25 at N=500), which is exactly the "mods 1-6 all on the first circle,
+// mixed data" symptom. No floor in linear mode.
+function ringRadiusFromNorm(radNorm, maxR, ringSpacing) {
+    if (!isFinite(radNorm) || radNorm < 0) radNorm = 0;
+    const floor = (ringSpacing === 1) ? 0 : 0.05;
+    return Math.max(radNorm, floor) * maxR;
+}
+
 function calculateRadius(m, maxR, ringSpacing, invertOrder = false) {
-    const startM = state.nMin || 1;
+    const nMax = state.nMax || 1;   // `state` is a const binding, not window.state
     let radNorm;
-    
+
     if (ringSpacing === 1) {
-        // Uniform linear spacing: radius directly proportional to m
-        // m=1 → radius=1, m=2 → radius=2, etc.
-        // Normalize by nMax to fit within maxR
-        radNorm = m / state.nMax;
+        // True proportional spacing: radius = m/nMax * maxR, no clamping.
+        // Inverted, m=1 goes to the rim and m=nMax to the innermost ring,
+        // written so it never lands on 0.
+        radNorm = invertOrder ? ((nMax + 1 - m) / nMax) : (m / nMax);
     } else {
-        // Non-linear spacing with power function
-        radNorm = invertOrder ? (1 - (m-startM)/(state.nMax-startM)) : ((m-startM)/(state.nMax-startM));
-        radNorm = Math.pow(radNorm, 1/ringSpacing);
+        const startM = ringStartM();
+        const span = nMax - startM;
+        let t = span > 0 ? (m - startM) / span : 0;
+        if (t < 0) t = 0;                     // m below startM (e.g. the m=1 cusp)
+        if (invertOrder) t = 1 - t;
+        radNorm = Math.pow(t, 1 / ringSpacing);
     }
-    
-    return Math.max(radNorm, 0.05) * maxR;
+
+    return ringRadiusFromNorm(radNorm, maxR, ringSpacing);
 }
 
 // ===== CONNECTION DRAWING =====
@@ -10909,7 +11159,11 @@ function drawSectorFill(ctx, cx, cy, maxR, mode) {
     // Inner hole matches where the point cloud starts (ring m = nMin).
     const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
     const nMaxV = state.nMax || 500, nMinV = state.nMin || 1;
-    let inner = (ringSpacing === 1) ? Math.max(0.05, nMinV / nMaxV) * maxR : 0.05 * maxR;
+    // Inner hole = the radius of the innermost ring that is actually plotted,
+    // under the same mapping the points use. The old linear branch floored at
+    // 0.05*maxR, which punched a hole far larger than the real m=1 ring.
+    const _fillInvert = document.getElementById('invertRingOrder')?.checked || false;
+    let inner = calculateRadius(ringStartM(), maxR, ringSpacing, _fillInvert);
     if (!isFinite(inner) || inner < 0) inner = 0;
 
     // 'lift' shades every wedge by the depth-n survival ratio C(n), tying the
@@ -11309,9 +11563,28 @@ function drawMainRing() {
         ctx.fillText(`${medP}/${medQ}`, cx+Math.cos(medAngle)*(maxR+18)-8, cy-Math.sin(medAngle)*(maxR+18));
     }
     
-    if(!showAll) {
-        const a1=(1/(sector+1))*2*Math.PI, a2=(1/sector)*2*Math.PI;
-        ctx.fillStyle='rgba(99,102,241,0.1)'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,maxR,-a2,-a1); ctx.closePath(); ctx.fill();
+    // Current-sector wedge S_n = (1/(n+1), 1/n]. This used to be gated on
+    // !showAll, so in the default All Sectors view nothing on the canvas moved
+    // when n changed -- the faint band people were reading as a highlight was
+    // just the sector palette. It now always tracks the selector.
+    if (document.getElementById('highlightCurrentSector')?.checked ?? true) {
+        const a1 = (1/(sector+1))*2*Math.PI, a2 = (1/sector)*2*Math.PI;
+        ctx.save();
+        ctx.fillStyle = 'rgba(99,102,241,0.13)';
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,maxR,-a2,-a1); ctx.closePath(); ctx.fill();
+        // Deep sectors collapse to a fraction of a degree, where the fill alone
+        // stops reading. Outline the two rays and the arc, and tag the wedge.
+        ctx.strokeStyle = 'rgba(165,180,252,0.7)'; ctx.lineWidth = 1.25;
+        [a1, a2].forEach(a => {
+            ctx.beginPath(); ctx.moveTo(cx,cy);
+            ctx.lineTo(cx+Math.cos(a)*maxR, cy-Math.sin(a)*maxR); ctx.stroke();
+        });
+        ctx.beginPath(); ctx.arc(cx,cy,maxR,-a2,-a1); ctx.stroke();
+        const am = (a1+a2)/2;
+        ctx.fillStyle = '#a5b4fc'; ctx.font = '600 12px system-ui';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('S' + sector, cx+Math.cos(am)*(maxR+22), cy-Math.sin(am)*(maxR+22));
+        ctx.restore();
     }
     
     state.ringPoints = [];
@@ -11413,16 +11686,8 @@ function drawMainRing() {
         const primeMs = [...new Set(residues.filter(r => r.isPrime).map(r => r.m))].sort((a,b) => a-b);
         ctx.strokeStyle = 'rgba(245,158,11,0.3)';
         ctx.lineWidth = 2;
-        const startM = state.startM || 2;
         primeMs.forEach(pm => {
-            let radNorm;
-            if (ringSpacing === 1) {
-                radNorm = pm / state.nMax;
-            } else {
-                radNorm = invertOrder ? (1 - (pm-startM)/(state.nMax-startM)) : ((pm-startM)/(state.nMax-startM));
-                radNorm = Math.pow(radNorm, 1/ringSpacing);
-            }
-            const rad = Math.max(radNorm, 0.05) * maxR;
+            const rad = calculateRadius(pm, maxR, ringSpacing, invertOrder);
             ctx.beginPath();
             ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
             ctx.stroke();
@@ -11437,14 +11702,7 @@ function drawMainRing() {
         ctx.strokeStyle = 'rgba(100,116,139,0.15)';
         ctx.lineWidth = 0.5;
         for (let m = startM; m <= state.nMax; m += step) {
-            let radNorm;
-            if (ringSpacing === 1) {
-                radNorm = m / state.nMax;
-            } else {
-                radNorm = invertOrder ? (1 - (m-startM)/(state.nMax-startM)) : ((m-startM)/(state.nMax-startM));
-                radNorm = Math.pow(radNorm, 1/ringSpacing);
-            }
-            const rad = Math.max(radNorm, 0.05) * maxR;
+            const rad = calculateRadius(m, maxR, ringSpacing, invertOrder);
             ctx.beginPath();
             ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
             ctx.stroke();
@@ -11517,22 +11775,10 @@ function drawMainRing() {
             angle += ringRotation + globalPhase;
         }
         
-        // Radius calculation with uniform linear spacing option
-        const startM = state.startM || 2;
-        let radNorm;
-        
-        if (ringSpacing === 1) {
-            // Absolute linear spacing: radius = m / nMax
-            // m=2 → radius = 2/100 * maxR
-            // m=100 → radius = 100/100 * maxR = maxR
-            radNorm = m / state.nMax;
-        } else {
-            // Non-linear spacing with power function
-            radNorm = invertOrder ? (1 - (m-startM)/(state.nMax-startM)) : ((m-startM)/(state.nMax-startM));
-            radNorm = Math.pow(radNorm, 1/ringSpacing);
-        }
-        
-        const rad = Math.max(radNorm, 0.05) * maxR;
+        // Radius: single shared mapping (see calculateRadius). At ringSpacing 1
+        // this is exactly proportional -- m=1 innermost, m=k at k times that
+        // radius -- with no floor to collapse the inner rings together.
+        const rad = calculateRadius(m, maxR, ringSpacing, invertOrder);
         const x = cx+rad*Math.cos(angle), y = cy-rad*Math.sin(angle);
         
         // Check for NaN/Infinity
@@ -11627,10 +11873,7 @@ function drawMainRing() {
                 const ringRotation = rotationCumulative ? rotationAmt * m : rotationAmt;
                 ang += ringRotation + globalPhase;
             }
-            let radNorm;
-            if (ringSpacing === 1) radNorm = m / state.nMax;
-            else { radNorm = invertOrder ? (1 - (m - _spStartM) / (state.nMax - _spStartM)) : ((m - _spStartM) / (state.nMax - _spStartM)); radNorm = Math.pow(radNorm, 1 / ringSpacing); }
-            const rad = Math.max(radNorm, 0.05) * maxR;
+            const rad = calculateRadius(m, maxR, ringSpacing, invertOrder);
             return { x: cx + rad * Math.cos(ang), y: cy - rad * Math.sin(ang) };
         }
         const _spDotR = Math.max(1.6, finalPointSize * 1.3);
@@ -11654,13 +11897,92 @@ function drawMainRing() {
             }
         }
         if (_spP <= state.nMax) {
-            let radNorm;
-            if (ringSpacing === 1) radNorm = _spP / state.nMax;
-            else { radNorm = invertOrder ? (1 - (_spP - _spStartM) / (state.nMax - _spStartM)) : ((_spP - _spStartM) / (state.nMax - _spStartM)); radNorm = Math.pow(radNorm, 1 / ringSpacing); }
-            const dRad = Math.max(radNorm, 0.05) * maxR;
+            const dRad = calculateRadius(_spP, maxR, ringSpacing, invertOrder);
             ctx.save(); ctx.setLineDash([4, 4]);
             ctx.strokeStyle = 'rgba(230,56,72,.6)'; ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.arc(cx, cy, dRad, 0, 2 * Math.PI); ctx.stroke();
+            ctx.restore();
+        }
+
+        // ── The 1/2 line and the walked path ─────────────────────────────
+        // The arm crosses value 1/2 at m = 2p; mark that ray so the start of
+        // the walk is visible even before it runs.
+        {
+            const halfAng = Math.PI + globalPhase;   // value 1/2 -> angle pi
+            ctx.save();
+            ctx.strokeStyle = 'rgba(251,191,36,0.45)';
+            ctx.lineWidth = 1.4; ctx.setLineDash([7, 5]);
+            ctx.beginPath(); ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(halfAng) * maxR, cy - Math.sin(halfAng) * maxR);
+            ctx.stroke(); ctx.restore();
+            if (2 * _spP <= state.nMax) {
+                const sp = _spXY(_spP, 2 * _spP);
+                ctx.save();
+                ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(sp.x, sp.y, _spDotR * 3.2, 0, 2 * Math.PI); ctx.stroke();
+                ctx.fillStyle = '#fbbf24'; ctx.font = '600 11px ui-monospace, monospace';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+                ctx.fillText('1/2 @ m=' + (2 * _spP), sp.x + _spDotR * 4, sp.y - 3);
+                ctx.restore();
+            }
+        }
+
+        const _SP = window.spiralPath;
+        if (_SP && _SP.pts && _SP.pts.length) {
+            const labelAll = document.getElementById('cnSpPathLabelAll')?.checked ?? true;
+            const main = _SP.pts.filter(t => !t.mir).map(t => ({ t, xy: _spXY(t.r, t.m) }));
+            const mir  = _SP.pts.filter(t =>  t.mir).map(t => ({ t, xy: _spXY(t.r, t.m) }));
+            ctx.save();
+            [[main, '#fbbf24'], [mir, '#9b7fe8']].forEach(([arr, col]) => {
+                if (arr.length < 2) return;
+                ctx.strokeStyle = col; ctx.lineWidth = 2.2;
+                ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(arr[0].xy.x, arr[0].xy.y);
+                for (let i = 1; i < arr.length; i++) ctx.lineTo(arr[i].xy.x, arr[i].xy.y);
+                ctx.stroke();
+            });
+            // r/m labels. Every visited point when "labels" is ticked, else
+            // just the head -- at 4000 steps the all-labels view is unreadable,
+            // so thin them out to keep roughly one label per 14px of path.
+            ctx.font = '600 11px ui-monospace, monospace';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            const drawLabel = (o, col) => {
+                ctx.fillStyle = col;
+                ctx.beginPath(); ctx.arc(o.xy.x, o.xy.y, _spDotR * 1.9, 0, 2 * Math.PI); ctx.fill();
+                ctx.fillStyle = 'rgba(11,17,32,0.85)';
+                const txt = o.t.r + '/' + o.t.m, w = ctx.measureText(txt).width;
+                ctx.fillRect(o.xy.x + 7, o.xy.y - 7, w + 5, 14);
+                ctx.fillStyle = col;
+                ctx.fillText(txt, o.xy.x + 9, o.xy.y);
+            };
+            if (labelAll) {
+                [[main, '#fbbf24'], [mir, '#9b7fe8']].forEach(([arr, col]) => {
+                    let lastX = -1e9, lastY = -1e9;
+                    arr.forEach(o => {
+                        if (Math.hypot(o.xy.x - lastX, o.xy.y - lastY) < 14) return;
+                        lastX = o.xy.x; lastY = o.xy.y;
+                        drawLabel(o, col);
+                    });
+                });
+            }
+            // Head always labelled and always on top.
+            if (_SP.head) {
+                const h = { t: _SP.head, xy: _spXY(_SP.head.r, _SP.head.m) };
+                ctx.save();
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(h.xy.x, h.xy.y, _spDotR * 3, 0, 2 * Math.PI); ctx.stroke();
+                ctx.restore();
+                drawLabel(h, '#ffffff');
+                if (_SP.head.mirror != null) {
+                    const hm = { t: { r: _SP.head.mirror, m: _SP.head.m },
+                                 xy: _spXY(_SP.head.mirror, _SP.head.m) };
+                    ctx.save();
+                    ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(hm.xy.x, hm.xy.y, _spDotR * 3, 0, 2 * Math.PI); ctx.stroke();
+                    ctx.restore();
+                    drawLabel(hm, '#c4b5fd');
+                }
+            }
             ctx.restore();
         }
     }
@@ -12113,18 +12435,10 @@ function drawMainRing() {
         ctx.font = '10px system-ui';
         ctx.textAlign = 'left';
         const labeledRings = new Set();
-        const startM = state.startM || 2;
         residues.forEach(res => {
             if (labeledRings.has(res.m)) return;
             labeledRings.add(res.m);
-            let radNorm;
-            if (ringSpacing === 1) {
-                radNorm = res.m / state.nMax;
-            } else {
-                radNorm = invertOrder ? (1 - (res.m-startM)/(state.nMax-startM)) : ((res.m-startM)/(state.nMax-startM));
-                radNorm = Math.pow(radNorm, 1/ringSpacing);
-            }
-            const rad = Math.max(radNorm, 0.05) * maxR;
+            const rad = calculateRadius(res.m, maxR, ringSpacing, invertOrder);
             const ringRotation = rotationCumulative ? rotationAmt * res.m : rotationAmt;
             const labelAngle = -Math.PI/2 + ringRotation + globalPhase;
             const lx = cx + rad * Math.cos(labelAngle);
@@ -12163,11 +12477,10 @@ function drawMainRing() {
             const nMax  = state.nMax  || 500;
             ctx.fillStyle = 'rgba(251,191,36,0.30)';
             for (let mm = startM; mm <= nMax; mm++) {
-                let rn = invertOrder
-                    ? (1 - (mm - startM) / (nMax - startM))
-                    : ((mm - startM) / (nMax - startM));
-                if (ringSpacing !== 1) rn = Math.pow(rn, 1 / ringSpacing);
-                const rr = Math.max(rn, 0.05) * maxR;
+                // Was computing its own normalised radius that ignored the
+                // ringSpacing===1 branch, so the ghost dots drifted off the
+                // rings they belong to. Same mapping as the points now.
+                const rr = calculateRadius(mm, maxR, ringSpacing, invertOrder);
                 // Per-ring rotation (same logic as main point loop)
                 let cA = cuspAngle;
                 if (rotationOn) {
@@ -12228,10 +12541,7 @@ function drawMainRing() {
     // Draw highlighted ring circle during loop playback
     if (typeof highlightedRingM !== 'undefined' && highlightedRingM !== null) {
         const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
-        const startM = state.startM || 2;
-        let radNorm = invertOrder ? (1 - (highlightedRingM-startM)/(state.nMax-startM)) : ((highlightedRingM-startM)/(state.nMax-startM));
-        if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
-        const ringRad = Math.max(radNorm, 0.05) * maxR;
+        const ringRad = calculateRadius(highlightedRingM, maxR, ringSpacing, invertOrder);
         ctx.strokeStyle = '#fbbf24';
         ctx.lineWidth = 3;
         ctx.globalAlpha = 0.8;
@@ -13231,14 +13541,23 @@ function composeRingPoster(ring) {
     // That is the right denominator -- against it the coprime share converges to
     // 6/pi^2. Reporting gcd=1 over the plotted points instead just returns 100%
     // whenever the gcd=1 filter is active.
-    const totalPairs = (nMax * (nMax + 1) - (nMin - 1) * nMin) / 2;
+    // Ordered pairs (r,m) with 1 <= r < m and nMin <= m <= nMax: sum of (m-1)
+    // over the range. r = m is EXCLUDED because the plot excludes it -- Farey
+    // pairs require r < m, and computeFastSectorCategories() strips the one
+    // r = m = 1 point for exactly that reason. The old denominator included
+    // the r = m diagonal while the numerator did not, so the two indexed
+    // different sets and the card sat one point (and N pairs) away from the
+    // C(n) panel below. Both forms converge to 6/pi^2; only this one is the
+    // share of the set actually being counted.
+    const mLo = Math.max(2, nMin);
+    const totalPairs = nMax >= mLo ? (nMax * (nMax - 1) - (mLo - 1) * (mLo - 2)) / 2 : 0;
     const coPct = totalPairs ? (100 * nCo / totalPairs) : 0;
     const targetPct = 600 / (Math.PI * Math.PI);   // 6/pi^2 as a percentage
 
     const cards = [
         ['N',                    nMin + '\u2013' + nMax,                       '#e2e8f0'],
         ['Sectors',              state.sectorMin + '\u2013' + state.sectorMax, '#f59e0b'],
-        ['pairs r \u2264 m \u2264 N',   totalPairs.toLocaleString(),                   '#818cf8'],
+        ['pairs r < m \u2264 N',   totalPairs.toLocaleString(),                   '#818cf8'],
         ['gcd = 1  \u2192 6/\u03c0\u00b2 = ' + targetPct.toFixed(2) + '%',
                                  nCo.toLocaleString() + '  (' + coPct.toFixed(2) + '%)', '#22c55e']
     ];
@@ -13270,8 +13589,10 @@ function composeRingPoster(ring) {
     const cols = [
         ['n',        0.040, 'right', '#f59e0b'],
         ['Interval', 0.135, 'left',  '#94a3b8'],
-        ['Exact',    0.090, 'right', '#e2e8f0'],
-        ['Pred',     0.095, 'right', '#94a3b8'],
+        [((typeof cnCountsActive === 'function') && cnCountsActive()) ? 'Exact\u2020' : 'Exact',
+                     0.090, 'right', '#e2e8f0'],
+        [((typeof cnCountsActive === 'function') && cnCountsActive()) ? 'Pred\u00b7C(n)' : 'Pred',
+                     0.095, 'right', '#94a3b8'],
         ['Err%',     0.070, 'right', '#22c55e'],
         ['P(m)',     0.075, 'right', '#f59e0b'],
         ['C(m)',     0.080, 'right', '#60a5fa'],
@@ -13293,6 +13614,13 @@ function composeRingPoster(ring) {
                '   Bound: ' + (state.sectorBoundConstant || 1).toFixed(4) +
                '   n* = ' + nStar.toFixed(2) +
                '   Plotted: ' + pts.length.toLocaleString(), M + px(190), ty);
+    if ((typeof cnCountsActive === 'function') && cnCountsActive()) {
+        x.fillStyle = '#c8a84a';
+        x.fillText('\u2020 counts filtered at depth n = ' + cnGetDepthN() +
+                   ': gcd(r, m+j) = 1 for j = 0\u2026' + cnGetDepthN() +
+                   '   \u00b7   Pred \u00d7 C(n) = ' + (window.cnGetCn ? cnGetCn(cnGetDepthN()).toFixed(6) : '\u2014'),
+                   M + px(190), ty + px(26));
+    }
     ty += px(30);
 
     // C(n) canvas filter / prime spiral — live value & survival ratios,
@@ -13349,6 +13677,11 @@ function composeRingPoster(ring) {
     x.beginPath(); x.moveTo(M, ty); x.lineTo(W - M, ty); x.stroke();
 
     const fmt = v => (v == null ? '\u2014' : v.toLocaleString());
+    // Depth-n lift filter applied to the counts? The 7 footer rows are recounted
+    // over the surviving set, marked with a dagger, and Pred is scaled by C(n).
+    const posterFilter = (typeof cnCountsActive === 'function') && cnCountsActive();
+    const posterDepth = posterFilter ? cnGetDepthN() : 0;
+    const posterCn = posterFilter && window.cnGetCn ? cnGetCn(posterDepth) : 1;
     x.font = `${px(21)}px 'JetBrains Mono', monospace`;
     for (let k = 0; k < ROWS; k++) {
         const sec = secs[k];
@@ -13359,7 +13692,18 @@ function composeRingPoster(ring) {
                           : (sec.exact != null && sec.primeCount != null ? sec.exact - sec.primeCount : null)) : null;
         const pr = sec && sec.ppCount != null && sec.pcCount != null ? sec.ppCount + sec.pcCount
                  : (sec && sec.primeNumCount != null ? sec.primeNumCount : null);
-        const vals = [
+        const fr = (posterFilter && sec) ? window.cnSectorFiltered(n, posterDepth, 6e7, state.nMin, state.nMax) : null;
+        const fPred = (fr && sec) ? sec.predicted * posterCn : null;
+        const vals = fr ? [
+            String(n),
+            '(1/' + (n + 1) + ', 1/' + n + ']',
+            fr.exact.toLocaleString() + '\u2020',
+            fPred.toFixed(2),
+            fPred ? (100 * (fr.exact - fPred) / fPred).toFixed(2) + '%' : '\u2014',
+            fmt(fr.pm), fmt(fr.cm),
+            fr.cm ? (fr.pm / fr.cm).toFixed(2) : '\u2014',
+            fmt(fr.pr), fmt(fr.pp), fmt(fr.pc), fmt(fr.cp), fmt(fr.cc)
+        ] : [
             String(n),
             '(1/' + (n + 1) + ', 1/' + n + ']',
             sec && sec.exact != null ? Math.round(sec.exact).toLocaleString() : '\u2014',
@@ -22231,16 +22575,8 @@ function highlightPointOnRing(fraction) {
         angle += ringRotation + globalPhase;
     }
     
-    // Calculate radius (same formula as drawMainRing)
-    const startM = state.startM || 2;
-    let radNorm = invertOrder 
-        ? (1 - (fraction.m - startM) / (state.nMax - startM)) 
-        : ((fraction.m - startM) / (state.nMax - startM));
-    
-    if (ringSpacing !== 1) {
-        radNorm = Math.pow(radNorm, 1 / ringSpacing);
-    }
-    const rad = Math.max(radNorm, 0.05) * maxR;
+    // Radius: same shared mapping as drawMainRing.
+    const rad = calculateRadius(fraction.m, maxR, ringSpacing, invertOrder);
     
     // Calculate position
     const x = cx + rad * Math.cos(angle);
@@ -23976,6 +24312,23 @@ function clearRingPlaybackTrail() {
     ringPlaybackTrail = [];
     resetRingFollowCamera();
     drawMainRing();
+}
+
+// One button that wipes EVERY overlay the ring canvas can accumulate, so a
+// stopped sweep never leaves a path with no way to remove it: the blue
+// playback trail, the corner readouts and point label, the ring-loop
+// highlight, the spiral path walk, and any leftover camera follow.
+function clearMainCanvas() {
+    if (typeof stopAllPlayback === 'function') { try { stopAllPlayback(); } catch(e){} }
+    if (typeof cnSpiralPathClear === 'function') { try { cnSpiralPathClear(); } catch(e){} }
+    ringPlaybackTrail = [];
+    if (typeof highlightedRingM !== 'undefined') highlightedRingM = null;
+    if (typeof ringFollowCurrent !== 'undefined') ringFollowCurrent = null;
+    if (typeof resetRingFollowCamera === 'function') { try { resetRingFollowCamera(); } catch(e){} }
+    // clearPlaybackLabels() ends with its own drawMainRing(), so this is the
+    // last call and no extra redraw is needed.
+    if (typeof clearPlaybackLabels === 'function') clearPlaybackLabels();
+    else if (typeof drawMainRing === 'function') drawMainRing();
 }
 
 function pushRingPlaybackTrailPoint(r, m) {
@@ -26931,8 +27284,8 @@ function updateModLabelInputs() {
     var v=el?parseInt(el.value,10):NaN;
     return (isFinite(v)&&v>0)?v:fallback;
   }
-  function cnRangeMax(){ return Math.max(2, _cnNum('nMax', (window.state&&state.nMax)||500)); }
-  function cnRangeMin(){ return Math.max(2, _cnNum('nMin', (window.state&&state.nMin)||1)); }
+  function cnRangeMax(){ return Math.max(2, _cnNum('nMax', state.nMax||500)); }
+  function cnRangeMin(){ return Math.max(2, _cnNum('nMin', state.nMin||1)); }
   function _cnPlaying(){
     return (window.cnDepthIsPlaying && window.cnDepthIsPlaying())
         || (window.cnSpiralIsPlaying && window.cnSpiralIsPlaying());
@@ -26978,17 +27331,23 @@ function updateModLabelInputs() {
 
   // Same technique for the full-ring ("All sectors") scope: r = 0..m-1 over
   // m = sMin..sMax, with the lift truncated at sMax exactly as before.
+  // Population is the FAREY triangle 1 <= r < m <= sMax, the same index set the
+  // ring plots and the same one cnSectorSieve uses (hi = min(m-1, ...)).
+  // It used to scan r = 0..m-1, which added the r=0 spoke: gcd(0,m)=m kills it
+  // for every m>1, but at m=1 it slipped one extra survivor into gcd1. That
+  // single point was the reason the panel read one above the header's gcd=1
+  // card, and the r=0 column inflated the denominator by N.
   function cnRangeSieve(sMin,sMax,n){
     _ensureSpf(sMax+n+2);
     var total=0,gcd1=0,lift=0;
     var mark=new Uint8Array(sMax+2), pf=[];
-    for(var m=Math.max(1,sMin); m<=sMax; m++){
-      var len=m;
-      total+=len;
+    for(var m=Math.max(2,sMin); m<=sMax; m++){
+      var len=m;                        // index u <-> r = u; we read u = 1..m-1
+      total+=m-1;
       for(var t=0;t<len;t++) mark[t]=0;
-      pf.length=0; if(m>1) _pfInto(m,pf);
+      pf.length=0; _pfInto(m,pf);
       for(var a=0;a<pf.length;a++){ var p=pf[a]; for(var q=0;q<len;q+=p) mark[q]=1; }
-      var g=0; for(var u=0;u<len;u++) if(!mark[u]) g++;
+      var g=0; for(var u=1;u<len;u++) if(!mark[u]) g++;
       gcd1+=g;
       if(n<=0){ lift+=g; continue; }
       if(m+n>sMax) continue;            // block runs off the range: no lift
@@ -26996,7 +27355,7 @@ function updateModLabelInputs() {
         pf.length=0; _pfInto(m+j,pf);
         for(var b=0;b<pf.length;b++){ var p2=pf[b]; for(var q2=0;q2<len;q2+=p2) mark[q2]=1; }
       }
-      for(var v=0;v<len;v++) if(!mark[v]) lift++;
+      for(var v=1;v<len;v++) if(!mark[v]) lift++;
     }
     return {total:total,gcd1:gcd1,lift:lift};
   }
@@ -27011,7 +27370,95 @@ function updateModLabelInputs() {
     _memo[key]=res;
     return res;
   }
-  // "This sector" scope — the value-based Sector S_k = (1/(k+1), 1/k],
+  // ── Depth-n filtered sector counts, WITH the category breakdown ──────────
+  // cnSectorSieve above returns totals only. This variant walks the surviving
+  // r's so the table can report P(m)/C(m)/P(r)/PP/PC/CP/CC over the SURVIVING
+  // set rather than the whole sector, which is what "remove the filtered
+  // points from the counts" means. At depth 0 it reproduces the unfiltered
+  // exact counts exactly, which is the self-check.
+  //
+  // Convention matches the rest of the page: r is the numerator, m the
+  // denominator, 1 is neither prime nor composite (so it lands in the
+  // composite-numerator buckets, same as isPrime(1) === false elsewhere).
+  function _isPrimeSpf(x){ return x >= 2 && _spf[x] === x; }
+  var _cnFiltMemo = {};
+  // Rough pair count for sector k over m <= mMax: the sector-k triangle.
+  window.cnSectorPairEstimate = function(sector, mMax){
+    sector = Math.max(1, sector|0); mMax = Math.max(0, mMax|0);
+    return (mMax*mMax) / (2*sector*(sector+1));
+  };
+  // Returns null when the sector is too large for the caller's remaining
+  // budget, so the table can mark the row rather than freeze the page.
+  // mMinOpt/mMaxOpt let the sector table pin the range to state.nMin/nMax --
+  // the range the sectors were actually computed over -- so a filtered Exact
+  // never gets compared against an s.exact from a different N. Omitted, it
+  // falls back to the live N boxes like the rest of the panel.
+  window.cnSectorFiltered = function(sector, n, budget, mMinOpt, mMaxOpt){
+    sector = Math.max(1, sector|0);
+    n = Math.max(0, n|0);
+    var mMin = (mMinOpt != null) ? Math.max(2, mMinOpt|0) : cnRangeMin();
+    var mMax = (mMaxOpt != null) ? Math.max(mMin, mMaxOpt|0) : cnRangeMax();
+    var key = 'f|'+sector+'|'+n+'|'+mMin+'|'+mMax+'|'+(state.cnCanvasInclNC?1:0);
+    var hit = _cnFiltMemo[key];
+    if (hit) return hit;
+    if (budget != null && window.cnSectorPairEstimate(sector, mMax) > budget) return null;
+
+    _ensureSpf(mMax + n + 2);
+    var total=0, gcd1=0, lift=0, pm=0, cm=0, pr=0, pp=0, pc=0, cp=0, cc=0;
+    var cap = Math.max(16, ((mMax/(sector*(sector+1)))|0) + 8);
+    var mark = new Uint8Array(cap), pf = [];
+    for (var m = Math.max(2, mMin); m <= mMax; m++){
+      var lo = ((m/(sector+1))|0)+1, hi = Math.min(m-1, (m/sector)|0);
+      if (hi < lo) continue;
+      var len = hi - lo + 1;
+      total += len;
+      if (mark.length < len) mark = new Uint8Array(len*2);
+      for (var t=0;t<len;t++) mark[t]=0;
+      pf.length=0; _pfInto(m, pf);
+      for (var a=0;a<pf.length;a++){
+        var p=pf[a], st=Math.ceil(lo/p)*p;
+        for (var q=st;q<=hi;q+=p) mark[q-lo]=1;
+      }
+      for (var u=0;u<len;u++) if(!mark[u]) gcd1++;
+      for (var j=1;j<=n;j++){
+        pf.length=0; _pfInto(m+j, pf);
+        for (var b=0;b<pf.length;b++){
+          var p2=pf[b], st2=Math.ceil(lo/p2)*p2;
+          for (var q2=st2;q2<=hi;q2+=p2) mark[q2-lo]=1;
+        }
+      }
+      var mP = _isPrimeSpf(m);
+      for (var v=0;v<len;v++){
+        if (mark[v]) continue;
+        lift++;
+        var rP = _isPrimeSpf(lo+v);
+        if (mP) pm++; else cm++;
+        if (rP) pr++;
+        if (rP && mP) pp++; else if (rP) pc++; else if (mP) cp++; else cc++;
+      }
+    }
+    var out = { sector:sector, depth:n, mMin:mMin, mMax:mMax,
+                total:total, gcd1:gcd1, exact:lift,
+                pm:pm, cm:cm, pr:pr, pp:pp, pc:pc, cp:cp, cc:cc };
+    var ks = Object.keys(_cnFiltMemo); if (ks.length > 512) delete _cnFiltMemo[ks[0]];
+    _cnFiltMemo[key] = out;
+    return out;
+  };
+  // Master switch for "apply the depth-n filter to the sector counts".
+  window.cnCountsActive = function(){
+    return !!(state.cnCountsApply && state.cnCanvasOn && window.cnGetDepthN() > 0);
+  };
+  window.cnSetCountsApply = function(v){
+    state.cnCountsApply = !!v;
+    var note = document.getElementById('cnCountsApplyNote');
+    if (note) note.textContent = state.cnCountsApply
+        ? (window.cnGetDepthN() > 0 ? 'sector counts filtered' : 'set depth n > 0 to filter')
+        : '';
+    if (typeof updateMainTable === 'function') updateMainTable();
+    if (typeof updateMainStats === 'function') updateMainStats();
+  };
+
+  // ── "This sector" scope — the value-based Sector S_k = (1/(k+1), 1/k],
   // matching the "Sector:" dropdown used everywhere else on the page.
   // ONE code path for every mode. It used to branch on state.residuesBySector,
   // which is why the panel behaved differently in Exact vs Formula/Hybrid:
@@ -27068,10 +27515,14 @@ function updateModLabelInputs() {
               + (c.capM<c.mMax ? ' \u00b7 capped from m='+c.mMax+' for speed' : ' \u00b7 full range')
               + (c.pending ? ' \u00b7 holding last value while animating' : '');
     } else {
-      var sMinEl=document.getElementById('sectorMin');
-      var sMaxEl=document.getElementById('sectorMax');
-      var sMin=Math.max(1,parseInt(sMinEl&&sMinEl.value,10)||1);
-      var sMax=Math.max(sMin,parseInt(sMaxEl&&sMaxEl.value,10)||275);
+      // m is bounded by N, not by the Sector boxes. The Sector range picks
+      // WHICH value-based sectors S_k get tabulated; it has nothing to say
+      // about how far the m axis runs. Reading sectorMin/sectorMax here made
+      // the panel silently report a different population from the header's
+      // "pairs r < m <= N" and "gcd = 1" cards the moment the two ranges
+      // differed (and matched only by coincidence when both read 1-500).
+      var sMin=Math.max(1,_cnNum('nMin',1));
+      var sMax=Math.max(sMin,_cnNum('nMax',state.nMax||500));
       // Ring scope holds ~ (sMax^2 - sMin^2)/2 pairs — same single budget.
       // The old fixed CAP=400 was a limit of the gcd-per-pair walk, not of the
       // data; the sieve clears several thousand rings well inside a frame.
@@ -27080,7 +27531,7 @@ function updateModLabelInputs() {
         sMaxUsed=Math.max(sMin+1, Math.floor(Math.sqrt(2*CN_PAIR_BUDGET+sMin*sMin)));
       }
       c=cnCountsRange(sMin,sMaxUsed,n);
-      rangeNote = 'All sectors \u00b7 m='+sMin+'\u2026'+sMaxUsed+' \u00b7 exact lattice counts'
+      rangeNote = 'All sectors \u00b7 N range m='+sMin+'\u2026'+sMaxUsed+' \u00b7 1\u2264r<m \u00b7 exact lattice counts'
                 + (sMaxUsed<sMax?' \u00b7 capped from '+sMax+' for speed':' \u00b7 full range');
     }
     var Cn=getCn(n), Dn=Cn/ZETA2;
@@ -27101,7 +27552,19 @@ function updateModLabelInputs() {
     setTxt('cnCondNote', '→ C('+n+') ≈ '+Cn.toFixed(5)+' as range→∞');
     setTxt('cnLiftTitle', n===0 ? 'lift: gcd(r,m)=1 (n=0 — no extra constraint, equals population)' : n===1 ? 'lift: gcd(r,m)=gcd(r,m+1)=1' : ('lift: gcd(r,m+j)=1 for j=0..'+n));
     setTxt('cnRangeNote', rangeNote);
+    var apNote=document.getElementById('cnCountsApplyNote');
+    if(apNote) apNote.textContent = state.cnCountsApply
+        ? (n>0 ? 'sector counts filtered' : 'set depth n > 0 to filter')
+        : '';
+    // Keep the sector table in step with the depth when the filter feeds it.
+    // Debounced while a transport runs: recounting every row per frame would
+    // drop the animation, and the settled table lands when it stops.
+    if(state.cnCountsApply && typeof updateMainTable==='function'){
+      clearTimeout(_cnTableTimer);
+      _cnTableTimer=setTimeout(function(){ try{ updateMainTable(); }catch(e){} }, _cnPlaying()?280:0);
+    }
   }
+  var _cnTableTimer=null;
   window.cnUpdatePanel = cnUpdatePanel;
   window.cnGetCn = getCn;   // used by the ring's 'Wedges x C(n) lift' shading
   // ── Prime helpers for the spiral ──────────────────────────────────────
@@ -27128,7 +27591,117 @@ function updateModLabelInputs() {
     _cnSpiralLbl();
   }
   window.cnSpiralSyncLock=_cnSpiralSyncLock;
-  window.cnSpiralSetOn=function(v){ state.liftSpiralOn=!!v; if(typeof drawMainRing==='function') drawMainRing(); };
+  // ── Spiral PATH walk ─────────────────────────────────────────────────────
+  // The arm is r = p mod m; for every m > p that is just r = p, so the arm is
+  // the fraction sequence p/m, m = p+1 .. N. It crosses the 1/2 line exactly
+  // at m = 2p (p/2p = 1/2), which is the natural place to start from:
+  //   m > 2p  =>  p/m < 1/2  =>  angle < pi  =>  UPPER half of the ring
+  //   m < 2p  =>  p/m > 1/2  =>  angle > pi  =>  LOWER half
+  // The mirror sigma(r) = m - r sends p/m to (m-p)/m, i.e. reflects across the
+  // 1/2 line, so 'both' walks one m sequence while lighting the two arms at
+  // once. If 2p > N the crossing is off the plotted range and we start at N.
+  window.spiralPath = { playing:false, timer:null, mode:'upper', p:2, k:0, pts:[], head:null };
+
+  function _spPathStartM(p){
+    var N = state.nMax || 500;
+    var m = 2 * p;
+    if (m > N) m = N;              // crossing beyond the range: clamp to the rim
+    if (m < p + 1) m = p + 1;      // ...or inside it: first ring that carries p
+    return m;
+  }
+  function _spPathSpeed(){
+    var sel = document.getElementById('cnSpiralSpeedSel');
+    return Math.max(20, parseInt(sel && sel.value, 10) || 180);
+  }
+  function _spPathReadout(txt){
+    var el = document.getElementById('cnSpPathReadout'); if (el) el.textContent = txt || '';
+  }
+  function _spPathBtn(){
+    var b = document.getElementById('cnSpPathPlayBtn'); if (!b) return;
+    if (window.spiralPath.playing) { b.innerHTML = '\u23f8 Pause'; b.style.background = 'rgba(200,168,74,0.4)'; }
+    else { b.innerHTML = '\u25b6 Path'; b.style.background = 'rgba(200,168,74,0.16)'; }
+  }
+  function _spPathNote(r, m){
+    if (!document.getElementById('cnSpPathAudio')?.checked) return;
+    try {
+      if (typeof initAudioContext === 'function') initAudioContext();
+      var base = (window.harmonicSettings && harmonicSettings.baseFreq) || 440;
+      if (typeof playTone === 'function') playTone(base * (r / m) * 2, 0.12, 0.25);
+    } catch (e) {}
+  }
+
+  window.cnSpiralPathStop = function(){
+    var S = window.spiralPath;
+    S.playing = false;
+    if (S.timer) { clearTimeout(S.timer); S.timer = null; }
+    _spPathBtn();
+  };
+  window.cnSpiralPathClear = function(){
+    window.cnSpiralPathStop();
+    var S = window.spiralPath;
+    S.pts = []; S.head = null; S.k = 0;
+    _spPathReadout('');
+    if (typeof drawMainRing === 'function') drawMainRing();
+  };
+  window.cnSpiralPathToggle = function(){
+    var S = window.spiralPath;
+    if (S.playing) { window.cnSpiralPathStop(); return; }
+
+    // Turning the walk on implies showing the spiral -- otherwise the arm it
+    // walks is invisible and the button looks broken.
+    if (!state.liftSpiralOn) {
+      state.liftSpiralOn = true;
+      var chk = document.getElementById('cnSpOnChk'); if (chk) chk.checked = true;
+    }
+    var mode = document.getElementById('cnSpPathDirSel')?.value || 'upper';
+    // A fresh run, or a resume of the same run?
+    if (S.mode !== mode || S.p !== state.liftSpiralP || !S.pts.length) {
+      S.mode = mode; S.p = state.liftSpiralP; S.k = 0; S.pts = []; S.head = null;
+    }
+    S.playing = true;
+    _spPathBtn();
+    _spPathStep();
+  };
+
+  function _spPathStep(){
+    var S = window.spiralPath;
+    if (!S.playing) return;
+    var p = S.p, N = state.nMax || 500, m0 = _spPathStartM(p), m;
+
+    if (S.mode === 'lower') {
+      m = m0 - S.k;
+      if (m < p + 1) { window.cnSpiralPathStop(); _spPathReadout('end \u00b7 m=' + (p+1)); return; }
+    } else {
+      m = m0 + S.k;
+      if (m > N) { window.cnSpiralPathStop(); _spPathReadout('end \u00b7 m=' + N); return; }
+    }
+
+    var r = p % m;                       // = p whenever m > p
+    var rMir = (m - r) % m;
+    S.head = { r:r, m:m, mirror:(S.mode === 'both') ? rMir : null };
+    S.pts.push({ r:r, m:m });
+    if (S.mode === 'both') S.pts.push({ r:rMir, m:m, mir:true });
+    if (S.pts.length > 4000) S.pts.splice(0, S.pts.length - 4000);
+
+    var val = r / m;
+    _spPathReadout(r + '/' + m + ' = ' + val.toFixed(4) + (val > 0.5 ? '  \u2193' : val < 0.5 ? '  \u2191' : '  = 1/2'));
+    _spPathNote(r, m);
+    if (typeof drawMainRing === 'function') drawMainRing();
+
+    S.k++;
+    S.timer = setTimeout(_spPathStep, _spPathSpeed());
+  }
+
+  // Restarting the prime or turning the spiral off invalidates a walk.
+  window.cnSpiralPathReset = function(){ window.cnSpiralPathClear(); };
+
+  window.cnSpiralSetOn=function(v){
+    state.liftSpiralOn=!!v;
+    // The walk is drawn inside the spiral block, so hiding the spiral must
+    // stop it rather than leave an invisible timer redrawing the canvas.
+    if(!state.liftSpiralOn && window.spiralPath && window.spiralPath.playing) window.cnSpiralPathStop();
+    if(typeof drawMainRing==='function') drawMainRing();
+  };
   window.cnSpiralSetMirror=function(v){ state.liftSpiralMirror=!!v; if(typeof drawMainRing==='function') drawMainRing(); };
   window.cnSpiralSetLock=function(v){
     state.liftSpiralLock=!!v;
@@ -27140,6 +27713,8 @@ function updateModLabelInputs() {
     if(typeof drawMainRing==='function') drawMainRing();
   };
   window.cnSpiralStep=function(dir){
+    // A walked path belongs to one prime; changing p makes it meaningless.
+    if(window.spiralPath && window.spiralPath.pts.length) window.cnSpiralPathClear();
     if(state.liftSpiralLock){
       // Locked: step within the active set rather than refusing outright.
       var A=_cnActivePrimes(), i=A.indexOf(state.liftSpiralP);
@@ -27156,6 +27731,7 @@ function updateModLabelInputs() {
     if(typeof drawMainRing==='function') drawMainRing();
   };
   window.cnSpiralReset=function(){
+    if(window.spiralPath && window.spiralPath.pts.length) window.cnSpiralPathClear();
     state.liftSpiralP=2;
     _cnSpiralLbl();
     if(typeof drawMainRing==='function') drawMainRing();
@@ -27179,6 +27755,9 @@ function updateModLabelInputs() {
   window.cnSetCanvasOn=function(v){
     state.cnCanvasOn=!!v;
     if(typeof drawMainRing==='function') drawMainRing();
+    // The counts filter is gated on the canvas link, so toggling it here has
+    // to redraw the table as well or the two go out of sync.
+    if(state.cnCountsApply && typeof updateMainTable==='function') updateMainTable();
   };
   window.cnSetCanvasMode=function(v){
     state.cnCanvasMode=(v==='remove')?'remove':'dim';
@@ -27187,6 +27766,7 @@ function updateModLabelInputs() {
   window.cnSetCanvasInclNC=function(v){
     state.cnCanvasInclNC=!!v;
     if(state.cnCanvasOn && typeof drawMainRing==='function') drawMainRing();
+    if(state.cnCountsApply && typeof updateMainTable==='function') updateMainTable();
   };
   window.cnSetCanvasDimAmt=function(v){
     state.cnCanvasDimAmt=Math.max(0,Math.min(1,(+v||0)/100));
@@ -27229,7 +27809,7 @@ function updateModLabelInputs() {
   // sweep tracks C(n) as n moves (see the sweep selector's tooltip).
   var _spSetCache=null, _spSetKey='';
   function _cnActivePrimes(){
-    var maxP=(window.state && state.nMax) || 500;
+    var maxP=state.nMax || 500;
     var locked=!!state.liftSpiralLock;
     var n=(window.cnGetDepthN?cnGetDepthN():0);
     var mode = locked ? (((document.getElementById('cnSpLockSetSel')||{}).value)||'firstn') : 'all';
