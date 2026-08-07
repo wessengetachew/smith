@@ -1161,6 +1161,10 @@ function openOpener(){
                     <span id="cnCanvasDimLbl" style="color:#64748b;font-size:10px;min-width:26px;">12%</span>
                     <label style="display:inline-flex;align-items:center;gap:4px;color:#e05060;font-size:10px;cursor:pointer;" title="Also dim/remove gcd(r,m)&gt;1 points. Off by default — they fail the lift trivially, so including them turns the C(n) link into a plain coprime filter."><input type="checkbox" id="cnCanvasNCChk" onchange="cnSetCanvasInclNC(this.checked)"> gcd&gt;1 too</label>
                     <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
+                    <label style="display:inline-flex;align-items:center;gap:4px;color:#22c55e;font-size:10.5px;cursor:pointer;" title="True lift arcs: r at ring m connects to r mod(m+1) at ring m+1 — same construction as index.html's Ring View Lift arcs. Only a valid surviving lift (gcd(r mod(m+1), m+1)=1) is drawn; an invalid one gets no line. A point the C(n) filter removes from the canvas breaks the line there too."><input type="checkbox" id="cnConnectChk" onchange="cnSetConnectOn(this.checked)"> Connect next gcd=1</label>
+                    <input type="range" id="cnConnectWidthSl" min="0.5" max="5" step="0.5" value="1.5" style="width:50px;" oninput="cnSetConnectWidth(this.value)" title="Connecting line thickness">
+                    <span id="cnConnectWidthLbl" style="color:#64748b;font-size:10px;min-width:22px;">1.5</span>
+                    <span style="width:1px;height:16px;background:#334155;display:inline-block;"></span>
                     <label style="display:inline-flex;align-items:center;gap:4px;color:#c8a84a;font-size:10.5px;cursor:pointer;font-weight:600;" title="Also remove the filtered-out points from the SECTOR COUNTS. Exact, P(m), C(m), P(r) and PP/PC/CP/CC are recounted over the surviving set, and Pred is scaled by C(n) — the limit of lift/gcd — so Err% still measures something. Filtered cells are shown in gold with a dagger."><input type="checkbox" id="cnCountsApplyChk" onchange="cnSetCountsApply(this.checked)"> Apply to counts</label>
                     <span id="cnCountsApplyNote" style="color:#c8a84a;font-size:10px;"></span>
                 </span>
@@ -4486,6 +4490,11 @@ const state = {
     // C(n) depth-lift canvas dynamic: as depth n climbs, points failing
     // gcd(r,m+j)=1 for j=0..n get dimmed or removed from the ring canvas.
     cnCanvasOn: true, cnCanvasMode: 'dim', cnCanvasDimAmt: 0.12, cnCanvasInclNC: false,
+    // Connect each residue r to its next surviving (gcd(r,m)=1) ring as m
+    // rises. Only actual coprime points participate, and a point the C(n)
+    // filter removes from the canvas drops out of the chain too — the line
+    // stops there instead of passing through a point that isn't drawn.
+    cnConnectOn: false, cnConnectWidth: 1.5,
     // When true the depth-n lift filter is applied to the SECTOR COUNTS too,
     // not just to what the canvas draws: Exact, P(m), C(m), P(r), PP/PC/CP/CC
     // are all recounted over the surviving points, and Pred is scaled by C(n).
@@ -10821,6 +10830,17 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
     const thickness = parseFloat(document.getElementById('connectionThickness')?.value || 1);
     const color = document.getElementById('connectionColor')?.value || '#8b5cf6';
     
+    // A node counts as "on" unless the C(n) canvas filter is actively set to
+    // Remove and this exact point is one it strips — that's the only case a
+    // point is actually gone from the canvas (Dim mode just fades it, so a
+    // dimmed point still has something to connect to).
+    const cnN = (state.cnCanvasOn && typeof cnGetDepthN === 'function') ? cnGetDepthN() : 0;
+    function nodeOn(r, m) {
+        if (!state.cnCanvasOn || state.cnCanvasMode !== 'remove') return true;
+        if (typeof cnCanvasAffects !== 'function') return true;
+        return !cnCanvasAffects(r, m, cnN);
+    }
+    
     ctx.globalAlpha = opacity;
     ctx.lineWidth = thickness;
     
@@ -10866,9 +10886,14 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
             });
         });
     } else if (type === 'sameResidue') {
-        // Connect same r value across different m
+        // Connect same r value across different m — only actual gcd(r,m)=1
+        // lift points participate, and a point the C(n) filter has removed
+        // (Remove mode) drops out of the chain entirely, breaking the line
+        // on both sides of it rather than passing through it.
         const byR = {};
         residues.forEach(p => {
+            if (gcd(p.r, p.m) !== 1) return;
+            if (!nodeOn(p.r, p.m)) return;
             if (!byR[p.r]) byR[p.r] = [];
             byR[p.r].push(p);
         });
@@ -10974,12 +10999,16 @@ function drawConnections(ctx, cx, cy, residues, maxR) {
             }
         });
     } else if (type === 'sameR') {
-        // Connect same numerator r across different moduli
+        // Connect same numerator r across different moduli — only valid
+        // gcd(r,m)=1 lift points, and a point removed by the C(n) filter
+        // (Remove mode) drops out of the chain so no line passes through it.
         ctx.strokeStyle = color;
         
         // Group by numerator
         const byR = {};
         residues.forEach(p => {
+            if (gcd(p.r, p.m) !== 1) return;
+            if (!nodeOn(p.r, p.m)) return;
             if (!byR[p.r]) byR[p.r] = [];
             byR[p.r].push(p);
         });
@@ -11860,7 +11889,39 @@ function drawMainRing() {
             }
         }
     });
-    
+
+    // ── C(n) canvas: true lift arcs, r at ring m → r mod(m+1) at ring m+1 ──
+    // Same construction as the Ring View's "Lift arcs" mode on index.html:
+    // a single-step lift, not "same r, skip to whatever ring survives next".
+    // Only a valid lift is drawn (gcd(r mod(m+1), m+1)=1) — an invalid one
+    // gets no line at all. Both endpoints are looked up in state.ringPoints,
+    // which only holds points that actually got drawn this pass — so a
+    // point the C(n) filter removed (mode='remove'), or that fell outside
+    // the current sector/filters, was never pushed there and the lookup
+    // simply misses, breaking the line at exactly that point.
+    if (state.cnCanvasOn && state.cnConnectOn) {
+        const byKey = new Map();
+        for (const p of state.ringPoints) {
+            if (p.gcdVal !== 1) continue; // only coprime points can be a lift source or target
+            byKey.set(p.r + '|' + p.m, p);
+        }
+        ctx.save();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = state.cnConnectWidth;
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        for (const p of byKey.values()) {
+            const r2 = p.r % (p.m + 1);
+            if (gcd(r2, p.m + 1) !== 1) continue; // invalid lift — no line
+            const target = byKey.get(r2 + '|' + (p.m + 1));
+            if (!target) continue; // target node not drawn this pass — skip
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(target.x, target.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
     // ── PRIME SPIRAL overlay (lockable to C(n) depth n) ──────────────────
     // Plots r = p (mod m) on every ring m>p — since p/m shrinks as m grows,
     // this traces a spiral arm inward toward the center.
@@ -27772,6 +27833,15 @@ function updateModLabelInputs() {
     state.cnCanvasDimAmt=Math.max(0,Math.min(1,(+v||0)/100));
     var lbl=document.getElementById('cnCanvasDimLbl'); if(lbl) lbl.textContent=Math.round(state.cnCanvasDimAmt*100)+'%';
     if(state.cnCanvasOn && typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSetConnectOn=function(v){
+    state.cnConnectOn=!!v;
+    if(typeof drawMainRing==='function') drawMainRing();
+  };
+  window.cnSetConnectWidth=function(v){
+    state.cnConnectWidth=Math.max(0.5,Math.min(5,+v||1.5));
+    var lbl=document.getElementById('cnConnectWidthLbl'); if(lbl) lbl.textContent=state.cnConnectWidth;
+    if(state.cnConnectOn && typeof drawMainRing==='function') drawMainRing();
   };
   window.cnDepthStep=function(d){
     var nEl=document.getElementById('cnDepthN'); if(!nEl) return;
