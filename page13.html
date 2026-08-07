@@ -479,7 +479,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
           <div class="stat"><div class="lbl">S<sub>n</sub> coprime</div><div class="val" id="sectorCoprime">–</div></div>
           <div class="stat"><div class="lbl">S<sub>n</sub> gcd&gt;1</div><div class="val" id="sectorNonCoprime">–</div></div>
         </div>
-        <div style="font-size:10px;color:#64748b;margin-top:8px;">Asymptotic: C(n,R) ≈ 3R² / (π²·n(n+1)) — coprime count in one octant's Sₙ wedge, R→∞</div>
+        <div style="font-size:10px;color:#64748b;margin-top:8px;" title="The disc-bounded wedge is measured by ANGLE, not by the sector's interval width. Page 11's 3N²/(π²·n(n+1)) is the denominator-bounded (q ≤ N) count and does not transfer here; it overstates this count by 55% at n=1, 17% at n=2, 9% at n=3, converging only as n→∞.">Asymptotic: C(n,R) ≈ (3R²/π²)·arctan(1/(n²+n+1)) — coprime count in one octant's Sₙ wedge, R→∞. The wedge measure is the sector's <em>angle</em> arctan(1/n)−arctan(1/(n+1)), not its interval width 1/(n(n+1)) — that width is page 11's denominator-bounded count, a different region.</div>
         <div class="stat-grid" style="margin-top:6px;">
           <div class="stat"><div class="lbl">Predicted</div><div class="val" id="sectorAsymp" style="color:#94a3b8">–</div></div>
           <div class="stat"><div class="lbl">Abs err</div><div class="val" id="sectorAbsErr">–</div></div>
@@ -1063,7 +1063,13 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     }
     return Math.max(0, parseInt(bn2Slider.value,10) || 0);
   }
-  function depthCap2(){ return Math.min(48, Math.max(blockN2(), 8)); }
+  // The cap is the horizon of the depth scan, so it must never sit BELOW the
+  // block length being measured: survival at block n is tested as depth >= n,
+  // and a cap of 48 makes that impossible for n > 48 — the measured column
+  // reads exactly 0.00000 while exact C(n) reads ~0.188. The n box accepts up
+  // to 200, so the old min(48, ...) was reachable. Floor of 8 keeps the colour
+  // ramp usable at small n; there is no ceiling below n any more.
+  function depthCap2(){ return Math.max(blockN2(), 8); }
   const legendSector1 = document.getElementById('legendSector1');
   const legendSector2 = document.getElementById('legendSector2');
 
@@ -1281,7 +1287,17 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     document.getElementById('sectorCoprime').textContent = observedCop.toLocaleString();
     document.getElementById('sectorNonCoprime').textContent = sectorPts.filter(p=>!p.coprime).length.toLocaleString();
 
-    const predicted = 3*R*R/(Math.PI*Math.PI*n*(n+1));
+    // Wedge measure inside a DISC is angular, not denominator-bounded.
+    // Page 11's 3N²/(π²·n(n+1)) counts Farey fractions with denominator q ≤ N —
+    // a triangular region, where the sector contributes its interval WIDTH
+    // 1/n − 1/(n+1) = 1/(n(n+1)). Here the region is x²+y²≤R², so the sector
+    // contributes its ANGLE instead:
+    //     arctan(1/n) − arctan(1/(n+1)) = arctan(1/(n²+n+1))
+    // (tangent subtraction). Coprime density 6/π² over a circular sector of
+    // area R²·Δθ/2 gives (3R²/π²)·Δθ. The two agree only as n→∞, where
+    // arctan(u)→u; at n=1 the width overstates the angle by 55%.
+    const dTheta = Math.atan(1/(n*n + n + 1));
+    const predicted = 3*R*R*dTheta/(Math.PI*Math.PI);
     document.getElementById('sectorAsymp').textContent = predicted.toFixed(1);
     const absErr = Math.abs(observedCop - predicted);
     document.getElementById('sectorAbsErr').textContent = absErr.toFixed(1);
@@ -1708,7 +1724,9 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     if(linkN3.checked) return Math.max(0, currentN());
     return Math.max(0, parseInt(bn3Slider.value,10) || 0);
   }
-  function depthCap3(){ return Math.min(48, Math.max(blockN3(), 8)); }
+  // Same reasoning as depthCap2: the 3D sector n box accepts up to 60, so a
+  // ceiling of 48 collapsed the measured survival to 0 for n in 49..60.
+  function depthCap3(){ return Math.max(blockN3(), 8); }
 
   /* ---------- view state ---------- */
   var rotX = -0.42, rotY = 0.65, zoom = 1, panX = 0, panY = 0;
