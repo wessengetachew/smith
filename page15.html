@@ -101,7 +101,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
 
   <div class="panel">
     <h2>1. The sector index is a continued-fraction digit</h2>
-    <p>For a Farey fraction x = a/b in lowest terms, the sector containing it is S_j = (1/(j+1), 1/j] with
+    <p>For a Farey fraction x = a/b in lowest terms, the sector containing it is S_s = (1/(s+1), 1/s] with
       n = ⌊b/a⌋. Writing out the continued fraction x = [0; a₁, a₂, …], the first partial quotient a₁ is
       also ⌊b/a⌋ &mdash; the two definitions coincide exactly, for every fraction. Sector membership is
       literally "what does the continued fraction expansion of x start with?" Try it on any pair:</p>
@@ -121,7 +121,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
 
   <div class="panel">
     <h2>2. Two different measures on the same partition</h2>
-    <p>F(j,N) ∝ 1/(j(j+1)) is the plain Euclidean width of sector S_j &mdash; how much of the interval (0,1]
+    <p>F(s,N) ∝ 1/(s(s+1)) is the plain Euclidean width of sector S_s &mdash; how much of the interval (0,1]
       it occupies. A second, unrelated quantity lives on the same partition: the Gauss&ndash;Kuzmin
       distribution P(a₁=n) = log₂(1+1/(n(n+2))), the natural invariant measure of the Gauss map (the dynamical
       system behind continued fractions). Both decay like 1/n² for large n &mdash; the same power law &mdash;
@@ -206,10 +206,10 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     const inSector = (A/B > lo - 1e-12) && (A/B <= hi + 1e-12);
     document.getElementById('demoResult').innerHTML =
       '<div class="demo-cell"><div class="lbl">reduced fraction</div><div class="val">'+A+'/'+B+'</div></div>' +
-      '<div class="demo-cell"><div class="lbl">sector j = ⌊b/a⌋</div><div class="val">'+n+'</div></div>' +
+      '<div class="demo-cell"><div class="lbl">sector s = ⌊b/a⌋</div><div class="val">'+n+'</div></div>' +
       '<div class="demo-cell"><div class="lbl">CF digits [0; a₁,a₂,…]</div><div class="val">[0; '+cf.join(', ')+']</div></div>' +
       '<div class="demo-cell"><div class="lbl">a₁ = n ?</div><div class="val">'+(cf[0]===n ? 'yes ✓' : 'NO — mismatch') +'</div></div>' +
-      '<div class="demo-cell"><div class="lbl">x ∈ S_j = (1/(j+1), 1/j] ?</div><div class="val">'+(inSector?'yes ✓':'NO')+'</div></div>';
+      '<div class="demo-cell"><div class="lbl">x ∈ S_s = (1/(s+1), 1/s] ?</div><div class="val">'+(inSector?'yes ✓':'NO')+'</div></div>';
   }
   document.getElementById('demoBtn').addEventListener('click', runDemo);
   runDemo();
@@ -261,7 +261,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     ctx.fillStyle='#4ade80'; ctx.fillRect(pad, 14, 10, 10);
     ctx.fillStyle='#cbd5e1'; ctx.fillText('n² · Gauss–Kuzmin P(a₁=n)', pad+16, 23);
     ctx.fillStyle='#67e8f9'; ctx.fillRect(pad+240, 14, 10, 10);
-    ctx.fillStyle='#cbd5e1'; ctx.fillText('n² · 1/(j(j+1))  [your sector width]', pad+256, 23);
+    ctx.fillStyle='#cbd5e1'; ctx.fillText('n² · 1/(s(s+1))  [your sector width]', pad+256, 23);
 
     ctx.fillStyle='#475569'; ctx.fillText('n →', W-pad-20, H-pad+20);
 
@@ -362,7 +362,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     for(let i=0;i<bars.length;i+=5){
       ctx.fillText(String(i+1), pad + i*bw, H-pad+14);
     }
-    const labels = {sum:'Σ|δ_j| in sector j', count:'# fractions in sector j', avg:'avg |δ_j| per fraction in sector j'};
+    const labels = {sum:'Σ|δ_j| in sector s', count:'# fractions in sector s', avg:'avg |δ_j| per fraction in sector s'};
     ctx.fillStyle = '#94a3b8';
     ctx.fillText(labels[view] + '   (sectors 1–'+bars.length+', N='+N+')', pad, 16);
   }

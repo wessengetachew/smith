@@ -1276,16 +1276,16 @@ function heroToggleTopBars(){
         <input type="range" min="0.2" max="6" step="0.1" value="0.7" style="width:70px;accent-color:rgba(155,127,232,.7);" oninput="liftSetThick(this.value)">
         <span class="lift-thick-lbl" style="color:#a8a294;min-width:30px;">0.7px</span>
         <span style="color:#a8a294;">Spiral lbl:</span>
-        <select onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(j+1), 1/j], j=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
+        <select onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(s+1), 1/s], j=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
           style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
           <option value="none">none</option>
           <option value="channel">1/n channel</option>
           <option value="outer" selected>outer point</option>
         </select>
         <span style="color:#a8a294;">sector:</span>
-        <button onclick="liftStepLblChan(-1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(j+1), 1/j] — 'all' labels every channel" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">−</button>
+        <button onclick="liftStepLblChan(-1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(s+1), 1/s] — 'all' labels every channel" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">−</button>
         <span class="lift-lblchan-lbl" style="color:rgba(230,120,130,.9);min-width:26px;text-align:center;">all</span>
-        <button onclick="liftStepLblChan(1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(j+1), 1/j] — e.g. 1/2 labels only points between 1/3 and 1/2" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
+        <button onclick="liftStepLblChan(1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(s+1), 1/s] — e.g. 1/2 labels only points between 1/3 and 1/2" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
         <span style="color:#a8a294;">lbl size:</span>
         <input type="range" min="0.5" max="3" step="0.1" value="1" style="width:60px;accent-color:rgba(230,56,72,.6);" oninput="liftSetLblScale(+this.value)">
         <span class="lift-lblsize-lbl" style="color:rgba(230,120,130,.9);min-width:26px;">1.0×</span>
@@ -4119,7 +4119,7 @@ function heroToggleTopBars(){
     }
     var k=Math.max(1,Math.floor(pM/Math.max(1,sr)));
     // Channel-mode sector filter: label only the picked Farey sector
-    // (1/(j+1), 1/j]. The single outer-point label is exempt.
+    // (1/(s+1), 1/s]. The single outer-point label is exempt.
     if(!rich&&typeof _liftLblChan!=='undefined'&&_liftLblChan>0&&k!==_liftLblChan)return;
     var lbl=rich?(rich+' '+sr+'/'+pM+' · 1/'+k):('1/'+k);
     var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
@@ -7718,6 +7718,13 @@ function heroToggleTopBars(){
     find where independence holds and where it fails; 7–9 generalise it (more blocks, then characters);
     10–13 place it in geometry; 14–15 connect it to the zeta function and to Farey discrepancy.
     Every page is self-contained — the links below say what each one actually does.
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--edge);">
+      <b>Notation, one letter per role.</b>
+      <b>n</b> is the depth — the block length in C(n).
+      <b>j</b> is the offset inside that block, gcd(r, M+j) = 1 for j = 0…n.
+      <b>s</b> is the Farey sector index, S<sub>s</sub> = (1/(s+1), 1/s], with count F(s, N).
+      <b>k</b> is the dimension on Page 13, the exponent in min(n+1,p)/p<sup>k</sup>.
+    </div>
   </div>
   <div class="toc-wrap">
     <a class="toc-row toc-cur" href="index.html">
@@ -7804,7 +7811,7 @@ function heroToggleTopBars(){
       <span class="toc-num" style="color:#f2c14e;border-color:#f2c14e55;">11</span>
       <span class="toc-txt">
         <span class="toc-ttl" style="color:#f2c14e;">Farey Sequence Summatory Function</span>
-        <span class="toc-what">The largest page in the suite. Franel–Landau discrepancy, Stern–Brocot sector rings, lift arcs with surviving/broken split, the C(n) canvas filter with depth transport, and a harmonic-analysis engine reading Farey fractions as intervals.</span>
+        <span class="toc-what">The largest page in the suite. Franel–Landau discrepancy, Stern–Brocot sector rings indexed by s, lift arcs with surviving/broken split, the C(n) canvas filter with depth transport, and a harmonic-analysis engine reading Farey fractions as intervals.</span>
         <span class="toc-note">The sat−/sat+ controls step n directly between saturation points n = p−1 rather than one integer at a time.</span>
       </span>
     </a>
@@ -7813,7 +7820,7 @@ function heroToggleTopBars(){
       <span class="toc-txt">
         <span class="toc-ttl" style="color:#ff6b9d;">The Prime Spiral — Winding r ≡ ±p (mod M)</span>
         <span class="toc-what">Fix one prime p and mark where it lands on every ring of modulus M. As M climbs, that single dot sweeps at a different rate on each ring and the trail reads as a spiral arm.</span>
-        <span class="toc-note">Not the Ulam spiral — this winds one prime through the moduli rather than laying every integer on a grid.</span>
+        <span class="toc-note">Not the Ulam spiral — this winds one prime through the moduli rather than laying every integer on a grid. Also carries the Ramanujan-sum interference panel and the Mertens ladder M(x).</span>
       </span>
     </a>
     <a class="toc-row" href="page13.html">
@@ -7821,7 +7828,7 @@ function heroToggleTopBars(){
       <span class="toc-txt">
         <span class="toc-ttl" style="color:#06b6d4;">Gauss Circle ↔ Farey Sector Bridge</span>
         <span class="toc-what">Lattice points in a disc, decomposed by symmetry orbit: N(R) = 1 + 4A + 4D + 8O, and its 3D counterpart with seven orbit classes. The C(n) filter applies to both.</span>
-        <span class="toc-note">The measure changes with the region: a disc sector contributes its <em>angle</em> arctan(1/j) − arctan(1/(j+1)), not the interval width 1/(j(j+1)) that Page 11's denominator-bounded count uses.</span>
+        <span class="toc-note">The measure changes with the region: a disc sector contributes its <em>angle</em> arctan(1/s) − arctan(1/(s+1)), not the interval width 1/(s(s+1)) that Page 11's denominator-bounded count uses.</span>
       </span>
     </a>
     <a class="toc-row" href="page14.html">
@@ -7836,8 +7843,8 @@ function heroToggleTopBars(){
       <span class="toc-num" style="color:#4ade80;border-color:#4ade8055;">15</span>
       <span class="toc-txt">
         <span class="toc-ttl" style="color:#4ade80;">Sector-Graded Farey Discrepancy</span>
-        <span class="toc-what">Takes Page 11's Franel–Landau sum Σ|F_k − k/|F_N|| — whose growth rate is equivalent to the Riemann Hypothesis — and grades it by sector instead of reporting only the total.</span>
-        <span class="toc-note">Rests on an exact coincidence: a fraction's sector index ⌊b/a⌋ is precisely the first partial quotient of its continued fraction.</span>
+        <span class="toc-what">Takes Page 11's Franel–Landau sum Σ|F_i − i/|F_N|| (i the Farey ordinal) — whose growth rate is equivalent to the Riemann Hypothesis — and grades it by sector instead of reporting only the total.</span>
+        <span class="toc-note">Rests on an exact coincidence: a fraction's sector index s = ⌊b/a⌋ is precisely the first partial quotient of its continued fraction.</span>
       </span>
     </a>
   </div>
@@ -15897,7 +15904,7 @@ function _fareyPanelUpdate(){
 // Lift panel
 let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=false, _liftDotScale=1.0;
 let _liftLblMode='outer'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding) — outer by default
-let _liftLblChan=0;  // channel-mode sector filter: 0 = all channels; k>0 = only label points in Farey sector (1/(j+1), 1/j]
+let _liftLblChan=0;  // channel-mode sector filter: 0 = all channels; k>0 = only label points in Farey sector (1/(s+1), 1/s]
 let _liftLblScale=1; // spiral label font scale
 function liftSetLblMode(v){
   _liftLblMode=v||'none';

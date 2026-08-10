@@ -396,6 +396,36 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
     <div class="card-note">The falsifiable exhibit. Squarefree moduli light up on prediction; the moment \(p^2\mid q\) (q = 4, 8, 9, 12, 16, 18, 25, 27…), \(\mu(q)=0\) and the measured amplitude collapses to the noise floor — first-order interference exactly cancelled by the Möbius sign structure. Nothing was fit: one formula, every bar.</div>
   </div>
 
+
+  <div class="card">
+    <div class="card-title">The Exact Case — Ramanujan's Sum at a = 1, and the Mertens Function</div>
+    <p style="font-size:11px;line-height:1.65;color:var(--cream2);margin:0 0 8px 0;">
+      Everything above sums over <i>primes</i>, so the \(\mu/\varphi\) law is asymptotic and its residual is
+      the hard part. There is a companion identity on the same ring that is <b>exact</b> and needs no primes
+      at all: sum the \(\varphi(M)\) coprime nodes themselves, as unit vectors, and the answer is the Möbius
+      function on the nose —
+    </p>
+    <p style="text-align:center;margin:6px 0;">\[\sum_{\gcd(r,M)=1} e^{2\pi i r/M} \;=\; \mu(M)\]</p>
+    <p style="font-size:11px;line-height:1.65;color:var(--cream2);margin:0 0 10px 0;">
+      This is \(c_M(1)\), the \(a=1\) case of the same Ramanujan sum the decoder table already reports.
+      Twelve unit vectors on ring 13 cancel to exactly \(-1\); eight on ring 24 cancel to exactly \(0\).
+      Note the cut is <b>squarefree against squareful</b>, not prime against composite: ring 15 sums to
+      \(+1\) as cleanly as any prime ring, while total cancellation happens precisely at
+      \(M = 4, 8, 9, 12, 16, 18, 20, 24\).
+    </p>
+    <canvas id="mertCv" style="width:100%;background:#020204;" class="pick"></canvas>
+    <div class="intf-read" id="mert-read">—</div>
+    <div class="card-note">
+      Running total of the ring cancellations, \(M(x)=\sum_{M\le x}\mu(M)\) — the Mertens function — against
+      the \(\pm\sqrt{x}\) envelope. Because \(\sum \mu(m)m^{-s} = 1/\zeta(s)\), this sum is tied directly to
+      the zeta function, and <b>RH is equivalent to \(M(x) = O(x^{1/2+\varepsilon})\)</b>. That it stays this
+      flat is the whole content of the conjecture. Page 11 visualises Franel–Landau, a second and independent
+      RH equivalence built on the same lattice. Both statements are classical; neither is a route to a proof,
+      and reading \(\mu(M)\) off a ring costs \(\varphi(M)\) gcd evaluations where a sieve would give it for
+      almost nothing.
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">The Noise Floor — Square-Root Cancellation</div>
     <canvas id="nfCv" style="width:100%;background:#020204;"></canvas>
@@ -1027,7 +1057,55 @@ function tableTap(e){
 }
 
 // ── wiring ──
-function ifRedraw(){ drawIntf(); drawSpec(); drawMu(); drawNf(); drawTable(); }
+
+// ── Mertens ladder: running sum of the exact ring cancellations ───────────
+// Each ring M contributes sum_{gcd(r,M)=1} exp(2*pi*i*r/M) = mu(M) exactly
+// (Ramanujan's c_M(1)). Accumulating across rings gives M(x) = sum mu, whose
+// growth rate is equivalent to RH. Drawn against the +/- sqrt(x) envelope.
+let MERT = { hover: null, xMax: 300 };
+function mertSeries(xMax){
+  const out = []; let run = 0;
+  for (let M = 1; M <= xMax; M++){ run += ifMu(M); out.push(run); }
+  return out;
+}
+function drawMert(){
+  const cv = document.getElementById('mertCv'); if(!cv) return;
+  const xMax = Math.max(60, Math.min(3000, MERT.xMax));
+  const [ctx, w, h] = _ifSize(cv, 210);
+  const ser = mertSeries(xMax);
+  const env = Math.sqrt(xMax);
+  const yMax = Math.max(env * 1.15, Math.max(...ser.map(Math.abs)) * 1.15, 3);
+  const padL = 34, padR = 10, padT = 12, padB = 20;
+  const X = i => padL + (i / (xMax - 1)) * (w - padL - padR);
+  const Y = v => padT + (1 - (v + yMax) / (2 * yMax)) * (h - padT - padB);
+  // sqrt envelope
+  ctx.strokeStyle = 'rgba(155,127,232,.45)'; ctx.setLineDash([4,3]); ctx.lineWidth = 1;
+  for (const sgn of [1,-1]){
+    ctx.beginPath();
+    for (let i = 0; i < xMax; i++){ const v = sgn*Math.sqrt(i+1); i ? ctx.lineTo(X(i),Y(v)) : ctx.moveTo(X(i),Y(v)); }
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // zero line
+  ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.moveTo(padL, Y(0)); ctx.lineTo(w-padR, Y(0)); ctx.stroke();
+  // M(x)
+  ctx.strokeStyle = '#c8a84a'; ctx.lineWidth = 1.4; ctx.beginPath();
+  for (let i = 0; i < xMax; i++){ i ? ctx.lineTo(X(i), Y(ser[i])) : ctx.moveTo(X(i), Y(ser[i])); }
+  ctx.stroke();
+  // labels
+  ctx.fillStyle = 'rgba(184,178,166,.75)'; ctx.font = '9px ui-monospace,monospace';
+  ctx.fillText('+' + yMax.toFixed(0), 4, Y(yMax) + 8);
+  ctx.fillText('0', 4, Y(0) + 3);
+  ctx.fillText('-' + yMax.toFixed(0), 4, Y(-yMax) + 3);
+  ctx.fillText('x = ' + xMax, w - padR - 46, h - 6);
+  ctx.fillStyle = 'rgba(155,127,232,.8)'; ctx.fillText('±√x', X(xMax-1) - 26, Y(Math.sqrt(xMax)) - 4);
+  const last = ser[xMax-1];
+  const el = document.getElementById('mert-read');
+  if (el) el.innerHTML = 'M(' + xMax + ') = <b>' + last + '</b> · √x = ' + env.toFixed(1) +
+    ' · M(x)/√x = <b>' + (last/env).toFixed(4) + '</b> — RH asserts this ratio stays bounded by x<sup>ε</sup> forever.';
+}
+
+function ifRedraw(){ drawIntf(); drawSpec(); drawMu(); drawNf(); drawTable(); drawMert(); }
 function ifSetM(v){ v=Math.max(2,Math.min(300,v)); IF.M=v;
   document.getElementById('if-mval').textContent=v; document.getElementById('if-msl').value=v;
   const asl=document.getElementById('if-asl'); asl.max=v-1; if(IF.a>v-1){IF.a=1;} asl.value=IF.a;

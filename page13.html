@@ -257,7 +257,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
 
 <div class="container">
   <h1>Gauss Circle ↔ Wessen Farey Sector Bridge</h1>
-  <p class="subtitle">A fundamental domain of the lattice, reconstructed exactly into the full Gauss body by orbit&ndash;stabiliser weights, then filtered by the Farey sector S<sub>j</sub></p>
+  <p class="subtitle">A fundamental domain of the lattice, reconstructed exactly into the full Gauss body by orbit&ndash;stabiliser weights, then filtered by the Farey sector S<sub>s</sub></p>
 
   <div class="tabbar" role="tablist">
     <button class="tabbtn active" data-pane="pane2d" onclick="showDim('pane2d',this)">Gauss circle<span class="dim">&#8484;&sup2; &middot; octant &middot; order 8</span></button>
@@ -269,7 +269,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
   <div class="formula-box">
     <div class="formula-main">N(R) = 1 + 4·A(R) + 4·D(R) + 8·O(R)</div>
     <div class="formula-sub">A(R): axis points k²≤R² &nbsp;·&nbsp; D(R): diagonal points 2k²≤R² &nbsp;·&nbsp; O(R): strict octant interior (0&lt;y&lt;x, x²+y²≤R²)</div>
-    <div class="formula-sub" style="margin-top:8px;">Sector membership: a/b ∈ S<sub>j</sub> = (1/(j+1), 1/j] &nbsp;⟺&nbsp; b/(n+1) &lt; a ≤ b/n &nbsp;(a=y, b=x, gcd(a,b)=1 for coprime/visible points)</div>
+    <div class="formula-sub" style="margin-top:8px;">Sector membership: a/b ∈ S<sub>s</sub> = (1/(s+1), 1/s] &nbsp;⟺&nbsp; b/(n+1) &lt; a ≤ b/n &nbsp;(a=y, b=x, gcd(a,b)=1 for coprime/visible points)</div>
   </div>
 
 
@@ -277,7 +277,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
       <summary><h3 style="color:#67e8f9;">The same n on both sides of the bridge</h3></summary>
       <p>
         The sector index and the block length are not two different parameters that happen to share a letter.
-        The Farey sector S<sub>j</sub> = (1/(j+1), 1/j] is the set of slopes whose denominators first separate at
+        The Farey sector S<sub>s</sub> = (1/(s+1), 1/s] is the set of slopes whose denominators first separate at
         step n+1, and C(n) is the density attached to a run of n+1 consecutive integers. Both tabs let you lock
         them together, so moving one slider moves the geometry and the density in step.
       </p>
@@ -329,8 +329,8 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
         <span><span class="swatch" style="background:#1e293b"></span>outside circle</span>
         <span><span class="swatch" style="background:#475569"></span>in circle</span>
         <span><span class="swatch" style="background:#4ade80"></span>axis / diagonal / origin</span>
-        <span id="legendSector1"><span class="swatch" style="background:#06b6d4"></span>in S<sub>j</sub>, coprime</span>
-        <span id="legendSector2"><span class="swatch" style="background:#f59e0b"></span>in S<sub>j</sub>, gcd&gt;1</span>
+        <span id="legendSector1"><span class="swatch" style="background:#06b6d4"></span>in S<sub>s</sub>, coprime</span>
+        <span id="legendSector2"><span class="swatch" style="background:#f59e0b"></span>in S<sub>s</sub>, gcd&gt;1</span>
         <span><span class="swatch" style="background:#ec4899"></span>selected point</span>
       </div>
       <div id="detailPanel">Click any point on the canvas or a table row to inspect it.</div>
@@ -428,7 +428,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
           Read (x,&nbsp;y) as (denominator&nbsp;M, numerator&nbsp;r). Slide the denominator through a block of
           n+1 consecutive values and ask how far coprimality survives.
         </div>
-        <div class="checkrow"><input type="checkbox" id="linkN2" checked> block n follows the sector j</div>
+        <div class="checkrow"><input type="checkbox" id="linkN2" checked> block n follows the sector s</div>
         <div class="row" style="margin-top:6px;">
           <label class="field-label">block n = <span id="bn2Val" class="valdisp">1</span> &middot; block length <span id="bl2Val" class="valdisp">2</span></label>
           <input type="range" id="bn2Slider" min="0" max="40" value="1">
@@ -476,10 +476,10 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
           <div class="stat"><div class="lbl">N(R) recon</div><div class="val" id="nRecon">–</div></div>
           <div class="stat"><div class="lbl">Match</div><div class="val" id="reconStatus">–</div></div>
           <div class="stat"><div class="lbl">Octant pts</div><div class="val" id="octCount">–</div></div>
-          <div class="stat"><div class="lbl">S<sub>j</sub> coprime</div><div class="val" id="sectorCoprime">–</div></div>
-          <div class="stat"><div class="lbl">S<sub>j</sub> gcd&gt;1</div><div class="val" id="sectorNonCoprime">–</div></div>
+          <div class="stat"><div class="lbl">S<sub>s</sub> coprime</div><div class="val" id="sectorCoprime">–</div></div>
+          <div class="stat"><div class="lbl">S<sub>s</sub> gcd&gt;1</div><div class="val" id="sectorNonCoprime">–</div></div>
         </div>
-        <div style="font-size:10px;color:#64748b;margin-top:8px;" title="The disc-bounded wedge is measured by ANGLE, not by the sector's interval width. Page 11's 3N²/(π²·j(j+1)) is the denominator-bounded (q ≤ N) count and does not transfer here; it overstates this count by 55% at j=1, 17% at j=2, 9% at j=3, converging only as j→∞.">Asymptotic: F(j,R) ≈ (3R²/π²)·arctan(1/(j²+j+1)) — coprime count in one octant's Sⱼ wedge, R→∞. The wedge measure is the sector's <em>angle</em> arctan(1/j)−arctan(1/(j+1)), not its interval width 1/(j(j+1)) — that width is page 11's denominator-bounded count, a different region.</div>
+        <div style="font-size:10px;color:#64748b;margin-top:8px;" title="The disc-bounded wedge is measured by ANGLE, not by the sector's interval width. Page 11's 3N²/(π²·s(s+1)) is the denominator-bounded (q ≤ N) count and does not transfer here; it overstates this count by 55% at s=1, 17% at s=2, 9% at s=3, converging only as s→∞.">Asymptotic: F(s,R) ≈ (3R²/π²)·arctan(1/(s²+s+1)) — coprime count in one octant's Sₛ wedge, R→∞. The wedge measure is the sector's <em>angle</em> arctan(1/s)−arctan(1/(s+1)), not its interval width 1/(s(s+1)) — that width is page 11's denominator-bounded count, a different region.</div>
         <div class="stat-grid" style="margin-top:6px;">
           <div class="stat"><div class="lbl">Predicted</div><div class="val" id="sectorAsymp" style="color:#94a3b8">–</div></div>
           <div class="stat"><div class="lbl">Abs err</div><div class="val" id="sectorAbsErr">–</div></div>
@@ -491,7 +491,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
 
   <div class="table-wrap panel">
     <div class="row-inline" style="justify-content:space-between;margin-bottom:8px;">
-      <strong style="color:#67e8f9;font-size:0.9em;">Sector S<sub>j</sub> points — click a row to select on canvas</strong>
+      <strong style="color:#67e8f9;font-size:0.9em;">Sector S<sub>s</sub> points — click a row to select on canvas</strong>
       <span style="font-size:11px;color:#64748b;" id="tableCount"></span>
     </div>
     <div class="table-scroll">
@@ -561,18 +561,18 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
         sorted cone alone. They are checked for exact equality at every R, the same PASS/FAIL discipline the 2D tab uses.
       </p>
 
-      <h3 style="margin-top:14px;">Lifting the Farey sector S<sub>j</sub></h3>
+      <h3 style="margin-top:14px;">Lifting the Farey sector S<sub>s</sub></h3>
       <p>
-        In 2D the sector is a slope band S<sub>j</sub> = (1/(j+1), 1/j] &mdash; a wedge between two rays. There are two
+        In 2D the sector is a slope band S<sub>s</sub> = (1/(s+1), 1/s] &mdash; a wedge between two rays. There are two
         honest ways to carry that into 3D, and both are available in the sector control:
       </p>
       <p>
-        <strong style="color:#cbd5e1">Azimuthal wedge</strong> &mdash; keep points with x &gt; 0 and y/x &isin; S<sub>j</sub>.
+        <strong style="color:#cbd5e1">Azimuthal wedge</strong> &mdash; keep points with x &gt; 0 and y/x &isin; S<sub>s</sub>.
         This is literally the 2D sector extruded along z: a dihedral wedge hinged on the z-axis. Its cross-section in the
         z = 0 plane is exactly what the 2D tab draws.
       </p>
       <p>
-        <strong style="color:#cbd5e1">Polar cone shell</strong> &mdash; keep points with z/&radic;(x&sup2;+y&sup2;) &isin; S<sub>j</sub>.
+        <strong style="color:#cbd5e1">Polar cone shell</strong> &mdash; keep points with z/&radic;(x&sup2;+y&sup2;) &isin; S<sub>s</sub>.
         This bands the sphere by latitude instead of longitude, so the sector becomes a cone shell about the z-axis. The
         counts differ from the wedge; the widget reports each separately rather than assuming they agree.
       </p>
@@ -696,7 +696,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
             gcd(x,&nbsp;y,&nbsp;z) = 1 survives. The local factor gains a power of p:
             <span style="font-family:monospace;color:#d8b4fe;">1 &minus; min(n+1,p)/p&sup3;</span>.
           </div>
-          <div class="checkrow"><input type="checkbox" id="linkN3" checked> block n follows the sector j</div>
+          <div class="checkrow"><input type="checkbox" id="linkN3" checked> block n follows the sector s</div>
           <div class="row" style="margin-top:6px;">
             <label class="field-label">block n = <span id="bn3Val" class="valdisp">1</span> &middot; block length <span id="bl3Val" class="valdisp">2</span></label>
             <input type="range" id="bn3Slider" min="0" max="40" value="1">
@@ -758,7 +758,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
         </fieldset>
 
         <fieldset id="sec3dStatsBox" style="display:none;">
-          <legend>Sector S<sub>j</sub></legend>
+          <legend>Sector S<sub>s</sub></legend>
           <div class="stat-grid">
             <div class="stat"><div class="lbl">In sector</div><div class="val" id="sec3dTotal">&ndash;</div></div>
             <div class="stat"><div class="lbl">Coprime</div><div class="val" id="sec3dCop">&ndash;</div></div>
@@ -1017,7 +1017,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     tag.classList.toggle('is-prime', p);
   }
   // A point lies in the mirrored sector when its sorted representative does.
-  // The 8 dihedral images of S_j form a pinwheel of congruent wedges.
+  // The 8 dihedral images of S_s form a pinwheel of congruent wedges.
   function inSector8(x, y, n){
     const ax=Math.abs(x), ay=Math.abs(y);
     const a=Math.max(ax,ay), b=Math.min(ax,ay);
@@ -1054,7 +1054,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
   const cnCurve2 = document.getElementById('cnCurve2');
 
   // Block length used by the C(n) panel. Locked to the sector index by default:
-  // the sector S_j and the block of n+1 consecutive denominators share the same n.
+  // the sector S_s and the block of n+1 consecutive denominators share the same n.
   function blockN2(){
     if(linkN2.checked){
       const p = parseInt(nNum.value,10);
@@ -1094,8 +1094,8 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
 
   function updateLegend(mode, R){
     if(mode==='coprime'){
-      legendSector1.innerHTML = '<span class="swatch" style="background:#06b6d4"></span>in S<sub>j</sub>, coprime';
-      legendSector2.innerHTML = '<span class="swatch" style="background:#f59e0b"></span>in S<sub>j</sub>, gcd&gt;1';
+      legendSector1.innerHTML = '<span class="swatch" style="background:#06b6d4"></span>in S<sub>s</sub>, coprime';
+      legendSector2.innerHTML = '<span class="swatch" style="background:#f59e0b"></span>in S<sub>s</sub>, gcd&gt;1';
       legendSector2.style.display = '';
     } else if(mode==='depth'){
       const cap = depthCap2();
@@ -1241,7 +1241,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
       + `gcd(y,x) = <span class="hl">${p.gcd!=null?p.gcd:gcd(p.y,p.x)}</span> &nbsp; `
       + `coprime = <span class="hl">${p.coprime!=null?p.coprime:(gcd(p.y,p.x)===1)}</span> &nbsp; `
       + `on diagonal = <span class="hl">${p.x===p.y}</span> &nbsp; `
-      + `in S<sub>j</sub> = <span class="hl">${p.inSector!=null?p.inSector:'—'}</span>`;
+      + `in S<sub>s</sub> = <span class="hl">${p.inSector!=null?p.inSector:'—'}</span>`;
   }
 
   window.jumpSector2d = function(n){
@@ -1288,9 +1288,9 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     document.getElementById('sectorNonCoprime').textContent = sectorPts.filter(p=>!p.coprime).length.toLocaleString();
 
     // Wedge measure inside a DISC is angular, not denominator-bounded.
-    // Page 11's 3N²/(π²·j(j+1)) counts Farey fractions with denominator q ≤ N —
+    // Page 11's 3N²/(π²·s(s+1)) counts Farey fractions with denominator q ≤ N —
     // a triangular region, where the sector contributes its interval WIDTH
-    // 1/n − 1/(n+1) = 1/(j(j+1)). Here the region is x²+y²≤R², so the sector
+    // 1/n − 1/(n+1) = 1/(s(s+1)). Here the region is x²+y²≤R², so the sector
     // contributes its ANGLE instead:
     //     arctan(1/n) − arctan(1/(n+1)) = arctan(1/(n²+n+1))
     // (tangent subtraction). Coprime density 6/π² over a circular sector of
@@ -1417,7 +1417,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
         plot(-p.x,  p.y, color, 'sector');
         plot( p.x, -p.y, color, 'sector');
         plot(-p.x, -p.y, color, 'sector');
-        if(p.inSector){                      // keep S_j readable inside the full disc
+        if(p.inSector){                      // keep S_s readable inside the full disc
           ctx.strokeStyle = '#f9a8d4'; ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(cx + p.x*scale, cy - p.y*scale, dotR+2, 0, Math.PI*2);
@@ -1596,7 +1596,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     octx.textAlign = 'right';
     octx.fillStyle = '#94a3b8';
     octx.font = `${Math.round(13*F)}px monospace`;
-    octx.fillText(`R = ${R}  ·  n = ${n}  ·  Sⱼ = (1/${+n+1}, 1/${n}]`, compW-pad, y);
+    octx.fillText(`R = ${R}  ·  n = ${n}  ·  Sₛ = (1/${+n+1}, 1/${n}]`, compW-pad, y);
     octx.textAlign = 'left';
 
     y += 22*F;
@@ -1612,8 +1612,8 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
       ['N(R) recon', document.getElementById('nRecon').textContent],
       ['Match', document.getElementById('reconStatus').textContent],
       ['Octant pts', document.getElementById('octCount').textContent],
-      ['Sⱼ coprime', document.getElementById('sectorCoprime').textContent],
-      ['Sⱼ gcd>1', document.getElementById('sectorNonCoprime').textContent],
+      ['Sₛ coprime', document.getElementById('sectorCoprime').textContent],
+      ['Sₛ gcd>1', document.getElementById('sectorNonCoprime').textContent],
     ];
     const cardGap = 8*F;
     const cardW = (compW - pad*2 - cardGap*(stats.length-1)) / stats.length;
@@ -1724,7 +1724,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
     if(linkN3.checked) return Math.max(0, currentN());
     return Math.max(0, parseInt(bn3Slider.value,10) || 0);
   }
-  // Same reasoning as depthCap2: the 3D sector j box accepts up to 60, so a
+  // Same reasoning as depthCap2: the 3D sector s box accepts up to 60, so a
   // ceiling of 48 collapsed the measured survival to 0 for n in 49..60.
   function depthCap3(){ return Math.max(blockN3(), 8); }
 
@@ -2197,7 +2197,7 @@ function openOpener(){ sessionStorage.setItem('wg_open_opener','1'); window.open
       + 'gcd = <span class="hl">'+g+'</span> &nbsp; primitive = <span class="hl">'+(g===1)+'</span><br>'
       + 'orbit class = <span class="hl" style="color:'+classColor(o)+'">&times;'+o+' &middot; '+className(o)+'</span> &nbsp; '
       + '&theta; = <span class="hl">'+theta.toFixed(2)+'&deg;</span> &nbsp; &phi; = <span class="hl">'+phi.toFixed(2)+'&deg;</span> &nbsp; '
-      + 'in S<sub>j</sub> = <span class="hl">'+secTxt+'</span><br>'
+      + 'in S<sub>s</sub> = <span class="hl">'+secTxt+'</span><br>'
       + 'block depth (slide '+slide3.value+') = <span class="hl">'+blockDepthAt(x,y,z)+'</span> &nbsp; '
       + 'survives block of '+(blockN3()+1)+' = <span class="hl">'+(blockDepthAt(x,y,z) >= blockN3())+'</span><br>'
       + '<span style="color:#94a3b8">All '+o+' images of this representative are highlighted on the canvas.</span>';
