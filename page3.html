@@ -500,7 +500,7 @@ const MODES=[
  fn:(r,M,n)=>blockOk(r,M,n)?'rgba(56,140,209,.95)':'rgba(15,15,33,.95)'},
 {sec:'global',id:'5 — sector',name:'Sector (r/M hue)',sc:['gl'],
  tex:'h=360\\cdot\\frac{r}{M};\\quad\\text{survivor: vivid HSV}(h,.75,.88);\\ \\text{coprime: }25\\%\\text{ vivid};\\ \\text{else dark}',
- desc:'The shader\'s angular mode, companion to the Farey Sector Formula \\(C(n,N)\\sim\\frac{3N^2}{\\pi^2 n(n+1)}\\): every directional sector from the origin gets one hue, so counting survivors per sector reads as counting per color.',
+ desc:'The shader\'s angular mode, companion to the Farey Sector Formula \\(F(j,N)\\sim\\frac{3N^2}{\\pi^2 j(j+1)}\\): every directional sector from the origin gets one hue, so counting survivors per sector reads as counting per color.',
  fn:(r,M,n)=>{const{cp,ok}=ctx3(r,M,n);const h=((r/M)*360)|0;if(ok)return`hsl(${h},75%,55%)`;if(cp)return`hsla(${h},45%,18%,.9)`;return'rgba(15,13,26,.95)';}},
 
 /* ───────── GLOBAL-only named modes ───────── */

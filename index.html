@@ -1276,16 +1276,16 @@ function heroToggleTopBars(){
         <input type="range" min="0.2" max="6" step="0.1" value="0.7" style="width:70px;accent-color:rgba(155,127,232,.7);" oninput="liftSetThick(this.value)">
         <span class="lift-thick-lbl" style="color:#a8a294;min-width:30px;">0.7px</span>
         <span style="color:#a8a294;">Spiral lbl:</span>
-        <select onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(k+1), 1/k], k=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
+        <select onchange="liftSetLblMode(this.value)" title="Label spiral points by their Farey channel — r/M sits in sector (1/(j+1), 1/j], j=⌊M/r⌋ — or label just the single outermost point to track the ▲/▼ winding"
           style="background:rgba(255,255,255,.04);border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
           <option value="none">none</option>
           <option value="channel">1/n channel</option>
           <option value="outer" selected>outer point</option>
         </select>
         <span style="color:#a8a294;">sector:</span>
-        <button onclick="liftStepLblChan(-1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(k+1), 1/k] — 'all' labels every channel" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">−</button>
+        <button onclick="liftStepLblChan(-1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(j+1), 1/j] — 'all' labels every channel" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">−</button>
         <span class="lift-lblchan-lbl" style="color:rgba(230,120,130,.9);min-width:26px;text-align:center;">all</span>
-        <button onclick="liftStepLblChan(1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(k+1), 1/k] — e.g. 1/2 labels only points between 1/3 and 1/2" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
+        <button onclick="liftStepLblChan(1)" title="Channel-mode filter: label only spiral points in one Farey sector (1/(j+1), 1/j] — e.g. 1/2 labels only points between 1/3 and 1/2" style="background:none;border:1px solid rgba(230,56,72,.35);color:rgba(230,120,130,.9);font-family:inherit;font-size:8px;padding:1px 6px;cursor:pointer;">+</button>
         <span style="color:#a8a294;">lbl size:</span>
         <input type="range" min="0.5" max="3" step="0.1" value="1" style="width:60px;accent-color:rgba(230,56,72,.6);" oninput="liftSetLblScale(+this.value)">
         <span class="lift-lblsize-lbl" style="color:rgba(230,120,130,.9);min-width:26px;">1.0×</span>
@@ -1558,7 +1558,7 @@ function heroToggleTopBars(){
     <p style="animation:wgFadeUp .6s .75s both;">
       Pick a random whole number. Now ask: how likely is it — and the next n numbers right
       after it — to all share no common factor with a fixed modulus M? That probability
-      has a name, C(n), and it drops in clean, predictable steps — one jump at every prime.
+      has a name, C(n), and it drops at every step, with the sharpest drops landing where a prime saturates.
     </p>
 
     <p style="animation:wgFadeUp .6s .9s both;">
@@ -4119,7 +4119,7 @@ function heroToggleTopBars(){
     }
     var k=Math.max(1,Math.floor(pM/Math.max(1,sr)));
     // Channel-mode sector filter: label only the picked Farey sector
-    // (1/(k+1), 1/k]. The single outer-point label is exempt.
+    // (1/(j+1), 1/j]. The single outer-point label is exempt.
     if(!rich&&typeof _liftLblChan!=='undefined'&&_liftLblChan>0&&k!==_liftLblChan)return;
     var lbl=rich?(rich+' '+sr+'/'+pM+' · 1/'+k):('1/'+k);
     var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
@@ -6800,7 +6800,7 @@ function heroToggleTopBars(){
     <p style="animation:wgFadeUp .6s .75s both;">
       Pick a random whole number. Now ask: how likely is it — and the next n numbers right
       after it — to all share no common factor with a fixed modulus M? That probability
-      has a name, C(n), and it drops in clean, predictable steps — one jump at every prime.
+      has a name, C(n), and it drops at every step, with the sharpest drops landing where a prime saturates.
     </p>
 
     <p style="animation:wgFadeUp .6s .9s both;">
@@ -6969,7 +6969,18 @@ function heroToggleTopBars(){
     <span style="font-family:var(--disp);font-size:.78rem;letter-spacing:.06em;color:var(--gold);">Block-Coprimality Canvas</span>
     <span style="font-size:8px;color:var(--cream3);font-weight:400;">Grid · Ring · Farey · Lift · 3D Cube</span>
   </summary>
-  <style>#s-canvas-dd[open]>summary>#s-canvas-arrow{transform:rotate(90deg);}</style>
+  <style>#s-canvas-dd[open]>summary>#s-canvas-arrow{transform:rotate(90deg);}
+.toc-wrap{display:flex;flex-direction:column;gap:1px;background:var(--edge);border:1px solid var(--edge);}
+.toc-row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg);text-decoration:none;transition:background .15s;}
+.toc-row:hover{background:rgba(200,168,74,.06);}
+.toc-cur{background:rgba(200,168,74,.09);}
+.toc-num{flex:0 0 auto;min-width:22px;text-align:center;font-family:monospace;font-size:11px;font-weight:700;border:1px solid;border-radius:3px;padding:2px 4px;line-height:1.2;margin-top:1px;}
+.toc-txt{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.toc-ttl{font-size:11.5px;font-weight:600;letter-spacing:.02em;}
+.toc-what{font-size:9.5px;color:var(--cream2);line-height:1.75;}
+.toc-note{font-size:9px;color:var(--cream3);line-height:1.7;font-style:italic;}
+@media(max-width:640px){.toc-what{font-size:9px;}.toc-note{font-size:8.5px;}}
+</style>
 <div class="card sec-anchor" id="s-canvas">
   <div class="card-title">Block-Coprimality Canvas
   <div style="margin-left:auto;display:flex;gap:5px;">
@@ -7697,6 +7708,140 @@ function heroToggleTopBars(){
   </div>
 </div>
 
+
+
+<!-- SECTION 10: CONTENTS -->
+<div class="card sec-anchor" id="s-contents">
+  <div class="card-title">Contents — The Fifteen Pages</div>
+  <div class="ibox" style="margin-bottom:14px;">
+    Reading order, not dependency order. Pages 2–4 explain the construction; 5–6 decompose it and
+    find where independence holds and where it fails; 7–9 generalise it (more blocks, then characters);
+    10–13 place it in geometry; 14–15 connect it to the zeta function and to Farey discrepancy.
+    Every page is self-contained — the links below say what each one actually does.
+  </div>
+  <div class="toc-wrap">
+    <a class="toc-row toc-cur" href="index.html">
+      <span class="toc-num" style="color:#c8a84a;border-color:#c8a84a55;">1</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#c8a84a;">C(n) — Block-Coprime Density</span>
+        <span class="toc-what">The main instrument. Builds C(n) = ζ(2)·∏ₚ(1 − min(n+1,p)/p²) from scratch, then plots it six ways — Cayley, Ring, Grid, Farey, Lift, Gauss — with the lift-dynamics and prime-spiral overlays driven from one shared depth n.</span>
+        <span class="toc-note">Also here: the calculator, prime-factor table, data table, step-by-step derivation, the Hardy–Littlewood and Goldbach connections, and the strip average that bridges to Page 5.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page2.html">
+      <span class="toc-num" style="color:#7ec87a;border-color:#7ec87a55;">2</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#7ec87a;">How C(n) Works — Guided Walkthrough</span>
+        <span class="toc-what">The plain-language entry point. Pick two random integers r and M; C(n) tracks the chance r shares no factor with any of the n+1 consecutive integers starting at M.</span>
+        <span class="toc-note">Start here if the formula on Page 1 reads as notation rather than a picture. No prerequisites beyond gcd.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page3.html">
+      <span class="toc-num" style="color:#9b7fe8;border-color:#9b7fe855;">3</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#9b7fe8;">Colour &amp; Label Modes — The Mathematics</span>
+        <span class="toc-what">The codex. Every colouring mode used anywhere in the suite, with its exact formula and a live swatch rendered by that same formula at n=2.</span>
+        <span class="toc-note">Reference rather than argument — the page to open when a hue on Page 1 or 5 is doing something you can't name.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page4.html">
+      <span class="toc-num" style="color:#4a9eff;border-color:#4a9eff55;">4</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#4a9eff;">The Prime Filter — Sieve View</span>
+        <span class="toc-what">Fixes the block anchor M instead of averaging over it, which turns the infinite Euler product into a finite sieve: only primes that actually divide one of M,…,M+n can remove anything.</span>
+        <span class="toc-note">Touch(M,n) splits into the primes p ≤ n+1 that always touch by pigeonhole, and the larger ones that touch by coincidence.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page5.html">
+      <span class="toc-num" style="color:#3dc8b8;border-color:#3dc8b855;">5</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#3dc8b8;">Gap Diagonal Identity</span>
+        <span class="toc-what">Reads the lattice as diagonals |M − r| = g, each with coprime density exactly φ(g)/g, and shows D(n) is the triangle-weighted mean of those strip densities — exactly, for every n.</span>
+        <span class="toc-note">An average needs no independence, which is precisely why this identity holds and Page 6's does not.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page6.html">
+      <span class="toc-num" style="color:#e05060;border-color:#e0506055;">6</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#e05060;">Strip Correlations — Where Independence Breaks</span>
+        <span class="toc-what">The companion to Page 5. Joint events across strips do need independence, and the strips fail it because they share prime factors. This makes the failure exact and measurable.</span>
+        <span class="toc-note">The same mechanism that shapes C(n)'s Euler product, isolated and watched directly.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page7.html">
+      <span class="toc-num" style="color:#ff8c42;border-color:#ff8c4255;">7</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#ff8c42;">C(n₁,n₂) — Two-Block Density (Prime Gaps)</span>
+        <span class="toc-what">One r surviving two independent blocks at once. The correlation ratio ρ = D(n₁,n₂)/(D(n₁)·D(n₂)) measures exactly where the shared r breaks independence between them.</span>
+        <span class="toc-note">k=1 reduces to Page 1's C(n) exactly. Twin, cousin and sexy prime configurations live here.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page8.html">
+      <span class="toc-num" style="color:#ff2fd0;border-color:#ff2fd055;">8</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#ff2fd0;">C(n₁,…,n_k) — k-Block Density (Constellations)</span>
+        <span class="toc-what">The same derivation carried to arbitrary k with no modification, verified by direct enumeration mod small primes rather than only asymptotically.</span>
+        <span class="toc-note">The new phenomenon at k ≥ 3: ρ_k doesn't merely exceed 1, it grows geometrically in k, for a structural reason given on the page.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page9.html">
+      <span class="toc-num" style="color:#d2691e;border-color:#d2691e55;">9</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#d2691e;">C_χ(n) — Dirichlet Character-Twisted Density</span>
+        <span class="toc-what">Every earlier page used the principal character in disguise — gcd(r,·)=1 is exactly χ₀(r), a filter that only says yes or no. Replace it with a genuine χ mod q and ζ(2) becomes L(2,χ).</span>
+        <span class="toc-note">Same Euler-product machinery, now carrying signed and complex weights on residue classes.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page10.html">
+      <span class="toc-num" style="color:#a855f7;border-color:#a855f755;">10</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#a855f7;">Farey &amp; Unit Circle</span>
+        <span class="toc-what">The circle x² + y² = 1 re-read as a discrete modular shell system: the same radius, circumference and rotation parameters seen through Farey residue rings.</span>
+        <span class="toc-note">Includes the Fourier strip view, obtained by unwrapping θ into a rectangle.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page11.html">
+      <span class="toc-num" style="color:#f2c14e;border-color:#f2c14e55;">11</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#f2c14e;">Farey Sequence Summatory Function</span>
+        <span class="toc-what">The largest page in the suite. Franel–Landau discrepancy, Stern–Brocot sector rings, lift arcs with surviving/broken split, the C(n) canvas filter with depth transport, and a harmonic-analysis engine reading Farey fractions as intervals.</span>
+        <span class="toc-note">The sat−/sat+ controls step n directly between saturation points n = p−1 rather than one integer at a time.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page12.html">
+      <span class="toc-num" style="color:#ff6b9d;border-color:#ff6b9d55;">12</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#ff6b9d;">The Prime Spiral — Winding r ≡ ±p (mod M)</span>
+        <span class="toc-what">Fix one prime p and mark where it lands on every ring of modulus M. As M climbs, that single dot sweeps at a different rate on each ring and the trail reads as a spiral arm.</span>
+        <span class="toc-note">Not the Ulam spiral — this winds one prime through the moduli rather than laying every integer on a grid.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page13.html">
+      <span class="toc-num" style="color:#06b6d4;border-color:#06b6d455;">13</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#06b6d4;">Gauss Circle ↔ Farey Sector Bridge</span>
+        <span class="toc-what">Lattice points in a disc, decomposed by symmetry orbit: N(R) = 1 + 4A + 4D + 8O, and its 3D counterpart with seven orbit classes. The C(n) filter applies to both.</span>
+        <span class="toc-note">The measure changes with the region: a disc sector contributes its <em>angle</em> arctan(1/j) − arctan(1/(j+1)), not the interval width 1/(j(j+1)) that Page 11's denominator-bounded count uses.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page14.html">
+      <span class="toc-num" style="color:#ef4444;border-color:#ef444455;">14</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#ef4444;">ζ(½ + it) — Critical-Line Spiral</span>
+        <span class="toc-what">Root-finds every zero in a chosen window live via Riemann–Siegel Z(t) sign changes rather than reading a stored list, so any range of t can be explored.</span>
+        <span class="toc-note">ζ evaluated by Euler–Maclaurin summation; the Riemann–von Mangoldt estimate predicts the count in advance.</span>
+      </span>
+    </a>
+    <a class="toc-row" href="page15.html">
+      <span class="toc-num" style="color:#4ade80;border-color:#4ade8055;">15</span>
+      <span class="toc-txt">
+        <span class="toc-ttl" style="color:#4ade80;">Sector-Graded Farey Discrepancy</span>
+        <span class="toc-what">Takes Page 11's Franel–Landau sum Σ|F_k − k/|F_N|| — whose growth rate is equivalent to the Riemann Hypothesis — and grades it by sector instead of reporting only the total.</span>
+        <span class="toc-note">Rests on an exact coincidence: a fraction's sector index ⌊b/a⌋ is precisely the first partial quotient of its continued fraction.</span>
+      </span>
+    </a>
+  </div>
+</div>
 
 </div><!-- #content -->
 
@@ -15752,7 +15897,7 @@ function _fareyPanelUpdate(){
 // Lift panel
 let _liftShowLines=true, _liftLineOp=0.18, _liftShowSpiral=true, _liftShowNPath=false, _liftDotScale=1.0;
 let _liftLblMode='outer'; // spiral point labels: 'none' | 'channel' (Farey sector 1/⌊M/r⌋) | 'outer' (single outermost point, tracks the ▲/▼ winding) — outer by default
-let _liftLblChan=0;  // channel-mode sector filter: 0 = all channels; k>0 = only label points in Farey sector (1/(k+1), 1/k]
+let _liftLblChan=0;  // channel-mode sector filter: 0 = all channels; k>0 = only label points in Farey sector (1/(j+1), 1/j]
 let _liftLblScale=1; // spiral label font scale
 function liftSetLblMode(v){
   _liftLblMode=v||'none';

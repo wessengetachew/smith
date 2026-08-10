@@ -809,9 +809,9 @@ function openOpener(){
     <p class="subtitle">Computational exploration of coprime pair distributions using classical summatory totient estimates</p>
     
     <div class="formula-box">
-        <div class="formula-main" id="formulaDisplay">C(n, N) = 3N² / (π² n(n+1))</div>
+        <div class="formula-main" id="formulaDisplay">F(j, N) = 3N² / (π² j(j+1))</div>
         <div id="formulaComputed" style="text-align:center; font-size:0.9em; color:#22c55e; margin-top:8px; display:none;"></div>
-        <p style="text-align:center; font-size:0.85em; opacity:0.9;">Mertens' totient formula applied to interval S_n = (1/(n+1), 1/n]</p>
+        <p style="text-align:center; font-size:0.85em; opacity:0.9;">Mertens' totient formula applied to interval S_j = (1/(j+1), 1/j]</p>
     </div>
     
     <div class="control-panel">
@@ -843,12 +843,12 @@ function openOpener(){
                 <input type="checkbox" id="autoPlayOnClick" checked>
                 <span>Auto-play audio</span>
             </label>
-            <!-- Formula target n. Same value as the "Sector:" selector under the
+            <!-- Formula target j. Same value as the "Sector:" selector under the
                  ring (one source of truth, kept in sync both ways); this copy just
-                 saves scrolling when all you want is to retarget the C(n,N) line
+                 saves scrolling when all you want is to retarget the F(j,N) line
                  in the header. -->
-            <div class="control-group highlight" style="border-color:#c8a84a;" title="n in the header formula C(n, N) = 3N² / (π² n(n+1)). This is the same n as the Sector selector under the ring — changing either updates both.">
-                <label style="color:#c8a84a;">n:</label>
+            <div class="control-group highlight" style="border-color:#c8a84a;" title="j in the header formula F(j, N) = 3N² / (π² j(j+1)). This is the same j as the Sector selector under the ring — changing either updates both.">
+                <label style="color:#c8a84a;">j:</label>
                 <button type="button" onclick="stepHeaderFormulaN(-1)" class="secondary" style="padding:2px 8px;font-size:12px;" title="n − 1">&#9664;</button>
                 <input type="number" id="headerFormulaN" value="2" min="1" step="1" style="width:64px;text-align:center;"
                        oninput="onHeaderFormulaNInput(this)"
@@ -996,10 +996,10 @@ function openOpener(){
         <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:12px 20px;border-radius:8px;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
                 <span style="color:#a78bfa;font-size:0.9em;font-weight:500;">Farey Summatory Function</span>
-                <div style="font-family:'Courier New',monospace;font-size:1.4em;color:#f1f5f9;margin-top:4px;">C(n,N) = 3N² / (π² n(n+1))</div>
+                <div style="font-family:'Courier New',monospace;font-size:1.4em;color:#f1f5f9;margin-top:4px;">F(j,N) = 3N² / (π² j(j+1))</div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
-                <span style="color:#64748b;font-size:0.8em;">Sector Sₙ = (1/(n+1), 1/n]</span>
+                <span style="color:#64748b;font-size:0.8em;">Sector Sⱼ = (1/(j+1), 1/j]</span>
             </div>
         </div>
         
@@ -1007,7 +1007,7 @@ function openOpener(){
         <div style="background:#0f172a;border-radius:8px;padding:15px;margin-bottom:15px;border-left:4px solid #8b5cf6;">
             <h3 style="color:#8b5cf6;margin:0 0 10px 0;font-size:1.1em;">Interactive Farey Sequence Explorer</h3>
             <p style="color:#94a3b8;font-size:0.9em;margin:0 0 8px 0;">
-                This visualization explores coprime fractions r/m within Farey sequence intervals (sectors). Each sector Sₙ = (1/(n+1), 1/n] contains fractions arranged in a circular ring, with colors indicating various mathematical properties.
+                This visualization explores coprime fractions r/m within Farey sequence intervals (sectors). Each sector Sⱼ = (1/(j+1), 1/j] contains fractions arranged in a circular ring, with colors indicating various mathematical properties.
             </p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px;font-size:0.85em;">
                 <div style="color:#cbd5e1;"><strong style="color:#22c55e;">Ring Canvas:</strong> Points arranged by angle (r/m × 2π) and radius (denominator m)</div>
@@ -1117,7 +1117,7 @@ function openOpener(){
         </div>
 
         <!-- ══ C(n) — LIVE VALUE & SURVIVAL RATIOS — the m axis is bounded by the N
-             boxes (nMin/nMax), never by the Sector boxes: each sector n IS a ring at
+             boxes (nMin/nMax), never by the Sector boxes: each sector j IS a ring at
              modulus m=n, so the lattice here is exactly the (r,M) lattice the opener's
              ring view uses, over the same N range the header cards report. ══ -->
         <div id="cn-ratio-panel" style="background:#0f172a;border-radius:8px;padding:12px 16px;margin-bottom:15px;border:1px solid #334155;border-left:4px solid #c8a84a;">
@@ -1408,8 +1408,8 @@ function openOpener(){
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="invertRingOrder" onchange="drawMainRing()"> Invert Order</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
-                            <label style="font-size:11px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
-                            <label style="font-size:11px;"><input type="checkbox" id="showNnChain" checked onchange="drawMainRing()"> n/n Chain</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/j Lines</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showNnChain" checked onchange="drawMainRing()"> j/j Chain</label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="showConcentricRings" onchange="drawMainRing()"> Concentric Rings</label>
@@ -1441,7 +1441,7 @@ function openOpener(){
                                 <optgroup label="Number Theory">
                                     <option value="totient">φ(m)</option>
                                     <option value="cf">CF depth</option>
-                                    <option value="sector">Sector Sₙ</option>
+                                    <option value="sector">Sector Sⱼ</option>
                                 </optgroup>
                                 <optgroup label="Music">
                                     <option value="ratio">ratio (m:r)</option>
@@ -1610,7 +1610,7 @@ function openOpener(){
                         <button onclick="clearPlaybackLabels()" title="Clear the labels a stopped sweep leaves behind: ring corner readouts, chart fraction readouts, and the highlighted point label. Does not touch the ring trail or the computed data." style="padding:3px 8px;font-size:10px;background:#475569;border:none;border-radius:3px;color:#e2e8f0;cursor:pointer;font-weight:600;">Clear Labels</button>
                         <button onclick="clearMainCanvas()" title="Wipe every overlay on the ring canvas: the playback trail a stopped sweep leaves behind, the corner readouts and point label, the ring-loop highlight and the spiral path walk. Does not touch the computed data." style="padding:3px 8px;font-size:10px;background:#7f1d1d;border:none;border-radius:3px;color:#fecaca;cursor:pointer;font-weight:600;">&#10005; Clear Canvas</button>
                         <select id="errorPlayDirA" onchange="setErrorPlayDir(this.value)" title="Sweep direction for Play All" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #8b5cf6;border-radius:3px;color:#c4b5fd;"><option value="forward">▶ Fwd</option><option value="backward">◀ Back</option><option value="pingpong">◀▶ Ping-pong</option></select>
-                        <select id="errorPlayScopeA" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at n*</option><option value="green">Green band</option></select><input id="errorTrapKA" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of n*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;">
+                        <select id="errorPlayScopeA" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at j*</option><option value="green">Green band</option></select><input id="errorTrapKA" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of j*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;">
                         <label style="font-size:10px;color:#fff;display:flex;align-items:center;gap:4px;">
                             Speed
                             <input type="range" id="errorPlaySpeedSlider" min="1" max="360" step="1" value="25"
@@ -1695,7 +1695,7 @@ function openOpener(){
                 <button onclick="stepViewSector(1)" class="secondary" style="padding:4px 9px;font-size:11px;" title="Next sector">&#9654;</button>
                 <span style="color:#a5b4fc;font-size:10px;margin-left:6px;">range <span id="viewSectorRangeLabel" style="color:#fbbf24;font-family:monospace;">-</span></span>
                 <label style="color:#a5b4fc;font-size:10px;margin-left:8px;"><input type="checkbox" id="viewSectorSoloMode" onchange="applyViewSectorSolo()"> Solo this sector</label>
-                <label style="color:#a5b4fc;font-size:10px;margin-left:8px;" title="Shade the wedge S_n = (1/(n+1), 1/n] on the ring and outline its two rays, so the selected n is visible even with All Sectors on."><input type="checkbox" id="highlightCurrentSector" checked onchange="drawMainRing()"> Highlight wedge</label>
+                <label style="color:#a5b4fc;font-size:10px;margin-left:8px;" title="Shade the wedge S_j = (1/(j+1), 1/j] on the ring and outline its two rays, so the selected j is visible even with All Sectors on."><input type="checkbox" id="highlightCurrentSector" checked onchange="drawMainRing()"> Highlight wedge</label>
             </div>
             
             <!-- Sector Range Playback Controls -->
@@ -2070,7 +2070,7 @@ function openOpener(){
                 <h4>Relative Error % 
                     <button class="secondary" onclick="playErrorBySector('error')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play All</button>
                     <select id="errorPlayDirB" onchange="setErrorPlayDir(this.value)" title="Sweep direction for Play All" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #8b5cf6;border-radius:3px;color:#c4b5fd;"><option value="forward">▶ Fwd</option><option value="backward">◀ Back</option><option value="pingpong">◀▶ Ping-pong</option></select>
-                    <select id="errorPlayScopeB" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at n*</option><option value="green">Green band</option></select><input id="errorTrapKB" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of n*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><span id="errorScopeNote" style="font-size:10px;color:#86efac;"></span>
+                    <select id="errorPlayScopeB" onchange="setErrorPlayScope(this.value)" title="Which sectors Play All covers" style="padding:2px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><option value="all">All sectors</option><option value="trap">Trap at j*</option><option value="green">Green band</option></select><input id="errorTrapKB" type="number" min="1" max="50" value="1" onchange="setErrorTrapK(this.value)" title="Sectors either side of j*: 1 = the two whole sectors straddling the line" style="display:none;width:44px;padding:2px 4px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#86efac;"><span id="errorScopeNote" style="font-size:10px;color:#86efac;"></span>
                     <button class="secondary" onclick="exportErrorChart()" style="font-size:10px;padding:3px 8px;">Export</button>
                     <button id="playSelectedRangeBtn" class="secondary" onclick="playSelectedErrorRange()" style="font-size:10px;padding:3px 8px;display:none;">▶ Play Selection</button>
                     <button class="secondary" onclick="clearErrorSelection()" style="font-size:10px;padding:3px 8px;">Clear</button>
@@ -2179,7 +2179,7 @@ function openOpener(){
                     <button class="secondary" onclick="openSectorInspector(null)" style="padding:3px 10px;" title="Open the row inspector: per-sector detail plus a scrollable list of every sector">&#9707; Inspector</button>
                     <span id="tableRowsNote" style="color:#64748b;"></span>
                 </div>
-                <table id="mainTable"><thead><tr id="mainTableHeader"><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th><th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th><th title="P/C = P(m)/C(m) ratio">P/C</th></tr></thead><tbody></tbody></table>
+                <table id="mainTable"><thead><tr id="mainTableHeader"><th>j</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th><th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th><th title="P/C = P(m)/C(m) ratio">P/C</th></tr></thead><tbody></tbody></table>
             </div>
             
             <!-- Sector Detail Panel -->
@@ -2398,7 +2398,7 @@ function openOpener(){
     <div id="tab-erroranalysis" class="tab-content">
         <div class="panel">
             <h2 style="color:#a78bfa;margin-bottom:5px;">Error Analysis</h2>
-            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula C(n,N) = 3N²/(π²n(n+1)) applied to intervals.</p>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula F(j,N) = 3N²/(π²j(j+1)) applied to intervals.</p>
             
             <!-- Range Controls -->
             <div style="background:#1e1b4b;border-radius:8px;padding:15px;margin-bottom:20px;border:1px solid #6366f1;">
@@ -2603,8 +2603,8 @@ function openOpener(){
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:12px;">
                         <div style="background:#1e1b4b;padding:12px;border-radius:4px;border-left:3px solid #22c55e;">
                             <div style="color:#22c55e;font-size:11px;font-weight:600;margin-bottom:6px;">SECTOR FORMULA (Main Page)</div>
-                            <div style="font-family:monospace;font-size:14px;color:#e2e8f0;margin-bottom:8px;">C(n,N) = 3N² / (π²n(n+1))</div>
-                            <div style="color:#94a3b8;font-size:11px;">Counts fractions in <em>one sector</em> Sₙ</div>
+                            <div style="font-family:monospace;font-size:14px;color:#e2e8f0;margin-bottom:8px;">F(j,N) = 3N² / (π²j(j+1))</div>
+                            <div style="color:#94a3b8;font-size:11px;">Counts fractions in <em>one sector</em> Sⱼ</div>
                         </div>
                         <div style="background:#1e1b4b;padding:12px;border-radius:4px;border-left:3px solid #8b5cf6;">
                             <div style="color:#8b5cf6;font-size:11px;font-weight:600;margin-bottom:6px;">GLOBAL FORMULA (Calculator)</div>
@@ -2612,7 +2612,7 @@ function openOpener(){
                             <div style="color:#94a3b8;font-size:11px;">Sums totient over <em>all k</em> from 1 to N</div>
                         </div>
                     </div>
-                    <p style="margin:12px 0 0 0;color:#cbd5e1;font-size:0.9em;"><strong>Relationship:</strong> Summing C(n,N) over all sectors n ≈ Σφ(k) (total coprime count)</p>
+                    <p style="margin:12px 0 0 0;color:#cbd5e1;font-size:0.9em;"><strong>Relationship:</strong> Summing F(j,N) over all sectors j ≈ Σφ(m) (total coprime count)</p>
                 </div>
             </div>
             
@@ -2621,7 +2621,7 @@ function openOpener(){
             
             <div class="theorem-box" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-left-color: #8b5cf6;">
 <h4 style="color:#e0e7ff; margin-top:0;">Abstract</h4>
-                <p style="margin:0; font-size:0.95em;">This work applies classical summatory totient estimates (Mertens, 1874) to Farey sequence intervals. We examine the distribution of coprime integer pairs (a,b) whose rational slope a/b lies in specific intervals S_n = (1/(n+1), 1/n]. The asymptotic count C(n,N) ~ (3/π²)N²/(n(n+1)) follows directly from applying Mertens' totient summation formula to the geometric constraint. This provides a computational framework for exploring interval-specific coprime density, complementing the well-known global density 6/π². We identify computational regimes where asymptotic estimates transition to discrete counting behavior.</p>
+                <p style="margin:0; font-size:0.95em;">This work applies classical summatory totient estimates (Mertens, 1874) to Farey sequence intervals. We examine the distribution of coprime integer pairs (a,b) whose rational slope a/b lies in specific intervals S_j = (1/(j+1), 1/j]. The asymptotic count F(j,N) ~ (3/π²)N²/(j(j+1)) follows directly from applying Mertens' totient summation formula to the geometric constraint. This provides a computational framework for exploring interval-specific coprime density, complementing the well-known global density 6/π². We identify computational regimes where asymptotic estimates transition to discrete counting behavior.</p>
             </div>
             
             <h3 style="margin-top:20px;">1. Introduction and Motivation</h3>
@@ -2635,7 +2635,7 @@ function openOpener(){
                 <div class="theorem-box" style="background:#1e1b4b; margin:0;">
                     <strong style="color:#c4b5fd;">Farey Sector</strong>
                     <div style="font-family:monospace; font-size:0.9em; margin-top:6px; background:#0f172a; padding:8px; border-radius:4px;">
-                        S_n = (1/(n+1), 1/n]
+                        S_j = (1/(j+1), 1/j]
                     </div>
                     <p style="margin:8px 0 0 0; font-size:0.85em;">Intervals partitioning (0,1], bounded by consecutive Farey fractions.</p>
                 </div>
@@ -2651,33 +2651,33 @@ function openOpener(){
             <h3>3. Main Result</h3>
             <div class="derivation-box" style="background: linear-gradient(135deg, #422006 0%, #5a3a1a 100%); border-left-color: #fbbf24;">
                 <strong style="color:#fcd34d; font-size:1.1em;">Interval-Specific Application</strong>
-                <p style="margin:12px 0 0 0;">Applying Mertens' summatory totient formula to Farey interval S_n = (1/(n+1), 1/n], we obtain:</p>
+                <p style="margin:12px 0 0 0;">Applying Mertens' summatory totient formula to Farey interval S_j = (1/(j+1), 1/j], we obtain:</p>
                 <div style="background:#0f172a; padding:12px; border-radius:5px; font-family:monospace; font-size:1em; margin:10px 0; text-align:center;">
-                    <strong>C(n,N) ~ (3/π²) × N² / (n(n+1))</strong>
+                    <strong>F(j,N) ~ (3/π²) × N² / (j(j+1))</strong>
                 </div>
-                <p style="margin:10px 0 0 0; font-size:0.9em;">Where C(n,N) counts coprime pairs (a,b) with 1 ≤ b ≤ N, gcd(a,b)=1, and a/b in S_n. This follows from classical totient summation.</p>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">Where F(j,N) counts coprime pairs (a,b) with 1 ≤ b ≤ N, gcd(a,b)=1, and a/b in S_j. This follows from classical totient summation.</p>
             </div>
             
             <h3 style="margin-top:20px;">4. Derivation from Classical Results</h3>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #22c55e; margin:10px 0;">
-                <p><strong>Step 1:</strong> The geometric constraint a/b ∈ S_n = (1/(n+1), 1/n] translates to b/(n+1) < a ≤ b/n.</p>
-                <p style="margin:8px 0;"><strong>Step 2:</strong> For each denominator b, there are approximately b/(n(n+1)) integers a in this range.</p>
-                <p style="margin:8px 0;"><strong>Step 3:</strong> Restricting to coprime pairs: Σ_{b≤N} φ(b)/(n(n+1)) + O(N)</p>
+                <p><strong>Step 1:</strong> The geometric constraint a/b ∈ S_j = (1/(j+1), 1/j] translates to b/(j+1) < a ≤ b/n.</p>
+                <p style="margin:8px 0;"><strong>Step 2:</strong> For each denominator b, there are approximately b/(j(j+1)) integers a in this range.</p>
+                <p style="margin:8px 0;"><strong>Step 3:</strong> Restricting to coprime pairs: Σ_{b≤N} φ(b)/(j(j+1)) + O(N)</p>
                 <p style="margin:8px 0;"><strong>Step 4:</strong> Apply <strong>Mertens' classical summatory totient formula</strong> (1874):</p>
                 <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace;">
                     Sum of phi(b) = (3/pi^2)N^2 + O(N log N)
                 </div>
-                <p style="margin:8px 0;"><strong>Conclusion:</strong> C(n,N) = (1/(n(n+1))) * ((3/pi^2)N^2 + O(N log N))</p>
+                <p style="margin:8px 0;"><strong>Conclusion:</strong> F(j,N) = (1/(j(j+1))) * ((3/pi^2)N^2 + O(N log N))</p>
             </div>
             
             <h3 style="margin-top:20px;">5. Computational Verification</h3>
             <table style="width:100%; margin-top:10px; border-collapse:collapse; font-size:0.85em;">
-                <thead><tr style="background:#334155;"><th style="padding:8px;">Sector n</th><th>Width 1/(n(n+1))</th><th>Asymptotic Factor C(n,N)/N²</th><th>Numeric Value</th></tr></thead>
+                <thead><tr style="background:#334155;"><th style="padding:8px;">Sector j</th><th>Width 1/(j(j+1))</th><th>Asymptotic Factor F(j,N)/N²</th><th>Numeric Value</th></tr></thead>
                 <tbody>
                     <tr style="border-bottom:1px solid #334155;"><td style="padding:8px;">1</td><td style="padding:8px;">1/2</td><td style="padding:8px;">3/(2pi^2)</td><td style="padding:8px;">approximately 0.1520</td></tr>
                     <tr style="border-bottom:1px solid #334155;"><td style="padding:8px;">2</td><td style="padding:8px;">1/6</td><td style="padding:8px;">3/(6pi^2)</td><td style="padding:8px;">approximately 0.0507</td></tr>
                     <tr style="border-bottom:1px solid #334155;"><td style="padding:8px;">3</td><td style="padding:8px;">1/12</td><td style="padding:8px;">3/(12pi^2)</td><td style="padding:8px;">approximately 0.0253</td></tr>
-                    <tr style="border-bottom:1px solid #334155;"><td style="padding:8px;">n</td><td style="padding:8px;">1/(n(n+1))</td><td style="padding:8px;">3/(pi^2 n(n+1))</td><td style="padding:8px;">approximately 0.3040/(n(n+1))</td></tr>
+                    <tr style="border-bottom:1px solid #334155;"><td style="padding:8px;">n</td><td style="padding:8px;">1/(j(j+1))</td><td style="padding:8px;">3/(pi^2 j(j+1))</td><td style="padding:8px;">approximately 0.3040/(j(j+1))</td></tr>
                 </tbody>
             </table>
             <p style="margin-top:10px; font-size:0.85em; color:#94a3b8;">Numerical experiments confirm convergence to predicted asymptotics at rates consistent with O(N log N) error decay. Interactive visualizations above display accumulation of primitive lattice points within each Farey sector.</p>
@@ -2693,24 +2693,24 @@ function openOpener(){
             <h3 style="margin-top:20px;">7. The Sector Boundary: Where the Predicted Count Drops Below 1</h3>
             <div class="derivation-box" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-left-color: #38bdf8;">
                 <strong style="color:#7dd3fc; font-size:1.1em;">The Discreteness Threshold of the Farey Sequence</strong>
-                <p style="margin:12px 0 0 0;">Computational analysis shows that for any fixed N, there exists a transition point n* ≈ (√3/π)N ≈ 0.5513N where the asymptotic formula transitions from useful density estimation to sparse discrete counting. This computational boundary represents where expected counts drop below 1, entering a regime where relative error becomes unstable.</p>
+                <p style="margin:12px 0 0 0;">Computational analysis shows that for any fixed N, there exists a transition point j* ≈ (√3/π)N ≈ 0.5513N where the asymptotic formula transitions from useful density estimation to sparse discrete counting. This computational boundary represents where expected counts drop below 1, entering a regime where relative error becomes unstable.</p>
                 <div style="background:#0f172a; padding:12px; border-radius:5px; font-family:monospace; font-size:1em; margin:10px 0; text-align:center;">
-                    <strong>n* ≈ (√3/π) · N ≈ 0.5513 · N</strong>
+                    <strong>j* ≈ (√3/π) · N ≈ 0.5513 · N</strong>
                 </div>
                 <p style="margin:10px 0 0 0; font-size:0.9em;">This is an elementary threshold, not a signal-processing result — "Nyquist limit" doesn't literally apply here. The only resemblance is qualitative: a fixed-N formula stops resolving individual sectors once predicted counts drop below 1, the same shape as sampling below a Nyquist rate, with no deeper connection than that shape.</p>
             </div>
             
             <h4 style="margin-top:15px; color:#7dd3fc;">7.1 Derivation of the Boundary Constant</h4>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #0ea5e9; margin:10px 0;">
-                <p><strong>Condition:</strong> The predicted count C(n,N) falls below unity when:</p>
+                <p><strong>Condition:</strong> The predicted count F(j,N) falls below unity when:</p>
                 <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace; text-align:center;">
-                    (3/π²) · N² / (n(n+1)) < 1
+                    (3/π²) · N² / (j(j+1)) < 1
                 </div>
                 <p style="margin:8px 0;"><strong>Solving for n:</strong> n² + n > (3/π²)N² implies n > (√3/π)N for large n</p>
                 <p style="margin:8px 0;"><strong>The Constant:</strong> √3/π ≈ 0.5513 emerges naturally from the interaction of:</p>
                 <ul style="margin:8px 0 0 15px; font-size:0.9em;">
                     <li>The coprime density constant 3/π² (from Euler's totient asymptotics)</li>
-                    <li>The geometric sector width 1/(n(n+1))</li>
+                    <li>The geometric sector width 1/(j(j+1))</li>
                 </ul>
             </div>
             
@@ -2718,7 +2718,7 @@ function openOpener(){
             <table style="width:100%; margin-top:10px; border-collapse:collapse; font-size:0.85em;">
                 <thead><tr style="background:#1e3a5f;"><th style="padding:10px; text-align:left;">Property</th><th style="padding:10px;">Dense Regime (n < 0.55N)</th><th style="padding:10px;">Boundary (n ≈ 0.55N)</th><th style="padding:10px;">Sparse Regime (n > 0.55N)</th></tr></thead>
                 <tbody>
-                    <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Predicted Count</strong></td><td style="padding:10px; text-align:center;">C(n,N) >> 1</td><td style="padding:10px; text-align:center;">C(n,N) ≈ 1</td><td style="padding:10px; text-align:center;">C(n,N) < 1</td></tr>
+                    <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Predicted Count</strong></td><td style="padding:10px; text-align:center;">F(j,N) >> 1</td><td style="padding:10px; text-align:center;">F(j,N) ≈ 1</td><td style="padding:10px; text-align:center;">F(j,N) < 1</td></tr>
                     <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Relative Error</strong></td><td style="padding:10px; text-align:center;">Low, stable (< 5%)</td><td style="padding:10px; text-align:center;">Increasing noise</td><td style="padding:10px; text-align:center;">Oscillatory, unbounded</td></tr>
                     <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Identity Distribution</strong></td><td style="padding:10px; text-align:center;">Spread across PP, PC, CP, CC</td><td style="padding:10px; text-align:center;">Concentrating</td><td style="padding:10px; text-align:center;">Single category dominates</td></tr>
                     <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Mathematical Regime</strong></td><td style="padding:10px; text-align:center; color:#4ade80;">Analytic (Density)</td><td style="padding:10px; text-align:center; color:#fbbf24;">Transitional</td><td style="padding:10px; text-align:center; color:#f472b6;">Discrete (Counting)</td></tr>
@@ -2745,8 +2745,8 @@ function openOpener(){
                 <p style="margin:0 0 10px 0;">The boundary constant provides a "resolution limit" for prime distribution analysis:</p>
                 <ul style="margin:0 0 0 15px; font-size:0.9em;">
                     <li><strong>Zooming In:</strong> Increasing N allows the asymptotic formula to penetrate deeper into higher-numbered sectors before encountering empty regions.</li>
-                    <li><strong>Exhaustion Point:</strong> For n &gt; N/2 every sector contains <em>exactly one</em> fraction, namely 1/n — any numerator a ≥ 2 would need denominator b ≥ 2n &gt; N. The predicted count crosses 1 near n ≈ 0.5513N and drifts slowly downward past this constant.</li>
-                    <li><strong>Not an accuracy guarantee:</strong> This is a resolution limit only. Relative error of the asymptotic is O(n²/N) and exceeds 15% well before n ≈ 0.55N; agreement <em>at</em> 0.55N looks better than the formula deserves because the exact count is pinned at 1 across that whole range. Note also that the high-n regime is fully deterministic and prime-independent — 1/n is present whether n is prime or composite.</li>
+                    <li><strong>Exhaustion Point:</strong> For j &gt; N/2 every sector contains <em>exactly one</em> fraction, namely 1/j — any numerator a ≥ 2 would need denominator b ≥ 2j &gt; N. The predicted count crosses 1 near n ≈ 0.5513N and drifts slowly downward past this constant.</li>
+                    <li><strong>Not an accuracy guarantee:</strong> This is a resolution limit only. Relative error of the asymptotic is O(n²/N) and exceeds 15% well before n ≈ 0.55N; agreement <em>at</em> 0.55N looks better than the formula deserves because the exact count is pinned at 1 across that whole range. Note also that the high-j regime is fully deterministic and prime-independent — 1/j is present whether j is prime or composite.</li>
                 </ul>
             </div>
             
@@ -2784,12 +2784,36 @@ function openOpener(){
                     |S₁| = |S₂| + |S₃| + |S₄| + ⋯
                 </div>
             </div>
+
+            <h3 style="margin-top:20px;">9.0 Refined Form — S₁ Sector by Sector</h3>
+            <div class="theorem-box" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-left-color:#a78bfa; margin-top:15px;">
+                <strong style="color:#a78bfa; font-size:1em;">Theorem 1′ (Refined Bisection)</strong>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">Theorem 1 equates two <em>totals</em>. The involution in fact matches S₁ against the rest one sector at a time. Label each fraction of S₁ by the sector of its reflection, sub&#8209;sector k = ⌊m/(m&minus;r)⌋. Then:</p>
+                <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace; text-align:center;">
+                    |S₁,ₖ| = |Sⱼ| for k ≥ 3 &nbsp;&nbsp;and&nbsp;&nbsp; |S₁,₂| = |S₂| &minus; 1
+                </div>
+                <p style="margin:8px 0 0 0; font-size:0.9em;">Summing these rows returns Theorem 1, so the refined form is strictly stronger: S₁ does not merely have the same total as the rest, it contains a piece matching every individual sector. The single deficit at k&nbsp;=&nbsp;2 is the fixed point &iota;(1/2)&nbsp;=&nbsp;1/2, which sits in S₂ and has no preimage in S₁ — the same orphan that makes Theorem 1 balance, now visible instead of cancelled.</p>
+            </div>
+
+            <div style="background:rgba(56,189,248,0.10);border-left:4px solid #38bdf8;padding:12px;margin:10px 0;border-radius:4px;">
+                <p style="margin:0;font-size:0.9em;color:#7dd3fc;"><strong>Why the reflection index and not the second CF digit</strong></p>
+                <p style="margin:8px 0 0 0;font-size:0.88em;color:#bae6fd;">
+                    Sector index is the first partial quotient a₁, so it is tempting to label sub&#8209;sectors by the second, a₂. That is a different index: over all 24,338 coprime fractions of S₁ with m ≤ 400, ⌊m/(m&minus;r)⌋ = a₂ + 1 in every case and the two are never equal. Indexing by a₂ shifts every row by one and the identity reads as |S₁,ₖ| = |S<sub>k+1</sub>|, which looks like a mismatch. The reflection index is used here so sub&#8209;sectors line up with sectors by name.
+                </p>
+                <p style="margin:8px 0 0 0;font-size:0.88em;color:#bae6fd;">
+                    The subdivision is applied to S₁ only, at one level. Descending further would need a labelling convention for sub&#8209;sectors of S₁,ₖ that has not been established, and no unverified index is put on the page.
+                </p>
+            </div>
+
+            <div id="refinedBisectionPanel" style="background:#0f172a;padding:12px;border-radius:6px;border-left:3px solid #a78bfa;margin:10px 0;">
+                <div style="color:#94a3b8;font-size:0.85em;">Run a computation to populate the refined check.</div>
+            </div>
             
             <h4 style="margin-top:15px; color:#22c55e;">9.1 Why the Identity Holds Exactly for gcd Pairs</h4>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #22c55e; margin:10px 0;">
                 <p style="margin:0 0 10px 0;">The involution ι(r/m) = (m−r)/m pairs S₁ with the rest almost perfectly, and the two leftover points cancel exactly:</p>
                 <ul style="margin:0 0 0 15px; font-size:0.9em;">
-                    <li>φ maps (1/2, 1) bijectively onto (0, 1/2), pairing every fraction in S₁ (other than the endpoint 1) with a fraction somewhere in S₂∪S₃∪⋯</li>
+                    <li>&iota; maps (1/2, 1) bijectively onto (0, 1/2), pairing every fraction in S₁ (other than the endpoint 1) with a fraction somewhere in S₂∪S₃∪⋯</li>
                     <li>The endpoint <strong>1 = 1/1 ∈ S₁</strong> has no partner: ι(1) = 0, which isn't a valid fraction in this range. That leaves S₁ with one unpaired element.</li>
                     <li>The fixed point <strong>ι(1/2) = 1/2</strong> maps to itself. Since S₁ = (1/2, 1] is <em>open</em> at 1/2, the fraction 1/2 itself belongs to S₂ = (1/3, 1/2], not S₁. That leaves the rest (S₂∪S₃∪⋯) with one unpaired element too.</li>
                     <li>Both sides have exactly one leftover point — S₁'s unpaired "1" and the rest's unpaired "1/2" — so they cancel and the sizes come out exactly equal, with no net offset.</li>
@@ -2855,7 +2879,7 @@ function openOpener(){
                 <div class="color-legend" id="sectorPartitionLegend"></div>
             </div>
             <div class="chart-box chart-wrapper">
-                <h4>Density Cone: C(n,N) ~ (3/π²)N²/n(n+1)</h4>
+                <h4>Density Cone: F(j,N) ~ (3/π²)N²/j(j+1)</h4>
                 <div class="control-row" style="margin-bottom:8px;">
                     <label>Sectors to show: <input type="number" id="tvConeSectors" value="4" min="1" max="10" onchange="drawDensityCone()"></label>
                     <label><input type="checkbox" id="tvLogScale" onchange="drawDensityCone()"> Log Y</label>
@@ -2894,12 +2918,12 @@ function openOpener(){
             <div class="chart-box chart-wrapper">
                 <h4>Proof Visualization: Step-by-Step Accumulation</h4>
                 <div class="control-row" style="margin-bottom:8px;">
-                    <label>Sector n: <input type="number" id="tvProofSector" value="2" min="1" max="10" onchange="drawProofSteps()"></label>
+                    <label>Sector j: <input type="number" id="tvProofSector" value="2" min="1" max="10" onchange="drawProofSteps()"></label>
                     <label><input type="checkbox" id="tvShowContribBars" checked onchange="drawProofSteps()"> Contrib bars</label>
                     <label><input type="checkbox" id="tvShowProofPredicted" checked onchange="drawProofSteps()"> Predicted</label>
                 </div>
                 <canvas id="proofStepsCanvas" width="550" height="350"></canvas>
-                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Cumulative count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted asymptotic</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>φ(b)/(n(n+1)) contribution</div></div>
+                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Cumulative count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted asymptotic</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>φ(b)/(j(j+1)) contribution</div></div>
             </div>
             <div class="chart-box chart-wrapper">
                 <h4>Convergence Rate Analysis</h4>
@@ -2913,7 +2937,7 @@ function openOpener(){
         </div>
         
         <div class="chart-box chart-wrapper" style="margin-top:15px;">
-            <h4>Sector Density Heatmap: C(n,N) across parameters</h4>
+            <h4>Sector Density Heatmap: F(j,N) across parameters</h4>
             <div class="control-row" style="margin-bottom:8px;">
                 <label>N range: <input type="number" id="tvHeatmapNMin" value="20" min="10" max="100"> to <input type="number" id="tvHeatmapNMax" value="150" min="50" max="300"></label>
                 <label>Sectors: <input type="number" id="tvHeatmapSectors" value="10" min="3" max="15"></label>
@@ -2925,7 +2949,7 @@ function openOpener(){
         </div>
         
         <div class="derivation-box" style="margin-top:15px;">
-            <strong>Summary:</strong> For fixed interval n, as N → ∞: C(n,N) = (3/π²) × N²/(n(n+1)) + O(N log N). This follows directly from applying Mertens' summatory totient formula Σφ(b) = (3/π²)N² + O(N log N) to the geometric constraint a/b ∈ (1/(n+1), 1/n].
+            <strong>Summary:</strong> For fixed sector j, as N → ∞: F(j,N) = (3/π²) × N²/(j(j+1)) + O(N log N). This follows directly from applying Mertens' summatory totient formula Σφ(b) = (3/π²)N² + O(N log N) to the geometric constraint a/b ∈ (1/(j+1), 1/j].
         </div>
         <div style="margin-top:15px;"><button onclick="screenshotFullTab('theoryviz')">Screenshot Full Theory Viz Tab</button></div>
     </div>
@@ -2990,8 +3014,8 @@ function openOpener(){
                 <div class="chart-box"><h4>Distribution of s(h,k) Values</h4><canvas id="dedekindDistChart"></canvas></div>
                 <div class="chart-box"><h4>12k*s(h,k) Distribution</h4><canvas id="dedekind12kChart"></canvas></div>
             </div>
-            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Dedekind Sum Table</h4><div class="table-scroll"><table id="dedekindTable"><thead><tr><th>h</th><th>k</th><th>s(h,k)</th><th>12k*s(h,k)</th><th>gcd</th></tr></thead><tbody></tbody></table></div></div>
-            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Reciprocity Verification <span style="font-weight:normal;color:#64748b;">(s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk)))</span></h4><div class="table-scroll"><table id="dedekindReciprocityTable"><thead><tr><th>h</th><th>k</th><th>s(h,k)</th><th>s(k,h)</th><th>Sum</th><th>RHS</th><th>Match</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Dedekind Sum Table</h4><div class="table-scroll"><table id="dedekindTable"><thead><tr><th>h</th><th>j</th><th>s(h,k)</th><th>12k*s(h,k)</th><th>gcd</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Reciprocity Verification <span style="font-weight:normal;color:#64748b;">(s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk)))</span></h4><div class="table-scroll"><table id="dedekindReciprocityTable"><thead><tr><th>h</th><th>j</th><th>s(h,k)</th><th>s(k,h)</th><th>Sum</th><th>RHS</th><th>Match</th></tr></thead><tbody></tbody></table></div></div>
             <div class="connection-box" style="margin-top:12px;"><strong>Reciprocity:</strong> s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk))</div>
             <div class="derivation-box" style="margin-top:12px;"><strong>Modular Forms Connection:</strong> Dedekind sums arise in the transformation formula for the Dedekind eta function η(τ) = e^(πiτ/12) Π(1-e^(2πinτ)). Under modular transformations, the eta function picks up factors involving Dedekind sums, making them essential in the theory of modular forms.</div>
             <div style="margin-top:15px;"><button onclick="screenshotFullTab('dedekind')">Screenshot Full Dedekind Tab</button></div>
@@ -3127,7 +3151,7 @@ function openOpener(){
         <div class="panel">
             <h3>3D Sector Cone</h3>
             <p style="color:#94a3b8;font-size:0.9em;margin-bottom:15px;">
-                Visualizes the density distribution C(n,N) ~ (3/π²)N²/(n(n+1)) as a 3D cone surface. The vertical axis represents sector number n, the radial axis shows N, and the height indicates fraction count. The cone shape reveals how coprime density concentrates in lower sectors and decreases as 1/n².
+                Visualizes the density distribution F(j,N) ~ (3/π²)N²/(j(j+1)) as a 3D cone surface. The vertical axis represents sector number j, the radial axis shows N, and the height indicates fraction count. The cone shape reveals how coprime density concentrates in lower sectors and decreases as 1/j².
             </p>
             
             <!-- 3D Controls with input boxes -->
@@ -3648,7 +3672,7 @@ function openOpener(){
                 </div>
                 <div style="background:rgba(34,197,94,0.2);padding:10px 15px;border-radius:6px;border:1px solid #22c55e;">
                     <div style="color:#86efac;font-size:0.75em;">Unified Formula</div>
-                    <div style="color:#f1f5f9;font-size:1.05em;font-family:monospace;">C(n,N,a,k) = [3N²/(π²n(n+1))] · (1/φ(k)) · ∏<sub>p|k</sub> p/(p+1)</div>
+                    <div style="color:#f1f5f9;font-size:1.05em;font-family:monospace;">F(j,N,a,k) = [3N²/(π²j(j+1))] · (1/φ(k)) · ∏<sub>p|k</sub> p/(p+1)</div>
                 </div>
                 <div style="background:rgba(245,158,11,0.2);padding:10px 15px;border-radius:6px;border:1px solid #f59e0b;">
                     <div style="color:#fcd34d;font-size:0.75em;">30×2ⁿ Density</div>
@@ -3727,7 +3751,7 @@ function openOpener(){
                     <label><input type="checkbox" id="unifiedShowAll" onchange="drawUnifiedFormulaChart()"> All classes</label>
                 </div>
                 <canvas id="unifiedFormulaCanvas" width="550" height="400"></canvas>
-                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Actual C(n,N,a,k) — exact count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted [3N²/(π²n(n+1))]·(1/φ(k))·∏<sub>p|k</sub>p/(p+1)</div></div>
+                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Actual C(n,N,a,k) — exact count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted [3N²/(π²j(j+1))]·(1/φ(k))·∏<sub>p|k</sub>p/(p+1)</div></div>
             </div>
         </div>
         
@@ -3780,13 +3804,13 @@ function openOpener(){
         
         <div class="derivation-box" style="margin-top:15px;">
             <strong>Key Insight:</strong> The unified formula
-            <span style="font-family:monospace;">C(n,N,a,k) = [3N²/(π²n(n+1))] · (1/φ(k)) · ∏<sub>p|k</sub> p/(p+1)</span>
+            <span style="font-family:monospace;">F(j,N,a,k) = [3N²/(π²j(j+1))] · (1/φ(k)) · ∏<sub>p|k</sub> p/(p+1)</span>
             combines Farey sector distribution with primorial residue filtering. Within each sector the numerators
             <em>r</em> distribute uniformly across the φ(k) residue classes <em>coprime to k</em> — but not across all k
-            classes, and not with weight C(n,N)/φ(k). Two corrections are needed and both are visible in the charts above.
+            classes, and not with weight F(j,N)/φ(k). Two corrections are needed and both are visible in the charts above.
             First, only a fraction ∏<sub>p|k</sub> p/(p+1) of numerators are coprime to k at all: conditioning on
             gcd(r,m)=1 already biases r away from divisibility, since P(p∤r | gcd(r,m)=1) = (1−1/p)/(1−1/p²) = p/(p+1).
-            For k = 30 that factor is (2/3)(3/4)(5/6) = 5/12, so the naive C(n,N)/φ(k) overshoots by 2.4×.
+            For k = 30 that factor is (2/3)(3/4)(5/6) = 5/12, so the naive F(j,N)/φ(k) overshoots by 2.4×.
             Second, the classes <em>not</em> coprime to k are neither empty nor uniform — their counts depend on gcd(a,k).
             The density φ(30×2ⁿ)/(30×2ⁿ) = 4/15 does remain constant under power-of-2 scaling, independently of the above.
             <div style="margin-top:10px;font-size:0.85em;color:#94a3b8;">
@@ -3942,25 +3966,25 @@ function openOpener(){
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
                 <div style="background:#1a1a2e;padding:20px;border-radius:8px;border-left:4px solid #5588ff;">
                     <h4 style="color:#5588ff;margin-top:0;">Sector Boundaries</h4>
-                    <p>Sector S<sub>n</sub> = (1/(n+1), 1/n] is bounded by:</p>
+                    <p>Sector S<sub>j</sub> = (1/(j+1), 1/j] is bounded by:</p>
                     <ul style="color:#94a3b8;">
-                        <li><strong style="color:#e2e8f0;">Left boundary:</strong> 1/(n+1)</li>
-                        <li><strong style="color:#e2e8f0;">Right boundary:</strong> 1/n</li>
+                        <li><strong style="color:#e2e8f0;">Left boundary:</strong> 1/(j+1)</li>
+                        <li><strong style="color:#e2e8f0;">Right boundary:</strong> 1/j</li>
                     </ul>
-                    <p>The <span style="color:#ff6b6b;font-weight:bold;">Gatekeeper</span> 2/(2n+1) is the mediant of these boundaries.</p>
+                    <p>The <span style="color:#ff6b6b;font-weight:bold;">Gatekeeper</span> 2/(2j+1) is the mediant of these boundaries.</p>
                 </div>
                 <div style="background:#1a1a2e;padding:20px;border-radius:8px;border-left:4px solid #a855f7;">
                     <h4 style="color:#a855f7;margin-top:0;">Tree Confinement</h4>
                     <p><strong style="color:#e2e8f0;">Key insight:</strong> Mediants generated within a sector stay confined to that sector.</p>
-                    <p style="color:#94a3b8;font-size:0.9em;">If a/b ∈ S<sub>n</sub> and we take mediants with the sector boundaries, all descendants remain in S<sub>n</sub>.</p>
-                    <p style="color:#94a3b8;font-size:0.9em;">The Stern-Brocot subtree rooted at the Gatekeeper generates exactly the fractions strictly between the boundaries — that is, S<sub>n</sub> ∩ F<sub>N</sub> minus the right endpoint 1/n, which belongs to S<sub>n</sub> but sits on the boundary as an ancestor of the subtree.</p>
+                    <p style="color:#94a3b8;font-size:0.9em;">If a/b ∈ S<sub>j</sub> and we take mediants with the sector boundaries, all descendants remain in S<sub>j</sub>.</p>
+                    <p style="color:#94a3b8;font-size:0.9em;">The Stern-Brocot subtree rooted at the Gatekeeper generates exactly the fractions strictly between the boundaries — that is, S<sub>j</sub> ∩ F<sub>N</sub> minus the right endpoint 1/j, which belongs to S<sub>j</sub> but sits on the boundary as an ancestor of the subtree.</p>
                 </div>
             </div>
             
             <div style="background:#1e2d3d;padding:20px;border-radius:8px;margin-bottom:20px;">
                 <h4 style="margin-top:0;">Explorer Controls</h4>
                 <div class="control-row">
-                    <label>Sector n:</label>
+                    <label>Sector j:</label>
                     <input type="number" id="horizonSectorN" value="5" min="1" max="500">
                     <label>Max Denom N:</label>
                     <input type="number" id="horizonMaxN" value="50" min="3" max="1000">
@@ -4054,8 +4078,8 @@ function openOpener(){
             
             <h4>Custom Formula Tester</h4>
             <div class="control-row" style="margin:12px 0;">
-                <label>Formula C(n,N) = </label>
-                <input type="text" id="customFormula" value="3*N*N/(Math.PI*Math.PI*n*(n+1))" style="width:300px;">
+                <label>Formula F(j,N) = </label>
+                <input type="text" id="customFormula" value="3*N*N/(Math.PI*Math.PI*j*(j+1))" style="width:300px;">
                 <button onclick="testCustomFormula()">Test</button>
             </div>
             <div class="chart-box" style="margin-top:12px;"><h4>Custom vs Standard</h4><canvas id="customFormulaChart"></canvas></div>
@@ -4153,11 +4177,11 @@ function openOpener(){
                 <strong style="color:#e0e7ff; font-size:1.1em;">Getachew, Wessen (2024-2025)</strong>
                 <p style="margin:12px 0 0 0; font-size:0.95em; color:#e2e8f0;"><strong>Exploratory work and visualizations:</strong></p>
                 <ul style="margin:10px 0 0 15px; font-size:0.9em; color:#c7d2fe;">
-                    <li><strong>Interval-Based Analysis:</strong> Application of classical summatory function results C(n,N) ~ (3/π²)N²/(n(n+1)) to Farey sequence intervals, building on Mertens' totient summation.</li>
-                    <li><strong>Boundary Transition Point:</strong> Observation of n* ≈ (√3/π)N ≈ 0.5513N as the point where the predicted count per sector falls below one fraction. This is a resolution limit, not an accuracy boundary: relative error of the asymptotic is O(n²/N) and grows well before n*.</li>
+                    <li><strong>Interval-Based Analysis:</strong> Application of classical summatory function results F(j,N) ~ (3/π²)N²/(j(j+1)) to Farey sequence intervals, building on Mertens' totient summation.</li>
+                    <li><strong>Boundary Transition Point:</strong> Observation of j* ≈ (√3/π)N ≈ 0.5513N as the point where the predicted count per sector falls below one fraction. This is a resolution limit, not an accuracy boundary: relative error of the asymptotic is O(j²/N) and grows well before j*.</li>
                     <li><strong>Involution Symmetry:</strong> The map &iota;(r/m) = (m&minus;r)/m as a self-inverse pairing on Farey fractions fixing only 1/2, and the sector correspondence it induces.</li>
                         <li><strong>Bisection Identity:</strong> |S&#8321;| = |S&#8322;| + |S&#8323;| + &hellip; &mdash; the first sector contains exactly as many coprime fractions as all remaining sectors combined. An exact integer identity at every N, following from the involution.</li>
-                        <li><strong>Exhaustion Structure:</strong> For n &gt; N/2 every sector contains exactly one fraction, 1/n, since any numerator a &ge; 2 requires denominator b &ge; 2n &gt; N.</li>
+                        <li><strong>Exhaustion Structure:</strong> For j &gt; N/2 every sector contains exactly one fraction, 1/j, since any numerator a &ge; 2 requires denominator b &ge; 2j &gt; N.</li>
                         <li><strong>Prime/Composite Categorization:</strong> Four-way decomposition (PP, PC, CP, CC) with computational analysis of distributions across intervals.</li>
                     <li><strong>Interactive Visualization Framework:</strong> Comprehensive tools for exploring interval structure, including ring visualization, tree paths, and harmonic sonification.</li>
                     <li><strong>Computational Verification:</strong> Direct enumeration and comparison with classical asymptotic predictions across multiple interval ranges.</li>
@@ -4197,7 +4221,7 @@ function openOpener(){
                 <h3 style="color:#c7d2fe;margin:0 0 15px 0;">What is This Tool?</h3>
                 <p style="color:#e0e7ff;line-height:1.8;">
                     The Farey Sequence Explorer visualizes coprime fractions r/m (where gcd(r,m)=1) organized into sectors based on their denominators. 
-                    Each sector Sₙ contains fractions in the interval (1/(n+1), 1/n]. The tool computes exact counts, compares them to asymptotic predictions 
+                    Each sector Sⱼ contains fractions in the interval (1/(j+1), 1/j]. The tool computes exact counts, compares them to asymptotic predictions 
                     from the Basel problem (6/π²), and analyzes the distribution of prime/composite patterns in number theory.
                 </p>
             </div>
@@ -4221,7 +4245,7 @@ function openOpener(){
                 <div style="margin-bottom:15px;">
                     <h4 style="color:#22c55e;margin:0 0 8px 0;">Sector Bound Controls</h4>
                     <ul style="color:#cbd5e1;margin-left:20px;line-height:1.8;">
-                        <li><strong>Auto-bound:</strong> Limits sector analysis to n ≤ constant × N</li>
+                        <li><strong>Auto-bound:</strong> Limits sector analysis to j ≤ constant × N</li>
                         <li><strong>Constants:</strong> √3/π ≈ 0.55 (computational boundary), √6/π ≈ 0.78, or 1/π ≈ 0.32</li>
                         <li><strong>Why use it:</strong> Asymptotic formulas become less accurate for large n. Boundary=0.55 gives best predictions</li>
                         <li><strong>Manual override:</strong> Slider lets you set custom boundary values</li>
@@ -4355,7 +4379,7 @@ function openOpener(){
                 <div style="margin-bottom:15px;">
                     <h4 style="color:#fbbf24;margin:0 0 8px 0;">Exact vs Predicted Chart</h4>
                     <ul style="color:#fef3c7;margin-left:20px;line-height:1.8;">
-                        <li><strong>Purpose:</strong> Compares actual coprime counts to asymptotic formula 3N²/(π²n(n+1))</li>
+                        <li><strong>Purpose:</strong> Compares actual coprime counts to asymptotic formula 3N²/(π²j(j+1))</li>
                         <li><strong>Green bars:</strong> Exact counts from computation</li>
                         <li><strong>Orange line:</strong> Predicted values from Mertens formula</li>
                         <li><strong>Play button:</strong> Sonifies data (higher count = higher pitch). Shows representative fraction in top-right corner during playback</li>
@@ -4383,7 +4407,7 @@ function openOpener(){
                 <h3 style="color:#94a3b8;margin:0 0 15px 0;">5. Sector Data Table</h3>
                 <ul style="color:#cbd5e1;margin-left:20px;line-height:1.8;">
                     <li><strong>Click any row:</strong> Opens detailed sector analysis modal</li>
-                    <li><strong>Columns:</strong> Sector n, Interval (1/(n+1), 1/n], Exact count, Predicted count, Error %, P(m) prime denominators, C(m) composite denominators, PP/PC/CP/CC breakdown</li>
+                    <li><strong>Columns:</strong> Sector j, Interval (1/(j+1), 1/j], Exact count, Predicted count, Error %, P(m) prime denominators, C(m) composite denominators, PP/PC/CP/CC breakdown</li>
                     <li><strong>Decimal precision:</strong> Dropdown to adjust display (0-4 decimals)</li>
                     <li><strong>Color coding:</strong> Rows highlighted based on error magnitude and sign</li>
                     <li><strong>Export:</strong> Button to download table as CSV</li>
@@ -4409,7 +4433,7 @@ function openOpener(){
                     <ul style="color:#e9d5ff;margin-left:20px;line-height:1.8;">
                         <li><strong>Formula:</strong> |S₁| = |S₂| + |S₃| + ... + |S_max|</li>
                         <li><strong>Meaning:</strong> The involution's two unpaired points — the endpoint 1 in S₁ and the fixed point 1/2 in S₂ — sit one on each side, so they cancel and leave exact balance</li>
-                        <li><strong>Derivation:</strong> φ pairs every other fraction across the two halves. r/m = 1/2 lies in S₂ (S₁ = (1/2, 1] is open at 1/2), so both "loose ends" — 1 ∈ S₁ and 1/2 ∈ S₂ — land on opposite sides and cancel</li>
+                        <li><strong>Derivation:</strong> &iota; pairs every other fraction across the two halves. r/m = 1/2 lies in S₂ (S₁ = (1/2, 1] is open at 1/2), so both "loose ends" — 1 ∈ S₁ and 1/2 ∈ S₂ — land on opposite sides and cancel</li>
                         <li><strong>Verification:</strong> Computed values shown with PASS/FAIL indicator</li>
                         <li><strong>Boundary requirement:</strong> Must have boundary = 1 for identity to hold exactly</li>
                     </ul>
@@ -4484,6 +4508,7 @@ const state = {
     // gcd(r,m)>1 support: 'coprime' | 'noncoprime' | 'both'
     gcdMode: 'coprime', includeNonCoprime: false,
     nonCoprimeBySector: {}, allNonCoprime: [],
+    subBySector1: {},   // S1 bucketed by getSubSector — refined bisection
     sectorBoundConstant: 1, // Default 1.0000 (no bound: max sector = N)
     tablePage: 0, // current page of the Sector Data table (0-indexed)
     // Bounded window data for P/C analysis in large N mode
@@ -5282,17 +5307,17 @@ function screenshotMainCanvas() {
     ctx.textAlign = 'left';
     ctx.fillText('Farey Summatory Function', legendX + 30, ly + 24 * canvasScale);
     
-    // Main formula: C(n,N) = 3N² / (π² n(n+1))
+    // Main formula: F(j,N) = 3N² / (π² j(j+1))
     ctx.fillStyle = '#e2e8f0';
     ctx.font = 'bold 22px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('C(n,N)  =  3N²  /  (π²  n(n+1))', legendX + legendWidth / 2, ly + 68 * canvasScale);
+    ctx.fillText('F(j,N)  =  3N²  /  (π²  j(j+1))', legendX + legendWidth / 2, ly + 68 * canvasScale);
     
-    // Sector definition: Sₙ = (1/(n+1), 1/n]
+    // Sector definition: Sⱼ = (1/(j+1), 1/j]
     ctx.fillStyle = '#94a3b8';
     ctx.font = '14px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('Sector Sₙ = (1/(n+1), 1/n]', legendX + 30, ly + 95 * canvasScale);
+    ctx.fillText('Sector Sⱼ = (1/(j+1), 1/j]', legendX + 30, ly + 95 * canvasScale);
     
     // Clarification note about 3/π² vs 6/π²
     ctx.fillStyle = '#a5b4fc';
@@ -5567,8 +5592,8 @@ function screenshotMainCanvas() {
         `Of all lattice points, ${gcdOneCount.toLocaleString()} are coprime (${(gcdOneRatio*100).toFixed(2)}%) with actual ` +
         `density ${gcdOneRatio.toFixed(4)}, achieving ${convergenceQuality.toLowerCase()} convergence (error: ${convergenceError.toFixed(4)}). ` +
         `The analysis displays ${totalRM.toLocaleString()} visualized Farey pairs across ${sectorDesc}, representing ` +
-        `${(visualizedRatio * 100).toFixed(2)}% of all coprime pairs. Each sector S_n = (1/(n+1), 1/n] follows Mertens' ` +
-        `asymptotic formula C(n,N) ≈ 3N²/(π²n(n+1)). Prime denominators account for ${primeRatio}% of displayed pairs, ` +
+        `${(visualizedRatio * 100).toFixed(2)}% of all coprime pairs. Each sector S_j = (1/(j+1), 1/j] follows Mertens' ` +
+        `asymptotic formula F(j,N) ≈ 3N²/(π²j(j+1)). Prime denominators account for ${primeRatio}% of displayed pairs, ` +
         `with ${ppRatio}% being Prime-Prime categories. The GCD distribution reveals the theoretical pattern where ` +
         `P(gcd=k) ∝ 1/k² from ζ(2) = π²/6, demonstrating Euler's product ∏_p(1-1/p²) = 6/π² and the fundamental ` +
         `connection between coprimality probability and the Riemann zeta function.`;
@@ -5954,7 +5979,7 @@ function generateScreenshotWithSelection(tabName) {
     const tabInfo = {
         'mainview': {
             title: 'Main Sector Analysis',
-            formula: 'C(n, N) = 3N² / (π² n(n+1))',
+            formula: 'F(j, N) = 3N² / (π² j(j+1))',
             description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sn',
             params: [
                 'Coprime density: 6/π² ≈ 0.6079',
@@ -5981,13 +6006,13 @@ function generateScreenshotWithSelection(tabName) {
         },
         'theory': {
             title: 'Farey Summatory Function Theory',
-            formula: 'C(n, N) ~ (3/π²) · N² / n(n+1)',
+            formula: 'F(j, N) ~ (3/π²) · N² / j(j+1)',
             description: 'Distribution of coprime integer pairs with bounded height',
             params: ['Summatory totient ~ 3N²/π²', 'Global density: 1/ζ(2) = 6/π²', 'Visible lattice points']
         },
         'theoryviz': {
             title: 'Theory Visualization',
-            formula: 'C(n, N) = 3N² / (π² n(n+1))',
+            formula: 'F(j, N) = 3N² / (π² j(j+1))',
             description: 'Visual exploration of the Farey Summatory Function Theorem',
             params: ['Summatory totient: Σφ(b) ~ 3N²/π²', 'Sector partition of (0,1]', 'Convergence analysis']
         },
@@ -6333,7 +6358,7 @@ function generateScreenshotWithSelection(tabName) {
     const bottomResult = (3 * bottomN * bottomN) / (bottomPi2 * bottomViewSector * (bottomViewSector + 1));
     ctx.fillStyle = '#22c55e';
     ctx.font = '11px system-ui';
-    ctx.fillText('C(' + bottomViewSector + ', ' + bottomN.toLocaleString() + ') = ' + bottomResult.toFixed(4), padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 90);
+    ctx.fillText('F(' + bottomViewSector + ', ' + bottomN.toLocaleString() + ') = ' + bottomResult.toFixed(4), padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 90);
     
     // Description (asymptotic count) - centered below example
     const formulaCenterX = padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2;
@@ -6739,7 +6764,7 @@ const NumberTheory = (function() {
             if (m <= sqrtn) return small[m];
             if (large.has(m)) return large.get(m);
             
-            // S(n) = n(n+1)/2 - sum_{d=2}^{n} S(floor(n/d))
+            // S(n) = j(j+1)/2 - sum_{d=2}^{n} S(floor(n/d))
             let result = m * (m + 1) / 2;
             
             // Use hyperbola method
@@ -6895,6 +6920,68 @@ function getSector(r,m) {
     // contain exactly one fraction (1/n is always in sector n for n <= N).
     if (r <= 0 || r > m) return null;
     return Math.floor(m / r);
+}
+// Sub-sector index inside S1 = (1/2, 1].
+//
+// S1 is carried onto (0, 1/2) by the involution iota(r/m) = (m-r)/m, so the
+// natural label for a fraction of S1 is the SECTOR OF ITS REFLECTION:
+//     subSector(r,m) = floor(m / (m-r))
+// With that labelling |S1,k| = |S_j| for every k >= 3, and |S1,2| = |S2| - 1,
+// the deficit being the fixed point iota(1/2) = 1/2, which lives in S2 and has
+// no preimage in S1. Summing those rows gives back Theorem 1.
+//
+// NOT the raw second continued-fraction digit. Checked over all 24,338 coprime
+// fractions of S1 with m <= 400: floor(m/(m-r)) = a2 + 1 in every single case,
+// never equal. Indexing by a2 instead shifts every row by one and makes the
+// identity read as |S1,k| = |S_(k+1)|, which looks like a mismatch.
+//
+// Depth is capped at 2 on purpose. Descending further needs a labelling
+// convention for sub-sectors of S1,k that has not been established here, and
+// guessing one would put an unverified index on the page.
+function getSubSector(r, m) {
+    if (r <= 0 || r >= m) return null;        // 1/1 is the unpaired endpoint
+    if (Math.floor(m / r) !== 1) return null; // only S1 subdivides
+    const d = m - r;
+    return d > 0 ? Math.floor(m / d) : null;
+}
+// Live check of Theorem 1'. Reads the buckets built during the compute pass and
+// compares each |S1,k| against |S_j|. Expected: equal for k >= 3, short by
+// exactly 1 at k = 2. Anything else is a genuine failure, not a tolerance issue
+// — these are integer counts, so there is no rounding to allow for.
+function renderRefinedBisection() {
+    const el = document.getElementById('refinedBisectionPanel');
+    if (!el) return;
+    const sub = state.subBySector1 || {};
+    const keys = Object.keys(sub).map(Number).sort((a,b)=>a-b);
+    if (!keys.length) { el.innerHTML = '<div style="color:#94a3b8;font-size:0.85em;">Run a computation to populate the refined check.</div>'; return; }
+    let rows = '', bad = 0, shown = 0;
+    for (const k of keys) {
+        const got = sub[k].length;
+        const want = (state.residuesBySector[k] || []).length - (k === 2 ? 1 : 0);
+        const ok = got === want;
+        if (!ok) bad++;
+        if (shown < 14) {
+            rows += '<tr><td style="padding:2px 8px;">' + k + '</td>'
+                 +  '<td style="padding:2px 8px;text-align:right;">' + (state.residuesBySector[k]||[]).length + '</td>'
+                 +  '<td style="padding:2px 8px;text-align:right;">' + got + '</td>'
+                 +  '<td style="padding:2px 8px;text-align:right;">' + want + '</td>'
+                 +  '<td style="padding:2px 8px;color:' + (ok ? '#22c55e' : '#ef4444') + ';">' + (ok ? 'ok' : 'MISMATCH') + '</td></tr>';
+            shown++;
+        }
+    }
+    const pass = bad === 0;
+    el.innerHTML =
+      '<div style="font-size:0.9em;margin-bottom:8px;color:' + (pass ? '#22c55e' : '#ef4444') + ';font-weight:600;">'
+      + (pass ? 'PASS' : 'FAIL') + ' \u2014 Theorem 1\u2032 over ' + keys.length + ' sub-sectors'
+      + (pass ? '' : ' (' + bad + ' mismatched)') + '</div>'
+      + '<table style="font-family:monospace;font-size:0.82em;color:#cbd5e1;border-collapse:collapse;">'
+      + '<thead><tr style="color:#a78bfa;"><th style="padding:2px 8px;text-align:left;">k</th>'
+      + '<th style="padding:2px 8px;text-align:right;">|S_j|</th>'
+      + '<th style="padding:2px 8px;text-align:right;">|S1,k|</th>'
+      + '<th style="padding:2px 8px;text-align:right;">expected</th>'
+      + '<th style="padding:2px 8px;"></th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + (keys.length > 14 ? '<div style="color:#64748b;font-size:0.8em;margin-top:6px;">first 14 of ' + keys.length + ' sub-sectors; the PASS/FAIL above covers all of them</div>' : '')
+      + '<div style="color:#64748b;font-size:0.8em;margin-top:6px;">expected = |S_j|, less 1 at k=2 for the fixed point \u03b9(1/2)=1/2</div>';
 }
 function formula(n,N) { return (3*N*N)/(Math.PI*Math.PI*n*(n+1)); }
 function fmt(x) { if(x>=1e9) return (x/1e9).toFixed(1)+'B'; if(x>=1e6) return (x/1e6).toFixed(1)+'M'; if(x>=1e3) return (x/1e3).toFixed(1)+'K'; return x.toFixed(x<10?2:0); }
@@ -7255,6 +7342,7 @@ async function computeAll() {
         
         state.sectors = []; state.residuesBySector = {}; state.allResidues = []; state.gaps = []; state.farey = [];
         state.nonCoprimeBySector = {}; state.allNonCoprime = [];
+        state.subBySector1 = {};
         state.tablePage = 0;
         state.boundedResiduesBySector = {};
         
@@ -7362,6 +7450,16 @@ async function computeExact(N) {
                     if(!state.residuesBySector[s]) state.residuesBySector[s] = [];
                     state.residuesBySector[s].push(res);
                 }
+                // Sub-sector bucket for S1 only — costs one division per S1
+                // point and nothing at all elsewhere.
+                if(s === 1) {
+                    const ss = getSubSector(r, m);
+                    if(ss) {
+                        res.subSector = ss;
+                        if(!state.subBySector1[ss]) state.subBySector1[ss] = [];
+                        state.subBySector1[ss].push(res);
+                    }
+                }
             }
         }
         ops += m;
@@ -7395,9 +7493,11 @@ async function computeExact(N) {
             ppCount, pcCount, cpCount, ccCount
         });
     }
+    // Refined bisection check runs off the buckets just built.
+    try { renderRefinedBisection(); } catch(e) {}
 }
 
-// width(n) = 1/(n(n+1)) telescopes: sum_{n=a}^{b} width(n) = 1/a - 1/(b+1).
+// width(n) = 1/(j(j+1)) telescopes: sum_{n=a}^{b} width(n) = 1/a - 1/(b+1).
 // That closed form gives the exact fraction of the predicted "mass" (and,
 // since formula(n,N) is just a constant times width(n), the exact fraction
 // of the predicted total) covered by any prefix of sectors — no brute-force
@@ -7797,7 +7897,7 @@ function updateFormulaOnlyDisplays() {
     // These require actual residue data which formula mode doesn't compute
 }
 
-// Predicted(n) = 3N^2/(pi^2 n(n+1)) is a smooth, monotonic curve — sampling it
+// Predicted(n) = 3N^2/(pi^2 j(j+1)) is a smooth, monotonic curve — sampling it
 // at a bounded number of points looks identical on screen to plotting every
 // single sector, but avoids handing Chart.js hundreds of thousands of points.
 // This ONLY thins the visual curve; it never touches state.sectors, the
@@ -7864,7 +7964,7 @@ function updateMainChartsFormulaOnly() {
                 title:{display:true, text: hasBoundedData ? 'Formula + Bounded Window Data' : 'Formula Predictions Only (No Exact Data)', color: hasBoundedData ? '#22c55e' : '#f59e0b'}
             },
             scales:{
-                x:{type:'linear', ticks:{color:'#94a3b8'}, title:{display:true, text:'Sector n', color:'#64748b'}},
+                x:{type:'linear', ticks:{color:'#94a3b8'}, title:{display:true, text:'Sector j', color:'#64748b'}},
                 y:{ticks:{color:'#94a3b8'}}
             }
         }
@@ -7909,7 +8009,7 @@ function updateMainChartsFormulaOnly() {
                             autoSkip: true,
                             maxTicksLimit: 30
                         },
-                        title: {display: true, text: 'Sector n', color: '#64748b'}
+                        title: {display: true, text: 'Sector j', color: '#64748b'}
                     },
                     y:{ticks:{color:'#94a3b8'}}
                 },
@@ -7983,7 +8083,7 @@ function updateViewSectorDropdown() {
 }
 
 // ── Sector selector helpers (selector lives directly under the ring) ──────
-// Shows the sector's defining interval (1/(n+1), 1/n] next to the dropdown.
+// Shows the sector's defining interval (1/(j+1), 1/j] next to the dropdown.
 function updateViewSectorRangeLabel() {
     const el = document.getElementById('viewSectorRangeLabel');
     if (!el) return;
@@ -8240,7 +8340,7 @@ function drawDensityCone() {
     ctx.save();
     ctx.translate(15, H/2);
     ctx.rotate(-Math.PI/2);
-    ctx.fillText('C(n,N) →', 0, 0);
+    ctx.fillText('F(j,N) →', 0, 0);
     ctx.restore();
     
     document.getElementById('densityConeLegend').innerHTML = legendHtml;
@@ -8519,7 +8619,7 @@ function drawProofSteps() {
     
     ctx.fillStyle = '#8b5cf6';
     ctx.font = 'bold 11px system-ui';
-    ctx.fillText(`Sector n=${n}`, W/2, 18);
+    ctx.fillText(`Sector j=${n}`, W/2, 18);
 }
 
 function drawConvergenceAnalysis() {
@@ -8730,7 +8830,7 @@ function drawDensityHeatmap() {
     for (let n = 1; n <= numSectors; n++) {
         ctx.fillText(`S${n}`, margin.l + (n - 0.5) * cellW, H - margin.b + 20);
     }
-    ctx.fillText('Sector n', margin.l + plotW/2, H - 10);
+    ctx.fillText('Sector j', margin.l + plotW/2, H - 10);
     
     // Y-axis labels (N values)
     ctx.textAlign = 'right';
@@ -8761,7 +8861,7 @@ function drawDensityHeatmap() {
     ctx.textAlign = 'left';
     ctx.fillText(fmt(maxVal), barX + barW + 5, margin.t + 10);
     ctx.fillText(fmt(minVal), barX + barW + 5, margin.t + barH);
-    ctx.fillText('C(n,N)', barX + barW + 5, margin.t + barH/2);
+    ctx.fillText('F(j,N)', barX + barW + 5, margin.t + barH/2);
     
     // Title
     ctx.fillStyle = '#cbd5e1';
@@ -8850,8 +8950,8 @@ function updateFormulaDisplay() {
     const result = (3 * N2) / (pi2 * denominator);
     
     // Show computed values
-    formulaComputed.innerHTML = `<span style="color:#94a3b8;">For n=${nVal}, N=${N.toLocaleString()}:</span> ` +
-        `C(${nVal}, ${N.toLocaleString()}) = 3×${N.toLocaleString()}² / (π²×${nVal}×${nVal+1}) = ` +
+    formulaComputed.innerHTML = `<span style="color:#94a3b8;">For j=${nVal}, N=${N.toLocaleString()}:</span> ` +
+        `F(${nVal}, ${N.toLocaleString()}) = 3×${N.toLocaleString()}² / (π²×${nVal}×${nVal+1}) = ` +
         `<span style="color:#22c55e;font-weight:bold;">${result.toFixed(4)}</span>`;
     formulaComputed.style.display = 'block';
 
@@ -8860,7 +8960,7 @@ function updateFormulaDisplay() {
     const hdr = document.getElementById('headerFormulaN');
     if (hdr && document.activeElement !== hdr && hdr.value !== String(nVal)) hdr.value = nVal;
     const hdrRange = document.getElementById('headerFormulaNRange');
-    if (hdrRange) hdrRange.textContent = `S_n = (1/${nVal + 1}, 1/${nVal}]`;
+    if (hdrRange) hdrRange.textContent = `S_j = (1/${nVal + 1}, 1/${nVal}]`;
 }
 
 // ── Header formula "n" box ────────────────────────────────────────────────
@@ -8957,7 +9057,7 @@ function updateMainCharts() {
                             autoSkip: true,
                             maxTicksLimit: 30
                         },
-                        title: {display: true, text: 'Sector n', color: '#64748b'}
+                        title: {display: true, text: 'Sector j', color: '#64748b'}
                     },
                     y:{ticks:{color:'#94a3b8'}}
                 },
@@ -9028,7 +9128,7 @@ function updateMainTable() {
     // Update header based on category toggle
     if (theadRow) {
         if (showCategories) {
-            theadRow.innerHTML = '<th>n</th><th>Interval</th><th' + hdrColor + cnTitleAttr + '>' + exactHdr + '</th><th' + hdrColor + '>' + predHdr + '</th><th>Err%</th>' +
+            theadRow.innerHTML = '<th>j</th><th>Interval</th><th' + hdrColor + cnTitleAttr + '>' + exactHdr + '</th><th' + hdrColor + '>' + predHdr + '</th><th>Err%</th>' +
                 '<th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)" style="color:#f59e0b;">P(m)</th>' +
                 '<th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)" style="color:#6366f1;">C(m)</th>' +
                 '<th title="P/C = P(m)/C(m) ratio">P/C</th>' +
@@ -9038,7 +9138,7 @@ function updateMainTable() {
                 '<th title="CP = Composite numerator, Prime denominator" style="color:#6366f1;">CP</th>' +
                 '<th title="CC = Both composite (r composite AND m composite)" style="color:#94a3b8;">CC</th>';
         } else {
-            theadRow.innerHTML = '<th>n</th><th>Interval</th><th' + hdrColor + cnTitleAttr + '>' + exactHdr + '</th><th' + hdrColor + '>' + predHdr + '</th><th>Err%</th>' +
+            theadRow.innerHTML = '<th>j</th><th>Interval</th><th' + hdrColor + cnTitleAttr + '>' + exactHdr + '</th><th' + hdrColor + '>' + predHdr + '</th><th>Err%</th>' +
                 '<th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th>' +
                 '<th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th>' +
                 '<th title="P/C = P(m)/C(m) ratio">P/C</th>';
@@ -9718,7 +9818,7 @@ function exportAllSectorsCSV() {
 
     // Add sector summary with P/C ratios and categories.
     // NonCoprime is the count of gcd(r,m)>1 points in the same sector and the
-    // same N range; Exact stays the coprime count so the C(n,N) comparison
+    // same N range; Exact stays the coprime count so the F(j,N) comparison
     // against Predicted is unchanged.
     csv += 'SECTOR SUMMARY\n';
     csv += 'Sector,Interval,Exact,Predicted,Error%,P(m),C(m),P/C Ratio,P(r),PP,PC,CP,CC,NonCoprime,SectorTotal\n';
@@ -11183,8 +11283,8 @@ let highlightedRingPoint = null;
 
 // ── Analytic sector fill ────────────────────────────────────────────────────
 // The ring maps a fraction straight to an angle: angle = (r/m)·2π. Sector
-// S_k = (1/(k+1), 1/k] is therefore EXACTLY the wedge between 2π/(k+1) and
-// 2π/k, with angular width 2π/(k(k+1)). That is a closed form — it needs no
+// S_j = (1/(j+1), 1/j] is therefore EXACTLY the wedge between 2π/(k+1) and
+// 2π/k, with angular width 2π/(j(j+1)). That is a closed form — it needs no
 // enumerated points, so Formula mode can show the same sector partition Exact
 // mode shows, at N=500 or N=1,000,000 alike.
 //
@@ -11203,8 +11303,8 @@ function drawSectorFill(ctx, cx, cy, maxR, mode) {
     const kMin = Math.max(1, state.sectorMin || 1);
     const kMax = Math.max(kMin, state.sectorMax || 275);
 
-    // Resolution limit. Wedge k spans 2π/(k(k+1)) rad, i.e. an arc of
-    // 2π·maxR/(k(k+1)) px at the rim. Below ~0.75px it cannot be drawn as a
+    // Resolution limit. Wedge k spans 2π/(j(j+1)) rad, i.e. an arc of
+    // 2π·maxR/(j(j+1)) px at the rim. Below ~0.75px it cannot be drawn as a
     // distinct wedge no matter what we do — that IS the zoom-out limit. Rather
     // than pretending to draw 551,328 sectors, everything past the limit is
     // merged into one band and labelled as such.
@@ -11253,7 +11353,7 @@ function drawSectorFill(ctx, cx, cy, maxR, mode) {
     const note = document.getElementById('sectorFillNote');
     if (note) {
         const frac = 1/(kMin*(kMin+1));
-        note.textContent = 'Wedge width = 2\u03c0/(k(k+1)) \u00b7 S' + kMin + ' holds '
+        note.textContent = 'Wedge width = 2\u03c0/(j(j+1)) \u00b7 S' + kMin + ' holds '
             + (frac*100).toFixed(2) + '% of the turn \u00b7 wedges ' + kMin + '\u2013' + kDrawn
             + tailNote
             + (mode === 'lift' ? ' \u00b7 shaded by C(' + n + ')=' + Cn.toFixed(6) : '')
@@ -11262,10 +11362,10 @@ function drawSectorFill(ctx, cx, cy, maxR, mode) {
 }
 
 // ── n*: the last sector at which a sign flip is possible ────────────────────
-// Every sector S_n = (1/(n+1), 1/n] with n <= N contains the fraction 1/n
+// Every sector S_j = (1/(j+1), 1/j] with n <= N contains the fraction 1/n
 // itself (denominator n <= N), so exact(n) >= 1 for EVERY sector in range.
 // The prediction drops below 1 at
-//     C(n,N) = 3N^2/(pi^2 n(n+1)) < 1  <=>  n(n+1) > 3N^2/pi^2
+//     F(j,N) = 3N^2/(pi^2 j(j+1)) < 1  <=>  j(j+1) > 3N^2/pi^2
 //     <=>  n > n* = (-1 + sqrt(1 + 12 N^2/pi^2))/2  =  N*sqrt(3)/pi - 1/2 + O(1/N)
 // Past n*, exact - pred >= 1 - pred > 0: the residual is pinned positive and
 // cannot cross zero again. So n* is a hard upper bound on the last sign flip,
@@ -11588,7 +11688,7 @@ function drawMainRing() {
             }
         }
     } else {
-        // Default sector lines (when All 1/n Lines is not checked)
+        // Default sector lines (when All 1/j Lines is not checked)
         ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
         for(let n=1; n<=Math.min(15,state.sectorMax); n++) {
             const angle = (1/n)*2*Math.PI;
@@ -11619,7 +11719,7 @@ function drawMainRing() {
         ctx.fillText(`${medP}/${medQ}`, cx+Math.cos(medAngle)*(maxR+18)-8, cy-Math.sin(medAngle)*(maxR+18));
     }
     
-    // Current-sector wedge S_n = (1/(n+1), 1/n]. This used to be gated on
+    // Current-sector wedge S_j = (1/(j+1), 1/j]. This used to be gated on
     // !showAll, so in the default All Sectors view nothing on the canvas moved
     // when n changed -- the faint band people were reading as a highlight was
     // just the sector palette. It now always tracks the selector.
@@ -12808,8 +12908,8 @@ function updateTrackerConnectionsPanel(trackerPoints, enabled) {
 }
 
 function updateSectorStats(sector, residues) {
-    // Coprime count drives the C(n,N) comparison and must stay the coprime
-    // count regardless of canvas mode — the asymptotic 3N^2/(pi^2 n(n+1))
+    // Coprime count drives the F(j,N) comparison and must stay the coprime
+    // count regardless of canvas mode — the asymptotic 3N^2/(pi^2 j(j+1))
     // predicts Farey fractions, not zero divisors. The gcd>1 count is shown
     // alongside it rather than folded into it.
     const sectorRes = (residues || []).filter(r => r.sector === sector && r.coprime !== false);
@@ -13641,7 +13741,7 @@ function composeRingPoster(ring) {
     x.font = `700 ${px(74)}px 'JetBrains Mono', ui-monospace, monospace`;
     x.fillText('Farey Sector Ring', M, px(140));
     x.fillStyle = '#818cf8'; x.font = `${px(30)}px 'JetBrains Mono', ui-monospace, monospace`;
-    x.fillText('C(n, N) = 3N\u00b2 / (\u03c0\u00b2 n(n+1))     S_n = (1/(n+1), 1/n]', M, px(190));
+    x.fillText('F(j, N) = 3N\u00b2 / (\u03c0\u00b2 j(j+1))     S_j = (1/(j+1), 1/j]', M, px(190));
 
     // ---- stat cards ----
     // Total ordered pairs (r,m) with 1 <= r <= m and nMin <= m <= nMax: the sum
@@ -13845,8 +13945,8 @@ function composeRingPoster(ring) {
 
     // r = numerator, m = denominator throughout
     const key = [
-        [['Exact', '#e2e8f0'], 'coprime pairs (r,m) counted directly, r/m in S_n'],
-        [['Pred',  '#94a3b8'], 'asymptotic C(n,N) = 3N\u00b2 / (\u03c0\u00b2 n(n+1))'],
+        [['Exact', '#e2e8f0'], 'coprime pairs (r,m) counted directly, r/m in S_j'],
+        [['Pred',  '#94a3b8'], 'asymptotic F(j,N) = 3N\u00b2 / (\u03c0\u00b2 j(j+1))'],
         [['Err%',  '#22c55e'], '100 \u00b7 (Exact \u2212 Pred) / Pred'],
         [['P(m)',  '#f59e0b'], 'prime denominator count'],
         [['C(m)',  '#60a5fa'], 'composite denominator count'],
@@ -13875,7 +13975,7 @@ function composeRingPoster(ring) {
     ty += perCol * px(32) + px(16);
 
     x.fillStyle = '#475569'; x.font = `${px(19)}px 'JetBrains Mono', monospace`;
-    x.fillText('r = numerator, m = denominator.  S_n = (1/(n+1), 1/n].  ' +
+    x.fillText('r = numerator, m = denominator.  S_j = (1/(j+1), 1/j].  ' +
                'Identities: PP+PC+CP+CC = Exact,  P(m)+C(m) = Exact,  P(r) = PP+PC', M, ty);
     ty += px(30);
     x.fillText(new Date().toISOString().slice(0, 10), M, ty);
@@ -17754,7 +17854,7 @@ function draw3D() {
     if(statsEl) {
         statsEl.innerHTML = `
             <div class="stat-card"><div class="stat-value">${totalPoints}</div><div class="stat-label">Points in Sector</div></div>
-            <div class="stat-card"><div class="stat-value">${sector}</div><div class="stat-label">Sector n</div></div>
+            <div class="stat-card"><div class="stat-value">${sector}</div><div class="stat-label">Sector j</div></div>
             <div class="stat-card"><div class="stat-value">${primePoints}</div><div class="stat-label">Prime Denoms</div></div>
             <div class="stat-card"><div class="stat-value">${(primePoints/totalPoints*100||0).toFixed(1)}%</div><div class="stat-label">Prime Rate</div></div>
             <div class="stat-card"><div class="stat-value">${minDenom}</div><div class="stat-label">Min Denom</div></div>
@@ -18733,9 +18833,11 @@ function playTwinPrimeGaps() {
 function testCustomFormula() {
     const formulaStr = document.getElementById('customFormula').value;
     try {
-        const customFn = new Function('n', 'N', `return ${formulaStr}`);
+        // 'j' is the sector index; 'n' stays bound to the same value so any
+        // formula written before the rename still evaluates.
+        const customFn = new Function('j', 'n', 'N', `return ${formulaStr}`);
         const N = state.nMax;
-        const customData = state.sectors.map(s => ({n:s.n, custom:customFn(s.n, N), standard:s.predicted, exact:s.exact}));
+        const customData = state.sectors.map(s => ({n:s.n, custom:customFn(s.n, s.n, N), standard:s.predicted, exact:s.exact}));
         
         if(state.charts.customFormula) state.charts.customFormula.destroy();
         state.charts.customFormula = new Chart(document.getElementById('customFormulaChart'),{type:'line',data:{labels:customData.map(d=>d.n),datasets:[{label:'Custom',data:customData.map(d=>d.custom),borderColor:'#f59e0b',fill:false},{label:'Standard',data:customData.map(d=>d.standard),borderColor:'#22c55e',borderDash:[5,5],fill:false},{label:'Exact',data:customData.map(d=>d.exact),borderColor:'#6366f1',fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
@@ -18779,7 +18881,7 @@ function exportLatexFigures() {
 
 \\section{Sector Counting Formula}
 \\begin{equation}
-C(n, N) = \\frac{3N^2}{\\pi^2 n(n+1)}
+F(j, N) = \\frac{3N^2}{\\pi^2 j(j+1)}
 \\end{equation}
 
 \\section{Data Table}
@@ -18806,17 +18908,17 @@ function exportCSVAll() {
     csv += '# Total Farey fractions |F_N|: ' + state.farey.length + '\n';
     csv += '#\n';
     csv += '# SECTOR FORMULA\n';
-    csv += '# C(n,N) = 3N^2 / (pi^2 * n * (n+1)) predicts count of fractions in sector n\n';
-    csv += '# Sector n contains fractions r/m where 1/(n+1) < r/m <= 1/n\n';
+    csv += '# F(j,N) = 3N^2 / (pi^2 * j * (j+1)) predicts count of fractions in sector j\n';
+    csv += '# Sector j contains fractions r/m where 1/(j+1) < r/m <= 1/j\n';
     csv += '#\n';
     csv += '# IDENTITY FORMULA (P/C Decomposition)\n';
     csv += '# For each sector: PP + PC + CP + CC = Exact Count\n';
     csv += '# This identity partitions fractions by prime/composite status of numerator and denominator\n';
     csv += '#\n';
     csv += '# COLUMN LEGEND\n';
-    csv += '# n: Sector number\n';
+    csv += '# j: Sector number\n';
     csv += '# exact: Actual count of fractions in sector\n';
-    csv += '# predicted: Formula prediction C(n,N)\n';
+    csv += '# predicted: Formula prediction F(j,N)\n';
     csv += '# error: Absolute error (exact - predicted)\n';
     csv += '# relError: Relative error percentage\n';
     csv += '# primeCount: P(m) - fractions with prime denominator\n';
@@ -18828,7 +18930,7 @@ function exportCSVAll() {
     csv += '# identitySum: PP + PC + CP + CC (should equal exact)\n';
     csv += '# identityMatch: TRUE if identitySum = exact, FALSE otherwise\n';
     csv += '#\n';
-    csv += 'n,exact,predicted,error,relError,primeCount,compositeCount,PP,PC,CP,CC,identitySum,identityMatch\n';
+    csv += 'j,exact,predicted,error,relError,primeCount,compositeCount,PP,PC,CP,CC,identitySum,identityMatch\n';
     
     state.sectors.forEach(s => {
         const pp = s.ppCount ?? 0;
@@ -18997,7 +19099,7 @@ async function exportFocused4K() {
     
     ctx.fillStyle = '#a5b4fc';
     ctx.font = '24px Arial';
-    ctx.fillText('Sector Formula: C(n,N) = 3N² / (π² · n · (n+1))', tableX + 30, formulaY + 35);
+    ctx.fillText('Sector Formula: F(j,N) = 3N² / (π² · n · (n+1))', tableX + 30, formulaY + 35);
     ctx.fillStyle = '#22c55e';
     ctx.fillText('Identity: PP + PC + CP + CC = Exact Count   (P = Prime, C = Composite for numerator/denominator)', tableX + 30, formulaY + 75);
     
@@ -19178,6 +19280,23 @@ function exportMainTabData() {
         csv += '|S_rest|,' + src + '\n';
         csv += 'Identity holds,' + ((s1c === src) ? 'Yes' : 'No') + '\n';
         csv += 'Fixed point,"1/2 (lives in S2, balances S1\'s unpaired endpoint 1)"\n';
+        // Refined form: S1 bucketed by the sector of its reflection.
+        const _sub = state.subBySector1 || {};
+        const _ks = Object.keys(_sub).map(Number).sort((a,b)=>a-b);
+        if (_ks.length) {
+            csv += '\nRefined Bisection (Theorem 1-prime)\n';
+            csv += 'Sub-sector index,"floor(m/(m-r)) = sector of the reflection (r/m) -> (m-r)/m"\n';
+            csv += 'k,|S_j|,|S1_k|,expected,match\n';
+            let _bad = 0;
+            for (const k of _ks) {
+                const got = _sub[k].length;
+                const tot = (state.residuesBySector[k] || []).length;
+                const want = tot - (k === 2 ? 1 : 0);
+                if (got !== want) _bad++;
+                csv += k + ',' + tot + ',' + got + ',' + want + ',' + (got === want ? 'yes' : 'NO') + '\n';
+            }
+            csv += 'All sub-sectors match,' + (_bad === 0 ? 'Yes' : 'No (' + _bad + ' mismatched)') + '\n';
+        }
     }
     
     const blob = new Blob([csv], {type:'text/csv'});
@@ -19668,7 +19787,7 @@ function updateHorizonStats(data, n, maxDenom) {
         </div>
         <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
             <div style="font-size:1.5em;color:#e2e8f0;font-weight:bold;">${n}</div>
-            <div style="font-size:0.85em;color:#888;">Sector n</div>
+            <div style="font-size:0.85em;color:#888;">Sector j</div>
         </div>
     `;
 }
@@ -21833,7 +21952,7 @@ function coprimeBiasFactor(k) {
     return f;
 }
 
-// C(n,N,a,k) = [3N^2 / (pi^2 n(n+1))] * (1/phi(k)) * prod_{p|k} p/(p+1)
+// C(n,N,a,k) = [3N^2 / (pi^2 j(j+1))] * (1/phi(k)) * prod_{p|k} p/(p+1)
 function unifiedPrediction(n, N, k, phiMod) {
     return formula(n, N) * coprimeBiasFactor(k) / phiMod;
 }
@@ -22249,7 +22368,7 @@ function drawUnifiedFormulaChart() {
         const x = margin.l + (i + 0.5) * (plotW / numSectors);
         ctx.fillText('S' + d.n, x, H - margin.b + 15);
     });
-    ctx.fillText('Sector n', margin.l + plotW / 2, H - 5);
+    ctx.fillText('Sector j', margin.l + plotW / 2, H - 5);
     
     // Axes
     ctx.strokeStyle = '#475569';
@@ -24536,7 +24655,7 @@ function applyRingFollowZoom(r, m, force) {
 }
 
 // ── Fit the camera to a sector's wedge ────────────────────────────────────
-// Sector n holds the fractions in (1/(n+1), 1/n], which occupy a pie slice
+// Sector j holds the fractions in (1/(j+1), 1/j], which occupy a pie slice
 // of the ring. Frames that slice so Play Sector is watchable on a sector
 // that would otherwise be a few pixels wide.
 const SECTOR_FIT_MAX_ZOOM = 10;
@@ -26402,7 +26521,7 @@ function drawPrimeCompChart(sectorNs, errors) {
             responsive: true,
             plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
             scales: {
-                x: { title: { display: true, text: 'Sector n', color: '#64748b' }, ticks: { color: '#64748b' } },
+                x: { title: { display: true, text: 'Sector j', color: '#64748b' }, ticks: { color: '#64748b' } },
                 y: { title: { display: true, text: 'Error %', color: '#64748b' }, ticks: { color: '#64748b' } }
             }
         }
@@ -27400,7 +27519,7 @@ function updateModLabelInputs() {
   }
 
   // Exact sector counts over m = mMin..mMax, no enumeration required.
-  // Sector k is floor(m/r)=k, i.e. m/(k+1) < r <= m/k — the same convention
+  // Sector j is floor(m/r)=k, i.e. m/(k+1) < r <= m/k — the same convention
   // as getSector(). For each ring we mark the r-window, strike multiples of
   // the primes of m (=> gcd(r,m)=1 survivors), count, then keep striking the
   // primes of m+1..m+n on the same window (=> the n-step lift survivors).
@@ -27566,7 +27685,7 @@ function updateModLabelInputs() {
     if (typeof updateMainStats === 'function') updateMainStats();
   };
 
-  // ── "This sector" scope — the value-based Sector S_k = (1/(k+1), 1/k],
+  // ── "This sector" scope — the value-based Sector S_j = (1/(j+1), 1/j],
   // matching the "Sector:" dropdown used everywhere else on the page.
   // ONE code path for every mode. It used to branch on state.residuesBySector,
   // which is why the panel behaved differently in Exact vs Formula/Hybrid:
@@ -27578,7 +27697,7 @@ function updateModLabelInputs() {
   var _cnLast = null;
   function cnCountsSector(sector,n){
     var mMax = cnRangeMax(), mMin = cnRangeMin();
-    // The sector-k triangle holds about m^2 / (2k(k+1)) pairs. Only cap if
+    // The sector-k triangle holds about m^2 / (2j(j+1)) pairs. Only cap if
     // that exceeds the budget; realistic N never does.
     var est = (mMax*mMax)/(2*sector*(sector+1));
     var capM = mMax;
@@ -27624,7 +27743,7 @@ function updateModLabelInputs() {
               + (c.pending ? ' \u00b7 holding last value while animating' : '');
     } else {
       // m is bounded by N, not by the Sector boxes. The Sector range picks
-      // WHICH value-based sectors S_k get tabulated; it has nothing to say
+      // WHICH value-based sectors S_j get tabulated; it has nothing to say
       // about how far the m axis runs. Reading sectorMin/sectorMax here made
       // the panel silently report a different population from the header's
       // "pairs r < m <= N" and "gcd = 1" cards the moment the two ranges
@@ -28231,7 +28350,7 @@ function updateModLabelInputs() {
     if(!s) return '<span style="color:#f59e0b;">Sector '+esc(n)+' is outside the computed range.</span>';
     var N=state.nMax||500;
     var res=(state.residuesBySector[n]||[]);
-    var width=1/(n*(n+1));                       // |S_n| as a fraction of the unit interval
+    var width=1/(n*(n+1));                       // |S_j| as a fraction of the unit interval
     var nStar=(typeof nStarSector==='function')?nStarSector(N):null;
     var Cn=(window.cnGetCn&&window.cnGetDepthN)?window.cnGetCn(window.cnGetDepthN()):null;
     function cell(lbl,val,color){
@@ -28245,7 +28364,7 @@ function updateModLabelInputs() {
     return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;">'
       + cell('Sector','S'+n,'#a78bfa')
       + cell('Interval','(1/'+(n+1)+', 1/'+n+']')
-      + cell('Width 1/(n(n+1))',width.toExponential(4))
+      + cell('Width 1/(j(j+1))',width.toExponential(4))
       + cell('Share of turn',(width*100).toFixed(4)+'%')
       + cell('Exact', s.exact!=null?s.exact.toLocaleString():'-','#93c5fd')
       + cell('Predicted', s.predicted!=null?s.predicted.toFixed(4):'-')
