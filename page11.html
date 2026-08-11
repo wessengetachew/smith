@@ -1640,7 +1640,17 @@ function openOpener(){
             <!-- gcd mode: coprime / non-coprime / both. Mirrors Page 10's
                  combined view (blue = gcd 1, red = gcd > 1). -->
             <div style="display:flex;justify-content:center;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;">
-                <span style="font-size:11px;color:#94a3b8;letter-spacing:.06em;">POINTS:</span>
+                <span style="font-size:11px;color:#94a3b8;letter-spacing:.06em;">VIEW:</span>
+                <button id="viewmode-ring" onclick="setCanvasViewMode('ring')" title="Polar ring layout (default) — every existing ring feature (rotation, tracker, connections, playback, zoom) applies here." style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #4a90d9;border-radius:4px;cursor:pointer;background:#4a90d9;color:#fff;">Ring</button>
+                <button id="viewmode-grid" onclick="setCanvasViewMode('grid')" title="Cartesian (r,m) grid layout, mirroring index.html's Grid view. Same points, sector filter, gcd mode, and color mode as Ring; click-to-inspect and export both work here too." style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #4a90d9;border-radius:4px;cursor:pointer;background:#1e293b;color:#4a90d9;">Grid</button>
+                <label style="font-size:10px;color:#4a90d9;cursor:pointer;display:flex;align-items:center;gap:3px;" title="This page's residue data only exists for r&lt;M (a proper fraction always has numerator &lt; denominator), so the Grid naturally only fills the triangle below the diagonal. With this on, every point also draws a dimmer mirror at (M,r) so the grid reads as a full G\u00d7G square instead of stopping at the diagonal.">
+                    <input type="checkbox" id="gridFullSquare" checked onchange="drawMainRing()">Full Square
+                </label>
+                <button id="viewmode-cayley" onclick="setCanvasViewMode('cayley')" title="Cayley view — conformal map \u0393(z)=(z\u22121)/(z+1), the same construction index.html calls Cayley/Smith, applied here as a point projection layered on Ring's own sector/gcd/color controls." style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #7ec87a;border-radius:4px;cursor:pointer;background:#1e293b;color:#7ec87a;">Cayley</button>
+                <label style="font-size:10px;color:#7ec87a;cursor:pointer;display:flex;align-items:center;gap:3px;" title="Automatically scale the Cayley view so the currently-plotted points fill the canvas, instead of a fixed frame. Rotation (Advanced tab \u2192 Rotation controls) applies here too.">
+                    <input type="checkbox" id="cayleyZoomFit" checked onchange="drawMainRing()">Fit
+                </label>
+                <span style="font-size:11px;color:#94a3b8;letter-spacing:.06em;margin-left:10px;">POINTS:</span>
                 <button id="gcdmode-coprime"   onclick="setGcdMode('coprime')"   style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #4a90d9;border-radius:4px;cursor:pointer;background:#4a90d9;color:#fff;">gcd = 1</button>
                 <button id="gcdmode-noncoprime" onclick="setGcdMode('noncoprime')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #c94040;border-radius:4px;cursor:pointer;background:#1e293b;color:#c94040;">gcd &gt; 1</button>
                 <button id="gcdmode-both"      onclick="setGcdMode('both')"      style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #f59e0b;border-radius:4px;cursor:pointer;background:#1e293b;color:#f59e0b;">Both</button>
@@ -11618,7 +11628,355 @@ function updateNStarNote(){
       + (inRange ? '' : ' &nbsp;\u00b7&nbsp; <span style="color:#f59e0b;">n* is beyond the current sector range \u2014 raise Sectors max to see the crossing.</span>');
 }
 
+// ── View dispatcher ─────────────────────────────────────────────────────
+// drawMainRing() is called from ~30 places across this file (click
+// handlers, playback, exports, tab switches...). Rather than touch every
+// call site, it now dispatches on state.canvasViewMode: 'ring' (default)
+// runs the original, untouched polar renderer below; 'grid' runs the new
+// Cartesian renderer. Ring mode's code path is byte-for-byte the same as
+// before this change, so everything that already works for Ring keeps
+// working for Ring.
+// Shared by Grid and Cayley (Ring keeps its own richer version in
+// drawMainRingPolar). Gathers the residues for the current sector/gcd-mode,
+// applies the same basic display filters as Ring (point filter dropdown,
+// min/max denominator, hide-small), and returns the point size the
+// ringPointSize slider (or its auto fallback) would produce — so "point
+// size" and the other basic display controls actually apply outside Ring.
+function _gatherViewResidues() {
+    const sector = +document.getElementById('viewSector').value;
+    const showAll = document.getElementById('showAllSectors').checked;
+    let residues;
+    const fullData = showAll ? Object.values(state.residuesBySector).flat() : (state.residuesBySector[sector] || []);
+    const boundedData = showAll ? Object.values(state.boundedResiduesBySector || {}).flat() : (state.boundedResiduesBySector?.[sector] || []);
+    residues = fullData.length > 0 ? fullData : boundedData;
+
+    const gcdMode = state.gcdMode || 'coprime';
+    if (gcdMode !== 'coprime') {
+        const ncFull = showAll
+            ? Object.values(state.nonCoprimeBySector || {}).flat()
+            : (state.nonCoprimeBySector?.[sector] || []);
+        residues = gcdMode === 'noncoprime' ? ncFull : residues.concat(ncFull);
+    }
+
+    if (state.ringBuildMaxM !== null && state.ringBuildMaxM !== undefined) {
+        residues = residues.filter(r => r.m <= state.ringBuildMaxM);
+    }
+
+    const pointFilterVal = document.getElementById('pointFilter')?.value || 'all';
+    const minDenom = parseInt(document.getElementById('minDenomFilter')?.value) || 2;
+    const maxDenom = parseInt(document.getElementById('maxDenomFilter')?.value) || Infinity;
+    const hideSmall = document.getElementById('hideSmallDenom')?.checked || false;
+    if (pointFilterVal !== 'all' || hideSmall || minDenom > 2 || isFinite(maxDenom)) {
+        residues = residues.filter(res => {
+            if (res.isCusp) return true;
+            if (hideSmall && res.m <= 5) return false;
+            if (res.m < minDenom || res.m > maxDenom) return false;
+            if (pointFilterVal === 'prime_denom' && !res.isPrime) return false;
+            if (pointFilterVal === 'composite_denom' && res.isPrime) return false;
+            if (pointFilterVal === 'prime_num' && !isPrime(res.r)) return false;
+            if (pointFilterVal === 'twin_prime' && !(res.isPrime && (isPrime(res.m - 2) || isPrime(res.m + 2)))) return false;
+            return true;
+        });
+    }
+    return { residues, sector, showAll };
+}
+
+function _viewPointSize(numPoints) {
+    let adaptiveSize;
+    if (numPoints === 0) adaptiveSize = 3;
+    else if (numPoints < 100) adaptiveSize = Math.max(4, 400 / numPoints);
+    else if (numPoints < 1000) adaptiveSize = Math.max(2.5, 80 / Math.sqrt(numPoints));
+    else if (numPoints < 10000) adaptiveSize = Math.max(1.8, 60 / Math.sqrt(numPoints));
+    else if (numPoints < 100000) adaptiveSize = Math.max(1.2, 40 / Math.sqrt(numPoints));
+    else adaptiveSize = Math.max(0.8, 25 / Math.sqrt(numPoints));
+    adaptiveSize = Math.max(1, Math.min(10, adaptiveSize));
+    const sliderVal = +(document.getElementById('ringPointSize')?.value || 5);
+    return sliderVal > 0 ? sliderVal : adaptiveSize;
+}
+
+// Same "follow current point" dimming Ring uses during playback (Play All
+// Error/Count, sector sweeps, ...): brightens the point currently playing
+// plus its trail, dims everything else. Reads the same ringFollowCurrent /
+// ringPlaybackTrail globals Ring reads, so a sweep started in Ring and left
+// running (or a fresh one started) lands on the right point after switching
+// to Grid/Cayley instead of only ever highlighting Ring's own layout.
+function _viewFollowState() {
+    const dimBox = (typeof playbackState !== 'undefined' && (playbackState.mode === 'sector' || playbackState.mode === 'tracked'))
+        ? document.getElementById('sectorZoomDim')
+        : document.getElementById('ringDimOthers');
+    const on = (dimBox?.checked ?? false) && !!ringFollowCurrent;
+    return { on, trailSet: on ? new Set(ringPlaybackTrail.map(t => t.r + '/' + t.m)) : null };
+}
+
+state.canvasViewMode = state.canvasViewMode || 'ring';
 function drawMainRing() {
+    if (state.canvasViewMode === 'grid') { drawMainGrid(); return; }
+    if (state.canvasViewMode === 'cayley') { drawMainCayley(); return; }
+    drawMainRingPolar();
+}
+
+function setCanvasViewMode(mode) {
+    state.canvasViewMode = mode;
+    const buttons = { ring: 'viewmode-ring', grid: 'viewmode-grid', cayley: 'viewmode-cayley' };
+    Object.keys(buttons).forEach(m => {
+        const b = document.getElementById(buttons[m]);
+        if (!b) return;
+        b.style.background = mode === m ? '#4a90d9' : '#1e293b';
+        b.style.color = mode === m ? '#fff' : '#4a90d9';
+    });
+    drawMainRing();
+}
+
+// Möbius/Cayley map Γ(z) = (z−1)/(z+1), same conformal projection index.html's
+// Cayley (Smith-chart-style) view uses, ported as the standalone point
+// transform only — the lift-dynamics/spiral overlays in index.html's version
+// are deeply wired to that page's own hero-canvas state and aren't ported
+// here. Every ring point (r,m) maps to a polar point (ringR,theta) exactly
+// as index.html's opener does, then through Γ into the unit disk.
+function _cayleyXY(zr, zi, R0) {
+    let denom = (zr + 1) * (zr + 1) + zi * zi;
+    if (denom < 1e-10) denom = 1e-10;
+    const gr = ((zr - 1) * (zr + 1) + zi * zi) / denom;
+    const gi = (2 * zi) / denom;
+    return { x: gr * R0, y: -gi * R0 };
+}
+function _cayleyPt(ringR, theta, R0) {
+    return _cayleyXY(ringR * Math.cos(theta), ringR * Math.sin(theta), R0);
+}
+
+function drawMainCayley() {
+    const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+    if (typeof updateViewSectorRangeLabel === 'function') updateViewSectorRangeLabel();
+    const colorMode = document.getElementById('colorMode').value;
+    const ringBgColor = document.getElementById('ringBgColor')?.value || '#0f172a';
+
+    state.ringPoints = [];
+    const { residues, sector, showAll } = _gatherViewResidues();
+    const rings = Math.max(2, state.nMax || 2);
+    const size = _viewPointSize(residues.length);
+    const { on: followOn, trailSet } = _viewFollowState();
+
+    // Rotation — reuses the same Advanced-panel controls Ring reads
+    // (enableRingRotation / ringRotationAmount / rotationCumulative /
+    // ringGlobalPhase), so a rotation dialed in for Ring carries straight
+    // over to Cayley instead of the map always sitting at its base angle.
+    const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
+    const rotationAmt = +(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
+    const rotationCumulative = document.getElementById('rotationCumulative')?.checked ?? true;
+    const globalPhase = +(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
+    function cayleyAngle(r, m) {
+        let theta = 2 * Math.PI * (r / m);
+        if (rotationOn) {
+            const ringRotation = rotationCumulative ? rotationAmt * m : rotationAmt;
+            theta += ringRotation + globalPhase;
+        }
+        return theta;
+    }
+
+    let maxGap = 0, minGap = Infinity;
+    residues.forEach(r => { const g = r.gapRight || 0; if (g > maxGap) maxGap = g; if (g > 0 && g < minGap) minGap = g; });
+
+    // Zoom to fit — scale R0 so the currently-plotted points actually fill
+    // the canvas, instead of always sitting inside a fixed 0.44 frame. The
+    // Cayley map crowds points toward the boundary, so once a sector/gcd
+    // filter cuts the point count down (or rotation moves the spread), a
+    // fixed frame wastes most of the canvas. Toggle with "Fit" by the
+    // Cayley button; off falls back to the original fixed frame.
+    const zoomFit = document.getElementById('cayleyZoomFit')?.checked ?? true;
+    let R0 = Math.min(W, H) * 0.44;
+    if (zoomFit && residues.length) {
+        let maxMag = 0;
+        residues.forEach(res => {
+            if (res.isCusp) return;
+            const ringR = 0.5 + ((res.m - 1) / Math.max(1, rings - 1)) * 1.5;
+            const theta = cayleyAngle(res.r, res.m);
+            const w = _cayleyPt(ringR, theta, 1);
+            const mag = Math.hypot(w.x, w.y);
+            if (isFinite(mag) && mag > maxMag) maxMag = mag;
+        });
+        if (maxMag > 1e-6) R0 = Math.min(W, H) * 0.48 / maxMag;
+    }
+
+    ctx.fillStyle = ringBgColor; ctx.fillRect(0, 0, W, H);
+
+    // Unit circle the map is centered on, same as index.html's Cayley view.
+    ctx.beginPath(); ctx.arc(cx, cy, R0, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(126,200,122,.18)'; ctx.lineWidth = 1; ctx.stroke();
+
+    residues.forEach(res => {
+        if (res.isCusp) return;
+        const { r, m, sector: s, isPrime: ip } = res;
+        // Same ring-radius normalization as index.html's Cayley view: m=2
+        // near the center (0.5), m=nMax near the outer rim (2.0).
+        const ringR = 0.5 + ((m - 1) / Math.max(1, rings - 1)) * 1.5;
+        const theta = cayleyAngle(r, m);
+        const w = _cayleyPt(ringR, theta, R0);
+        const x = cx + w.x, y = cy + w.y;
+        if (!isFinite(x) || !isFinite(y)) return;
+
+        const color = getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap);
+        let alpha = 1, ptSize = size;
+        if (!showAll && s !== sector) alpha = 0.25;
+        if (followOn) {
+            const isCurrent = r === ringFollowCurrent.r && m === ringFollowCurrent.m;
+            const isTrail = trailSet.has(r + '/' + m);
+            if (isCurrent) { alpha = 1; ptSize = size * 2.5; }
+            else if (isTrail) alpha = Math.max(alpha, 0.6);
+            else alpha = 0.06;
+        }
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, ptSize, 0, 2 * Math.PI); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        state.ringPoints.push({ x, y, r, m, sector: s, isPrime: ip, gap: res.gapRight, color,
+                                 coprime: res.coprime !== false, gcdVal: res.gcdVal || 1 });
+    });
+
+    if (highlightedRingPoint) {
+        const hp = state.ringPoints.find(p => p.r === highlightedRingPoint.r && p.m === highlightedRingPoint.m);
+        if (hp) {
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(hp.x, hp.y, size + 4, 0, 2 * Math.PI); ctx.stroke();
+        }
+    }
+
+    // C(n) "Connect next gcd=1" lift-arc overlay — same control Ring uses,
+    // target endpoint mapped through this view's own Cayley coordinates.
+    drawCnConnectOverlay(ctx, (rr, mm) => {
+        const ringR = 0.5 + ((mm - 1) / Math.max(1, rings - 1)) * 1.5;
+        const theta = cayleyAngle(rr, mm);
+        const w = _cayleyPt(ringR, theta, R0);
+        return [cx + w.x, cy + w.y];
+    });
+
+    // Playback trail (Play All / Play Selection path) — same overlay Ring uses.
+    drawPlaybackTrailOverlay(ctx);
+
+    // Advanced "Point Labels" overlay — same control Ring uses.
+    applyPointLabelsOverlay(ctx, size);
+
+    ctx.fillStyle = '#475569'; ctx.font = '10px system-ui'; ctx.textAlign = 'left';
+    ctx.fillText('Cayley view \u00b7 \u0393(z)=(z\u22121)/(z+1) \u00b7 ' + gcdModeLabel() + ' \u00b7 ' + residues.length.toLocaleString() + ' pts' +
+        (rotationOn ? ' \u00b7 rot ' + (globalPhase * 180 / Math.PI).toFixed(0) + '\u00b0' : '') +
+        (zoomFit ? ' \u00b7 fit' : ''), 10, H - 10);
+}
+
+// Integer (r,M) lattice — matches index.html's actual Grid view, NOT the
+// earlier value-based (r/m, m) plot, which read as a Farey-tree curve
+// instead of a square grid. Points sit at literal integer cell centers:
+// r along the numerator axis (1..G), M along the denominator axis (1..G),
+// same convention as index.html's drawWGrid (M increasing downward). Because
+// this page's residue data is Farey-restricted to r<m, the lattice fills the
+// triangular half below the diagonal — the same domain as index's "Half
+// (diagonal)" toggle, since there's no r≥m data on this page to fill the
+// other half of the full square.
+function drawMainGrid() {
+    const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const margin = 30;
+    const G = Math.max(2, state.nMax || 2);
+    const side = Math.max(1, Math.min(W, H) - margin * 2);
+    const cell = side / G;
+    const ox = (W - side) / 2, oy = (H - side) / 2;
+    if (typeof updateViewSectorRangeLabel === 'function') updateViewSectorRangeLabel();
+    const colorMode = document.getElementById('colorMode').value;
+    const ringBgColor = document.getElementById('ringBgColor')?.value || '#0f172a';
+
+    ctx.fillStyle = ringBgColor; ctx.fillRect(0, 0, W, H);
+
+    // Faint G×G boundary, same as index's grid.
+    ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
+    ctx.strokeRect(ox, oy, side, side);
+    // Diagonal r=M for reference — the edge the real (unmirrored) data fills up to.
+    ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + side, oy + side); ctx.stroke();
+    ctx.setLineDash([]);
+
+    state.ringPoints = [];
+    const { residues, sector, showAll } = _gatherViewResidues();
+    const size = _viewPointSize(residues.length);
+    const radBase = Math.min(cell * 0.45, Math.max(cell * 0.28, size * 0.35));
+    const { on: followOn, trailSet } = _viewFollowState();
+
+    // Full square — this page's residue data is Farey-restricted to r<M
+    // (a proper fraction always has numerator < denominator), so there's
+    // no independent r>=M data to plot. With this on (default), every
+    // point also gets a mirrored companion at (M,r) across the diagonal,
+    // dimmer, so the grid fills a full G×G square like index.html's Grid
+    // view instead of stopping dead at the diagonal. Turn it off to see
+    // only the real r<M triangle. Mirrored points are visual only — they
+    // aren't pushed into state.ringPoints, so click/tooltip/tracker still
+    // resolve only to the real Farey point.
+    const fullSquare = document.getElementById('gridFullSquare')?.checked ?? true;
+
+    let maxGap = 0, minGap = Infinity;
+    residues.forEach(r => { const g = r.gapRight || 0; if (g > maxGap) maxGap = g; if (g > 0 && g < minGap) minGap = g; });
+
+    residues.forEach(res => {
+        if (res.isCusp) return;
+        const { r, m, sector: s, isPrime: ip } = res;
+        // r along x, M along y — literal integer cell centers, M increasing
+        // downward (matches index.html's convention exactly).
+        const x = ox + (r - 0.5) * cell, y = oy + (m - 0.5) * cell;
+        if (!isFinite(x) || !isFinite(y)) return;
+
+        const color = getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap);
+        let alpha = 1, rad = radBase;
+        if (!showAll && s !== sector) alpha = 0.25;
+        if (followOn) {
+            const isCurrent = r === ringFollowCurrent.r && m === ringFollowCurrent.m;
+            const isTrail = trailSet.has(r + '/' + m);
+            if (isCurrent) { alpha = 1; rad = radBase * 2; }
+            else if (isTrail) alpha = Math.max(alpha, 0.6);
+            else alpha = 0.06;
+        }
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, rad, 0, 2 * Math.PI); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        if (fullSquare && m !== r) {
+            const mx = ox + (m - 0.5) * cell, my = oy + (r - 0.5) * cell;
+            ctx.globalAlpha = alpha * 0.55;
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(mx, my, rad, 0, 2 * Math.PI); ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        state.ringPoints.push({ x, y, r, m, sector: s, isPrime: ip, gap: res.gapRight, color,
+                                 coprime: res.coprime !== false, gcdVal: res.gcdVal || 1 });
+    });
+
+    if (highlightedRingPoint) {
+        const hp = state.ringPoints.find(p => p.r === highlightedRingPoint.r && p.m === highlightedRingPoint.m);
+        if (hp) {
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(hp.x, hp.y, radBase + 4, 0, 2 * Math.PI); ctx.stroke();
+        }
+    }
+
+    // C(n) "Connect next gcd=1" lift-arc overlay — same control Ring uses,
+    // target endpoint mapped through this view's own grid-cell coordinates.
+    drawCnConnectOverlay(ctx, (rr, mm) => [ox + (rr - 0.5) * cell, oy + (mm - 0.5) * cell]);
+
+    // Playback trail (Play All / Play Selection path) — same overlay Ring uses.
+    drawPlaybackTrailOverlay(ctx);
+
+    // Advanced "Point Labels" overlay — same control Ring uses.
+    applyPointLabelsOverlay(ctx, size);
+
+    ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui'; ctx.textAlign = 'left';
+    ctx.fillText('M \u2192 ' + G + ' (down)', ox, oy - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText('r \u2192 ' + G, ox + side, oy - 8);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#475569'; ctx.font = '10px system-ui';
+    ctx.fillText('Grid view \u00b7 (r,M) integer lattice \u00b7 ' + gcdModeLabel() + ' \u00b7 ' + residues.length.toLocaleString() +
+        (fullSquare ? ' pts (mirrored)' : ' pts'), 10, H - 10);
+}
+
+function drawMainRingPolar() {
     const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
     const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, maxR=Math.min(W,H)/2-35;
     const sector = +document.getElementById('viewSector').value;
@@ -12029,16 +12387,7 @@ function drawMainRing() {
     if (state.cnCanvasOn && state.cnConnectOn) {
         // Gate on the SOURCE surviving depth n — index.html's rule verbatim
         // (_wDynLiftOverlay: `if(n>0 && !_wBlockCoprime2D(lr,lM,n)) continue;`).
-        // The old test was "is the target node in state.ringPoints", which only
-        // bites in Remove mode: in Dim mode a non-surviving point is still
-        // pushed there, so its arcs kept drawing at full strength while the
-        // point itself faded. Gating the source fixes both modes at once.
-        const _cnN = (typeof cnGetDepthN === 'function') ? cnGetDepthN() : 0;
-        // Same angle/radius mapping the points use, so a target that falls
-        // outside the current sector or point filters still gets an endpoint —
-        // index computes B = xy(lr2, lM+1) geometrically rather than looking
-        // the node up, and a broken lift needs that or it could never be shown.
-        const _cnXY = (rr, mm) => {
+        drawCnConnectOverlay(ctx, (rr, mm) => {
             let a = (rr / mm) * 2 * Math.PI;
             if (rotationOn) {
                 const ringRotation = rotationCumulative ? rotationAmt * mm : rotationAmt;
@@ -12046,27 +12395,7 @@ function drawMainRing() {
             }
             const rd = calculateRadius(mm, maxR, ringSpacing, invertOrder);
             return [cx + rd * Math.cos(a), cy - rd * Math.sin(a)];
-        };
-        // Teal = the lift survives (image still coprime to m+1); coral = the
-        // chain breaks there. Split into two Path2Ds so each is one stroke.
-        const pSurv = new Path2D(), pBrok = new Path2D();
-        let nSurv = 0, nBrok = 0;
-        for (const p of state.ringPoints) {
-            if (p.gcdVal !== 1) continue;                              // lift sources are coprime
-            if (typeof cnLiftSurvives === 'function' &&
-                !cnLiftSurvives(p.r, p.m, _cnN)) continue;             // ← the C(n) gate
-            const r2 = p.r % (p.m + 1);
-            const B = _cnXY(r2, p.m + 1);
-            if (gcd(r2, p.m + 1) === 1) { pSurv.moveTo(p.x, p.y); pSurv.lineTo(B[0], B[1]); nSurv++; }
-            else                        { pBrok.moveTo(p.x, p.y); pBrok.lineTo(B[0], B[1]); nBrok++; }
-        }
-        ctx.save();
-        ctx.lineWidth = state.cnConnectWidth;
-        ctx.globalAlpha = 0.7;
-        if (state.cnConnectSurv   && nSurv) { ctx.strokeStyle = '#22c55e'; ctx.stroke(pSurv); }
-        if (state.cnConnectBroken && nBrok) { ctx.strokeStyle = '#e05060'; ctx.stroke(pBrok); }
-        ctx.restore();
-        state.cnConnectCounts = { surviving: nSurv, broken: nBrok };
+        });
     }
 
     // ── PRIME SPIRAL overlay (lockable to C(n) depth n) ──────────────────
@@ -12209,32 +12538,7 @@ function drawMainRing() {
     // Draw ring playback trail: connects fractions in the order they were
     // played (e.g. by the error chart's Play All / Play Selection), as a
     // straight path, so the listener can see the path travelled.
-    if (ringPlaybackTrail.length > 1) {
-        const trailPts = ringPlaybackTrail
-            .map(t => state.ringPoints.find(p => p.r === t.r && p.m === t.m))
-            .filter(Boolean);
-        if (trailPts.length > 1) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(96,165,250,0.85)';
-            ctx.lineWidth = 2;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(trailPts[0].x, trailPts[0].y);
-            for (let i = 1; i < trailPts.length; i++) ctx.lineTo(trailPts[i].x, trailPts[i].y);
-            ctx.stroke();
-            ctx.restore();
-            
-            // Mark the most recently played point (head of the trail)
-            const head = trailPts[trailPts.length - 1];
-            ctx.save();
-            ctx.fillStyle = '#60a5fa';
-            ctx.beginPath();
-            ctx.arc(head.x, head.y, 5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.restore();
-        }
-    }
+    drawPlaybackTrailOverlay(ctx);
     
     // Draw prime-residue-tracker highlight (independent of the tracker above,
     // so a residue class and the ring's own tracked residues can be lit at
@@ -12502,140 +12806,9 @@ function drawMainRing() {
     }
     
     // Simple fraction labels for all points when enabled (with new controls)
-    if (showFractionLabels) {
-        const labelType = document.getElementById('labelType')?.value || 'fraction';
-        const labelSize = parseInt(document.getElementById('labelSize')?.value) || 10;
-        const maxLabels = parseInt(document.getElementById('maxLabels')?.value) || 50;
-        const labelMinDenom = parseInt(document.getElementById('labelMinDenom')?.value) || 1;
-        const specificLabelsInput = document.getElementById('specificLabels')?.value || '';
-        
-        ctx.font = `${labelSize}px system-ui`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        
-        // Parse specific labels (format: "1/2,3/5,2/7")
-        const specificFractions = new Set();
-        if (specificLabelsInput.trim()) {
-            specificLabelsInput.split(',').forEach(frac => {
-                const match = frac.trim().match(/^(\d+)\s*\/\s*(\d+)$/);
-                if (match) {
-                    specificFractions.add(`${match[1]}/${match[2]}`);
-                }
-            });
-        }
-        
-        // Filter and limit points to label based on mode
-        let pointsToLabel;
-        const labelMode = document.getElementById('labelMode')?.value || 'first';
-        
-        if (specificFractions.size > 0) {
-            // Only label specific fractions (from specific input box)
-            pointsToLabel = state.ringPoints.filter(p => specificFractions.has(`${p.r}/${p.m}`));
-        } else {
-            // Use label mode to determine which mods to label
-            const modsToLabel = new Set();
-            
-            if (labelMode === 'first') {
-                // Label first N mods
-                const firstN = parseInt(document.getElementById('labelFirstN')?.value || 10);
-                const startM = state.startM || 1;
-                for (let i = 0; i < firstN && (startM + i) <= state.nMax; i++) {
-                    modsToLabel.add(startM + i);
-                }
-            } else if (labelMode === 'range') {
-                // Label mod range
-                const rangeStart = parseInt(document.getElementById('labelRangeStart')?.value || 1);
-                const rangeEnd = parseInt(document.getElementById('labelRangeEnd')?.value || 10);
-                for (let m = rangeStart; m <= rangeEnd && m <= state.nMax; m++) {
-                    modsToLabel.add(m);
-                }
-            } else if (labelMode === 'list') {
-                // Label specific mod list
-                const listStr = document.getElementById('labelModList')?.value || '';
-                listStr.split(',').forEach(s => {
-                    const m = parseInt(s.trim());
-                    if (m && m <= state.nMax) modsToLabel.add(m);
-                });
-            } else if (labelMode === 'pattern') {
-                // Label by pattern
-                const pattern = document.getElementById('labelPattern')?.value || '2n';
-                const patternMax = parseInt(document.getElementById('labelPatternMax')?.value || 20);
-                
-                if (pattern === '2n') {
-                    // Even numbers
-                    for (let m = 2; m <= Math.min(patternMax, state.nMax); m += 2) {
-                        modsToLabel.add(m);
-                    }
-                } else if (pattern === '2n+1') {
-                    // Odd numbers
-                    for (let m = 1; m <= Math.min(patternMax, state.nMax); m += 2) {
-                        modsToLabel.add(m);
-                    }
-                } else if (pattern === '2^n') {
-                    // Powers of 2
-                    for (let m = 1; m <= Math.min(patternMax, state.nMax); m *= 2) {
-                        modsToLabel.add(m);
-                    }
-                } else if (pattern === '2*2^n') {
-                    // 2 times powers of 2
-                    for (let m = 4; m <= Math.min(patternMax, state.nMax); m *= 2) {
-                        modsToLabel.add(m);
-                    }
-                } else if (pattern === 'primes') {
-                    // Prime numbers
-                    for (let m = 2; m <= Math.min(patternMax, state.nMax); m++) {
-                        if (isPrime(m)) modsToLabel.add(m);
-                    }
-                }
-            }
-            
-            // Filter points by selected mods
-            pointsToLabel = state.ringPoints
-                .filter(p => modsToLabel.size === 0 || modsToLabel.has(p.m))
-                .slice(0, maxLabels);
-        }
-        
-        pointsToLabel.forEach(p => {
-            let labelText;
-            const val = p.r / p.m;
-            const gcdVal = gcd(p.r, p.m);
-            const lcmVal = (p.r * p.m) / gcdVal;
-            const phiM = eulerPhi(p.m);
-            const cfDepth = toCF(p.r, p.m).length;
-            
-            switch(labelType) {
-                case 'r': labelText = `${p.r}`; break;
-                case 'm': labelText = `${p.m}`; break;
-                case 'decimal': labelText = val.toFixed(4); break;
-                case 'degree': labelText = `${(val * 360).toFixed(1)}°`; break;
-                case 'radian': labelText = `${(val * 2 * Math.PI).toFixed(3)}`; break;
-                case 'percent': labelText = `${(val * 100).toFixed(1)}%`; break;
-                case 'gcd': labelText = `gcd=${gcdVal}`; break;
-                case 'lcm': labelText = `lcm=${lcmVal}`; break;
-                case 'sum': labelText = `${p.r + p.m}`; break;
-                case 'product': labelText = `${p.r * p.m}`; break;
-                case 'totient': labelText = `φ=${phiM}`; break;
-                case 'cf': labelText = `d=${cfDepth}`; break;
-                case 'sector': labelText = `S${p.sector}`; break;
-                case 'ratio': labelText = `${p.m}:${p.r}`; break;
-                case 'cents': 
-                    const cents = 1200 * Math.log2(val);
-                    labelText = `${cents.toFixed(0)}¢`;
-                    break;
-                case 'interval':
-                    // Musical interval names (approximate)
-                    const semitones = Math.round(12 * Math.log2(val));
-                    const intervals = ['P1','m2','M2','m3','M3','P4','TT','P5','m6','M6','m7','M7','P8'];
-                    labelText = intervals[Math.abs(semitones % 12)] || 'P1';
-                    break;
-                default: // fraction
-                    labelText = `${p.r}/${p.m}`;
-            }
-            
-            ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
-            ctx.fillText(labelText, p.x, p.y - finalPointSize - 2);
-        });
-    }
+    // — extracted into applyPointLabelsOverlay() below so Grid and Cayley
+    // can call it too; it only reads state.ringPoints + DOM controls.
+    applyPointLabelsOverlay(ctx, finalPointSize);
     
     // Draw ring labels (modulus values at ring positions)
     if (showRingLabels && rotationOn) {
@@ -12776,6 +12949,216 @@ function drawMainRing() {
     
     updateColorLegend(colorMode, showAll, sector);
     updateSectorStats(sector, residues);
+}
+
+// Shared C(n) "Connect next gcd=1" lift-arc overlay — r at ring m → r mod(m+1)
+// at ring m+1. The source endpoint comes straight from state.ringPoints
+// (whichever view last drew already computed x,y there); the target endpoint
+// is computed geometrically via the view's own xyFn(r,m), since a broken
+// lift's target may fall outside the current sector/filters and never get
+// pushed to state.ringPoints at all. The old test was "is the target node in
+// state.ringPoints", which only bites in Remove mode: in Dim mode a
+// non-surviving point is still pushed there, so its arcs kept drawing at full
+// strength while the point itself faded — computing B geometrically fixes
+// both modes at once, and lets Grid/Cayley plug in their own coordinate
+// mapping instead of Ring's polar one.
+function drawCnConnectOverlay(ctx, xyFn) {
+    if (!(state.cnCanvasOn && state.cnConnectOn)) return;
+    const _cnN = (typeof cnGetDepthN === 'function') ? cnGetDepthN() : 0;
+    // Teal = the lift survives (image still coprime to m+1); coral = the
+    // chain breaks there. Split into two Path2Ds so each is one stroke.
+    const pSurv = new Path2D(), pBrok = new Path2D();
+    let nSurv = 0, nBrok = 0;
+    for (const p of state.ringPoints) {
+        if (p.gcdVal !== 1) continue;                              // lift sources are coprime
+        if (typeof cnLiftSurvives === 'function' &&
+            !cnLiftSurvives(p.r, p.m, _cnN)) continue;             // ← the C(n) gate
+        const r2 = p.r % (p.m + 1);
+        const B = xyFn(r2, p.m + 1);
+        if (!B || !isFinite(B[0]) || !isFinite(B[1])) continue;
+        if (gcd(r2, p.m + 1) === 1) { pSurv.moveTo(p.x, p.y); pSurv.lineTo(B[0], B[1]); nSurv++; }
+        else                        { pBrok.moveTo(p.x, p.y); pBrok.lineTo(B[0], B[1]); nBrok++; }
+    }
+    ctx.save();
+    ctx.lineWidth = state.cnConnectWidth;
+    ctx.globalAlpha = 0.7;
+    if (state.cnConnectSurv   && nSurv) { ctx.strokeStyle = '#22c55e'; ctx.stroke(pSurv); }
+    if (state.cnConnectBroken && nBrok) { ctx.strokeStyle = '#e05060'; ctx.stroke(pBrok); }
+    ctx.restore();
+    state.cnConnectCounts = { surviving: nSurv, broken: nBrok };
+}
+
+// Shared "Point Labels" overlay (the showFractionLabels advanced control).
+// Extracted out of drawMainRingPolar so Grid and Cayley can call it too —
+// it only reads state.ringPoints (already populated by all three view draw
+// functions), the labelType/labelMode/etc DOM controls, and ctx, so it
+// needs no Ring-specific geometry to run.
+function applyPointLabelsOverlay(ctx, finalPointSize) {
+    const showFractionLabels = document.getElementById('showFractionLabels')?.checked || false;
+    if (!showFractionLabels) return;
+    const labelType = document.getElementById('labelType')?.value || 'fraction';
+    const labelSize = parseInt(document.getElementById('labelSize')?.value) || 10;
+    const maxLabels = parseInt(document.getElementById('maxLabels')?.value) || 50;
+    const labelMinDenom = parseInt(document.getElementById('labelMinDenom')?.value) || 1;
+    const specificLabelsInput = document.getElementById('specificLabels')?.value || '';
+
+    ctx.font = `${labelSize}px system-ui`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+
+    // Parse specific labels (format: "1/2,3/5,2/7")
+    const specificFractions = new Set();
+    if (specificLabelsInput.trim()) {
+        specificLabelsInput.split(',').forEach(frac => {
+            const match = frac.trim().match(/^(\d+)\s*\/\s*(\d+)$/);
+            if (match) {
+                specificFractions.add(`${match[1]}/${match[2]}`);
+            }
+        });
+    }
+
+    // Filter and limit points to label based on mode
+    let pointsToLabel;
+    const labelMode = document.getElementById('labelMode')?.value || 'first';
+
+    if (specificFractions.size > 0) {
+        // Only label specific fractions (from specific input box)
+        pointsToLabel = state.ringPoints.filter(p => specificFractions.has(`${p.r}/${p.m}`));
+    } else {
+        // Use label mode to determine which mods to label
+        const modsToLabel = new Set();
+
+        if (labelMode === 'first') {
+            // Label first N mods
+            const firstN = parseInt(document.getElementById('labelFirstN')?.value || 10);
+            const startM = state.startM || 1;
+            for (let i = 0; i < firstN && (startM + i) <= state.nMax; i++) {
+                modsToLabel.add(startM + i);
+            }
+        } else if (labelMode === 'range') {
+            // Label mod range
+            const rangeStart = parseInt(document.getElementById('labelRangeStart')?.value || 1);
+            const rangeEnd = parseInt(document.getElementById('labelRangeEnd')?.value || 10);
+            for (let m = rangeStart; m <= rangeEnd && m <= state.nMax; m++) {
+                modsToLabel.add(m);
+            }
+        } else if (labelMode === 'list') {
+            // Label specific mod list
+            const listStr = document.getElementById('labelModList')?.value || '';
+            listStr.split(',').forEach(s => {
+                const m = parseInt(s.trim());
+                if (m && m <= state.nMax) modsToLabel.add(m);
+            });
+        } else if (labelMode === 'pattern') {
+            // Label by pattern
+            const pattern = document.getElementById('labelPattern')?.value || '2n';
+            const patternMax = parseInt(document.getElementById('labelPatternMax')?.value || 20);
+
+            if (pattern === '2n') {
+                // Even numbers
+                for (let m = 2; m <= Math.min(patternMax, state.nMax); m += 2) {
+                    modsToLabel.add(m);
+                }
+            } else if (pattern === '2n+1') {
+                // Odd numbers
+                for (let m = 1; m <= Math.min(patternMax, state.nMax); m += 2) {
+                    modsToLabel.add(m);
+                }
+            } else if (pattern === '2^n') {
+                // Powers of 2
+                for (let m = 1; m <= Math.min(patternMax, state.nMax); m *= 2) {
+                    modsToLabel.add(m);
+                }
+            } else if (pattern === '2*2^n') {
+                // 2 times powers of 2
+                for (let m = 4; m <= Math.min(patternMax, state.nMax); m *= 2) {
+                    modsToLabel.add(m);
+                }
+            } else if (pattern === 'primes') {
+                // Prime numbers
+                for (let m = 2; m <= Math.min(patternMax, state.nMax); m++) {
+                    if (isPrime(m)) modsToLabel.add(m);
+                }
+            }
+        }
+
+        // Filter points by selected mods
+        pointsToLabel = state.ringPoints
+            .filter(p => modsToLabel.size === 0 || modsToLabel.has(p.m))
+            .slice(0, maxLabels);
+    }
+
+    pointsToLabel.forEach(p => {
+        let labelText;
+        const val = p.r / p.m;
+        const gcdVal = gcd(p.r, p.m);
+        const lcmVal = (p.r * p.m) / gcdVal;
+        const phiM = eulerPhi(p.m);
+        const cfDepth = toCF(p.r, p.m).length;
+
+        switch(labelType) {
+            case 'r': labelText = `${p.r}`; break;
+            case 'm': labelText = `${p.m}`; break;
+            case 'decimal': labelText = val.toFixed(4); break;
+            case 'degree': labelText = `${(val * 360).toFixed(1)}°`; break;
+            case 'radian': labelText = `${(val * 2 * Math.PI).toFixed(3)}`; break;
+            case 'percent': labelText = `${(val * 100).toFixed(1)}%`; break;
+            case 'gcd': labelText = `gcd=${gcdVal}`; break;
+            case 'lcm': labelText = `lcm=${lcmVal}`; break;
+            case 'sum': labelText = `${p.r + p.m}`; break;
+            case 'product': labelText = `${p.r * p.m}`; break;
+            case 'totient': labelText = `φ=${phiM}`; break;
+            case 'cf': labelText = `d=${cfDepth}`; break;
+            case 'sector': labelText = `S${p.sector}`; break;
+            case 'ratio': labelText = `${p.m}:${p.r}`; break;
+            case 'cents':
+                const cents = 1200 * Math.log2(val);
+                labelText = `${cents.toFixed(0)}¢`;
+                break;
+            case 'interval':
+                // Musical interval names (approximate)
+                const semitones = Math.round(12 * Math.log2(val));
+                const intervals = ['P1','m2','M2','m3','M3','P4','TT','P5','m6','M6','m7','M7','P8'];
+                labelText = intervals[Math.abs(semitones % 12)] || 'P1';
+                break;
+            default: // fraction
+                labelText = `${p.r}/${p.m}`;
+        }
+
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
+        ctx.fillText(labelText, p.x, p.y - finalPointSize - 2);
+    });
+}
+
+// Shared playback-trail overlay (the blue path Play All / Play Selection
+// leaves behind). Extracted so Grid and Cayley can call it too — it only
+// looks up ringPlaybackTrail entries in state.ringPoints, which all three
+// view draw functions populate with correct on-canvas x,y.
+function drawPlaybackTrailOverlay(ctx) {
+    if (ringPlaybackTrail.length <= 1) return;
+    const trailPts = ringPlaybackTrail
+        .map(t => state.ringPoints.find(p => p.r === t.r && p.m === t.m))
+        .filter(Boolean);
+    if (trailPts.length <= 1) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(96,165,250,0.85)';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(trailPts[0].x, trailPts[0].y);
+    for (let i = 1; i < trailPts.length; i++) ctx.lineTo(trailPts[i].x, trailPts[i].y);
+    ctx.stroke();
+    ctx.restore();
+
+    // Mark the most recently played point (head of the trail)
+    const head = trailPts[trailPts.length - 1];
+    ctx.save();
+    ctx.fillStyle = '#60a5fa';
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.restore();
 }
 
 // Animate the main ring being built up point-by-point as m goes from 1 -> N.
@@ -13762,12 +14145,27 @@ function composeRingPoster(ring) {
     const coPct = totalPairs ? (100 * nCo / totalPairs) : 0;
     const targetPct = 600 / (Math.PI * Math.PI);   // 6/pi^2 as a percentage
 
+    // Non-coprime count over the same plotted set. In 'coprime' mode this is
+    // always 0 (no gcd>1 points were enumerated), which is correct there --
+    // but the card used to report nCo (gcd=1 count) no matter which gcdMode
+    // was active, so 'noncoprime' mode showed 0/no counts (nCo really is 0
+    // when only gcd>1 points were plotted) and 'both' mode silently dropped
+    // the gcd>1 half of what was on screen. The card now matches state.gcdMode.
+    const nNC = pts.length - nCo;
+    const ncPct = totalPairs ? (100 * nNC / totalPairs) : 0;
+    const gcdModeNow = state.gcdMode || 'coprime';
+    const gcdCard = gcdModeNow === 'noncoprime'
+        ? ['gcd > 1', nNC.toLocaleString() + '  (' + ncPct.toFixed(2) + '%)', '#c94040']
+        : gcdModeNow === 'both'
+        ? ['gcd = 1 / gcd > 1', nCo.toLocaleString() + ' / ' + nNC.toLocaleString(), '#22c55e']
+        : ['gcd = 1  \u2192 6/\u03c0\u00b2 = ' + targetPct.toFixed(2) + '%',
+           nCo.toLocaleString() + '  (' + coPct.toFixed(2) + '%)', '#22c55e'];
+
     const cards = [
         ['N',                    nMin + '\u2013' + nMax,                       '#e2e8f0'],
         ['Sectors',              state.sectorMin + '\u2013' + state.sectorMax, '#f59e0b'],
         ['pairs r < m \u2264 N',   totalPairs.toLocaleString(),                   '#818cf8'],
-        ['gcd = 1  \u2192 6/\u03c0\u00b2 = ' + targetPct.toFixed(2) + '%',
-                                 nCo.toLocaleString() + '  (' + coPct.toFixed(2) + '%)', '#22c55e']
+        gcdCard
     ];
     const cw = (W - M*2 - px(30)*3) / 4, ch = px(76), cy = px(216);
     cards.forEach((cd, i) => {
@@ -22781,34 +23179,50 @@ function highlightPointOnRing(fraction) {
     const canvas = document.getElementById('mainRing');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
-    const maxR = Math.min(W, H) / 2 - 35;
-    
-    // Get rotation and spacing settings
-    const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
-    const rotationAmt = parseFloat(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
-    const rotationCumulative = document.getElementById('rotationCumulative')?.checked ?? true;
-    const globalPhase = parseFloat(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
-    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
-    const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
-    
-    // Calculate angle
-    let angle = (fraction.r / fraction.m) * 2 * Math.PI;
-    
-    // Apply rotation
-    if (rotationOn) {
-        const ringIdx = fraction.m;
-        const ringRotation = rotationCumulative ? rotationAmt * ringIdx : rotationAmt;
-        angle += ringRotation + globalPhase;
+
+    // Look up the point's actual on-canvas position from state.ringPoints —
+    // whichever view last drew (Ring/Grid/Cayley) already computed x,y for
+    // every plotted point in that view's own layout. Using the same lookup
+    // the click handler uses keeps the blink highlight, playback trail, and
+    // "follow" zoom landing on the exact rendered point in every view,
+    // instead of always assuming Ring's polar formula.
+    const pt = (state.ringPoints || []).find(p => p.r === fraction.r && p.m === fraction.m);
+    let x, y;
+    if (pt) {
+        x = pt.x; y = pt.y;
+    } else if (state.canvasViewMode === 'grid' || state.canvasViewMode === 'cayley') {
+        // Point isn't currently plotted (wrong sector/gcd filter) — nothing
+        // sensible to blink in these views, so skip rather than guess wrong.
+        return;
+    } else {
+        const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+        const maxR = Math.min(W, H) / 2 - 35;
+
+        // Get rotation and spacing settings
+        const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
+        const rotationAmt = parseFloat(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
+        const rotationCumulative = document.getElementById('rotationCumulative')?.checked ?? true;
+        const globalPhase = parseFloat(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
+        const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
+        const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+
+        // Calculate angle
+        let angle = (fraction.r / fraction.m) * 2 * Math.PI;
+
+        // Apply rotation
+        if (rotationOn) {
+            const ringIdx = fraction.m;
+            const ringRotation = rotationCumulative ? rotationAmt * ringIdx : rotationAmt;
+            angle += ringRotation + globalPhase;
+        }
+
+        // Radius: same shared mapping as drawMainRing.
+        const rad = calculateRadius(fraction.m, maxR, ringSpacing, invertOrder);
+
+        x = cx + rad * Math.cos(angle);
+        y = cy - rad * Math.sin(angle);
     }
-    
-    // Radius: same shared mapping as drawMainRing.
-    const rad = calculateRadius(fraction.m, maxR, ringSpacing, invertOrder);
-    
-    // Calculate position
-    const x = cx + rad * Math.cos(angle);
-    const y = cy - rad * Math.sin(angle);
-    
+
     // Store current highlight
     blinkHighlightState.currentFraction = fraction;
     blinkHighlightState.x = x;
@@ -24616,17 +25030,29 @@ function applyRingFollowZoom(r, m, force) {
     const canvas = document.getElementById('mainRing');
     if (!canvas || !state.nMax) return;
     
-    // Compute the point's position directly (same geometry drawMainRing
-    // uses) so this works regardless of draw order / which sector is
-    // currently shown.
+    // For Grid/Cayley, use the point's actual on-canvas position from
+    // state.ringPoints — whichever of those two views last drew already
+    // computed x,y for every plotted point in its own layout, and there's
+    // no analytic polar formula that would make sense for either. Ring
+    // keeps its original direct analytic computation (unchanged below):
+    // it's called mid-step, before that step's drawMainRing() redraw, so
+    // state.ringPoints can still hold the previous sector's points — the
+    // analytic formula sidesteps that ordering issue entirely.
     const cx = canvas.width / 2, cy = canvas.height / 2;
-    const maxR = Math.min(canvas.width, canvas.height) / 2 - 35;
-    const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
-    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
-    const angle = (r / m) * 2 * Math.PI;
-    const radius = calculateRadius(m, maxR, ringSpacing, invertOrder);
-    const px = cx + radius * Math.cos(angle);
-    const py = cy - radius * Math.sin(angle);
+    let px, py;
+    if (state.canvasViewMode === 'grid' || state.canvasViewMode === 'cayley') {
+        const plotted = (state.ringPoints || []).find(p => p.r === r && p.m === m);
+        if (!plotted) return; // not currently plotted in this view — nothing sensible to zoom to
+        px = plotted.x; py = plotted.y;
+    } else {
+        const maxR = Math.min(canvas.width, canvas.height) / 2 - 35;
+        const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+        const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
+        const angle = (r / m) * 2 * Math.PI;
+        const radius = calculateRadius(m, maxR, ringSpacing, invertOrder);
+        px = cx + radius * Math.cos(angle);
+        py = cy - radius * Math.sin(angle);
+    }
     
     ringFollowStep++;
     const increment = ringFollowTotalSteps > 0
