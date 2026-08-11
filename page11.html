@@ -11839,6 +11839,23 @@ function drawMainCayley() {
         if (hp) {
             ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(hp.x, hp.y, size + 4, 0, 2 * Math.PI); ctx.stroke();
+
+            // Whole ring m belongs to — Möbius maps circles to circles, so the
+            // z-plane circle |z|=ringR(m) traces out a circle (or near-circle)
+            // in the transformed Cayley view too; sample it directly rather
+            // than solve for its center/radius algebraically.
+            const modRingR = 0.5 + ((hp.m - 1) / Math.max(1, rings - 1)) * 1.5;
+            const rotOffset = rotationOn ? (rotationCumulative ? rotationAmt * hp.m : rotationAmt) + globalPhase : 0;
+            ctx.strokeStyle = 'rgba(251,191,36,0.45)'; ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            for (let i = 0; i <= 128; i++) {
+                const theta = (i / 128) * 2 * Math.PI + rotOffset;
+                const w = _cayleyPt(modRingR, theta, R0);
+                const px = cx + w.x, py = cy + w.y;
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            highlightSameModulusPoints(ctx, size);
         }
     }
 
@@ -11953,6 +11970,19 @@ function drawMainGrid() {
         if (hp) {
             ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(hp.x, hp.y, radBase + 4, 0, 2 * Math.PI); ctx.stroke();
+
+            // Whole ring m belongs to — in this Cartesian layout the "ring"
+            // is the horizontal row y=m (every r for that denominator); with
+            // Full Square mirroring on, the mirrored column x=m is the same
+            // row reflected, so highlight that too.
+            const rowY = oy + (hp.m - 0.5) * cell;
+            ctx.strokeStyle = 'rgba(251,191,36,0.45)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(ox, rowY); ctx.lineTo(ox + side, rowY); ctx.stroke();
+            if (fullSquare) {
+                const colX = ox + (hp.m - 0.5) * cell;
+                ctx.beginPath(); ctx.moveTo(colX, oy); ctx.lineTo(colX, oy + side); ctx.stroke();
+            }
+            highlightSameModulusPoints(ctx, radBase);
         }
     }
 
@@ -12618,6 +12648,16 @@ function drawMainRingPolar() {
             ctx.beginPath();
             ctx.arc(hp.x, hp.y, highlightSize + 5, 0, 2 * Math.PI);
             ctx.stroke();
+
+            // Whole ring m belongs to — the concentric circle this point sits
+            // on, plus a gold outline around every other point on that ring.
+            const modRingRadius = calculateRadius(hp.m, maxR, ringSpacing, invertOrder);
+            ctx.strokeStyle = 'rgba(251,191,36,0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, modRingRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+            highlightSameModulusPoints(ctx, finalPointSize);
         }
     }
     
@@ -12962,6 +13002,26 @@ function drawMainRingPolar() {
 // strength while the point itself faded — computing B geometrically fixes
 // both modes at once, and lets Grid/Cayley plug in their own coordinate
 // mapping instead of Ring's polar one.
+// Shared "highlight the whole ring m belongs to" helper — draws a subtle
+// gold outline around every plotted point sharing the clicked point's
+// denominator m, so clicking a fraction shows its whole modulus-m ring, not
+// just that one point. Works identically in all three views since it only
+// reads state.ringPoints (already populated with correct x,y everywhere).
+function highlightSameModulusPoints(ctx, ptRadius) {
+    if (!highlightedRingPoint) return;
+    const m = highlightedRingPoint.m;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(251,191,36,0.85)';
+    ctx.lineWidth = 1.5;
+    state.ringPoints.forEach(p => {
+        if (p.m !== m) return;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, ptRadius + 3, 0, 2 * Math.PI);
+        ctx.stroke();
+    });
+    ctx.restore();
+}
+
 function drawCnConnectOverlay(ctx, xyFn) {
     if (!(state.cnCanvasOn && state.cnConnectOn)) return;
     const _cnN = (typeof cnGetDepthN === 'function') ? cnGetDepthN() : 0;
