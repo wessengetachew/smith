@@ -22034,13 +22034,18 @@ async function doExport(){
     ctx.fillStyle=PANEL_COLORS[reg.panel]||GOLD;ctx.textAlign='left';
     ctx.fillText(tagTxt,reg.x+16,reg.y+8+tagSz+1);
 
-    // Color mode sub-tag
+    // Color mode sub-tag — read the label straight from the live <select>, since
+    // color mode values are a mix of numeric legacy modes (0-5) and named
+    // extended modes (e.g. "rainbow"); a fixed 0-5 array returned "undefined"
+    // for every extended mode, which is what showed up in the exported PNG.
     if(reg.panel!=='chart'){
-      const modeNames=['3-state','Survival','Fail prime','Gold/dark','Density heatmap','Sector (r/M hue)'];
       const modeIdx=getGlobalCM();
+      const modeSel=document.getElementById('global-color');
+      const modeOpt=modeSel&&Array.from(modeSel.options).find(o=>o.value===String(modeIdx));
+      const modeLabel=modeOpt?modeOpt.textContent.trim():String(modeIdx);
       ctx.font=`${fs(.009)}px 'JetBrains Mono',monospace`;
       ctx.fillStyle=DIM;
-      ctx.fillText('color: '+modeNames[modeIdx],reg.x+16,reg.y+8+tagH+tagSz+3);
+      ctx.fillText('color: '+modeLabel,reg.x+16,reg.y+8+tagH+tagSz+3);
     }
   }
 
