@@ -825,6 +825,9 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 .px-res-btn{background:none;border:1px solid rgba(200,168,74,.35);color:#c8a84a;
   font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 10px;cursor:pointer;letter-spacing:.06em;}
 .px-res-btn.on{background:rgba(200,168,74,.16);border-color:#c8a84a;font-weight:600;}
+#px-overlay .px-view-btn{background:none;border:1px solid rgba(155,127,232,.35);color:rgba(155,127,232,.6);
+  font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;transition:all .15s;}
+#px-overlay .px-view-btn.on{background:rgba(155,127,232,.18);border-color:rgba(155,127,232,.85);color:rgba(155,127,232,.98);}
 #px-overlay{display:none;position:fixed;inset:0;z-index:100200;background:rgba(0,0,0,.88);align-items:center;justify-content:center;}
 #px-overlay.open{display:flex;}
 #px-box{background:var(--bg1);border:1px solid rgba(200,168,74,.32);width:min(840px,96vw);max-height:93vh;display:flex;flex-direction:column;box-shadow:0 28px 90px rgba(0,0,0,.97);}
@@ -1255,6 +1258,8 @@ function heroToggleTopBars(){
           style="background:none;border:1px solid rgba(61,200,184,.4);color:rgba(61,200,184,.9);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;letter-spacing:.05em;">🔗 Link</button>
         <button onclick="wExport4K()" title="Export current view as a 4K PNG with title, formula, and stats panel"
           style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.5);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;">↓ 4K</button>
+        <button onclick="wExportComposite4K()" title="Export a MULTI-VIEW composite PNG — pick any combination of Cayley / Ring / Grid / Farey / Gauss, laid out 1–5 up with per-panel legends"
+          style="background:rgba(155,127,232,.1);border:1px solid rgba(155,127,232,.5);color:rgba(155,127,232,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;">⊞ 4K multi</button>
         <button id="w-send-hero-btn" onclick="wSendToHero()" title="Send this view/G/n/color to the hero section, hiding its text overlay — then use the hero's own 4K export for a clean shot"
           style="background:rgba(61,200,184,.1);border:1px solid rgba(61,200,184,.5);color:rgba(61,200,184,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;">↥ Send to Hero</button>
       </div>
@@ -1331,24 +1336,59 @@ function heroToggleTopBars(){
       </div>
 
       <span id="wfs-anchor-colorlabel" style="display:none;"></span>
-        <div id="w-colorlabel-row" style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+        <div id="w-colorlabel-row" style="display:flex;align-items:center;gap:6px;row-gap:6px;margin-top:6px;flex-wrap:wrap;max-width:100%;min-width:0;">
         <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.7);white-space:nowrap;">Color:</span>
         <select id="w-color-mode" onchange="wSetColorMode()"
-          style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;flex:1;max-width:220px;">
-          <option value="default">Distance-from-center hue (default)</option>
-          <option value="residue_value">By Residue Value (r hue, ignores ring)</option>
-          <option value="ring_hash">By Ring/Modulus (M hue, ignores r)</option>
-          <option value="phi_position" selected>φ(M) Mathematical Progression</option>
-          <option value="phi_spectrum">φ(M)/M Spectral Distribution</option>
-          <option value="phi_value">φ(M) Magnitude Hue</option>
-          <option value="gcd_status">gcd(r,M) = 1 vs ≠ 1 (binary)</option>
-          <option value="gcd_value">By gcd(r,M) Value</option>
-          <option value="fraction_ab">By r/M Position (a/b, Farey ratio)</option>
+          style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;flex:1 1 150px;min-width:0;max-width:220px;">
+          <optgroup label="── 2πr/M · Farey ──">
+            <option value="farey_angle">2πr/M angle (Farey rainbow)</option>
+            <option value="farey_prox">Farey proximity 1/p</option>
+            <option value="lift_angle">Lift angle r→M+1</option>
+          </optgroup>
+          <optgroup label="── Block Structure ──">
+            <option value="default">3-state (gold/teal/dark)</option>
+            <option value="depth">Survival depth</option>
+            <option value="block_window">Block window j-index</option>
+            <option value="saturation">Saturation profile</option>
+            <option value="fail_prime">Fail prime spectrum</option>
+          </optgroup>
+          <optgroup label="── Arithmetic ──">
+            <option value="gcd_val">GCD(r,M) spectrum</option>
+            <option value="phi_ratio">φ(M)/M density</option>
+            <option value="mobius">Möbius μ(M)</option>
+            <option value="quad_res">Quadratic Residue</option>
+            <option value="r_prime">r primality</option>
+          </optgroup>
+          <optgroup label="── Grid/Ring Extended ──">
+            <option value="mod_residue">r mod M / M (mod class)</option>
+            <option value="rainbow">Rainbow (r/M hue)</option>
+            <option value="divisibility">Divisibility count</option>
+            <option value="zeroDivisors">Zero Divisors</option>
+            <option value="idempotents">Idempotents</option>
+            <option value="primality">Primality (spf)</option>
+            <option value="modular_distance">Modular Distance</option>
+          </optgroup>
+          <optgroup label="── Ported from old project ──">
+            <option value="residue_value">By Residue Value (r hue, ignores ring)</option>
+            <option value="ring_hash">By Ring/Modulus (M hue, ignores r)</option>
+            <option value="phi_position" selected>φ(M) Mathematical Progression</option>
+            <option value="phi_spectrum">φ(M)/M Spectral Distribution</option>
+          </optgroup>
+          <optgroup label="── Opener only ──">
+            <option value="phi_value">φ(M) Magnitude Hue</option>
+            <option value="gcd_status">gcd(r,M) = 1 vs ≠ 1 (binary)</option>
+            <option value="gcd_value">By gcd(r,M) Value</option>
+            <option value="fraction_ab">By r/M Position (a/b, Farey ratio)</option>
+            <option value="w_distance">Distance-from-center hue (opener default)</option>
+          </optgroup>
+          <optgroup label="── Global ──">
+            <option value="global">↳ Use global-color mode</option>
+          </optgroup>
         </select>
           <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.7);white-space:nowrap;margin-left:6px;">Label:</span>
           <select id="w-label-mode" onchange="wSetLabelMode()"
             title="Per-point labels on every lattice point — same set the Sector Path panel uses, and it renders into the PNG export"
-            style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;">
+            style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;min-width:0;max-width:100%;">
             <option value="none">None</option>
             <option value="coords">r, M</option>
             <option value="fraction">r/M (reduced)</option>
@@ -1363,8 +1403,14 @@ function heroToggleTopBars(){
             <option value="r_val" selected>r only</option>
             <option value="M_val">M only</option>
           </select>
-          <label style="display:flex;align-items:center;gap:3px;margin-left:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.7);cursor:pointer;white-space:nowrap;" title="Only label points admitted by the current C(n) — points excluded by the block-coprime filter go unlabeled">
-            <input type="checkbox" id="w-label-lock" onchange="wRedrawCanvas()" style="accent-color:rgba(200,168,74,.85);">🔒 C(n)</label>
+          <label style="display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.7);white-space:nowrap;" title="Scales every point label. Smaller labels also unlock at tighter spacing, so shrinking them reveals labels in dense regions instead of just making the same ones smaller.">
+            Size
+            <input type="range" id="w-label-size" min="0.3" max="3" step="0.05" value="1"
+              style="width:66px;accent-color:rgba(200,168,74,.85);" oninput="wSetLabelSize()">
+            <span id="w-label-size-val" style="color:#a8a294;min-width:26px;">1.00×</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.7);cursor:pointer;white-space:nowrap;" title="Only label points admitted by the current C(n) — points excluded by the block-coprime filter go unlabeled">
+            <input type="checkbox" id="w-label-lock" checked onchange="wRedrawCanvas()" style="accent-color:rgba(200,168,74,.85);">🔒 C(n)</label>
           <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.85);white-space:nowrap;margin-left:4px;" title="Tap any point on the canvas to pin its label — tap again to unpin. Multiple pins stay labeled and ring-highlighted regardless of Label mode.">📌<span id="w-pin-count"></span></span>
           <button onclick="_wClearPinnedLabels()" title="Clear all pinned/tapped labels" style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.75);font-family:'JetBrains Mono',monospace;font-size:7px;padding:1px 5px;cursor:pointer;margin-left:2px;">clear</button>
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#6a6560;">all 5 views</span>
@@ -1397,8 +1443,8 @@ function heroToggleTopBars(){
         <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;">
           <label style="display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.9);">
             Support size
-            <input type="range" id="w-char-support-size" min="0" max="3" step="0.05" value="1" oninput="wSetCharSize()" style="width:80px;accent-color:rgba(200,168,74,.9);">
-            <span id="w-char-support-size-val" style="color:#a8a294;min-width:28px;">1.00×</span>
+            <input type="range" id="w-char-support-size" min="0" max="3" step="0.05" value="0.5" oninput="wSetCharSize()" style="width:80px;accent-color:rgba(200,168,74,.9);">
+            <span id="w-char-support-size-val" style="color:#a8a294;min-width:28px;">0.50×</span>
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#a8a294;">
             Vanish size
@@ -1445,12 +1491,12 @@ function heroToggleTopBars(){
         <button onclick="wGStepPrime(-1)" title="Jump G to the previous prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">◂ prime</button>
         <input type="range" id="ws-g-sl" min="0" max="100" step="1" value="62"
-          style="flex:1;accent-color:rgba(200,168,74,.8);" oninput="wGMarkUserTouched();wSetG(_sliderToG(+this.value))">
+          style="flex:1;accent-color:rgba(200,168,74,.8);" oninput="wGMarkUserTouched();_wBeginDrag();wSetG(_sliderToG(+this.value))">
         <button onclick="wGStepPrime(1)" title="Jump G to the next prime"
           style="background:none;border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">prime ▸</button>
         <input type="number" id="ws-g-num" min="1" max="2048" value="109"
           style="width:46px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.3);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;text-align:center;padding:2px 3px;outline:none;"
-          oninput="wGMarkUserTouched();wSetG(+this.value)">
+          oninput="wGMarkUserTouched();_wBeginDrag();wSetG(+this.value)">
         <span id="ws-g-lbl" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,168,74,.75);white-space:nowrap;">G=109  (grid p²=11881)</span>
       </div>
 
@@ -1550,6 +1596,41 @@ function heroToggleTopBars(){
         style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(6,6,20,.8);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 12px;cursor:pointer;border-radius:3px;z-index:3;">Show controls</button>
     </div>
 
+    <!-- ══ SELECTED POINTS — every tapped (r,M), with its facts ══
+         Sits directly under the canvas because that is where the taps
+         happen. Backed by the SAME _wPinnedPts array the on-canvas gold
+         rings and labels already use, so the list and the picture can
+         never disagree. -->
+    <details id="w-pins-dd" style="position:relative;z-index:1;margin:6px 0 4px;background:rgba(61,200,184,.04);border:1px solid rgba(61,200,184,.18);">
+      <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;padding:6px 9px;user-select:none;">
+        <span style="display:inline-block;transition:transform .15s;font-size:8px;color:rgba(61,200,184,.85);">▸</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(61,200,184,.85);">Selected Points</span>
+        <span id="w-pins-badge" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(200,168,74,.9);">0</span>
+        <span style="flex:1;"></span>
+        <button onclick="event.preventDefault();event.stopPropagation();_wClearPinnedLabels();"
+          title="Remove every selected point"
+          style="background:none;border:1px solid rgba(224,80,96,.45);color:rgba(224,80,96,.85);font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 7px;cursor:pointer;">Clear all</button>
+        <button onclick="event.preventDefault();event.stopPropagation();_wCopyPinsCSV(this);"
+          title="Copy every selected point and its facts as CSV"
+          style="background:none;border:1px solid rgba(61,200,184,.45);color:rgba(61,200,184,.85);font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 7px;cursor:pointer;">CSV</button>
+      </summary>
+      <style>#w-pins-dd[open]>summary>span:first-child{transform:rotate(90deg);}</style>
+      <div style="padding:0 9px 9px;border-top:1px solid rgba(61,200,184,.14);padding-top:7px;">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;row-gap:5px;margin-bottom:6px;">
+          <label style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#8a8478;cursor:pointer;white-space:nowrap;"
+            title="Re-centre and zoom the canvas on each newly tapped point. Off by default — when you are collecting several points the view jumping on every tap fights you.">
+            <input type="checkbox" id="w-pin-zoom" style="accent-color:rgba(61,200,184,.9);">
+            Zoom to point on tap
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#8a8478;cursor:pointer;white-space:nowrap;"
+            title="Only points admitted by the current C(n) can be tapped. Points excluded by the block-coprime filter are still drawn, but stop stealing taps from their gold neighbours. No effect at n=0, where nothing is excluded.">
+            <input type="checkbox" id="w-pin-cnonly" checked style="accent-color:rgba(200,168,74,.9);">
+            🔒 Tap only C(n) points
+          </label>
+        </div>
+        <div id="w-pins-list" style="max-height:230px;overflow-y:auto;"></div>
+      </div>
+    </details>
     <details id="w-intro-dd" style="position:relative;z-index:1;">
     <summary style="cursor:pointer;list-style:none;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,74,.7);padding:2px 0 6px;user-select:none;">
       <span style="display:inline-block;transition:transform .15s;">▸</span> Intro — what is C(n)?
@@ -2022,7 +2103,7 @@ function heroToggleTopBars(){
   var _wPrimeK=1;           // nth prime index for finite mode (default p₁)
   var _wDP=12;               // decimal places for value display (user-controlled slider)
   var _wN=0;
-  var _wView='grid';       // 'smith' | 'ring' | 'grid' | 'farey'
+  var _wView='ring';       // 'smith' | 'ring' | 'grid' | 'farey' — opener lands on Ring
   var _wRaf=null;
 
   // Smith chart rotation/animation state (opener-only — independent of hero's _heroSmithAlpha)
@@ -2103,6 +2184,22 @@ function heroToggleTopBars(){
     if(l)l.textContent=Math.round(_wGbDimAlpha*100)+'%';
     wRedrawCanvas();
   };
+  // Label scale. Applied to the general labels, the pin labels, AND the
+  // density guard: shrinking labels lets them appear at tighter spacing,
+  // which is the actual point — otherwise a smaller size just renders the
+  // same too-few labels smaller, and dense regions stay blank.
+  window.wSetLabelSize=function(){
+    var el=document.getElementById('w-label-size');
+    var v=el?(parseFloat(el.value)||1):1;
+    var lbl=document.getElementById('w-label-size-val');
+    if(lbl)lbl.textContent=v.toFixed(2)+'\u00d7';
+    wRedrawCanvas();
+  };
+  window._wLabelScale=function(){
+    var el=document.getElementById('w-label-size');
+    var v=el?(parseFloat(el.value)||1):1;
+    return Math.max(0.3,Math.min(3,v));
+  };
   window.wSetLabelMode=function(){ if(typeof wRedrawCanvas==='function')wRedrawCanvas(); };
 
   // Per-point labels for every view. Positions come from _wHitPts (x,y,r,M),
@@ -2128,11 +2225,12 @@ function heroToggleTopBars(){
     }
     if(!isFinite(sp))sp=6;
     var effSp=sp*Z;
-    var showGeneral=(mode!=='none')&&effSp>=4*K;
+    var LS=(typeof window._wLabelScale==='function')?window._wLabelScale():1;
+    var showGeneral=(mode!=='none')&&effSp>=4*K*LS;
     // fz is in world units (ctx is already zoom-scaled), sized off the
     // on-screen spacing then divided back down by Z so the rendered label
     // stays a sane on-screen size instead of ballooning as you zoom in.
-    var fz=Math.max(5*K,Math.min(effSp*0.62,13*K))/Z;
+    var fz=Math.max(5*K,Math.min(effSp*0.62,13*K))*LS/Z;
     if(fz<0.5)fz=0.5;
     var n=(typeof _wN!=='undefined')?_wN:0;
     var cnt=_wHitPts.length>>2;
@@ -2174,7 +2272,7 @@ function heroToggleTopBars(){
     // Tap-to-label pins: always shown, regardless of mode/lock/density, in a
     // distinct gold color. Falls back to "r,M" if no Label mode is chosen.
     if(hasPins){
-      var pfz=Math.max(fz,9*K/Z);
+      var pfz=Math.max(fz,9*K*LS/Z);
       ctx.font="bold "+pfz+"px 'JetBrains Mono',monospace";
       ctx.fillStyle='rgba(255,224,140,.98)';
       for(var pi=0;pi<_wPinnedPts.length;pi++){
@@ -2234,7 +2332,11 @@ function heroToggleTopBars(){
   // shared across all five opener views (Smith/Ring/Grid/Farey/Gauss). ──
   var _wActiveRings=null; // null = all rings 1..G active (default); else a Set of specific M values
   var _wCharFilter='support'; // 'both' | 'support' (χ≠0, gcd=1) | 'vanishing' (χ=0, gcd≠1) — default matches the checkboxes (vanishing OFF)
-  var _wCharSupportSize=1, _wCharVanishSize=1; // independent point-size multipliers, all 5 views
+  var _wCharSupportSize=0.5, _wCharVanishSize=1; // independent point-size multipliers, all 5 views.
+  // Support ships at 0.5x: the slider attribute alone is not enough, because
+  // any draw that happens before the first wSetCharSize() call reads this
+  // variable, not the DOM — they have to agree or the opening frame renders
+  // at a different dot size than the panel claims.
   function _wRingActive(M){ return M===1 || !_wActiveRings || _wActiveRings.has(M); }
   function _wCharPass(pureCop){ return _wCharFilter==='both' || (_wCharFilter==='support'&&pureCop) || (_wCharFilter==='vanishing'&&!pureCop); }
   function _wCharSizeMul(pureCop){ return pureCop?_wCharSupportSize:_wCharVanishSize; }
@@ -3483,7 +3585,33 @@ function heroToggleTopBars(){
     _wColorMode=document.getElementById('w-color-mode')?.value||'default';
     wRedrawCanvas();
   };
+  // Modes the opener implements itself. Everything else is delegated to the
+  // hero's _getHeroColor so the two sections cannot drift: same mode value,
+  // same pixel. 'w_distance' is the opener's original distance-from-centre
+  // default, kept under its own name because the hero has no equivalent.
+  var _W_OWN_MODES={phi_value:1,gcd_status:1,gcd_value:1,fraction_ab:1,w_distance:1};
+
+  // Depth is what _getHeroColor keys almost everything off. Recomputing the
+  // true depth per point would undo the row-sieve work, so it is only paid
+  // for by the modes that actually render depth; every other mode gets a
+  // surrogate that agrees on the three things it is read for — d<0 means not
+  // coprime, d>=n means block-coprime, otherwise it fails somewhere below n.
+  var _W_DEPTH_MODES={depth:1,block_window:1,saturation:1,fail_prime:1};
+  function _wDepthFor(r,M,ok,pureCop,mode){
+    if(!pureCop) return -1;
+    if(_W_DEPTH_MODES[mode]&&typeof _heroTrueDepth==='function'){
+      try{ return _heroTrueDepth(r,M); }catch(e){}
+    }
+    return ok?Math.max(_wN,0):Math.max(0,_wN-1);
+  }
+
   function _wModColor(r,M,ok,pureCop){
+    if(!_W_OWN_MODES[_wColorMode]&&typeof _getHeroColor==='function'){
+      var _d=_wDepthFor(r,M,ok,pureCop,_wColorMode);
+      try{
+        return _getHeroColor(r,M,_wN,_d,_wColorMode,0,null,false,false,false,true);
+      }catch(e){ /* fall through to the opener's own switch */ }
+    }
     // gcd_status / gcd_value color non-coprime (gcd≠1) points deliberately —
     // every other mode keeps the flat "χ(r)=0" red so that behaviour is unchanged.
     var _selfHandlesGcd=(_wColorMode==='gcd_status'||_wColorMode==='gcd_value');
@@ -3532,6 +3660,7 @@ function heroToggleTopBars(){
         var h7=(frac*300)%360;
         return ok?('hsla('+(h7|0)+',78%,60%,.92)'):('hsla('+(h7|0)+',45%,30%,.4)');
       }
+      case 'w_distance':
       default:{
         var dist=Math.min(r,M-r);
         var ratio=dist/Math.max(1,Math.floor(M/2));
@@ -3675,7 +3804,7 @@ function heroToggleTopBars(){
   // collapse the intro at 10s. ──
   window._wOpeningSequence=function(){
     var target=_wDP||12;            // whatever is configured (URL hash may set it later)
-    if((location.hash||'').indexOf('wv=')<0&&typeof wSetView==='function')wSetView('grid'); // same view already rendered — this only syncs button highlight + smith-only controls, no visible snap
+    if((location.hash||'').indexOf('wv=')<0&&typeof wSetView==='function')wSetView('ring'); // same view already rendered — this only syncs button highlight + smith-only controls, no visible snap
     window.wSetDP(target);          // fixed at the configured value (default 12)
     var dd=document.getElementById('w-intro-dd');
     if(dd){
@@ -3738,6 +3867,28 @@ function heroToggleTopBars(){
   window._gToSlider=function(g){
     g=Math.max(1,Math.min(2048,Math.round(+g||1)));
     return Math.max(0,Math.min(100,Math.round(Math.log(g)/Math.log(2048)*100)));
+  };
+  // ══ DRAG BUDGET ══════════════════════════════════════════════════════
+  //  Even with the row sieve and batched fills, one full sheet at G=2048 is
+  //  real work — and an <input type=range> fires oninput on EVERY pixel of
+  //  travel, so a single sweep to 2048 used to queue ~100 full renders back
+  //  to back. That is what locks the tab, not any one frame.
+  //
+  //  So: while G is actively changing, draw a decimated preview (lattice
+  //  capped at _W_DRAG_CAP) which is near-instant at any G, and schedule the
+  //  true full-resolution render for when the drag goes quiet. Nothing is
+  //  lost — the settled picture is byte-identical to what the old path drew,
+  //  it just no longer tries to draw it a hundred times on the way there.
+  var _W_DRAG_CAP=384;
+  var _wDragging=false, _wDragTimer=null;
+  window._wDragCap=function(){ return _wDragging?_W_DRAG_CAP:0; };
+  window._wBeginDrag=function(){
+    _wDragging=true;
+    if(_wDragTimer)clearTimeout(_wDragTimer);
+    _wDragTimer=setTimeout(function(){
+      _wDragging=false; _wDragTimer=null;
+      wRedrawCanvas();          // settle: full fidelity, once
+    },150);
   };
   window.wSetG=function(v){
     _wG=Math.max(1,Math.min(2048,Math.round(+v||31)));
@@ -3842,12 +3993,135 @@ function heroToggleTopBars(){
   // already-pinned point removes it. Always labeled + ring-highlighted
   // regardless of the Label dropdown, lock state, or density guard.
   var _wPinnedPts=[];
+  // Per-point colour, assigned by position in the list so the swatch in the
+  // Selected Points panel is the same colour as the ring drawn on the canvas.
+  // Pins used to all ring in one gold, which is fine for one point and
+  // useless for eight.
+  var _W_PIN_COLS=['#3dc8b8','#e05060','#c8a84a','#9b7fe8','#7ec87a','#e88fc0','#5aa6e0','#e0a050'];
+  window._wPinColor=function(i){ return _W_PIN_COLS[i%_W_PIN_COLS.length]; };
+
+  // Every fact the panel shows about one point, in one place, so the inspect
+  // bar and the list can never drift apart. thCv is the ON-CANVAS angle: it
+  // reads the position actually plotted (_wHitPts, the view's own local
+  // frame) and then applies the Smith flip and the global 90°-step rotation,
+  // so it stays correct in all five views and under any rotation. thRes is
+  // the number-theoretic 2πr/M, which rotation does not touch.
+  window._wPointFacts=function(r,M){
+    var g=(M===1)?1:gcd(r,M);
+    var thRes=(((360*r/Math.max(1,M))%360)+360)%360;
+    var thCv=null, cvEl=document.getElementById('welcome-teaser');
+    if(cvEl&&_wHitPts.length){
+      var W=cvEl.clientWidth||536, H=cvEl.clientHeight||536;
+      for(var i=0;i<_wHitPts.length;i+=4){
+        if(_wHitPts[i+2]===r&&_wHitPts[i+3]===M){
+          var dx=_wHitPts[i]-W/2, dy=_wHitPts[i+1]-H/2;
+          if(_wView==='smith'&&_wsFlipScale<0)dx=-dx;
+          var a=Math.atan2(-dy,dx)*180/Math.PI-(_wRotSteps||0)*90;
+          thCv=((a%360)+360)%360; break;
+        }
+      }
+    }
+    var liftOK=null, liftFail=0;
+    if(g===1&&_wN>0){
+      liftOK=true;
+      for(var j=1;j<=_wN;j++){ if(gcd(r,M+j)!==1){ liftOK=false; liftFail=j; break; } }
+    }
+    var depth=-1;
+    try{ if(typeof _heroTrueDepth==='function') depth=_heroTrueDepth(r,M); }catch(e){}
+    return {r:r,M:M,gcd:g,thRes:thRes,thCv:thCv,depth:depth,
+            liftOK:liftOK,liftFail:liftFail,
+            chan:Math.max(1,Math.floor(M/Math.max(1,r))),
+            frac:r/Math.max(1,M)};
+  };
+
+  window._wRemovePin=function(r,M){
+    var i=_wPinnedPts.findIndex(function(p){return p.r===r&&p.M===M;});
+    if(i>=0)_wPinnedPts.splice(i,1);
+    if(_wInspectPt&&_wInspectPt.r===r&&_wInspectPt.M===M)_wInspectPt=null;
+    _wSyncPinCount();
+    if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+  };
+  // Clicking a row re-centres the canvas on that point without changing the
+  // selection — useful once the list is long enough to lose track.
+  window._wFocusPin=function(r,M){
+    for(var i=0;i<_wHitPts.length;i+=4){
+      if(_wHitPts[i+2]===r&&_wHitPts[i+3]===M){
+        _wInspectPt={r:r,M:M};
+        if(typeof _wZoomToWorldPoint==='function')_wZoomToWorldPoint(_wHitPts[i],_wHitPts[i+1],Math.max(_wZoom,3));
+        _wSyncPinCount();
+        if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+        return;
+      }
+    }
+  };
+  window._wCopyPinsCSV=function(btn){
+    var rows=['r,M,gcd,depth,theta_residue_deg,theta_canvas_deg,farey_channel,r_over_M,block_coprime_at_n'];
+    for(var i=0;i<_wPinnedPts.length;i++){
+      var f=window._wPointFacts(_wPinnedPts[i].r,_wPinnedPts[i].M);
+      rows.push([f.r,f.M,f.gcd,f.depth,f.thRes.toFixed(3),
+        (f.thCv==null?'':f.thCv.toFixed(3)),f.chan,f.frac.toFixed(6),
+        (f.liftOK===null?'':(f.liftOK?'yes':'no'))].join(','));
+    }
+    var txt=rows.join('\n');
+    try{
+      navigator.clipboard.writeText(txt);
+      if(btn){var o=btn.textContent;btn.textContent='copied';setTimeout(function(){btn.textContent=o;},1200);}
+    }catch(e){
+      if(btn){var o2=btn.textContent;btn.textContent='failed';setTimeout(function(){btn.textContent=o2;},1200);}
+    }
+  };
+
+  window._wRenderPinList=function(){
+    var host=document.getElementById('w-pins-list');
+    var badge=document.getElementById('w-pins-badge');
+    if(badge)badge.textContent=String(_wPinnedPts.length);
+    if(!host)return;
+    if(!_wPinnedPts.length){
+      host.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:7.5px;color:#6a6560;padding:4px 0;">'+
+        'No points selected. Tap any point on the canvas to add it; tap it again to remove it.</div>';
+      return;
+    }
+    var out=[];
+    for(var i=0;i<_wPinnedPts.length;i++){
+      var f=window._wPointFacts(_wPinnedPts[i].r,_wPinnedPts[i].M);
+      var col=window._wPinColor(i);
+      var lift = (f.liftOK===null)
+        ? '<span style="color:#6a6560;">lift n/a</span>'
+        : (f.liftOK
+            ? '<span style="color:#7ec87a;">lift ✓ j=1…'+_wN+'</span>'
+            : '<span style="color:#e05060;">lift ✗ at j='+f.liftFail+'</span>');
+      var gcdTxt=(f.gcd===1)
+        ? '<span style="color:#3dc8b8;">gcd=1</span>'
+        : '<span style="color:#e05060;">gcd='+f.gcd+'</span>';
+      out.push(
+        '<div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);">'+
+          '<span style="width:9px;height:9px;flex-shrink:0;margin-top:2px;background:'+col+';border-radius:50%;"></span>'+
+          '<div style="flex:1;min-width:0;cursor:pointer;" onclick="_wFocusPin('+f.r+','+f.M+')" title="Centre the canvas on this point">'+
+            '<div style="font-family:\'JetBrains Mono\',monospace;font-size:8.5px;color:'+col+';">('+f.r+', '+f.M+')'+
+              '<span style="color:#8a8478;"> · r/M='+f.frac.toFixed(6)+'</span></div>'+
+            '<div style="font-family:\'JetBrains Mono\',monospace;font-size:7.5px;color:#a8a294;line-height:1.55;">'+
+              gcdTxt+' · depth '+(f.depth<0?'—':f.depth)+' · '+lift+'<br>'+
+              'θ<sub>res</sub>='+f.thRes.toFixed(1)+'° · θ<sub>canvas</sub>='+(f.thCv==null?'—':f.thCv.toFixed(1)+'°')+
+              ' · Farey 1/'+f.chan+
+            '</div>'+
+          '</div>'+
+          '<button onclick="event.stopPropagation();_wRemovePin('+f.r+','+f.M+')" title="Remove this point"'+
+            ' style="background:none;border:1px solid rgba(224,80,96,.4);color:rgba(224,80,96,.8);'+
+            'font-family:\'JetBrains Mono\',monospace;font-size:8px;line-height:1;padding:2px 5px;cursor:pointer;flex-shrink:0;">×</button>'+
+        '</div>');
+    }
+    host.innerHTML=out.join('');
+  };
+
   window._wClearPinnedLabels=function(){
     _wPinnedPts=[];
+    _wInspectPt=null;
     var el=document.getElementById('w-pin-count'); if(el)el.textContent='';
+    if(typeof window._wRenderPinList==='function')window._wRenderPinList();
     if(typeof wRedrawCanvas==='function')wRedrawCanvas();
   };
   function _wSyncPinCount(){
+    if(typeof window._wRenderPinList==='function')window._wRenderPinList();
     var el=document.getElementById('w-pin-count');
     if(el)el.textContent=_wPinnedPts.length?(' ('+_wPinnedPts.length+')'):'';
   }
@@ -3907,6 +4181,13 @@ function heroToggleTopBars(){
     // When zooming in, keep G unchanged (we're magnifying the existing rings).
     // Smith never widens G regardless of zoom (see note above).
     var drawG=(_wView!=='smith'&&_wZoom<1)?Math.min(400,Math.round(G/_wZoom)):G;
+    // Mid-drag: cap the lattice so every intermediate frame is cheap. The
+    // settle pass 150ms after the last input runs with _wDragging false and
+    // therefore at the true G — this ONLY affects frames nobody stops on.
+    // Exports and the composite sheet never see this: they call the drawW*
+    // functions directly, not through here.
+    var _dc=(typeof window._wDragCap==='function')?window._wDragCap():0;
+    if(_dc&&drawG>_dc) drawG=_dc;
     _wHitPts.length=0; _wHitRec=true;
     var _sLbl=document.getElementById('ws-spiral-lbl'); if(_sLbl)_sLbl.textContent='';
     if(typeof window._wSecLblReset==='function')window._wSecLblReset();
@@ -3928,9 +4209,12 @@ function heroToggleTopBars(){
     // Highlight every pinned (tap-to-label) point in gold, distinct from the
     // single teal inspect ring above.
     if(_wPinnedPts.length){
-      ctx.strokeStyle='rgba(200,168,74,.95)'; ctx.lineWidth=2/_wZoom;
+      // One colour per pin, matching its swatch in the Selected Points list —
+      // a single gold for all of them made a list of eight unreadable.
+      ctx.lineWidth=2/_wZoom;
       for(var pj=0;pj<_wPinnedPts.length;pj++){
         var pr=_wPinnedPts[pj].r, pM=_wPinnedPts[pj].M;
+        ctx.strokeStyle=(typeof window._wPinColor==='function')?window._wPinColor(pj):'rgba(200,168,74,.95)';
         for(var hj=0;hj<_wHitPts.length;hj+=4){
           if(_wHitPts[hj+2]===pr&&_wHitPts[hj+3]===pM){
             ctx.beginPath();ctx.arc(_wHitPts[hj],_wHitPts[hj+1],7/_wZoom,0,Math.PI*2);ctx.stroke();
@@ -3974,6 +4258,71 @@ function heroToggleTopBars(){
 
   function isCoprime(r,M,n){
     for(var k=0;k<=n;k++){if(gcd(r,M+k)!==1)return false;}
+    return true;
+  }
+
+  // ══ ROW SIEVE ════════════════════════════════════════════════════════
+  //  isCoprime(r,M,n) costs up to (n+1) gcds PER LATTICE POINT, so a full
+  //  G=2048 sheet ran ~4.2M points x (n+1) gcd chains — measured at 0.5s
+  //  (n=0) climbing to 1.4s (n=16) for the arithmetic alone, before a single
+  //  dot is drawn. That is the freeze.
+  //
+  //  A whole row M can be decided at once instead: r fails gcd(r,M+k)=1 for
+  //  some k iff r is a multiple of some prime dividing one of M..M+n. So
+  //  factor those n+1 numbers once per row (smallest-prime-factor table),
+  //  then strike multiples into a byte mask. Cost per row is O(G x sum 1/p),
+  //  which is not only ~12-50x faster but FLAT in n (20-29ms total across
+  //  n=0..16, vs 501-1439ms). Verified to reproduce the gcd path exactly.
+  // ══ EXPORT INK SCALE ═════════════════════════════════════════════════
+  //  Several dot radii below are ABSOLUTE pixel constants tuned against the
+  //  ~536px live canvas (Ring 2px, Farey 1.8px, Smith 2.2px, plus the floors
+  //  in Grid and Gauss). A 4K panel is 1037-2117px wide, so those same
+  //  constants render 2-4x smaller RELATIVE to the frame — which is why the
+  //  exports read as dim and why the brightness slider could never fix it:
+  //  the problem was ink coverage, not luminance. _wPx() rescales every
+  //  absolute constant by the export scale (1 on the live canvas, so nothing
+  //  on screen changes), and _wExportDotScale is the user-facing knob.
+  var _wExportDotScale=1;
+  function _wPx(){
+    var e=(typeof _wExportScale!=='undefined'&&_wExportScale>0)?_wExportScale:1;
+    return e*_wExportDotScale;
+  }
+  window._wSetExportDotScale=function(v){ _wExportDotScale=Math.max(0.3,Math.min(4,+v||1)); };
+  var _wPxOwn=null;          // pixel-occupancy scratch for the grid dedupe
+  var _wSpf=null, _wSpfLim=0;
+  function _wEnsureSpf(lim){
+    if(_wSpf&&_wSpfLim>=lim) return;
+    _wSpfLim=Math.max(lim,2112);
+    _wSpf=new Int32Array(_wSpfLim+1);
+    for(var i=2;i<=_wSpfLim;i++){
+      if(!_wSpf[i]) for(var j=i;j<=_wSpfLim;j+=i){ if(!_wSpf[j])_wSpf[j]=i; }
+    }
+  }
+  function _wPrimesOf(x,out){
+    out.length=0;
+    while(x>1){ var p=_wSpf[x]; if(!p){out.push(x);break;} out.push(p); while(x%p===0)x=(x/p)|0; }
+    return out;
+  }
+  // Scratch buffers — reused across rows so a full sheet allocates nothing.
+  var _wMaskCop=null, _wMaskBlk=null, _wMaskLen=0;
+  var _wPfA=[], _wPfB=[], _wPfAll=[];
+  // Fills the two masks for row M. mask[r]=1 means the test passes.
+  //   cop[r] : gcd(r,M)===1
+  //   blk[r] : gcd(r,M+k)===1 for every k=0..n   (block-coprime at depth n)
+  function _wRowMasks(M,n,G){
+    if(_wMaskLen<G+2){ _wMaskLen=G+2; _wMaskCop=new Uint8Array(_wMaskLen); _wMaskBlk=new Uint8Array(_wMaskLen); }
+    _wEnsureSpf(G+n+2);
+    var cop=_wMaskCop, blk=_wMaskBlk, r, p, i, k;
+    cop.fill(1,0,G+1); blk.fill(1,0,G+1);
+    cop[0]=0; blk[0]=0;
+    if(M>1){ _wPrimesOf(M,_wPfA); for(i=0;i<_wPfA.length;i++){ p=_wPfA[i]; for(r=p;r<=G;r+=p) cop[r]=0; } }
+    _wPfAll.length=0;
+    for(k=0;k<=n;k++){
+      var v=M+k; if(v<2) continue;
+      _wPrimesOf(v,_wPfB);
+      for(i=0;i<_wPfB.length;i++){ p=_wPfB[i]; if(_wPfAll.indexOf(p)<0)_wPfAll.push(p); }
+    }
+    for(i=0;i<_wPfAll.length;i++){ p=_wPfAll[i]; for(r=p;r<=G;r+=p) blk[r]=0; }
     return true;
   }
 
@@ -4365,24 +4714,51 @@ function heroToggleTopBars(){
     // ~4M individual fill() calls (at G=2048) into a few hundred.
     var _gridBatch=new Map(); // color -> Path2D
     var _hitCap=200000; // tap-to-inspect precision is moot past this density anyway
+    // Sub-pixel dedupe. Past G~500 the cell is under a pixel wide, so the
+    // dots stop being separately visible and up to ~4.2M of them pile onto
+    // ~250K pixels — all that extra arc() work buys literally nothing on
+    // screen. Below the threshold nothing changes: the guard is off and the
+    // old path runs point for point. Block-coprime (gold) points win their
+    // pixel over plain-coprime ones so the structure stays legible rather
+    // than being whatever landed last.
+    var _dedupe=(cell<1);
+    var _pxW=0,_pxOwn=null;
+    if(_dedupe){
+      _pxW=Math.max(1,Math.ceil(side)+2);
+      var _need=_pxW*_pxW;
+      if(!_wPxOwn||_wPxOwn.length<_need)_wPxOwn=new Uint8Array(_need);
+      _pxOwn=_wPxOwn; _pxOwn.fill(0,0,_need);
+    }
+    var _mCop=null,_mBlk=null;
     for(var M=1;M<=G;M++){
       if(!_wRingActive(M))continue;
+      // One sieve pass decides the whole row — see _wRowMasks.
+      _wRowMasks(M,n,G); _mCop=_wMaskCop; _mBlk=_wMaskBlk;
       // Full G×G square (r=1..G for every M) by default — matches the hero
       // grid. With the "Half (diagonal)" toggle on, keep only the r<M
       // triangle above the bottom-left → top-right r=M diagonal.
       for(var r=1;r<=G;r++){
         if(_wGridHalf&&r>=M)continue;
-        var pureCop=gcd(r,M)===1;
+        var pureCop=_mCop[r]===1;
         if(!_wCharPass(pureCop))continue;
-        var ok=isCoprime(r,M,n);
+        var ok=_mBlk[r]===1;
         var rDisp=(r<M)?_wPerRingShiftedR(r,M,G,_wPerRing):r;
         // M increasing downward — matches the hero grid's y=originY+(mi+0.5)*cH
         // convention exactly (was previously inverted here, which is why the
         // opener grid read as vertically flipped / "rotated" next to the hero).
         var x=ox+(rDisp-0.5)*cell,y=oy+(M-0.5)*cell;
-        var radBase=Math.min(cell*0.45,Math.max(cell*0.28,0.9/_wZoom)); // never-overlap cap, ≥~1px on screen
+        var radBase=Math.min(cell*0.45*_wPx(),Math.max(cell*0.28,0.9*_wPx()/_wZoom)); // never-overlap cap, ≥~1px on screen
         var rad=Math.max(0.05,(ok?radBase:radBase*0.55)*_wCharSizeMul(pureCop));
         if(_wHitRec&&_wHitPts.length<_hitCap)_wHitPts.push(x,y,r,M);
+        if(_dedupe){
+          var _pi=((y-oy)|0)*_pxW+((x-ox)|0);
+          if(_pi>=0&&_pi<_pxOwn.length){
+            var _own=_pxOwn[_pi];
+            // 0 = free, 1 = taken by a non-block point, 2 = taken by a gold one
+            if(_own===2||(_own===1&&!ok))continue;
+            _pxOwn[_pi]=ok?2:1;
+          }
+        }
         var col=_wModColor(r,M,ok,pureCop);
         var gp=_gridBatch.get(col);
         if(!gp){gp=new Path2D();_gridBatch.set(col,gp);}
@@ -4399,7 +4775,7 @@ function heroToggleTopBars(){
       var sp=_wSectorPts[si];
       var spDisp=_wPerRingShiftedR(sp.r,sp.M,G,_wPerRing);
       var spx=ox+(spDisp-0.5)*cell,spy=oy+(sp.M-0.5)*cell;
-      var spRad=Math.min(cell*0.42,Math.max(cell*0.22,0.9/_wZoom))*_wSecDotScale;
+      var spRad=Math.min(cell*0.42*_wPx(),Math.max(cell*0.22,0.9*_wPx()/_wZoom))*_wSecDotScale;
       ctx.beginPath();ctx.arc(spx,spy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,spRad*1.7,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
@@ -4516,26 +4892,37 @@ function heroToggleTopBars(){
     // on top of the lift arcs/spirals and at full opacity were flattening
     // them out. Hit-testing (_wHitPts) still records at full fidelity.
     var _dimA=_wDynDimA('ring'); if(_dimA<1){ctx.save();ctx.globalAlpha=_dimA;}
+    // Batched exactly like the Grid view: one Path2D per distinct colour and
+    // one fill() each, instead of a beginPath/arc/fill per point. At G=2048
+    // this ring layout holds ~2.1M points, so the old per-point path issued
+    // ~2.1M fill() calls. Row masks replace the per-point gcd/isCoprime.
+    var _ringBatch=new Map();
+    var _ringHitCap=200000;
     for(var M=1;M<=rings;M++){
       if(!_wRingActive(M))continue;
       var Mx=_wRingInvert?(rings+1-M):M;
       var R=maxR*(Mx-1)/Math.max(1,rings-1);
       var extraRot=extraTurn*(M-1);
       var rStart=(M===1)?0:1, rEnd=(M===1)?0:M-1;
+      _wRowMasks(M,n,Math.max(1,rEnd));
+      var _rCop=_wMaskCop,_rBlk=_wMaskBlk;
       for(var r=rStart;r<=rEnd;r++){
-        var pureCop=(M===1)||gcd(r,M)===1;
+        var pureCop=(M===1)||_rCop[r]===1;
         if(!_wCharPass(pureCop))continue;
-        var ok=isCoprime(r,M,n);
+        var ok=(M===1)?true:_rBlk[r]===1;
         var theta=2*Math.PI*r/M+extraRot; // M=1,r=0 → theta=0°; M=2,r=1 → theta=180°
         var x=cx+R*Math.cos(theta);
         var y=cy-R*Math.sin(theta);
-        var rad=(ok?2:0.8)*_wCharSizeMul(pureCop);
-        if(_wHitRec)_wHitPts.push(x,y,r,M);
-        ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);
-        ctx.fillStyle=_wModColor(r,M,ok,pureCop);
-        ctx.fill();
+        var rad=(ok?2:0.8)*_wPx()*_wCharSizeMul(pureCop);
+        if(_wHitRec&&_wHitPts.length<_ringHitCap)_wHitPts.push(x,y,r,M);
+        var rcol=_wModColor(r,M,ok,pureCop);
+        var rp=_ringBatch.get(rcol);
+        if(!rp){rp=new Path2D();_ringBatch.set(rcol,rp);}
+        rp.moveTo(x+rad,y);
+        rp.arc(x,y,rad,0,Math.PI*2);
       }
     }
+    _ringBatch.forEach(function(path,col){ctx.fillStyle=col;ctx.fill(path);});
     if(_dimA<1){ctx.restore();}
     // Sector path — highlight traced points at their true ring position.
     // Reuses ringXY directly (not a separate radius calc) so it automatically
@@ -4544,7 +4931,7 @@ function heroToggleTopBars(){
       var sp=_wSectorPts[si];
       var spXY=ringXY(sp.r,sp.M);
       var spx=spXY[0],spy=spXY[1];
-      ctx.beginPath();ctx.arc(spx,spy,1.7*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
+      ctx.beginPath();ctx.arc(spx,spy,1.7*_wPx()*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,2.9*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,2.9*_wSecDotScale+3);
@@ -4565,24 +4952,31 @@ function heroToggleTopBars(){
       ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(W-pad,gy);ctx.stroke();
     });
     ctx.save();ctx.globalAlpha=_wDynDimA('farey');
+    var _fareyBatch=new Map();
+    var _fareyHitCap=200000;
     for(var M=1;M<=G;M++){
       if(!_wRingActive(M))continue;
       var yFrac=(M===1)?0:Math.log(M)/Math.log(G);
       var y=H-pad-(H-pad*2)*(1-yFrac);
       var rStart=(M===1)?0:1, rEnd=(M===1)?0:M-1;
+      _wRowMasks(M,n,Math.max(1,rEnd));
+      var _fCop=_wMaskCop,_fBlk=_wMaskBlk;
       for(var r=rStart;r<=rEnd;r++){
-        var pureCop=(M===1)||gcd(r,M)===1;
+        var pureCop=(M===1)||_fCop[r]===1;
         if(!_wCharPass(pureCop))continue;
-        var ok=isCoprime(r,M,n);
+        var ok=(M===1)?true:_fBlk[r]===1;
         var rDisp=(M===1)?0:_wPerRingShiftedR(r,M,M,_wPerRing); // wrap within this row's own modulus
         var x=pad+(W-pad*2)*(rDisp/M);
-        var farRad=(ok?1.8:0.7)*_wCharSizeMul(pureCop);
-        if(_wHitRec)_wHitPts.push(x,y,r,M);
-        ctx.beginPath();ctx.arc(x,y,farRad,0,Math.PI*2);
-        ctx.fillStyle=_wModColor(r,M,ok,pureCop);
-        ctx.fill();
+        var farRad=(ok?1.8:0.7)*_wPx()*_wCharSizeMul(pureCop);
+        if(_wHitRec&&_wHitPts.length<_fareyHitCap)_wHitPts.push(x,y,r,M);
+        var fcol=_wModColor(r,M,ok,pureCop);
+        var fp=_fareyBatch.get(fcol);
+        if(!fp){fp=new Path2D();_fareyBatch.set(fcol,fp);}
+        fp.moveTo(x+farRad,y);
+        fp.arc(x,y,farRad,0,Math.PI*2);
       }
     }
+    _fareyBatch.forEach(function(path,col){ctx.fillStyle=col;ctx.fill(path);});
     ctx.restore();
     // Sector path — highlight traced points at their true Farey position.
     for(var si=0;si<_wSectorPts.length;si++){
@@ -4591,7 +4985,7 @@ function heroToggleTopBars(){
       var spy=H-pad-(H-pad*2)*(1-spYFrac);
       var spDisp=_wPerRingShiftedR(sp.r,sp.M,sp.M,_wPerRing);
       var spx=pad+(W-pad*2)*(spDisp/sp.M);
-      ctx.beginPath();ctx.arc(spx,spy,1.5*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
+      ctx.beginPath();ctx.arc(spx,spy,1.5*_wPx()*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,2.5*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.2;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,2.5*_wSecDotScale+3);
@@ -4645,7 +5039,7 @@ function heroToggleTopBars(){
           var ok=coprime&&(n===0||_wBlockCoprime2D(rA,mA,n));
           var rAdisp=_wPerRingShiftedR(rA,mA,G,_wPerRing); // same twist as Grid — shears each row by (mA-1)×frac
           var x=(rAdisp-1+0.5)*cw, y=(mi+0.5)*cw;
-          var rad=Math.max(0.05,Math.max(0.6,cw*0.36)*_wCharSizeMul(coprime));
+          var rad=Math.max(0.05,Math.max(0.6*_wPx(),cw*0.36*_wPx())*_wCharSizeMul(coprime));
           if(!coprime) ctx.fillStyle='rgba(224,80,96,.78)'; // χ(r)=0 — clearly red, not the old near-invisible dim
           else if(_wColorMode!=='default'){
             ctx.fillStyle=_wModColor(rA,mA,ok,true); // reuse the shared palette so Gauss finally follows the Color dropdown too
@@ -4680,7 +5074,7 @@ function heroToggleTopBars(){
           var sp=_wSectorPts[si];
           var spRdisp=_wPerRingShiftedR(sp.r,sp.M,G,_wPerRing);
           var sx=(spRdisp-1+0.5)*cw, sy=(sp.M-1+0.5)*cw;
-          var spRad=Math.max(1,Math.min(2.2,cw*0.24))*_wSecDotScale;
+          var spRad=Math.max(1*_wPx(),Math.min(2.2*_wPx(),cw*0.24*_wPx()))*_wSecDotScale;
           ctx.beginPath();ctx.arc(sx,sy,spRad,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
           ctx.beginPath();ctx.arc(sx,sy,spRad*1.7,0,Math.PI*2);
           ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
@@ -4894,7 +5288,7 @@ function heroToggleTopBars(){
         var p=_conformalSmithPt(ringR,theta,R0);
         var px=cx+p.x,py=cy+p.y;
         if(px<-R0*0.05||px>W+R0*0.05||py<-R0*0.05||py>H+R0*0.05)continue;
-        var rad=(ok?2.2:0.7)*_wCharSizeMul(pureCop);
+        var rad=(ok?2.2:0.7)*_wPx()*_wCharSizeMul(pureCop);
         if(_wHitRec)_wHitPts.push(px,py,r,M);
         ctx.beginPath();ctx.arc(px,py,rad,0,Math.PI*2);
         ctx.fillStyle=_wModColor(r,M,ok,pureCop);
@@ -4911,7 +5305,7 @@ function heroToggleTopBars(){
       var spTheta=2*Math.PI*spDisp/sp.M+alpha;
       var spP=_conformalSmithPt(spRingR,spTheta,R0);
       var spx=cx+spP.x,spy=cy+spP.y;
-      ctx.beginPath();ctx.arc(spx,spy,1.8*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
+      ctx.beginPath();ctx.arc(spx,spy,1.8*_wPx()*_wSecDotScale,0,Math.PI*2);ctx.fillStyle=_wSectorColor(sp.s);ctx.fill();
       ctx.beginPath();ctx.arc(spx,spy,3.0*_wSecDotScale,0,Math.PI*2);
       ctx.strokeStyle=_wSectorColor(sp.s);ctx.lineWidth=1.3;ctx.stroke();
       _wDrawSecLabel(ctx,spx,spy,sp.r,sp.M,3.0*_wSecDotScale+3);
@@ -5059,8 +5453,17 @@ function heroToggleTopBars(){
       var wx=ux/(_wZoom*flip)+W/2;
       var wy=uy/_wZoom+H/2;
       var tol=Math.max(6,12/_wZoom),tol2=tol*tol;
+      // C(n)-admitted picking. Points that FAIL the block-coprime test at the
+      // current n are still drawn (dim), so they still sit in _wHitPts and
+      // still win the nearest-point race — which is why tapping near a gold
+      // point at n>0 so often grabbed a dark neighbour instead. With this on,
+      // they are simply not candidates. Costs one isCoprime per candidate and
+      // only when n>0, so at n=0 (nothing is excluded) the loop is untouched.
+      var _pk=document.getElementById('w-pin-cnonly');
+      var _cnOnly=(!_pk||_pk.checked)&&_wN>0;
       var best=-1,bd=Infinity;
       for(var i=0;i<_wHitPts.length;i+=4){
+        if(_cnOnly&&!isCoprime(_wHitPts[i+2],_wHitPts[i+3],_wN))continue;
         var dx=_wHitPts[i]-wx,dy=_wHitPts[i+1]-wy,d=dx*dx+dy*dy;
         if(d<bd){bd=d;best=i;}
       }
@@ -5072,8 +5475,11 @@ function heroToggleTopBars(){
         } else {
           _wPinnedPts.push({r:_wInspectPt.r,M:_wInspectPt.M});
           // Zoom in on the newly-pinned point so its neighborhood opens up —
-          // mirrors the hero's click-to-zoom-and-label behavior.
-          _wZoomToWorldPoint(wx,wy,Math.max(_wZoom,3));
+          // mirrors the hero's click-to-zoom-and-label behavior. Now opt-out:
+          // when you are collecting a dozen points across the canvas, having
+          // the view jump and re-centre on every single tap fights you.
+          var _zt=document.getElementById('w-pin-zoom');
+          if(!_zt||_zt.checked) _wZoomToWorldPoint(wx,wy,Math.max(_wZoom,3));
         }
         _wSyncPinCount();
       }
@@ -5287,6 +5693,194 @@ function heroToggleTopBars(){
     ]);
   };;
 
+  // ══ Opener MULTI-VIEW 4K composite ═══════════════════════════════════
+  //  Renders any subset of the five opener views into one sheet, each panel
+  //  with its own legend, sharing a single header/stat block and footer.
+  //  Lift dynamics are deliberately suppressed for every panel: the lift
+  //  overlay renders into ALL five views (see _wRingLift at the top of this
+  //  IIFE), so leaving it on would scribble the same arc bundle across every
+  //  panel and bury the thing each view is there to show.
+  var _wCompLegend={
+    smith:['Cayley Γ(z)=(z−1)/(z+1)','z=R·e^{iθ}, θ=2πr/M+α — Ring layout, Cayley-mapped'],
+    ring :['Ring','r on concentric ring M · angle 2πr/M · prime rings cleanest'],
+    grid :['Grid','cell (r,M) · gold density → D(n)=C(n)/ζ(2) as G→∞'],
+    farey:['Farey','x=r/M ∈ (0,1) · y=log(2/M)/log(2/G) · mediants between parents'],
+    gauss:['Gaussian Integers','a+bi lattice · octant 0≤b≤a, 8-fold symmetry']
+  };
+  // Row shapes by panel count — chosen so panels stay as large as possible
+  // and short rows sit centred rather than left-ragged.
+  var _wCompRows={1:[1],2:[2],3:[2,1],4:[2,2],5:[3,2]};
+
+  // One panel, drawn offscreen at `side` px. Mirrors _wRender4KInto's
+  // transform stack (rotation, Smith flip, export zoom) but drops pan —
+  // a composite panel is a fitted thumbnail, not the live viewport.
+  function _wCompPanel(view,side,n,drawG){
+    var oc=document.createElement('canvas'); oc.width=side; oc.height=side;
+    var c=oc.getContext('2d');
+    c.fillStyle='#04040d'; c.fillRect(0,0,side,side);
+    var savedScale=_wExportScale; _wExportScale=side/500;
+    var savedHit=_wHitPts.slice(), savedRec=_wHitRec;
+    _wHitPts.length=0; _wHitRec=true;
+    var fs=(view==='smith')?_wsFlipScale:1;
+    var z=(_wExportZoom||1);
+    c.save();
+    c.translate(side/2,side/2);
+    if(_wRotSteps)c.rotate(_wRotSteps*Math.PI/2);
+    c.scale(z*fs,z);
+    c.translate(-side/2,-side/2);
+    try{
+      if(view==='smith')      drawWSmith(c,side,side,n,drawG,_wSmithZoomOut);
+      else if(view==='ring')  drawWRing (c,side,side,n,drawG);
+      else if(view==='grid')  drawWGrid (c,side,side,n,drawG);
+      else if(view==='farey') drawWFarey(c,side,side,n,drawG);
+      else if(view==='gauss') drawWGauss(c,side,side,n,drawG);
+    }catch(e){}
+    _wHitRec=false;
+    if(window._wGoldbachActive&&typeof window._wDrawGoldbach==='function'){
+      try{ window._wDrawGoldbach(c,drawG); }catch(e){}
+    }
+    // Ring the inspected point in EVERY panel — the main reason to want a
+    // composite is watching one (r,M) sit in five different geometries.
+    try{ window._wDrawInspectMark(c,_wHitPts,side/500); }catch(e){}
+    c.restore();
+    _wHitPts.length=0; Array.prototype.push.apply(_wHitPts,savedHit); _wHitRec=savedRec;
+    _wExportScale=savedScale;
+    if(_wExportGain!==1){
+      var b=document.createElement('canvas'); b.width=side; b.height=side;
+      b.getContext('2d').drawImage(oc,0,0);
+      c.globalCompositeOperation='lighter';
+      var g=_wExportGain-1, steps=Math.ceil(Math.abs(g));
+      for(var i=0;i<steps;i++){ c.globalAlpha=Math.min(1,Math.abs(g)-i); c.drawImage(b,0,0); }
+      c.globalAlpha=1; c.globalCompositeOperation='source-over';
+    }
+    return oc;
+  }
+
+  window._wRenderComposite4KInto=function(ctx,SIZE){
+    var H=_makeExportHelpers(ctx,SIZE);
+    var G=_wG, n=_wN;
+    var sel=(window._wCompSel&&window._wCompSel.length)?window._wCompSel.slice(0,5):['grid'];
+    var Cn=(_wMode==='finite'?_wCnFin(n,_wPrimeK):_wCn(n)).toFixed(6);
+    var modeLabel=(_wMode==='finite')?('Finite p≤'+(_wPrimes[_wPrimeK-1]||'?')):'Asymptotic';
+
+    var footerH=Math.round(SIZE*0.036);
+    var ty=Math.round(SIZE*0.020);
+    ty=H.drawTag(ty);
+    ty=H.drawTitleRow(ty,'C(n) — '+sel.length+'-View Composite','');
+    ty=H.drawFormula(ty,'C(n) = ζ(2)·∏_p(1−min(n+1,p)/p²)');
+    ty=H.drawStatBoxes(ty,[
+      {label:'Views', val:String(sel.length), col:'rgba(155,127,232,.9)'},
+      {label:'G', val:String(G), col:'rgba(200,168,74,.9)'},
+      {label:'n', val:String(n), col:'rgba(155,127,232,.9)'},
+      {label:'C(n)', val:Cn, col:'rgba(200,168,74,.9)'},
+      ...((_wMode==='finite')?[{label:'Mode', val:modeLabel, col:'rgba(126,200,122,.9)'}]:[]),
+    ]);
+    ty=H.drawSeparator(ty);
+
+    // Shared colour key — identical semantics in every panel, so it is stated
+    // once up here instead of repeated five times underneath.
+    ty=H.drawFormula(ty,'Gold = block-coprime, gcd(r,M+j)=1 for j=0…'+n+'   ·   Teal = coprime only   ·   Dark = not coprime','rgba(200,168,74,.85)');
+
+    var subH=Math.round(SIZE*0.052);
+    var availH=SIZE-ty-subH-footerH;
+    var availW=SIZE-H.TX*2;
+    var rows=_wCompRows[sel.length]||[sel.length];
+    var R=rows.length;
+    var gap=Math.round(SIZE*0.012);
+    var capH0=0.11;                                  // legend strip, as a fraction of panel side
+    var maxCols=Math.max.apply(null,rows);
+    var side=Math.min(
+      Math.floor((availW-gap*(maxCols-1))/maxCols),
+      Math.floor(((availH-gap*(R-1))/R)/(1+capH0))
+    );
+    side=Math.max(40,side);
+    var capH=Math.round(side*capH0);
+    var blockH=R*(side+capH)+gap*(R-1);
+    var yTop=ty+Math.max(0,Math.floor((availH-blockH)/2));
+
+    // Lift off for the whole sheet, restored before we return.
+    var _liftWas=_wRingLift; _wRingLift=false;
+    var drawG=(_wZoom<1)?Math.min(400,Math.round(G/_wZoom)):G;
+
+    var idx=0;
+    for(var ri=0;ri<R;ri++){
+      var c=rows[ri];
+      var rowW=c*side+gap*(c-1);
+      var x0=H.TX+Math.floor((availW-rowW)/2);
+      var y0=yTop+ri*(side+capH+gap);
+      for(var ci=0;ci<c&&idx<sel.length;ci++,idx++){
+        var v=sel[idx];
+        var px=x0+ci*(side+gap);
+        var panel=_wCompPanel(v,side,n,drawG);
+        ctx.drawImage(panel,px,y0,side,side);
+        ctx.strokeStyle='rgba(200,168,74,.20)'; ctx.lineWidth=Math.max(1,SIZE*0.0008);
+        ctx.strokeRect(px,y0,side,side);
+        // Per-panel legend: name on the first line, what the axes mean below.
+        var L=_wCompLegend[v]||[v,''];
+        ctx.textAlign='left'; ctx.textBaseline='top';
+        var nameFs=Math.max(9,Math.round(side*0.052));
+        ctx.font='bold '+nameFs+'px "JetBrains Mono",monospace';
+        ctx.fillStyle='rgba(232,226,214,.92)';
+        ctx.fillText(L[0],px,y0+side+Math.round(capH*0.10));
+        var descFs=Math.max(7,Math.round(side*0.036));
+        ctx.font=descFs+'px "JetBrains Mono",monospace';
+        ctx.fillStyle='rgba(155,127,232,.80)';
+        var desc=L[1];
+        while(desc.length>4&&ctx.measureText(desc).width>side){ desc=desc.slice(0,-2); }
+        ctx.fillText(desc,px,y0+side+Math.round(capH*0.10)+Math.round(nameFs*1.35));
+      }
+    }
+    _wRingLift=_liftWas;
+
+    var cnts=_cnExportCounts(G,n);
+    var sy=yTop+blockH+Math.round(SIZE*0.012);
+    H.drawFormula(sy,'gcd=1: '+cnts.gcd1+'/'+cnts.total+' ('+(cnts.gcd1/Math.max(1,cnts.total)*100).toFixed(2)+'%)   ·   '+
+      'lift: '+cnts.lift+'/'+cnts.total+' ('+(cnts.lift/Math.max(1,cnts.total)*100).toFixed(2)+'%)   ·   '+
+      'lift/gcd=1: '+cnts.lift+'/'+cnts.gcd1+' ('+(cnts.lift/Math.max(1,cnts.gcd1)*100).toFixed(2)+'%)','rgba(126,200,122,.85)');
+
+    H.drawFooter(SIZE-footerH+Math.round(SIZE*0.004),[
+      ['rgba(155,127,232,.75)', sel.map(function(v){return _wCompLegend[v][0];}).join('  ·  ')+
+        '   —   G='+G+' · n='+n+' · C('+n+')='+Cn+((_wMode==='finite')?(' · '+modeLabel):'')],
+    ]);
+  };
+
+  var _wComp4KConfirmed=false;
+  window.wExportComposite4K=function(){
+    if(!_wComp4KConfirmed){
+      var sel=window._wCompSel||[];
+      _pxSetHead('Opener PNG — Multi-View Composite',
+        _wExportSize+' × '+_wExportSize+' · '+sel.length+' panel'+(sel.length===1?'':'s'),
+        [['G',String(_wG)],['n',String(_wN)],
+         ['Panels',String(sel.length)],
+         ['Brightness',(_wExportGain||1).toFixed(2)+'×'],
+         ['Output',(_wExportSize/1024).toFixed(0)+'K']]);
+      _pxShowViews(true); _pxShowGain(true); _pxShowRes(true); _pxShowZoom(true);
+      _pxFn=function(){ _wComp4KConfirmed=true; try{ window.wExportComposite4K(); } finally { _wComp4KConfirmed=false; } };
+      _pxReRender=function(){
+        var sub=document.getElementById('px-sub');
+        if(sub) sub.textContent=_wExportSize+' × '+_wExportSize+' · '+
+          (window._wCompSel||[]).length+' panel'+((window._wCompSel||[]).length===1?'':'s');
+        _pxRender(function(cv,PW){
+          var S=Math.max(320,Math.min(PW,900));
+          cv.width=S; cv.height=S;
+          var c=cv.getContext('2d');
+          c.fillStyle='#03030a'; c.fillRect(0,0,S,S);
+          window._wRenderComposite4KInto(c,S);
+        });
+      };
+      _pxReRender();
+      return;
+    }
+    var SIZE=_wExportSize;
+    var cv=document.createElement('canvas'); cv.width=SIZE; cv.height=SIZE;
+    var ctx=cv.getContext('2d');
+    ctx.fillStyle='#03030a'; ctx.fillRect(0,0,SIZE,SIZE);
+    window._wRenderComposite4KInto(ctx,SIZE);
+    var a=document.createElement('a');
+    a.download='cn_opener_composite_'+(window._wCompSel||[]).join('-')+'_G'+_wG+'_n'+_wN+'_'+(SIZE/1024).toFixed(0)+'K.png';
+    a.href=cv.toDataURL('image/png'); a.click();
+  };
+
   // ── Send to Hero — copies the opener's FULL current state onto the hero
   // section: view, G, n, color mode, per-ring twist, zoom, grid-half,
   // χ(r) filter + point sizes, active/custom rings, active gaps, and the
@@ -5435,10 +6029,11 @@ function heroToggleTopBars(){
     wRenderCn();
     if(typeof window._wOpeningSequence==='function')window._wOpeningSequence();
     if(typeof window._wMoveWorking==='function')window._wMoveWorking(true);
-    // Default sector path traced on load: 1/2, s=0 ray — draws once on the
-    // stable Smith open (the old objection was it appearing mid-snap; the
-    // snap itself is gone).
-    if(typeof window.wTraceSector==='function')window.wTraceSector();
+    if(typeof window._wRenderPinList==='function')window._wRenderPinList();
+    // Sector path now ships CLEARED on load — nothing is traced until the
+    // user picks a/b and presses Trace. (Previously 1/2, s=0 drew itself on
+    // the stable Smith open, which pre-loaded the opener with a path the
+    // reader never asked for and had to figure out how to dismiss.)
     // ▶ p now ships on by default (paired with Sync w/ C(n) defaulting on) —
     // unlike the general auto-animations above, this one is intentionally
     // left running; liftPPlay lives in a later script block but is a plain
@@ -7082,8 +7677,8 @@ function heroToggleTopBars(){
   <div class="cv-controls" id="grid-controls">
     <span class="cv-lbl">Grid G:</span>
     <button class="cv-btn" onclick="stepGridToPrimeSq(-1)" title="Previous prime² size (4,9,25,49,121…)" style="padding:2px 7px;font-size:11px;">◀p²</button>
-    <input class="cv-sl" type="range" id="grid-g" min="4" max="512" value="128" style="width:90px;" oninput="syncGridGInputs('sl');renderGrid();">
-    <input type="number" id="grid-g-num" min="4" max="2000" value="128" style="width:56px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:11px;padding:2px 5px;outline:none;text-align:center;" oninput="syncGridGInputs('num');renderGrid();">
+    <input class="cv-sl" type="range" id="grid-g" min="4" max="512" value="4" style="width:90px;" oninput="syncGridGInputs('sl');renderGrid();">
+    <input type="number" id="grid-g-num" min="4" max="2000" value="4" style="width:56px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:11px;padding:2px 5px;outline:none;text-align:center;" oninput="syncGridGInputs('num');renderGrid();">
     <button class="cv-btn" onclick="stepGridToPrimeSq(1)" title="Next prime² size (4,9,25,49,121…)" style="padding:2px 7px;font-size:11px;">▶p²</button>
     <div class="cv-sep"></div>
     <span class="cv-lbl">Grid n:</span>
@@ -7224,8 +7819,8 @@ function heroToggleTopBars(){
   </details>
   <div class="cv-controls">
     <span class="cv-lbl">Max M:</span>
-    <input class="cv-sl" type="range" id="ring-max" min="1" max="500" value="128" style="width:90px;" oninput="syncRingMInputs('sl');renderRing();">
-    <input type="number" id="ring-max-num" min="5" max="5000" value="128" style="width:56px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:11px;padding:2px 5px;outline:none;text-align:center;" oninput="syncRingMInputs('num');renderRing();">
+    <input class="cv-sl" type="range" id="ring-max" min="5" max="500" value="5" style="width:90px;" oninput="syncRingMInputs('sl');renderRing();">
+    <input type="number" id="ring-max-num" min="5" max="5000" value="5" style="width:56px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:11px;padding:2px 5px;outline:none;text-align:center;" oninput="syncRingMInputs('num');renderRing();">
     <div class="cv-sep"></div>
     <span class="cv-lbl">Dot size:</span>
     <input class="cv-sl" type="range" id="ring-dot" min="0.5" max="9" value="1" step=".5" style="width:70px;" oninput="document.getElementById('ring-dot-v').textContent=this.value;renderRing();">
@@ -7383,8 +7978,8 @@ function heroToggleTopBars(){
     <span class="cv-lbl" id="cube-n-v">1</span>
     <div class="cv-sep"></div>
     <span class="cv-lbl">Grid G:</span>
-    <input class="cv-sl" type="range" id="cube-g-sl" min="4" max="100" value="20" style="width:70px;" oninput="document.getElementById('cube-g-v').textContent=this.value;drawCube3D();">
-    <span class="cv-lbl" id="cube-g-v">20</span>
+    <input class="cv-sl" type="range" id="cube-g-sl" min="4" max="100" value="4" style="width:70px;" oninput="document.getElementById('cube-g-v').textContent=this.value;drawCube3D();">
+    <span class="cv-lbl" id="cube-g-v">4</span>
     <div class="cv-sep"></div>
     <span class="cv-lbl" style="color:var(--teal);">Color:</span>
     <select class="cv-sel" id="cube-col" onchange="drawCube3D()">
@@ -7582,9 +8177,9 @@ function heroToggleTopBars(){
   </div>
   <div class="cv-bar" style="flex-wrap:wrap;row-gap:6px;margin-bottom:8px;">
     <span class="cv-lbl">N max:</span>
-    <input class="cv-sl" type="range" id="add-nmax" min="100" max="20000" step="100" value="5000"
+    <input class="cv-sl" type="range" id="add-nmax" min="100" max="20000" step="100" value="100"
       style="width:90px;" oninput="document.getElementById('add-nmax-v').textContent=this.value;drawAdditiveGoldbach();">
-    <span class="cv-lbl" id="add-nmax-v">5000</span>
+    <span class="cv-lbl" id="add-nmax-v">100</span>
     <div class="cv-sep"></div>
     <label style="font-size:8.5px;color:var(--gold);display:flex;align-items:center;gap:4px;">
       <input type="checkbox" id="add-show-rn" checked onchange="drawAdditiveGoldbach()" style="accent-color:var(--gold);">R(N)
@@ -7614,9 +8209,9 @@ function heroToggleTopBars(){
   </div>
   <div class="cv-bar" style="flex-wrap:wrap;row-gap:6px;margin-bottom:8px;">
     <span class="cv-lbl">x max:</span>
-    <input class="cv-sl" type="range" id="add-pimax" min="100" max="100000" step="100" value="10000"
+    <input class="cv-sl" type="range" id="add-pimax" min="100" max="100000" step="100" value="100"
       style="width:90px;" oninput="document.getElementById('add-pimax-v').textContent=this.value;drawAdditivePi();">
-    <span class="cv-lbl" id="add-pimax-v">10000</span>
+    <span class="cv-lbl" id="add-pimax-v">100</span>
     <div class="cv-sep"></div>
     <label style="font-size:8.5px;color:var(--gold);display:flex;align-items:center;gap:4px;">
       <input type="checkbox" id="add-show-pi" checked onchange="drawAdditivePi()" style="accent-color:var(--gold);">π(x)
@@ -7643,9 +8238,9 @@ function heroToggleTopBars(){
   </div>
   <div class="cv-bar" style="flex-wrap:wrap;row-gap:6px;margin-bottom:8px;">
     <span class="cv-lbl">Primes:</span>
-    <input class="cv-sl" type="range" id="add-gapmax" min="20" max="1000" step="10" value="300"
+    <input class="cv-sl" type="range" id="add-gapmax" min="20" max="1000" step="10" value="20"
       style="width:90px;" oninput="document.getElementById('add-gapmax-v').textContent=this.value;drawAdditiveGaps();">
-    <span class="cv-lbl" id="add-gapmax-v">300</span>
+    <span class="cv-lbl" id="add-gapmax-v">20</span>
     <div class="cv-sep"></div>
     <label style="font-size:8.5px;color:var(--violet);display:flex;align-items:center;gap:4px;">
       <input type="checkbox" id="add-gap-maxima" checked onchange="drawAdditiveGaps()" style="accent-color:var(--violet);">Maximal gaps
@@ -7678,9 +8273,9 @@ function heroToggleTopBars(){
   </div>
   <div class="cv-controls" style="flex-wrap:wrap;row-gap:6px;margin-bottom:8px;">
     <span class="cv-lbl">G max:</span>
-    <input class="cv-sl" type="range" id="strip-gmax" min="10" max="2000" step="10" value="400"
+    <input class="cv-sl" type="range" id="strip-gmax" min="10" max="2000" step="10" value="10"
       style="width:100px;" oninput="document.getElementById('strip-gmax-v').textContent=this.value;drawStripAverage();">
-    <input type="number" id="strip-gmax-v" value="400" min="10" max="2000"
+    <input type="number" id="strip-gmax-v" value="10" min="10" max="2000"
       style="width:50px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:11px;padding:2px 4px;outline:none;text-align:center;"
       oninput="document.getElementById('strip-gmax').value=Math.max(10,Math.min(2000,+this.value||400));drawStripAverage();">
     <div class="cv-sep"></div>
@@ -21226,8 +21821,11 @@ function init(){
     if(!isNaN(_urlN)&&_urlN>=0) { setN(_urlN); } else { setN(0); }
   }catch(e){ setN(0); }
   drawConvergenceChart();
-  // Apply default G=31 after everything is initialized
-  heroLatticeSetG(31);
+  // Apply default G after everything is initialized. Ships at the slider
+  // minimum (2) so the index does no meaningful lattice work on first paint —
+  // this call, not the slider's value attribute, is what actually decides the
+  // landing state, which is why setting value="2" alone had no effect.
+  heroLatticeSetG(2);
   // heroSetView('smith') deferred — _drawHeroSmith is in a later script block
   // Just sync button/panel UI here; the rAF loop uses _heroViewMode directly
   (['grid','ring','farey','lift','gauss','smith']).forEach(m=>{
@@ -22368,7 +22966,50 @@ let _pxFn=null; let _pxReRender=null;
   function _pxShowGain(on){
     const r=document.getElementById('px-gain-row');
     if(r) r.style.display=on?'flex':'none';
+    const d=document.getElementById('px-dot-row');
+    if(d) d.style.display=on?'flex':'none';   // dot size travels with brightness
   }
+  window.pxSetDot=function(v){
+    const d=Math.max(0.3,Math.min(4,+v||1));
+    if(typeof window._wSetExportDotScale==='function') window._wSetExportDotScale(d);
+    const sl=document.getElementById('px-dot'), lbl=document.getElementById('px-dot-lbl');
+    if(sl) sl.value=Math.round(d*100);
+    if(lbl) lbl.textContent=d.toFixed(2)+'\u00d7';
+    if(_pxReRender) _pxReRender();
+  };
+  // Multi-view picker — only the composite export turns this on. Selection
+  // lives on window so the opener IIFE and this block share one source of
+  // truth; order is fixed (reading order of the view bar) so panel layout
+  // doesn't jump around as views are toggled on and off.
+  window._wCompOrder=['smith','ring','grid','farey','gauss'];
+  window._wCompSel=window._wCompSel||['grid','ring'];
+  function _pxShowViews(on){
+    const r=document.getElementById('px-views-row');
+    if(r) r.style.display=on?'flex':'none';
+    if(on) _pxSyncViewBtns();
+  }
+  function _pxSyncViewBtns(){
+    document.querySelectorAll('.px-view-btn').forEach(function(b){
+      b.classList.toggle('on', window._wCompSel.indexOf(b.dataset.v)>=0);
+    });
+    const l=document.getElementById('px-views-lbl');
+    if(l) l.textContent=window._wCompSel.length+' view'+(window._wCompSel.length===1?'':'s');
+  }
+  window.pxToggleView=function(v){
+    const i=window._wCompSel.indexOf(v);
+    if(i>=0){
+      if(window._wCompSel.length<=1) return;   // never let the sheet go empty
+      window._wCompSel.splice(i,1);
+    } else {
+      window._wCompSel.push(v);
+      // keep the fixed reading order regardless of click order
+      window._wCompSel.sort(function(a,b){
+        return window._wCompOrder.indexOf(a)-window._wCompOrder.indexOf(b);
+      });
+    }
+    _pxSyncViewBtns();
+    if(_pxReRender) _pxReRender();
+  };
 
 function closePX(){
   document.getElementById('px-overlay').classList.remove('open');
@@ -22982,6 +23623,15 @@ function drawStripAverage(overrideG,overrideW){
         <canvas id="px-cv"></canvas>
         <div class="px-spin" id="px-spin"><span class="px-spin-txt">Rendering preview…</span></div>
       </div>
+      <div class="px-note" id="px-views-row" style="display:none;align-items:center;gap:7px;justify-content:center;flex-wrap:wrap;">
+        <span style="color:#9b7fe8;">Views</span>
+        <button class="px-view-btn" data-v="smith" onclick="pxToggleView('smith')">Cayley</button>
+        <button class="px-view-btn" data-v="ring"  onclick="pxToggleView('ring')">Ring</button>
+        <button class="px-view-btn" data-v="grid"  onclick="pxToggleView('grid')">Grid</button>
+        <button class="px-view-btn" data-v="farey" onclick="pxToggleView('farey')">Farey</button>
+        <button class="px-view-btn" data-v="gauss" onclick="pxToggleView('gauss')">Gauss</button>
+        <span id="px-views-lbl" style="color:#9b7fe8;min-width:64px;">2 views</span>
+      </div>
       <div class="px-note" id="px-res-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
         <span style="color:#c8a84a;">Output size</span>
         <button class="px-res-btn" data-s="2048" onclick="pxSetRes(2048)">2K</button>
@@ -23000,6 +23650,16 @@ function drawStripAverage(overrideG,overrideW){
           color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;">Fit</button>
         <button onclick="pxSetZoom(1)" style="background:none;border:1px solid rgba(200,168,74,.35);
           color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;">1:1</button>
+      </div>
+      <div class="px-note" id="px-dot-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <span style="color:#c8a84a;">Dot size</span>
+        <input type="range" id="px-dot" min="30" max="400" step="5" value="100"
+          style="width:150px;accent-color:#c8a84a;"
+          title="Scales every plotted point. Export dots are already rescaled to match the live canvas — this is on top of that, for when a sparse lattice needs more ink."
+          oninput="pxSetDot(this.value/100)">
+        <span id="px-dot-lbl" style="color:#c8a84a;min-width:38px;">1.00&times;</span>
+        <button onclick="pxSetDot(1)" style="background:none;border:1px solid rgba(200,168,74,.35);
+          color:#c8a84a;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;">Reset</button>
       </div>
       <div class="px-note" id="px-gain-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
         <span style="color:#c8a84a;">Canvas brightness</span>
