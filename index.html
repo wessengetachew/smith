@@ -64,34 +64,24 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
   width:100%;display:flex;align-items:center;gap:0;flex-wrap:wrap;
 }
 #nbar::-webkit-scrollbar{display:none;}
-/* ── Canvas / whole-opener fullscreen — applies at ALL widths now (this used
-     to be mobile-only, which is why desktop fullscreen previously just
-     stretched the wrapper full-screen while the canvas itself stayed pinned
-     at a tiny fixed height). Mobile gets a shorter canvas override below so
-     there's still room for the touch controls underneath. ── */
-#welcome-card:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;overflow:auto;display:block;}
-#welcome-card:-webkit-full-screen{width:100vw;height:100vh;max-width:none;max-height:none;overflow:auto;display:block;}
-#welcome-teaser-wrap:fullscreen{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#04040d;width:100vw;height:100vh;overflow-y:auto;padding:8px 0 24px;box-sizing:border-box;}
-#welcome-teaser-wrap:fullscreen #welcome-teaser{width:min(94vw,62vh,900px)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto 8px!important;flex-shrink:0;position:sticky;top:0;z-index:5;background:#04040d;}
-#welcome-teaser-wrap:-webkit-full-screen{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#04040d;width:100vw;height:100vh;overflow-y:auto;padding:8px 0 24px;box-sizing:border-box;}
-#welcome-teaser-wrap:-webkit-full-screen #welcome-teaser{width:min(94vw,62vh,900px)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto 8px!important;flex-shrink:0;position:sticky;top:0;z-index:5;background:#04040d;}
-/* Hiding controls now actually grows the canvas into the freed space —
-   without that, the hide button would be pointless since the canvas
-   already stays pinned at top and controls scroll independently below it. */
-#welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{width:min(94vw,92vh,1100px)!important;}
-/* #wfs-ctrl-bar only ever holds the moved-in formula/view/n/G rows + the
-   Hide button — it's a fullscreen-overlay convenience, not needed inline. */
-#wfs-ctrl-bar{display:none;}
-#welcome-teaser-wrap:fullscreen #wfs-ctrl-bar,#welcome-teaser-wrap:-webkit-full-screen #wfs-ctrl-bar{display:flex;}
-/* Collapse toggle for the fullscreen control stack — sits pinned beside the
-   lock/exit icons at the top of the canvas so it's reachable WITHOUT
-   scrolling past the whole moved-in control stack first (unlike the old
-   "Hide" button, which lands at the bottom of that stack once it fills up). */
-#wfs-collapse-btn{display:none;}
-#welcome-teaser-wrap:fullscreen #wfs-collapse-btn,#welcome-teaser-wrap:-webkit-full-screen #wfs-collapse-btn{display:flex;}
-/* Rows moved in here keep their page widths, which overflow a phone in
-   fullscreen — every control must stay reachable, so wrap and clamp. */
-#wfs-ctrl-bar>*{max-width:100%;box-sizing:border-box;}
+/* ── Canvas / whole-opener fullscreen — mirrors the opener exactly: no
+     rows get relocated into a separate bar, everything just stays where it
+     already lives on the page. The one thing fullscreen changes is that the
+     canvas locks to the top of the screen (position:sticky) so it stays in
+     view while every control below it scrolls normally underneath —
+     nothing else overlays or covers it. ── */
+#welcome-card:fullscreen{width:100vw;height:100vh;max-width:none;max-height:none;overflow-y:auto;display:block;padding:14px;box-sizing:border-box;background:#04040d;}
+#welcome-card:-webkit-full-screen{width:100vw;height:100vh;max-width:none;max-height:none;overflow-y:auto;display:block;padding:14px;box-sizing:border-box;background:#04040d;}
+#welcome-card:fullscreen #welcome-teaser-wrap,#welcome-card:-webkit-full-screen #welcome-teaser-wrap{
+  position:sticky;top:0;z-index:30;background:#04040d;padding-top:4px;margin:0 auto 10px;
+}
+#welcome-card:fullscreen #welcome-teaser,#welcome-card:-webkit-full-screen #welcome-teaser{
+  width:min(94vw,62vh,900px)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto!important;display:block;
+}
+/* The old fullscreen-only control bar + row-relocation + Hide/Show system is
+   retired entirely — it's what used to strand controls off-screen with no
+   way back. Anything left over from it stays permanently out of the way. */
+#wfs-ctrl-bar,#wfs-collapse-btn,#wfs-show-btn{display:none!important;}
 /* ── Control rows: grow to fill, so wrapping never strands a lone button
    beside half a row of empty space. min-width:0 lets them shrink below
    their intrinsic text width instead of forcing an early wrap. ── */
@@ -100,10 +90,6 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
 .w-ctl-grp{display:inline-flex;align-items:center;gap:5px;min-width:0;flex:1 1 200px;}
 .w-ctl-grp>select{flex:1 1 auto;min-width:0;}
 .w-ctl-grp>span:first-child{flex:0 0 auto;white-space:nowrap;}
-#wfs-ctrl-bar select,#wfs-ctrl-bar input[type=range]{max-width:100%;min-width:0;}
-@media(max-width:700px){
-  #wfs-ctrl-bar{width:96vw!important;padding:8px 9px!important;}
-}
 
 /* ── In-page canvas lock (opt-in, no native fullscreen needed): pins the
    preview canvas near the top of the viewport so it stays visible while the
@@ -124,17 +110,7 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
   #nb-stat-compact{display:flex !important;}
   #nb-row1,#nb-row2{flex-wrap:wrap;height:auto;row-gap:6px;padding:4px 0;}
   #finite-panel{flex-wrap:wrap;row-gap:4px;}
-  #welcome-teaser-wrap:fullscreen #welcome-teaser,#welcome-teaser-wrap:-webkit-full-screen #welcome-teaser{width:min(94vw,44vh)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto!important;position:sticky;top:0;z-index:5;}
-  /* Fullscreen is for working the parameters, not just looking: the formula
-     block, n row and G row have to be reachable WITHOUT scrolling the canvas
-     off. Tighten their vertical rhythm rather than shrinking the canvas
-     further — Hide controls still gives the canvas the whole screen. */
-  #wfs-ctrl-bar{gap:4px!important;padding:7px 9px!important;}
-  #wfs-ctrl-bar #welcome-cn-block{margin:0!important;}
-  #wfs-ctrl-bar .wf-digits,#wfs-ctrl-bar #wf-digits{font-size:15px!important;letter-spacing:.02em!important;}
-  #welcome-teaser-wrap:fullscreen #ws-g-row,#welcome-teaser-wrap:-webkit-full-screen #ws-g-row,
-  #welcome-teaser-wrap:fullscreen #welcome-n-row,#welcome-teaser-wrap:-webkit-full-screen #welcome-n-row{margin:2px 0!important;}
-  #welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{width:min(94vw,75vh)!important;}
+  #welcome-card:fullscreen #welcome-teaser,#welcome-card:-webkit-full-screen #welcome-teaser{width:min(94vw,44vh)!important;height:auto!important;aspect-ratio:1/1!important;margin:0 auto!important;}
   #ws-zoom-ctrl{flex-wrap:wrap;row-gap:6px;}
 }
 #nb-row1,#nb-row2{
@@ -1087,7 +1063,6 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
   #hero-view-bar{position:sticky;top:0;z-index:60;backdrop-filter:blur(4px);}
   #hero-canvas-fs-wrap:fullscreen #hero-view-bar,
   #hero-canvas-fs-wrap:-webkit-full-screen #hero-view-bar{position:static;backdrop-filter:none;}
-  #ws-view-row{position:sticky;top:0;z-index:50;background:rgba(7,7,26,.94);backdrop-filter:blur(4px);padding:4px 0;}
   #ws-view-row button,#hero-view-bar button{min-height:30px;min-width:38px;}
   button[onclick^="wGapStep"],button[onclick^="heroGapStep"],#w-gap-play,#hero-gap-play{
     width:28px!important;height:28px!important;font-size:12px!important;}
@@ -1119,7 +1094,7 @@ function heroToggleTopBars(){
     <div id="welcome-glow"></div>
     <div id="welcome-head">
       <div id="welcome-eyebrow">Block-Coprime Density</div>
-      <button id="welcome-fs-page-btn" onclick="wToggleOpenerFullscreen()" title="Fullscreen the whole opener"
+      <button id="welcome-fs-page-btn" onclick="wToggleOpenerFullscreen()" title="Toggle fullscreen"
         style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.75);font-size:12px;width:22px;height:22px;cursor:pointer;border-radius:2px;margin-right:6px;">⛶</button>
       <button id="welcome-x" onclick="window.closeWelcome()" aria-label="Close">×</button>
     </div>
@@ -1541,14 +1516,11 @@ function heroToggleTopBars(){
       <canvas id="welcome-teaser" width="900" height="900" style="display:block;width:100%;aspect-ratio:1/1;max-width:min(64vh,536px);height:auto;margin:2px auto 12px;border-radius:2px;animation:wgFadeUp .7s .4s both;"></canvas>
       <button id="welcome-lock-btn" onclick="wToggleCanvasLock()" title="Pin the canvas to the top of the screen so you can scroll through the controls below while still seeing it"
         style="position:absolute;top:6px;right:34px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(6,6,20,.7);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-size:11px;cursor:pointer;border-radius:2px;z-index:2;">📌</button>
-      <button id="welcome-fs-btn" onclick="wToggleFullscreen()" title="Toggle fullscreen"
-        style="position:absolute;top:6px;right:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(6,6,20,.7);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-size:12px;cursor:pointer;border-radius:2px;z-index:2;">⛶</button>
-      <!-- Collapses/reopens the whole moved-in control stack below the canvas
-           while in canvas fullscreen — same action as the "Hide" button inside
-           wfs-ctrl-bar, just pinned up here so it's reachable at a glance
-           instead of after scrolling past every control row. -->
-      <button id="wfs-collapse-btn" onclick="wToggleHideControls()" title="Collapse controls below"
-        style="position:absolute;top:6px;right:62px;width:22px;height:22px;align-items:center;justify-content:center;background:rgba(6,6,20,.7);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-size:11px;cursor:pointer;border-radius:2px;z-index:2;">▾</button>
+      <!-- The one fullscreen control lives at the top of the card
+           (welcome-fs-page-btn) and fullscreens the whole opener, mirroring
+           its normal layout exactly — a second, canvas-only fullscreen
+           button used to live here too, which is what caused two different
+           (and inconsistent) fullscreen behaviors. Removed. -->
       <!-- Lattice size G — moved here (above zoom) so it stays reachable in
            fullscreen too, same as the zoom control right below it. -->
       <div id="ws-g-row" style="display:flex;align-items:center;gap:6px;margin:8px 0 2px;flex-wrap:wrap;">
@@ -1649,18 +1621,9 @@ function heroToggleTopBars(){
         <button id="ws-smith-zoomout-8" onclick="wSmithSetZoomOut(8)" style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;">8×</button>
       </div>
 
-      <!-- Populated only while in canvas fullscreen: the formula/view/n/G
-           controls get moved in here (not cloned) so they stay usable while
-           fullscreen, then moved back to their normal spots on exit. -->
-      <div id="wfs-ctrl-bar" style="flex-direction:column;gap:6px;width:min(94vw,520px);padding:10px 14px;background:rgba(6,6,20,.92);border:1px solid rgba(200,168,74,.25);border-radius:4px;">
-        <div id="wfs-btn-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <button onclick="wToggleHideControls()" title="Hide controls"
-            style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 9px;cursor:pointer;margin-left:auto;">Hide</button>
-        </div>
-      </div>
-      <!-- Always-visible tab to bring controls back after hiding (canvas fullscreen only) -->
-      <button id="wfs-show-btn" onclick="wToggleHideControls()" title="Show controls"
-        style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(6,6,20,.8);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 12px;cursor:pointer;border-radius:3px;z-index:3;">Show controls</button>
+      <!-- The fullscreen-only control bar, its Hide button, and the
+           Show-controls tab are retired — fullscreen no longer relocates
+           anything, so there's nothing left to hide or show. -->
     </div>
 
     <!-- ══ SELECTED POINTS — every tapped (r,M), with its facts ══
@@ -2668,18 +2631,6 @@ function heroToggleTopBars(){
     }
   };
 
-  window.wToggleFullscreen=function(){
-    var wrap=document.getElementById('welcome-teaser-wrap');
-    if(!wrap)return;
-    var isFs=document.fullscreenElement||document.webkitFullscreenElement;
-    if(!isFs){
-      var req=wrap.requestFullscreen||wrap.webkitRequestFullscreen;
-      if(req){var p=req.call(wrap);if(p&&p.catch)p.catch(function(){});}
-    } else {
-      var exit=document.exitFullscreen||document.webkitExitFullscreen;
-      if(exit){var p2=exit.call(document);if(p2&&p2.catch)p2.catch(function(){});}
-    }
-  };
   // Pin the canvas near the top of the viewport in normal page flow (no
   // native fullscreen required) so it stays visible while the control
   // panels below it scroll past underneath — mirrors the hero's fullscreen
@@ -2697,85 +2648,21 @@ function heroToggleTopBars(){
       wrap.style.setProperty('--wcv-lock-top','8px');
     }
   };
+  // ── Fullscreen now mirrors the opener exactly: #welcome-card (the whole
+  // opener) is the only fullscreen target, and nothing ever gets moved out
+  // of its normal position. CSS alone locks the canvas to the top of the
+  // screen (position:sticky on #welcome-teaser-wrap, scoped to
+  // #welcome-card:fullscreen) while every control scrolls underneath it —
+  // see the stylesheet near the top of <head>. This JS only needs to keep
+  // the fullscreen icon in sync and force a canvas resize.
   function _wFsChangeHandler(){
     var cv=document.getElementById('welcome-teaser');
-    var btn=document.getElementById('welcome-fs-btn');
-    var wrap=document.getElementById('welcome-teaser-wrap');
-    var bar=document.getElementById('wfs-ctrl-bar');
+    var btn=document.getElementById('welcome-fs-page-btn');
+    var card=document.getElementById('welcome-card');
     var isFs=document.fullscreenElement||document.webkitFullscreenElement;
-    // Some engines report an ancestor rather than the exact element passed to
-    // requestFullscreen, in which case strict identity is false and not one
-    // control ever moves — the canvas goes fullscreen alone.
-    var canvasFs=!!isFs&&(isFs===wrap||(isFs.contains&&isFs.contains(wrap)&&isFs!==document.documentElement));
-    if(btn)btn.textContent=canvasFs?'⤬':'⛶';
-    // Relocate the formula/view/n/G control rows so they're still usable while
-    // the canvas itself is fullscreen (fullscreen only shows the element + its
-    // descendants, so controls left outside #welcome-teaser-wrap would
-    // otherwise be unreachable). Moved, not cloned — single source of truth.
-    var btnRow=document.getElementById('wfs-btn-row');
-    // Formula + view-select rows go ABOVE the spin/flip/zoom button row
-    var topRows=[
-      // ── reached first: what you adjust while watching the lattice ──
-      ['ws-view-row','wfs-anchor-view'],              // view picker + Link / 4K / 4K-multi / Send to Hero
-      ['w-colorlabel-row','wfs-anchor-colorlabel'],   // Color, Label, label size, C(n) lock, pins
-      ['w-pins-dd','wfs-anchor-pins'],                // Selected Points list + CSV
-      ['w-ringlift-ctrl','wfs-anchor-ringlift'],
-      ['w-grid-plot-ctrl','wfs-anchor-gridplot'],
-      ['ws-perring-dd','wfs-anchor-perring'],
-      ['ws-smith-ctrl','wfs-anchor-smithctrl'],
-      // ── setup / one-off panels sink below ──
-      ['welcome-cn-block','wfs-anchor-formula'],
-      ['ws-mode-row','wfs-anchor-mode'],
-      ['wm-finite-panel','wfs-anchor-finite'],
-      ['ws-sector-ctrl','wfs-anchor-sector'],
-      ['ws-gaps-dd','wfs-anchor-gaps'],
-      ['ws-goldbach-dd','wfs-anchor-goldbach'],
-      ['hero-working-dd','wfs-anchor-working'],
-      ['w-adv-section','wfs-anchor-adv']
-    ];
-    // Per-row try/catch: a single throwing insertBefore used to abort the whole
-    // forEach, silently stranding every row after it outside the fullscreened
-    // element. That fails in the worst way — the rows still exist, they are
-    // just unreachable — so no one row is allowed to take the others down.
-    var _fsFailed=[];
-    topRows.forEach(function(pair){
-      var row=document.getElementById(pair[0]);
-      var anchor=document.getElementById(pair[1]);
-      if(!row||!anchor)return;
-      try{
-        if(canvasFs&&bar){ bar.insertBefore(row,btnRow||bar.firstChild); }
-        else if(anchor.parentNode){ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
-      }catch(e){ _fsFailed.push(pair[0]); }
-    });
-    // Verify rather than assume: anything that did not actually land in the bar
-    // gets appended outright. Being in the wrong order beats being invisible.
-    if(canvasFs&&bar){
-      topRows.forEach(function(pair){
-        var row=document.getElementById(pair[0]);
-        if(row&&row.parentNode!==bar){
-          try{ bar.appendChild(row); }catch(e){}
-        }
-      });
-    }
-    // n row goes DIRECTLY below the canvas, above the G slider row
-    (function(){
-      var row=document.getElementById('welcome-n-row');
-      var anchor=document.getElementById('wfs-anchor-n');
-      var gRow=document.getElementById('ws-g-row');
-      if(!row||!anchor)return;
-      if(canvasFs&&gRow&&gRow.parentNode){ gRow.parentNode.insertBefore(row,gRow); }
-      else if(anchor.parentNode){ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
-    })();
+    var cardFs=!!isFs&&(isFs===card||(isFs.contains&&isFs.contains(card)&&isFs!==document.documentElement));
+    if(btn)btn.textContent=cardFs?'⤬':'⛶';
     if(cv){cv._W=0;cv._H=0;} // force size recalc on next redraw
-    // Reset hide/show state each time canvas fullscreen is entered/exited
-    var showBtn=document.getElementById('wfs-show-btn');
-    var zoomRow=document.getElementById('ws-zoom-ctrl');
-    if(bar)bar.style.display=canvasFs?'flex':'none';
-    if(zoomRow)zoomRow.style.display='flex';
-    if(showBtn)showBtn.style.display='none';
-    if(wrap)wrap.classList.remove('wfs-controls-hidden');
-    var collapseBtn=document.getElementById('wfs-collapse-btn');
-    if(collapseBtn){collapseBtn.textContent='▾';collapseBtn.title='Collapse controls below';}
     wRedrawCanvas();
   }
   document.addEventListener('fullscreenchange',_wFsChangeHandler);
@@ -4467,30 +4354,11 @@ function heroToggleTopBars(){
   // (which call the local closure copy directly) ever trigger a redraw.
   window.wRedrawCanvas=wRedrawCanvas;
 
-  // ── Canvas fullscreen: hide/show the control bar (+ zoom row) ──
-  window.wToggleHideControls=function(){
-    if(typeof window._wSyncViewOptsMini==='function'){ try{ window._wSyncViewOptsMini(); }catch(e){} }
-    var bar=document.getElementById('wfs-ctrl-bar');
-    var zoomRow=document.getElementById('ws-zoom-ctrl');
-    var szRow=document.getElementById('ws-smith-zoomout-ctrl');
-    var showBtn=document.getElementById('wfs-show-btn');
-    var wrap=document.getElementById('welcome-teaser-wrap');
-    var cv=document.getElementById('welcome-teaser');
-    if(!bar||!showBtn)return;
-    var hidden=bar.style.display==='none';
-    var collapseBtn=document.getElementById('wfs-collapse-btn');
-    if(hidden){
-      bar.style.display='flex';if(zoomRow)zoomRow.style.display='flex';if(szRow&&_wView==='smith')szRow.style.display='flex';showBtn.style.display='none';
-      if(wrap)wrap.classList.remove('wfs-controls-hidden');
-      if(collapseBtn){collapseBtn.textContent='▾';collapseBtn.title='Collapse controls below';}
-    }else{
-      bar.style.display='none';if(zoomRow)zoomRow.style.display='none';if(szRow)szRow.style.display='none';showBtn.style.display='block';
-      if(wrap)wrap.classList.add('wfs-controls-hidden'); // grows the canvas into the freed space (see CSS)
-      if(collapseBtn){collapseBtn.textContent='▸';collapseBtn.title='Show controls below';}
-    }
-    if(cv){cv._W=0;cv._H=0;} // canvas's actual pixel size changed — force recalc on next redraw
-    wRedrawCanvas();
-  };
+  // ── Retired: fullscreen no longer moves controls into a separate bar or
+  // hides them (see _wFsChangeHandler), so there's nothing left to
+  // collapse/restore. Kept as a harmless no-op in case anything stale still
+  // calls it (e.g. a cached page or an old deep link).
+  window.wToggleHideControls=function(){};
 
 
 
