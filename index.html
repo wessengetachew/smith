@@ -2754,7 +2754,13 @@ function heroToggleTopBars(){
     // Some engines report an ancestor rather than the exact element passed to
     // requestFullscreen, in which case strict identity is false and not one
     // control ever moves — the canvas goes fullscreen alone.
-    var canvasFs=!!isFs&&(isFs===wrap||(isFs.contains&&isFs.contains(wrap)&&isFs!==document.documentElement));
+    // STRICT identity, and it has to stay strict. The relaxed "an ancestor
+    // counts too" test was written when the wrap was the only fullscreen
+    // target; now that #welcome-card can also go fullscreen, an ancestor
+    // check matches the CARD as well — which relocated all 15 control rows
+    // into the canvas bar during whole-opener fullscreen and scrambled the
+    // page layout. Only the wrap itself is canvas fullscreen.
+    var canvasFs=(isFs===wrap);
     if(btn)btn.textContent=canvasFs?'⤬':'⛶';
     // Relocate the formula/view/n/G control rows so they're still usable while
     // the canvas itself is fullscreen (fullscreen only shows the element + its
@@ -2786,15 +2792,31 @@ function heroToggleTopBars(){
     // element. That fails in the worst way — the rows still exist, they are
     // just unreachable — so no one row is allowed to take the others down.
     var _fsFailed=[];
-    topRows.forEach(function(pair){
-      var row=document.getElementById(pair[0]);
-      var anchor=document.getElementById(pair[1]);
-      if(!row||!anchor)return;
-      try{
-        if(canvasFs&&bar){ bar.insertBefore(row,btnRow||bar.firstChild); }
-        else if(anchor.parentNode){ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
-      }catch(e){ _fsFailed.push(pair[0]); }
-    });
+    // Only ever RESTORE rows we actually relocated. The old code ran the
+    // restore branch on every fullscreenchange, so entering CARD fullscreen
+    // (canvasFs=false) yanked rows to their anchors even though nothing had
+    // been moved. Three anchors are no longer adjacent to their rows after
+    // the panel restructure — ws-view-row, ws-gaps-dd and hero-working-dd —
+    // so that "restore" was a genuine reorganisation of the page.
+    if(canvasFs&&bar){
+      topRows.forEach(function(pair){
+        var row=document.getElementById(pair[0]);
+        var anchor=document.getElementById(pair[1]);
+        if(!row||!anchor)return;
+        try{ bar.insertBefore(row,btnRow||bar.firstChild); }
+        catch(e){ _fsFailed.push(pair[0]); }
+      });
+      window._wRowsRelocated=true;
+    } else if(window._wRowsRelocated){
+      topRows.forEach(function(pair){
+        var row=document.getElementById(pair[0]);
+        var anchor=document.getElementById(pair[1]);
+        if(!row||!anchor||!anchor.parentNode)return;
+        try{ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
+        catch(e){ _fsFailed.push(pair[0]); }
+      });
+      window._wRowsRelocated=false;
+    }
     // Verify rather than assume: anything that did not actually land in the bar
     // gets appended outright. Being in the wrong order beats being invisible.
     if(canvasFs&&bar){
@@ -23442,8 +23464,42 @@ let _pxFn=null; let _pxReRender=null;
     if(_pxReRender) _pxReRender();
   };
 
+// ── Fullscreen re-parenting for the export preview ────────────────────
+// #px-overlay is a child of <body>. When the canvas wrap is the fullscreen
+// element the browser renders ONLY that subtree, so the overlay opened
+// invisibly behind it — you had to leave fullscreen to see your own preview.
+// Move it into whatever element is currently fullscreen, and put it back on
+// close (or when fullscreen exits under it).
+let _pxHomeParent=null, _pxHomeNext=null;
+function _pxAttachToFullscreen(){
+  const ov=document.getElementById('px-overlay');
+  const fs=document.fullscreenElement||document.webkitFullscreenElement;
+  if(!ov)return;
+  if(fs&&!fs.contains(ov)){
+    if(!_pxHomeParent){ _pxHomeParent=ov.parentNode; _pxHomeNext=ov.nextSibling; }
+    fs.appendChild(ov);
+  }
+}
+function _pxRestoreHome(){
+  const ov=document.getElementById('px-overlay');
+  if(!ov||!_pxHomeParent)return;
+  _pxHomeParent.insertBefore(ov,_pxHomeNext||null);
+  _pxHomeParent=null; _pxHomeNext=null;
+}
+// If fullscreen ends while the preview is open, the overlay must come home or
+// it would be stranded inside a no-longer-fullscreen element.
+document.addEventListener('fullscreenchange',function(){
+  const fs=document.fullscreenElement||document.webkitFullscreenElement;
+  if(!fs)_pxRestoreHome(); else _pxAttachToFullscreen();
+});
+document.addEventListener('webkitfullscreenchange',function(){
+  const fs=document.fullscreenElement||document.webkitFullscreenElement;
+  if(!fs)_pxRestoreHome(); else _pxAttachToFullscreen();
+});
+
 function closePX(){
   document.getElementById('px-overlay').classList.remove('open');
+  _pxRestoreHome();
   _pxFn=null;
 }
 
@@ -23459,6 +23515,7 @@ function _pxRender(renderFn){
   const spin=document.getElementById('px-spin');
   const cv=document.getElementById('px-cv');
   spin.style.display='flex';
+  _pxAttachToFullscreen();   // must happen BEFORE .open, or the first paint is lost
   ov.classList.add('open');
   // Defer so the overlay renders first and box layout is known
   setTimeout(async()=>{
