@@ -125,6 +125,12 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
 #welcome-lock-btn.active{
   background:rgba(200,168,74,.18)!important;border-color:rgba(200,168,74,.8)!important;color:var(--gold)!important;
 }
+/* The in-page lock button pins the canvas to the top of the viewport — but
+   native canvas fullscreen (#welcome-teaser-wrap:fullscreen) already does
+   exactly that by construction, so the button is redundant (and confusing)
+   once you're in fullscreen. Hide it there; ⛶/⤬ alone remains. */
+#welcome-teaser-wrap:fullscreen #welcome-lock-btn,
+#welcome-teaser-wrap:-webkit-full-screen #welcome-lock-btn{display:none;}
 
 /* ── MOBILE: two rows ── */
 @media(max-width:700px){
@@ -1734,6 +1740,18 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
           <button onclick="wToggleHideControls()" title="Hide controls"
             style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 9px;cursor:pointer;margin-left:auto;">Hide</button>
         </div>
+        <!-- Collapses the view/color/size/pins/lift/twist controls into one
+             closed-by-default panel on entering canvas-only fullscreen — that
+             block was eating most of the screen before you ever scrolled to
+             the canvas. Starts closed every time fullscreen is (re-)entered;
+             tap to expand when you actually need one of these. -->
+        <details id="wfs-ctrl-collapse" style="background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.2);border-radius:3px;">
+          <summary style="cursor:pointer;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:rgba(200,168,74,.85);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
+            <span style="display:inline-block;transition:transform .15s;">▸</span> Controls — view / color / size / pins / lift / twist
+          </summary>
+          <style>#wfs-ctrl-collapse[open]>summary>span{transform:rotate(90deg);}</style>
+          <div id="wfs-ctrl-collapse-body" style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(200,168,74,.15);"></div>
+        </details>
       </div>
       <!-- Always-visible tab to bring controls back after hiding (canvas fullscreen only) -->
       <button id="wfs-show-btn" onclick="wToggleHideControls()" title="Show controls"
@@ -2408,6 +2426,11 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       if(!rot){
         // Fast path: no rotation, so no per-label transform push/pop.
         for(var q=0;q<_wHitPts.length;q+=4){
+          // Non-coprime (gcd≠1) points stay plain dots — only gcd=1 points
+          // ever get a numeric label, regardless of which label mode is
+          // active, so a dense "vanishing"/"both" filter doesn't bury the
+          // canvas in text for points that aren't the ones being studied.
+          if(gcd(_wHitPts[q+2],_wHitPts[q+3])!==1)continue;
           var lbl=_getHeroLabel(_wHitPts[q+2],_wHitPts[q+3],n,
             (typeof _heroTrueDepth==='function')?_heroTrueDepth(_wHitPts[q+2],_wHitPts[q+3]):-1,mode,locked);
           if(!lbl)continue;
@@ -2418,6 +2441,7 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       } else {
         for(var q2=0;q2<_wHitPts.length;q2+=4){
           var r2=_wHitPts[q2+2],M2=_wHitPts[q2+3];
+          if(gcd(r2,M2)!==1)continue; // same dots-only rule under rotation
           var lbl2=_getHeroLabel(r2,M2,n,
             (typeof _heroTrueDepth==='function')?_heroTrueDepth(r2,M2):-1,mode,locked);
           if(!lbl2)continue;
@@ -2845,12 +2869,23 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     // been moved. Three anchors are no longer adjacent to their rows after
     // the panel restructure — ws-view-row, ws-gaps-dd and hero-working-dd —
     // so that "restore" was a genuine reorganisation of the page.
+    // The first six rows (view/color/pins/lift/grid-plot/per-ring twist) are
+    // the ones that used to eat the whole screen above the fold in canvas
+    // fullscreen — they go into the closed-by-default wfs-ctrl-collapse
+    // panel instead of straight into the bar; everything else is unchanged.
+    var _wfsCollapseIds={'ws-view-row':1,'w-colorlabel-row':1,'w-pins-dd':1,'w-ringlift-ctrl':1,'w-grid-plot-ctrl':1,'ws-perring-dd':1};
+    var collapseWrap=document.getElementById('wfs-ctrl-collapse');
+    var collapseBody=document.getElementById('wfs-ctrl-collapse-body');
     if(canvasFs&&bar){
+      if(collapseWrap){ collapseWrap.open=false; bar.insertBefore(collapseWrap,btnRow||bar.firstChild); }
       topRows.forEach(function(pair){
         var row=document.getElementById(pair[0]);
         var anchor=document.getElementById(pair[1]);
         if(!row||!anchor)return;
-        try{ bar.insertBefore(row,btnRow||bar.firstChild); }
+        try{
+          if(_wfsCollapseIds[pair[0]]&&collapseBody) collapseBody.appendChild(row);
+          else bar.insertBefore(row,btnRow||bar.firstChild);
+        }
         catch(e){ _fsFailed.push(pair[0]); }
       });
       window._wRowsRelocated=true;
@@ -2864,13 +2899,16 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       });
       window._wRowsRelocated=false;
     }
-    // Verify rather than assume: anything that did not actually land in the bar
-    // gets appended outright. Being in the wrong order beats being invisible.
+    // Verify rather than assume: anything that did not actually land where it
+    // should (bar, or the collapse panel for the six collapsed rows) gets
+    // appended outright. Being in the wrong order beats being invisible.
     if(canvasFs&&bar){
       topRows.forEach(function(pair){
         var row=document.getElementById(pair[0]);
-        if(row&&row.parentNode!==bar){
-          try{ bar.appendChild(row); }catch(e){}
+        var wantBody=_wfsCollapseIds[pair[0]]&&collapseBody;
+        var target=wantBody?collapseBody:bar;
+        if(row&&row.parentNode!==target){
+          try{ target.appendChild(row); }catch(e){}
         }
       });
     }
@@ -6632,6 +6670,67 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     },80); // small delay so the modal-close/fullscreen-exit reflow finishes first
   };
 
+  // ── Send to Opener — reverse of Send to Hero above: copies the hero's
+  // current view/G/n/color mode/χ(r) filter+sizes/grid-half/zoom/active
+  // gaps & rings onto the opener, then opens the opener modal on exactly
+  // that state. G is applied FIRST (wSetG resizes the n-slider's max),
+  // and n is written straight to the slider + _wN right after via
+  // wRenderCn() — so opening never falls back to a default n, it lands
+  // on whatever n the hero was showing. ──
+  window.wSendToOpener=function(){
+    if(document.fullscreenElement||document.webkitFullscreenElement){
+      var exitFs2=document.exitFullscreen||document.webkitExitFullscreen;
+      if(exitFs2){ var p2=exitFs2.call(document); if(p2&&p2.catch)p2.catch(function(){}); }
+    }
+    var heroG=(typeof _heroG!=='undefined')?_heroG:31;
+    var heroN=(typeof N!=='undefined')?N:0;
+    if(typeof window.wSetG==='function') window.wSetG(heroG);
+
+    var nSl=document.getElementById('welcome-n-slider');
+    if(nSl) nSl.value=Math.max(0,Math.min(_wG,heroN));
+    if(typeof window.wRenderCn==='function') window.wRenderCn();
+
+    var viewMap={grid:'grid',ring:'ring',farey:'farey',gauss:'gauss',smith:'smith',lift:'ring'};
+    var heroViewNow=(typeof _heroViewMode!=='undefined')?_heroViewMode:'ring';
+    if(typeof window.wSetView==='function') window.wSetView(viewMap[heroViewNow]||'ring');
+
+    var colorMap={modular_distance:'default',residue_value:'residue_value',ring_hash:'ring_hash',phi_position:'phi_position',phi_spectrum:'phi_spectrum'};
+    var heroColorNow=(typeof _heroColorModeLocal!=='undefined')?_heroColorModeLocal:'modular_distance';
+    var cSel=document.getElementById('w-color-mode');
+    if(cSel) cSel.value=colorMap[heroColorNow]||'default';
+    if(typeof window.wSetColorMode==='function') window.wSetColorMode();
+
+    // χ(r) support/vanishing filter + independent point-size multipliers
+    var heroFilterNow=(typeof _heroCharFilter!=='undefined')?_heroCharFilter:'support';
+    var wSup=document.getElementById('w-char-support'), wVan=document.getElementById('w-char-vanishing');
+    if(wSup) wSup.checked=(heroFilterNow==='both'||heroFilterNow==='support');
+    if(wVan) wVan.checked=(heroFilterNow==='both'||heroFilterNow==='vanishing');
+    if(typeof window.wSetCharFilter==='function') window.wSetCharFilter();
+    var wSupSz=document.getElementById('w-char-support-size'); if(wSupSz&&typeof _heroCharSupportSize!=='undefined') wSupSz.value=_heroCharSupportSize;
+    var wVanSz=document.getElementById('w-char-vanish-size'); if(wVanSz&&typeof _heroCharVanishSize!=='undefined') wVanSz.value=_heroCharVanishSize;
+    if(typeof window.wSetCharSize==='function') window.wSetCharSize();
+
+    // Grid half-triangle toggle
+    if(typeof window.wSetGridHalf==='function') window.wSetGridHalf(!!(typeof _heroGridHalf!=='undefined'&&_heroGridHalf));
+
+    // Zoom — scale-independent, carries over directly. Pan is deliberately
+    // NOT copied 1:1 (different canvas pixel sizes), reset to centered instead
+    // — same reasoning as the opener→hero direction above.
+    var heroZoomNow=(typeof _heroZoomTarget!=='undefined')?_heroZoomTarget:1;
+    if(typeof window.wZoomSetAbs==='function') window.wZoomSetAbs(Math.max(0.1,Math.min(20,heroZoomNow||1)));
+
+    // Active/custom rings — same Set-of-M-or-null shape on both sides
+    if(typeof _wActiveRings!=='undefined'){
+      _wActiveRings=(typeof _heroActiveRings!=='undefined'&&_heroActiveRings)?new Set(_heroActiveRings):null;
+      if(typeof _wRefreshActiveRingList==='function') _wRefreshActiveRingList();
+    }
+    // Active gap highlights (twin/cousin/sexy-prime pairs)
+    if(typeof _wActiveGaps!=='undefined'&&typeof _heroActiveGaps!=='undefined') _wActiveGaps=new Set(_heroActiveGaps);
+
+    if(typeof wRedrawCanvas==='function') wRedrawCanvas();
+    window.openWelcome();
+  };
+
   // ── Init ──
   function init(){
     // Sync _wPrimes to global PRIMES array now that the page is fully loaded
@@ -6782,6 +6881,9 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
    ['Page 10 — Farey & Unit Circle','Farey modular residue rings on concentric circles: ten representations of the unit circle, cyclotomic presets, Ford circles, and the Franel\u2013Landau discrepancy connection to RH.','Most interesting: the spectral-correlation panel comparing Farey gap statistics against GUE, Poisson, and the actual Riemann zeros.'],
    ['Page 11 — Farey Sequence Summatory Function','A research-platform-style explorer for the Farey sequence summatory function.','Most interesting: the Exact / Hybrid / Formula mode toggle — you can watch the same quantity switch between brute-force enumeration and closed-form prediction.'],
    ['Page 12 — The Prime Spiral','Isolates the "Lift Dynamics" spiral overlay from the hero Ring/Lift view: fix one prime p, mark where it lands on every ring modulus M from p+1 up to G, and watch the sequence of markers read as a spiral arm.','Most interesting: the live spiral demo lets you drive G and the chosen prime directly, with an explicit aside on why this is unrelated to the Ulam spiral despite the name.'],
+   ['Page 13 — Gauss Circle ↔ Farey Sector Bridge','Lattice points in a disc, decomposed by symmetry orbit: N(R) = 1 + 4A + 4D + 8O, and its 3D counterpart with seven orbit classes. The C(n) filter applies to both.','Most interesting: the measure changes with the region — a disc sector contributes its angle arctan(1/s) − arctan(1/(s+1)), not the interval width Page 11 uses.'],
+   ['Page 14 — ζ(½ + it): Critical-Line Spiral','Root-finds every zero in a chosen window live via Riemann–Siegel Z(t) sign changes rather than reading a stored list, so any range of t can be explored.','Most interesting: ζ evaluated by Euler–Maclaurin summation, with the Riemann–von Mangoldt estimate predicting the zero count in advance.'],
+   ['Page 15 — Sector-Graded Farey Discrepancy','Takes Page 11\'s Franel–Landau sum — whose growth rate is equivalent to the Riemann Hypothesis — and grades it by sector instead of reporting only the total.','Most interesting: an exact coincidence underlies it — a fraction\'s sector index s = ⌊b/a⌋ is precisely the first partial quotient of its continued fraction.'],
   ];
   var pi='<div id="wg-pageinfo-panel" style="display:none;position:sticky;top:44px;z-index:9998;background:#0a0a16;border-bottom:1px solid rgba(255,255,255,.13);padding:14px 18px 16px;font-family:\'JetBrains Mono\',monospace;font-size:10px;line-height:1.55;color:rgba(255,255,255,.72);max-height:60vh;overflow-y:auto;">';
   pi+='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:.12em;color:#c8a84a;margin-bottom:10px;text-transform:uppercase;">Page Info — What Each Page Does</div>';
@@ -7375,6 +7477,8 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
   <div style="width:1px;height:18px;background:var(--edge);flex-shrink:0;"></div>
   <button onclick="exportHero4K()" title="Export 4K"
     style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">↓ 4K Export</button>
+  <button id="hero-send-opener-btn" onclick="wSendToOpener()" title="Send this view/G/n/color to the opener, opening it on exactly this state"
+    style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.5);color:rgba(200,168,74,.9);font-family:var(--mono);font-size:7.5px;padding:3px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.05em;">↧ Send to Opener</button>
 </div>
 </details>
 
@@ -8934,147 +9038,8 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
 
 
 
-<!-- SECTION 10: CONTENTS -->
-<div class="card sec-anchor" id="s-contents">
-  <div class="card-title">Contents — The Fifteen Pages</div>
-  <div class="ibox" style="margin-bottom:14px;">
-    Reading order, not dependency order. Pages 2–4 explain the construction; 5–6 decompose it and
-    find where independence holds and where it fails; 7–9 generalise it (more blocks, then characters);
-    10–13 place it in geometry; 14–15 connect it to the zeta function and to Farey discrepancy.
-    Every page is self-contained — the links below say what each one actually does.
-    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--edge);">
-      <b>Notation, one letter per role.</b>
-      <b>n</b> is the depth — the block length in C(n).
-      <b>j</b> is the offset inside that block, gcd(r, M+j) = 1 for j = 0…n.
-      <b>s</b> is the Farey sector index, S<sub>s</sub> = (1/(s+1), 1/s], with count F(s, N).
-      <b>k</b> is the dimension on Page 13, the exponent in min(n+1,p)/p<sup>k</sup>.
-    </div>
-  </div>
-  <div class="toc-wrap">
-    <a class="toc-row toc-cur" href="index.html">
-      <span class="toc-num" style="color:#c8a84a;border-color:#c8a84a55;">1</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#c8a84a;">C(n) — Block-Coprime Density</span>
-        <span class="toc-what">The main instrument. Builds C(n) = ζ(2)·∏ₚ(1 − min(n+1,p)/p²) from scratch, then plots it six ways — Cayley, Ring, Grid, Farey, Lift, Gauss — with the lift-dynamics and prime-spiral overlays driven from one shared depth n.</span>
-        <span class="toc-note">Also here: the calculator, prime-factor table, data table, step-by-step derivation, the Hardy–Littlewood and Goldbach connections, and the strip average that bridges to Page 5.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page2.html">
-      <span class="toc-num" style="color:#7ec87a;border-color:#7ec87a55;">2</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#7ec87a;">How C(n) Works — Guided Walkthrough</span>
-        <span class="toc-what">The plain-language entry point. Pick two random integers r and M; C(n) tracks the chance r shares no factor with any of the n+1 consecutive integers starting at M.</span>
-        <span class="toc-note">Start here if the formula on Page 1 reads as notation rather than a picture. No prerequisites beyond gcd.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page3.html">
-      <span class="toc-num" style="color:#9b7fe8;border-color:#9b7fe855;">3</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#9b7fe8;">Colour &amp; Label Modes — The Mathematics</span>
-        <span class="toc-what">The codex. Every colouring mode used anywhere in the suite, with its exact formula and a live swatch rendered by that same formula at n=2.</span>
-        <span class="toc-note">Reference rather than argument — the page to open when a hue on Page 1 or 5 is doing something you can't name.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page4.html">
-      <span class="toc-num" style="color:#4a9eff;border-color:#4a9eff55;">4</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#4a9eff;">The Prime Filter — Sieve View</span>
-        <span class="toc-what">Fixes the block anchor M instead of averaging over it, which turns the infinite Euler product into a finite sieve: only primes that actually divide one of M,…,M+n can remove anything.</span>
-        <span class="toc-note">Touch(M,n) splits into the primes p ≤ n+1 that always touch by pigeonhole, and the larger ones that touch by coincidence.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page5.html">
-      <span class="toc-num" style="color:#3dc8b8;border-color:#3dc8b855;">5</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#3dc8b8;">Gap Diagonal Identity</span>
-        <span class="toc-what">Reads the lattice as diagonals |M − r| = g, each with coprime density exactly φ(g)/g, and shows D(n) is the triangle-weighted mean of those strip densities — exactly, for every n.</span>
-        <span class="toc-note">An average needs no independence, which is precisely why this identity holds and Page 6's does not.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page6.html">
-      <span class="toc-num" style="color:#e05060;border-color:#e0506055;">6</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#e05060;">Strip Correlations — Where Independence Breaks</span>
-        <span class="toc-what">The companion to Page 5. Joint events across strips do need independence, and the strips fail it because they share prime factors. This makes the failure exact and measurable.</span>
-        <span class="toc-note">The same mechanism that shapes C(n)'s Euler product, isolated and watched directly.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page7.html">
-      <span class="toc-num" style="color:#ff8c42;border-color:#ff8c4255;">7</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#ff8c42;">C(n₁,n₂) — Two-Block Density (Prime Gaps)</span>
-        <span class="toc-what">One r surviving two independent blocks at once. The correlation ratio ρ = D(n₁,n₂)/(D(n₁)·D(n₂)) measures exactly where the shared r breaks independence between them.</span>
-        <span class="toc-note">k=1 reduces to Page 1's C(n) exactly. Twin, cousin and sexy prime configurations live here.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page8.html">
-      <span class="toc-num" style="color:#ff2fd0;border-color:#ff2fd055;">8</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#ff2fd0;">C(n₁,…,n_k) — k-Block Density (Constellations)</span>
-        <span class="toc-what">The same derivation carried to arbitrary k with no modification, verified by direct enumeration mod small primes rather than only asymptotically.</span>
-        <span class="toc-note">The new phenomenon at k ≥ 3: ρ_k doesn't merely exceed 1, it grows geometrically in k, for a structural reason given on the page.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page9.html">
-      <span class="toc-num" style="color:#d2691e;border-color:#d2691e55;">9</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#d2691e;">C_χ(n) — Dirichlet Character-Twisted Density</span>
-        <span class="toc-what">Every earlier page used the principal character in disguise — gcd(r,·)=1 is exactly χ₀(r), a filter that only says yes or no. Replace it with a genuine χ mod q and ζ(2) becomes L(2,χ).</span>
-        <span class="toc-note">Same Euler-product machinery, now carrying signed and complex weights on residue classes.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page10.html">
-      <span class="toc-num" style="color:#a855f7;border-color:#a855f755;">10</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#a855f7;">Farey &amp; Unit Circle</span>
-        <span class="toc-what">The circle x² + y² = 1 re-read as a discrete modular shell system: the same radius, circumference and rotation parameters seen through Farey residue rings.</span>
-        <span class="toc-note">Includes the Fourier strip view, obtained by unwrapping θ into a rectangle.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page11.html">
-      <span class="toc-num" style="color:#f2c14e;border-color:#f2c14e55;">11</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#f2c14e;">Farey Sequence Summatory Function</span>
-        <span class="toc-what">The largest page in the suite. Franel–Landau discrepancy, Stern–Brocot sector rings indexed by s, lift arcs with surviving/broken split, the C(n) canvas filter with depth transport, and a harmonic-analysis engine reading Farey fractions as intervals.</span>
-        <span class="toc-note">The sat−/sat+ controls step n directly between saturation points n = p−1 rather than one integer at a time.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page12.html">
-      <span class="toc-num" style="color:#ff6b9d;border-color:#ff6b9d55;">12</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#ff6b9d;">The Prime Spiral — Winding r ≡ ±p (mod M)</span>
-        <span class="toc-what">Fix one prime p and mark where it lands on every ring of modulus M. As M climbs, that single dot sweeps at a different rate on each ring and the trail reads as a spiral arm.</span>
-        <span class="toc-note">Not the Ulam spiral — this winds one prime through the moduli rather than laying every integer on a grid. Also carries the Ramanujan-sum interference panel and the Mertens ladder M(x).</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page13.html">
-      <span class="toc-num" style="color:#06b6d4;border-color:#06b6d455;">13</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#06b6d4;">Gauss Circle ↔ Farey Sector Bridge</span>
-        <span class="toc-what">Lattice points in a disc, decomposed by symmetry orbit: N(R) = 1 + 4A + 4D + 8O, and its 3D counterpart with seven orbit classes. The C(n) filter applies to both.</span>
-        <span class="toc-note">The measure changes with the region: a disc sector contributes its <em>angle</em> arctan(1/s) − arctan(1/(s+1)), not the interval width 1/(s(s+1)) that Page 11's denominator-bounded count uses.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page14.html">
-      <span class="toc-num" style="color:#ef4444;border-color:#ef444455;">14</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#ef4444;">ζ(½ + it) — Critical-Line Spiral</span>
-        <span class="toc-what">Root-finds every zero in a chosen window live via Riemann–Siegel Z(t) sign changes rather than reading a stored list, so any range of t can be explored.</span>
-        <span class="toc-note">ζ evaluated by Euler–Maclaurin summation; the Riemann–von Mangoldt estimate predicts the count in advance.</span>
-      </span>
-    </a>
-    <a class="toc-row" href="page15.html">
-      <span class="toc-num" style="color:#4ade80;border-color:#4ade8055;">15</span>
-      <span class="toc-txt">
-        <span class="toc-ttl" style="color:#4ade80;">Sector-Graded Farey Discrepancy</span>
-        <span class="toc-what">Takes Page 11's Franel–Landau sum Σ|F_i − i/|F_N|| (i the Farey ordinal) — whose growth rate is equivalent to the Riemann Hypothesis — and grades it by sector instead of reporting only the total.</span>
-        <span class="toc-note">Rests on an exact coincidence: a fraction's sector index s = ⌊b/a⌋ is precisely the first partial quotient of its continued fraction.</span>
-      </span>
-    </a>
-  </div>
-</div>
 
-</div><!-- #content -->
+
 
 <!-- TOOLTIP -->
 <div id="tip"><div class="tt-hd" id="tt-hd"></div><div id="tt-body"></div></div>
