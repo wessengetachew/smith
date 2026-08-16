@@ -1164,7 +1164,7 @@ function heroToggleTopBars(){
     </div>
     <details id="w-intro-wrap" open style="position:relative;z-index:1;">
     <summary style="list-style:none;cursor:pointer;user-select:none;display:flex;align-items:flex-start;gap:10px;">
-      <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53?</div>
+      <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53071?</div>
       <span class="wi-chev" style="margin-left:auto;flex-shrink:0;font-size:13px;color:rgba(200,168,74,.7);transition:transform .18s;padding-top:6px;">▾</span>
     </summary>
     <style>#w-intro-wrap>summary::-webkit-details-marker{display:none}#w-intro-wrap:not([open]) .wi-chev{transform:rotate(-90deg)}#w-intro-wrap:not([open])>summary #welcome-title{margin-bottom:6px;}</style>
@@ -3198,20 +3198,27 @@ function heroToggleTopBars(){
     if(piEl&&_wMathReady) piEl.textContent=ann||'';
 
     // ── Headline number follows ground state ──────────────────────────
-    // "Why does this number keep landing near 0.53?" is written for the
+    // "Why does this number keep landing near 0.53071?" is written for the
     // default n=1 case. When "set ground state (lock to page n)" is on,
-    // swap 0.53 for the live C(n) value so the headline always matches
+    // swap it for the live C(n) value so the headline always matches
     // whatever n the page is actually locked to.
+    // Five decimals, trailing zeros trimmed: C(1)=0.530711820472 reads
+    // 0.53071, but a value like 0.61000 should not show three dead zeros.
     (function(){
       var titleEl=document.getElementById('welcome-title');
       if(!titleEl)return;
       var locked=document.getElementById('top-steps-link')?.checked
         ||document.getElementById('w-steps-link')?.checked
         ||document.getElementById('hero-steps-link')?.checked;
+      var fmt5=function(v){
+        var t=(+v).toFixed(5);
+        if(t.indexOf('.')>=0) t=t.replace(/0+$/,'').replace(/\.$/,'');
+        return t;
+      };
       if(locked&&_wMathReady){
-        titleEl.textContent='Why does this number keep landing near '+val.toFixed(2)+'?';
+        titleEl.textContent='Why does this number keep landing near '+fmt5(val)+'?';
       } else if(!locked){
-        titleEl.textContent='Why does this number keep landing near 0.53?';
+        titleEl.textContent='Why does this number keep landing near 0.53071?';
       }
     })();
 
@@ -4769,7 +4776,10 @@ function heroToggleTopBars(){
     cv.width=S; cv.height=S;
     var c=cv.getContext('2d');
     c.fillStyle='#04040d'; c.fillRect(0,0,S,S);
-    var drawG=(_wView!=='smith'&&_wZoom<1)?Math.min(400,Math.round(_wG/_wZoom)):_wG;
+    // Export at the true G: the Math.min(400,…) zoom-out widening below is a
+    // live-canvas cost control, and capping an export at 400 is what stopped
+    // the prime spiral short of the last prime in range.
+    var drawG=_wG;
     _wExportScale=S/500;
     var _pvSaved=_wHitPts.slice(), _pvRec=_wHitRec;
     _wHitPts.length=0; _wHitRec=true;
@@ -4810,7 +4820,18 @@ function heroToggleTopBars(){
   // the flat views); this names the prime that owns it, so with All-p on you
   // can tell the concentric dropout circles apart.
   function _wDropoutLbl(){ return (typeof _liftDropoutLbl==='undefined')?true:_liftDropoutLbl; }
-  function _wDropoutLabel(ctx,x,y,pP){
+  // Flip the label inside when the dropout ring is close to the canvas edge.
+  // p sits at radius maxR*(p-1)/(rings-1), so as p approaches the ring count
+  // the label was drawn past the right edge and simply disappeared.
+  function _wDropoutLabel(ctx,x,y,pP,W){
+    var _k=(typeof _wExportScale!=='undefined'&&_wExportScale>0)?_wExportScale:1;
+    var _lsc0=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
+    var _w=(typeof W==='number'&&W>0)?W:(ctx.canvas?ctx.canvas.width:0);
+    var _need=(('p='+pP).length*5.6*_lsc0+10)*_k; // rough advance width
+    var _side=(_w&&(x+_need)>_w-4*_k)?-1:1;       // no room right -> write left
+    return _wDropoutLabelAt(ctx,x,y,pP,_side,_need);
+  }
+  function _wDropoutLabelAt(ctx,x,y,pP,side,need){
     var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
     var K=(typeof _wExportScale!=='undefined'&&_wExportScale>0)?_wExportScale:1;
     ctx.save();
@@ -4818,8 +4839,10 @@ function heroToggleTopBars(){
     ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.lineWidth=2.6*K;ctx.strokeStyle='rgba(4,4,13,.9)';
     ctx.fillStyle='rgba(230,56,72,.95)';
+    ctx.textAlign=(side<0)?'right':'left';
+    var dx=(side<0?-6:6)*K;
     _wUprightAt(ctx,x,y,function(){
-      ctx.strokeText('p='+pP,6*K,0); ctx.fillText('p='+pP,6*K,0);
+      ctx.strokeText('p='+pP,dx,0); ctx.fillText('p='+pP,dx,0);
     });
     ctx.restore();
   }
@@ -4934,7 +4957,7 @@ function heroToggleTopBars(){
       var E1=xy(1,spP),E2=xy(Math.max(1,spP-1),spP);
       if(E1&&E2){ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.2;
         ctx.beginPath();ctx.moveTo(E1[0],E1[1]);ctx.lineTo(E2[0],E2[1]);ctx.stroke();ctx.restore();
-        if(_wDropoutLbl())_wDropoutLabel(ctx,E2[0],E2[1],spP);}
+        if(_wDropoutLbl())_wDropoutLabel(ctx,E2[0],E2[1],spP,W);}
     }
     if(allPOn&&typeof PRIMES!=='undefined'){
       for(var api=0;api<PRIMES.length;api++){
@@ -5225,7 +5248,7 @@ function heroToggleTopBars(){
         var dR=maxR*(dMx-1)/Math.max(1,rings-1);
         ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.75)';ctx.lineWidth=1.3;
         ctx.beginPath();ctx.arc(cx,cy,dR,0,Math.PI*2);ctx.stroke();ctx.restore();
-        if(_wDropoutLbl())_wDropoutLabel(ctx,cx+dR,cy,spP); // r=0 ray, the p/p residue line
+        if(_wDropoutLbl())_wDropoutLabel(ctx,cx+dR,cy,spP,cx+maxR); // r=0 ray, the p/p residue line
       }
       // All-primes overlay — every other prime's spiral, dimmed relative to the selected one.
       if(allPOn&&typeof PRIMES!=='undefined'){
@@ -5630,7 +5653,7 @@ function heroToggleTopBars(){
           ctx.closePath();ctx.stroke();ctx.restore();
           if(_wDropoutLbl()){
             var dp0=_conformalSmithPt(dRingR,alpha,R0); // θ=0 → the r=0 residue ray
-            _wDropoutLabel(ctx,cx+dp0.x,cy+dp0.y,spP);
+            _wDropoutLabel(ctx,cx+dp0.x,cy+dp0.y,spP,cx+R0);
           }
         }
         // All-primes overlay — every other prime's spiral, dimmed vs. the selected one.
@@ -6041,7 +6064,10 @@ function heroToggleTopBars(){
     var offCtx=offCv.getContext('2d');
     _wExportScale=squareSide/500;
     offCtx.fillStyle='#04040d'; offCtx.fillRect(0,0,squareSide,squareSide);
-    var drawG=(_wView!=='smith'&&_wZoom<1)?Math.min(400,Math.round(G/_wZoom)):G;
+    // True G. The zoom-out widening's 400 cap exists to keep LIVE frames cheap;
+    // an export has no frame budget, and the cap was truncating the lattice and
+    // the prime spiral whenever G ran past 400.
+    var drawG=G;
     // Record hit positions in export space so the selected point can be ringed,
     // then put the live hit-table back exactly as it was.
     var _savedHit=_wHitPts.slice(), _savedRec=_wHitRec;
@@ -6218,9 +6244,14 @@ function heroToggleTopBars(){
     var blockH=R*(side+capH)+gap*(R-1);
     var yTop=ty+Math.max(0,Math.floor((availH-blockH)/2));
 
-    // Lift off for the whole sheet, restored before we return.
-    var _liftWas=_wRingLift; _wRingLift=false;
-    var drawG=(_wZoom<1)?Math.min(400,Math.round(G/_wZoom)):G;
+    // Lift stays ON for the sheet. It used to be forced off here — which is
+    // why the prime spiral, mirror and ±n path were missing from every panel
+    // of a multi-view export while showing fine on the live canvas.
+    var _liftWas=_wRingLift;
+    // Zoom-out widening is a LIVE-canvas convenience (fill the revealed space
+    // cheaply). Applying its 400 cap to an export silently truncated the
+    // lattice — and the spiral with it — at G above 400.
+    var drawG=G;
 
     var idx=0;
     for(var ri=0;ri<R;ri++){
