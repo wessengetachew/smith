@@ -145,6 +145,7 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
   #welcome-teaser-wrap:fullscreen #welcome-n-row,#welcome-teaser-wrap:-webkit-full-screen #welcome-n-row{margin:2px 0!important;}
   #welcome-teaser-wrap.wfs-controls-hidden:fullscreen #welcome-teaser,#welcome-teaser-wrap.wfs-controls-hidden:-webkit-full-screen #welcome-teaser{width:min(94vw,75vh)!important;}
   #ws-zoom-ctrl{flex-wrap:wrap;row-gap:6px;}
+}
 
 /* ── Control rows: grow to fill, so wrapping never strands a lone button
    beside half a row of empty space. min-width:0 lets them shrink below
@@ -1077,6 +1078,21 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 @keyframes wgCardIn{from{opacity:0;transform:translateY(10px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
 @keyframes wgGlowPulse{0%,100%{opacity:.5;}50%{opacity:.9;}}
 @keyframes wgFadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes wgIntroFlash{0%{box-shadow:0 0 0 0 rgba(200,168,74,0);background:rgba(200,168,74,0);}18%{box-shadow:0 0 0 3px rgba(200,168,74,.5);background:rgba(200,168,74,.12);}100%{box-shadow:0 0 0 0 rgba(200,168,74,0);background:rgba(200,168,74,0);}}
+.wg-intro-flash{animation:wgIntroFlash 1.7s ease-out;}
+#ws-view-mode-row::-webkit-scrollbar{display:none;}
+/* Keep the 5 view-mode buttons (Cayley/Ring/Grid/Farey/Gauss) together as
+   one atomic group — the internal flex-wrap:nowrap means this block never
+   splits mid-set. On desktop it just sits inline at its natural width like
+   any other button in the row. Only on a narrow phone, where the old layout
+   used to wrap mid-set (stranding Invert between Ring and Grid), do we force
+   it onto its own full-width line so the group stays intact; if even that's
+   too narrow it scrolls horizontally rather than wrapping internally. */
+#ws-view-mode-row{flex:0 0 auto;min-width:0;}
+@media(max-width:560px){
+  #ws-view-mode-row{flex:1 1 100%;}
+  #ws-view-mode-row button{padding-left:5px!important;padding-right:5px!important;}
+}
 #welcome-card{
   position:relative;background:#07071a;border:1px solid rgba(200,168,74,.3);max-width:600px;width:100%;max-height:90vh;
   overflow-y:auto;padding:30px 32px 24px;box-shadow:0 24px 70px rgba(0,0,0,.65),0 0 90px -20px rgba(200,168,74,.18);
@@ -1153,6 +1169,17 @@ function heroToggleTopBars(){
 </head>
 <body>
 
+<script>
+// ── Early stub for wSetMode ───────────────────────────────────────────
+// The ∞ ASYMPTOTIC / FINITE ∏ buttons are parsed roughly 1,675 lines before
+// window.wSetMode is assigned (their handler lives in a later script block).
+// A click inside that window evaluated a bare identifier that did not exist
+// yet and threw "ReferenceError: wSetMode is not defined" — intermittent,
+// because it only happens if you reach the buttons before that block runs.
+// Queue the request rather than throwing; the real function flushes it.
+window.__wPendingMode = null;
+window.wSetMode = function(m){ window.__wPendingMode = m; };
+</script>
 <div id="welcome-modal">
   <div id="welcome-card">
     <div id="welcome-glow"></div>
@@ -1189,6 +1216,7 @@ function heroToggleTopBars(){
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
         <input type="checkbox" id="top-steps-link" checked style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('top-steps-n')?.value||0))"> set ground state (lock to page n)
       </label>
+      <a href="javascript:void(0)" onclick="wScrollToIntro();return false;" style="color:#c8a84a;font-size:8.5px;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px;cursor:pointer;white-space:nowrap;" title="Jump down to the &quot;Intro — what is C(n)?&quot; section (stays collapsed)">↓ more on C(n)</a>
     </div>
     </details>
 
@@ -1322,21 +1350,25 @@ function heroToggleTopBars(){
       <!-- Buttons grow to fill the line they land on, so a wrap never leaves a
            lone "Send to Hero" with half a row of dead space beside it. -->
       <div id="ws-view-row" style="display:flex;gap:5px;row-gap:5px;flex-wrap:wrap;align-items:stretch;">
+        <!-- The 5 view-mode buttons get their own nowrap strip so they always
+             read as one row, even on a narrow phone; it scrolls horizontally
+             in the rare case none of it fits rather than wrapping mid-set. -->
+        <div id="ws-view-mode-row" style="display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
         <button class="wv-btn" id="wvb-smith" onclick="wSetView('smith')"
           title="Cayley View — a conformal map (Γ(z)=(z−1)/(z+1)) borrowed from RF engineering, where the same construction is called a Smith chart; repurposed here purely as a lattice projection, ring-polar (R=ring radius, θ=2πr/M) — same convention as the hero Cayley view"
-          style="background:none;border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Cayley</button>
+          style="background:none;border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;flex-shrink:0;">Cayley</button>
         <button class="wv-btn" id="wvb-ring" onclick="wSetView('ring')"
-          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Ring</button>
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;flex-shrink:0;">Ring</button>
+        <button class="wv-btn" id="wvb-grid" onclick="wSetView('grid')"
+          style="background:rgba(200,168,74,.18);border:1px solid rgba(200,168,74,.7);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;flex-shrink:0;">Grid</button>
+        <button class="wv-btn" id="wvb-farey" onclick="wSetView('farey')"
+          style="background:none;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;flex-shrink:0;">Farey</button>
+        <button class="wv-btn" id="wvb-gauss" onclick="wSetView('gauss')" title="Gaussian integers a+bi, octant 0≤b≤a (8-fold symmetry)"
+          style="background:none;border:1px solid rgba(155,127,232,.35);color:rgba(155,127,232,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;flex-shrink:0;">Gauss</button>
+        </div>
         <label style="display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(232,226,214,.75);cursor:pointer;white-space:nowrap;margin-right:6px;">
           <input type="checkbox" id="w-ring-invert-cb" onchange="wToggleRingInvert(this.checked)" style="accent-color:var(--gold, #c8a84a);" title="Inverts ring order — M=2 moves to the outer edge instead of the center. Order only, no color/background change. Ring view only.">Invert
         </label>
-
-        <button class="wv-btn" id="wvb-grid" onclick="wSetView('grid')"
-          style="background:rgba(200,168,74,.18);border:1px solid rgba(200,168,74,.7);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Grid</button>
-        <button class="wv-btn" id="wvb-farey" onclick="wSetView('farey')"
-          style="background:none;border:1px solid rgba(61,200,184,.35);color:rgba(61,200,184,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Farey</button>
-        <button class="wv-btn" id="wvb-gauss" onclick="wSetView('gauss')" title="Gaussian integers a+bi, octant 0≤b≤a (8-fold symmetry)"
-          style="background:none;border:1px solid rgba(155,127,232,.35);color:rgba(155,127,232,.6);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.06em;transition:all .15s;">Gauss</button>
         <button id="wvb-ring-lift" onclick="wSetRingLift(!window._wRingLiftState);window._wRingLiftState=!window._wRingLiftState;" title="Lift dynamics MODE — r → r mod(M+1) lines, prime spiral, mirror σ, ±n path — overlays whichever view is active (all five)"
           style="background:none;border:1px dashed rgba(61,200,184,.4);color:rgba(61,200,184,.55);font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.06em;margin-left:10px;">⇑ Lift: off</button>
         <button onclick="cnShareLink(this)" title="Copy a shareable link that restores this exact state (view, G, n, gaps, half plot)"
@@ -1487,7 +1519,7 @@ function heroToggleTopBars(){
           <select id="w-label-mode" onchange="wSetLabelMode()"
             title="Per-point labels on every lattice point — same set the Sector Path panel uses, and it renders into the PNG export"
             style="background:rgba(255,255,255,.04);border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 5px;cursor:pointer;outline:none;min-width:0;max-width:100%;">
-            <option value="none">None</option>
+            <option value="none" selected>None</option>
             <option value="coords">r, M</option>
             <option value="fraction">r/M (reduced)</option>
             <option value="angle">2πr/M °</option>
@@ -1498,7 +1530,7 @@ function heroToggleTopBars(){
             <option value="phi_M">φ(M)</option>
             <option value="mobius_M">μ(M)</option>
             <option value="gap">gap |M-r|</option>
-            <option value="r_val" selected>r only</option>
+            <option value="r_val">r only</option>
             <option value="M_val">M only</option>
           </select>
           </span>
@@ -2313,10 +2345,20 @@ function heroToggleTopBars(){
     if(lbl)lbl.textContent=v.toFixed(2)+'\u00d7';
     wRedrawCanvas();
   };
+  // Label size has to fall with G or the text outgrows the lattice: at G=31 a
+  // 1x label sits between points, at G=400 the same label spans a dozen of
+  // them and the view turns into overlapping digits. Scale by sqrt(48/G),
+  // which tracks the inter-point spacing (spacing ~ 1/G in one axis, ~1/sqrt
+  // of the point count overall), clamped so it never vanishes or overshoots.
+  // The user's slider still multiplies on top, so 1.00x now means "auto".
+  window._wLabelAutoScale=function(){
+    var G=(typeof _wG!=='undefined'&&_wG>0)?_wG:31;
+    return Math.max(0.30,Math.min(1,Math.sqrt(48/G)));
+  };
   window._wLabelScale=function(){
     var el=document.getElementById('w-label-size');
     var v=el?(parseFloat(el.value)||1):1;
-    return Math.max(0.3,Math.min(3,v));
+    return Math.max(0.3,Math.min(3,v))*window._wLabelAutoScale();
   };
   window.wSetLabelMode=function(){ if(typeof wRedrawCanvas==='function')wRedrawCanvas(); };
 
@@ -2884,6 +2926,8 @@ function heroToggleTopBars(){
 
   window.wSetMode=function(m){
     _wMode=m;
+    // Clear any queued request from the early stub so it cannot re-fire.
+    if(window.__wPendingMode) window.__wPendingMode=null;
     // Ground state covers the regime as well as n: an asymptotic C(n)
     // breakdown sitting under a FINITE ∏ selection is simply wrong. Re-render
     // the locked panel so the two can never disagree.
@@ -2928,6 +2972,12 @@ function heroToggleTopBars(){
       window._modeSyncGuard=false;
     }
   };
+  // If the person clicked a mode button before this block loaded, the stub
+  // recorded it — apply it now so the click is honoured instead of lost.
+  (function(){
+    var q=window.__wPendingMode;
+    if(q){ window.__wPendingMode=null; try{ window.wSetMode(q); }catch(e){} }
+  })();
 
   var W_SLIDER_CAP=1000; // same rationale as hero's FINITE_SLIDER_CAP — dragging fires
   // oninput continuously, so the slider itself must stay capped even though the number
@@ -6084,6 +6134,10 @@ function heroToggleTopBars(){
       : String(_wColorMode).replace(/_/g,' ');
     var charLabel=_wCharFilter==='both'?'χ≠0 & χ=0':(_wCharFilter==='support'?'χ≠0 only':(_wCharFilter==='vanishing'?'χ=0 only':'overlays only (no lattice)'));
     var ringLabel=_wActiveRings&&_wActiveRings.size?(_wActiveRings.size+' custom rings'):'all rings 1–'+G;
+    // What the numbers ON the points mean. Without this the export shows a
+    // lattice covered in digits with nothing saying whether they are r, M,
+    // r/M, a Farey channel or a survival depth.
+    var _lblTxt=window._wLabelLegendText();
 
     var _selTxt=window._wInspectExportText();
     // Reserve an extra line when a point is selected, or the selection
@@ -6171,6 +6225,7 @@ function heroToggleTopBars(){
     ty=H.drawSubStats(ty,[
       {label:'χ', val:charLabel, col:'rgba(61,200,184,.85)'},
       {label:'Color', val:colorLabel.slice(0,16), col:'rgba(184,178,166,.75)'},
+      {label:'Labels', val:_lblTxt.slice(0,22), col:'rgba(230,120,130,.85)'},
       {label:'Rings', val:ringLabel.slice(0,18), col:'rgba(155,127,232,.8)'},
       {label:'Gaps ('+((typeof _gapSemantics!=='undefined'&&_gapSemantics==='diagonal')?'|M−r|':'Δp')+')',
        val:_wActiveGaps.size?Array.from(_wActiveGaps).sort(function(a,b){return a-b;}).join(',').slice(0,14):'none',
@@ -6179,7 +6234,9 @@ function heroToggleTopBars(){
     ]);
 
     // ── gcd=1 / lift survival ratios for the current G and n — independent of view ──
-    var cnts=_cnExportCounts(G, n);
+    // Count over the view's OWN domain — a Grid sheet reporting triangle counts
+    // is off by 2x, and Farey was being counted as coprime-only.
+    var cnts=_cnExportCounts(G, n, _viewPop(_wView));
     var ratioTxt='gcd=1: '+cnts.gcd1+'/'+cnts.total+' ('+(cnts.gcd1/Math.max(1,cnts.total)*100).toFixed(2)+'%)   ·   '+
       'lift: '+cnts.lift+'/'+cnts.total+' ('+(cnts.lift/Math.max(1,cnts.total)*100).toFixed(2)+'%)   ·   '+
       'lift/gcd=1: '+cnts.lift+'/'+cnts.gcd1+' ('+(cnts.lift/Math.max(1,cnts.gcd1)*100).toFixed(2)+'%)';
@@ -6198,6 +6255,33 @@ function heroToggleTopBars(){
   //  overlay renders into ALL five views (see _wRingLift at the top of this
   //  IIFE), so leaving it on would scribble the same arc bundle across every
   //  panel and bury the thing each view is there to show.
+  // What the numbers ON the points mean. Two independent label systems can be
+  // active at once — the general per-point label mode and the lift-dynamics
+  // spiral/mirror mode — so the legend names both. Without it an export shows
+  // a lattice covered in digits with nothing saying whether they are r, M,
+  // r/M, a Farey channel or a survival depth.
+  window._wLabelLegendText=function(){
+    var out=[];
+    var g=document.getElementById('w-label-mode');
+    var gv=g?g.value:'none';
+    if(gv&&gv!=='none'){
+      out.push((g.selectedIndex>=0&&g.options[g.selectedIndex])?g.options[g.selectedIndex].text:gv);
+    }
+    if(typeof _wRingLift!=='undefined'&&_wRingLift&&typeof _wLblMode==='function'){
+      var lv=_wLblMode();
+      var names={r:'spiral r',M:'spiral M',rM:'spiral r/M',
+                 channel:'spiral 1/n channel',outer:'spiral outer pt'};
+      if(names[lv]){
+        var extra=names[lv];
+        if(lv==='channel'&&typeof _liftLblChan!=='undefined'&&_liftLblChan>0) extra+=' (1/'+_liftLblChan+')';
+        if(typeof _liftMirrorOn!=='undefined'&&_liftMirrorOn&&names[lv]&&lv!=='outer') extra+=' + \u03c3';
+        out.push(extra);
+      }
+      if(typeof _liftDropoutOn!=='undefined'&&_liftDropoutOn&&typeof _wDropoutLbl==='function'&&_wDropoutLbl())
+        out.push('dropout p');
+    }
+    return out.length?out.join(' \u00b7 '):'none';
+  };
   var _wCompLegend={
     smith:['Cayley Γ(z)=(z−1)/(z+1)','z=R·e^{iθ}, θ=2πr/M+α — Ring layout, Cayley-mapped'],
     ring :['Ring','r on concentric ring M · angle 2πr/M · prime rings cleanest'],
@@ -6293,7 +6377,20 @@ function heroToggleTopBars(){
 
     // Shared colour key — identical semantics in every panel, so it is stated
     // once up here instead of repeated five times underneath.
-    ty=H.drawFormula(ty,'Gold = block-coprime, gcd(r,M+j)=1 for j=0…'+n+'   ·   Teal = coprime only   ·   Dark = not coprime','rgba(200,168,74,.85)');
+    // The gold/teal/dark key describes the 'default' 3-state palette ONLY.
+    // Under any other colour mode it is simply false — this sheet was exported
+    // with φ(M) Mathematica and still claimed gold meant block-coprime. Name
+    // the active mode instead, and keep the 3-state key for the mode it fits.
+    var _cms=document.getElementById('w-color-mode');
+    var _cmTxt=(_cms&&_cms.selectedIndex>=0&&_cms.options[_cms.selectedIndex])
+      ? _cms.options[_cms.selectedIndex].text : String(_wColorMode).replace(/_/g,' ');
+    var _chTxt=(_wCharFilter==='support')?'χ≠0 (gcd=1) only'
+      :(_wCharFilter==='vanishing')?'χ=0 (gcd≠1) only'
+      :(_wCharFilter==='none')?'overlays only':'χ≠0 and χ=0';
+    var _keyTxt=(_wColorMode==='default')
+      ? ('Gold = block-coprime, gcd(r,M+j)=1 for j=0…'+n+'   ·   Teal = coprime only   ·   Dark = not coprime')
+      : ('Colour = '+_cmTxt+'   ·   '+_chTxt);
+    ty=H.drawFormula(ty,_keyTxt,'rgba(200,168,74,.85)');
 
     var subH=Math.round(SIZE*0.052);
     var availH=SIZE-ty-subH-footerH;
@@ -6351,15 +6448,28 @@ function heroToggleTopBars(){
     }
     _wRingLift=_liftWas;
 
-    var cnts=_cnExportCounts(G,n);
+    // Per-panel counts. The five views sample DIFFERENT domains — square G²,
+    // triangle G(G−1)/2+1 — so a single figure was right for at most two of
+    // them. The densities agree in the limit (all → 6/π²); the counts do not,
+    // and quoting one for all five hid exactly that.
     var sy=yTop+blockH+Math.round(SIZE*0.012);
-    H.drawFormula(sy,'gcd=1: '+cnts.gcd1+'/'+cnts.total+' ('+(cnts.gcd1/Math.max(1,cnts.total)*100).toFixed(2)+'%)   ·   '+
-      'lift: '+cnts.lift+'/'+cnts.total+' ('+(cnts.lift/Math.max(1,cnts.total)*100).toFixed(2)+'%)   ·   '+
-      'lift/gcd=1: '+cnts.lift+'/'+cnts.gcd1+' ('+(cnts.lift/Math.max(1,cnts.gcd1)*100).toFixed(2)+'%)','rgba(126,200,122,.85)');
+    var _popName={square:'G²',triangle:'G(G−1)/2+1'};
+    var _parts=sel.map(function(v){
+      var pv=_viewPop(v), c=_cnExportCounts(G,n,pv);
+      return _wCompLegend[v][0].split(' ')[0]+' '+c.gcd1+'/'+c.total+' ('+(c.gcd1/Math.max(1,c.total)*100).toFixed(1)+'%)';
+    });
+    H.drawFormula(sy,_parts.join('   ·   '),'rgba(126,200,122,.85)');
+    var _uniq=[];
+    sel.forEach(function(v){ var p=_viewPop(v); if(_uniq.indexOf(p)<0)_uniq.push(p); });
+    H.drawFormula(sy+Math.round(SIZE*0.018),
+      'domains: '+_uniq.map(function(p){return _popName[p]||p;}).join('  ·  ')
+      +'   —   Gauss draws 4 mirrored quadrants of the same G² pairs',
+      'rgba(184,178,166,.55)');
 
     H.drawFooter(SIZE-footerH+Math.round(SIZE*0.004),[
       ['rgba(155,127,232,.75)', sel.map(function(v){return _wCompLegend[v][0];}).join('  ·  ')+
         '   —   G='+G+' · n='+n+' · C('+n+')='+Cn+((_wMode==='finite')?(' · '+modeLabel):'')],
+      ['rgba(230,120,130,.75)', 'Labels: '+window._wLabelLegendText()],
     ]);
   };
 
@@ -14583,7 +14693,16 @@ function exportHeroSideBySide8K(rightPanel){
 // stayed frozen at the n=1 numbers no matter where the N slider was.
 // pop: 'triangle' (r<M — ring/smith/lift), 'square' (all r,M ≤ G — grid/gauss),
 //      'coprime' (reduced fractions only — farey)
-function _viewPop(v){return(v==='grid'||v==='gauss')?'square':(v==='farey')?'coprime':'triangle';}
+function _viewPop(v){
+  // Domains, verified against the draw loops:
+  //   grid   full G x G square      -> G^2      (triangle when Half is on)
+  //   gauss  4 mirrored quadrants   -> G^2 DISTINCT pairs; the 4x is symmetry,
+  //          not extra data, so it counts as one square
+  //   ring / cayley / farey  1<=r<M plus the single M=1 point -> G(G-1)/2 + 1
+  if(v==='grid')  return (typeof _wGridHalf!=='undefined'&&_wGridHalf)?'triangle':'square';
+  if(v==='gauss') return 'square';
+  return 'triangle';
+}
 const _cnCountsMemo=new Map(); // key G|n|pop → {total,gcd1,lift}; pure fn, capped LRU-ish
 // Exact counting is O(G²) with a gcd per cell: 196 ms at G=2048, 1.1 s at
 // G=5000, 17 s at G=20000. _wUpdateFormulaRatios calls this from inside
@@ -25193,6 +25312,17 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')window.close
   var P=null;
   function sieve(){if(P)return P;var L=60000,f=new Uint8Array(L+1);P=[];
     for(var i=2;i<=L;i++){if(!f[i]){P.push(i);for(var j=i*i;j<=L;j+=i)f[j]=1;}}return P;}
+  // Jump from the opener's ground-state control down to the "Intro — what
+  // is C(n)?" dropdown, and flash its summary so it's easy to spot — without
+  // expanding it (leaves the <details> closed/open exactly as the reader had it).
+  window.wScrollToIntro=function(){
+    var dd=document.getElementById('w-intro-dd'); if(!dd)return;
+    var head=dd.querySelector('summary')||dd;
+    head.scrollIntoView({behavior:'smooth',block:'center'});
+    head.classList.remove('wg-intro-flash'); void head.offsetWidth;
+    head.classList.add('wg-intro-flash');
+    setTimeout(function(){head.classList.remove('wg-intro-flash');},1700);
+  };
   // ▲▼ stepper for the n inputs (opener + hero): clamp 0..500, sync, recompute
   window.wCnStep=function(id,d){
     var e=document.getElementById(id); if(!e)return;
