@@ -1185,9 +1185,9 @@ function heroToggleTopBars(){
     <div id="w-groundstate-top" style="animation:wgFadeUp .6s .22s both;margin:8px 0 4px;padding:8px 10px;background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.18);font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
       <span>C(1) ≈ 0.530711&hellip; is the first step down from certainty — set n below to lock a ground state and watch each later step live.</span>
       <span style="color:#a8a294;">n&nbsp;=</span>
-      <button onclick="wCnStep('top-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="top-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('top-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
+      <button onclick="wCnStep('top-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="top-steps-n" min="0" max="500" value="1" oninput="wCnSteps(+this.value)" style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('top-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
-        <input type="checkbox" id="top-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('top-steps-n')?.value||0))"> set ground state (lock to page n)
+        <input type="checkbox" id="top-steps-link" checked style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('top-steps-n')?.value||0))"> set ground state (lock to page n)
       </label>
     </div>
     </details>
@@ -1359,6 +1359,11 @@ function heroToggleTopBars(){
           <span style="color:rgba(61,200,184,.85);letter-spacing:.08em;text-transform:uppercase;font-size:7.5px;">Lift dynamics</span>
         </summary>
         <style>#w-ringlift-dd[open]>summary>span.wrl-chev{transform:rotate(90deg);}</style>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:3px 0;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:rgba(230,56,72,.85);">
+          <span title="Point size for the prime spiral, mirror sigma, all-p dots and the dropout ring. Scales with export resolution too, so 4K sheets stay as sharp as the screen.">Spiral/mirror size</span>
+          <input class="lift-dot-sl" type="range" min="0.3" max="5" step="0.1" value="1" oninput="window._wSetLiftDotScale(this.value)" style="flex:1 1 90px;min-width:0;max-width:150px;accent-color:rgba(230,56,72,.9);">
+          <span id="lift-dot-val" style="color:#8a8478;min-width:34px;">1.00&times;</span>
+        </div>
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;">
         <label style="display:inline-flex;align-items:center;gap:4px;color:rgba(61,200,184,.9);cursor:pointer;"><input type="checkbox" class="lift-surv-chk" checked style="accent-color:rgba(61,200,184,.8);" onchange="liftSetSurv(this.checked)">Surviving</label>
         <label style="display:inline-flex;align-items:center;gap:4px;color:rgba(224,80,96,.9);cursor:pointer;"><input type="checkbox" class="lift-broken-chk" checked style="accent-color:rgba(224,80,96,.8);" onchange="liftSetBroken(this.checked)">Broken</label>
@@ -1800,10 +1805,10 @@ function heroToggleTopBars(){
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;background:#0c0c22;border:1px solid rgba(155,127,232,.25);padding:12px 14px;margin:0 0 12px;">
       <div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Try any n — step-by-step (C(n) &amp; D(n))</div>
       <span style="color:#a8a294;">n =</span>
-      <button onclick="wCnStep('w-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="w-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('w-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
+      <button onclick="wCnStep('w-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="w-steps-n" min="0" max="500" value="1" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('w-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <button onclick="wCnSteps(+document.getElementById('w-steps-n').value)" style="background:rgba(155,127,232,.12);border:1px solid rgba(155,127,232,.5);color:#9b7fe8;font-family:inherit;font-size:9px;padding:4px 12px;cursor:pointer;">Show steps</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
-        <input type="checkbox" id="w-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('w-steps-n')?.value||0))"> set ground state (lock to page n)
+        <input type="checkbox" id="w-steps-link" checked style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('w-steps-n')?.value||0))"> set ground state (lock to page n)
         <span id="w-ground-mode" style="font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(200,168,74,.75);margin-left:4px;"></span>
       </label>
       <div id="w-steps-out" style="margin-top:8px;line-height:1.9;color:#b8b2a6;"></div>
@@ -4633,6 +4638,21 @@ function heroToggleTopBars(){
     return e*_wExportDotScale;
   }
   window._wSetExportDotScale=function(v){ _wExportDotScale=Math.max(0.3,Math.min(4,+v||1)); };
+  // The lift-dynamics marks (prime spiral, mirror σ, all-p, dropout ring) never
+  // went through _wPx(), so their radii stayed absolute: 2.6 px on a 536 px
+  // canvas is a clear dot, the same 2.6 px on a 4096 px sheet is 1/8 the
+  // relative size — which is exactly why they export dim and soft while the
+  // base lattice stays sharp. _wLiftPx() = export scale x its own user knob.
+  var _wLiftDotScale=1;
+  function _wLiftPx(){ return _wPx()*_wLiftDotScale; }
+  window._wSetLiftDotScale=function(v){
+    _wLiftDotScale=Math.max(0.3,Math.min(5,+v||1));
+    var o=document.getElementById('lift-dot-val'); if(o)o.textContent=_wLiftDotScale.toFixed(2)+'\u00d7';
+    document.querySelectorAll('.lift-dot-sl').forEach(function(el){ if(+el.value!==_wLiftDotScale)el.value=_wLiftDotScale; });
+    if(typeof wRedrawCanvas==='function')wRedrawCanvas();
+    if(typeof _liftRedraw==='function')_liftRedraw();
+  };
+  window._wGetLiftPx=function(){ return _wLiftPx(); };
   var _wPxOwn=null;          // pixel-occupancy scratch for the grid dedupe
   var _wSpf=null, _wSpfLim=0;
   function _wEnsureSpf(lim){
@@ -4736,7 +4756,7 @@ function heroToggleTopBars(){
   // with one red dot" first-paint bug). Always read the label mode through
   // this guard.
   function _wLblMode(){return (typeof _liftLblMode==='undefined')?'none':_liftLblMode;}
-  var _wExportScale=0, _wExportGain=1, _wExport4KConfirmed=false, _wExportSize=3840, _wExportZoom=0.92;
+  var _wExportScale=0, _wExportGain=1, _wExport4KConfirmed=false, _wExportSize=4096, _wExportZoom=0.92;
 
   // Detail line for the currently inspected point — same facts as the live
   // inspect bar under the opener canvas, so an export is self-describing.
@@ -4828,7 +4848,12 @@ function heroToggleTopBars(){
     var _lsc0=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
     var _w=(typeof W==='number'&&W>0)?W:(ctx.canvas?ctx.canvas.width:0);
     var _need=(('p='+pP).length*5.6*_lsc0+10)*_k; // rough advance width
-    var _side=(_w&&(x+_need)>_w-4*_k)?-1:1;       // no room right -> write left
+    // Flip inward well before the true edge when the outer label is on: it is
+    // pinned to the right margin at this SAME y, so anything reaching the outer
+    // third would sit under it. Writing inward keeps both on the ray.
+    var _outerOn=(typeof _wLblMode==='function'&&_wLblMode()==='outer');
+    var _limit=_outerOn?(_w*0.62):(_w-4*_k);
+    var _side=(_w&&(x+_need)>_limit)?-1:1;       // no room right -> write left
     return _wDropoutLabelAt(ctx,x,y,pP,_side,_need);
   }
   function _wDropoutLabelAt(ctx,x,y,pP,side,need){
@@ -4841,8 +4866,13 @@ function heroToggleTopBars(){
     ctx.fillStyle='rgba(230,56,72,.95)';
     ctx.textAlign=(side<0)?'right':'left';
     var dx=(side<0?-6:6)*K;
+    // Stay ON the r=0 ray. The vertical nudge I used to dodge the outer label
+    // pushed this onto the neighbouring gcd=1 line, which is precisely the
+    // wrong line to sit on — the point of this label is that it marks residue
+    // 0. Collision is handled purely horizontally, by the side flip above.
+    var dy=0;
     _wUprightAt(ctx,x,y,function(){
-      ctx.strokeText('p='+pP,dx,0); ctx.fillText('p='+pP,dx,0);
+      ctx.strokeText('p='+pP,dx,dy); ctx.fillText('p='+pP,dx,dy);
     });
     ctx.restore();
   }
@@ -4860,6 +4890,27 @@ function heroToggleTopBars(){
     ctx.lineWidth=2.2*K;ctx.strokeStyle='rgba(4,4,13,.85)';
     ctx.fillStyle=mir?'rgba(175,150,240,.95)':'rgba(230,120,130,.95)';
     _wUprightAt(ctx,x,y,function(){ctx.strokeText(lbl,5*K,0);ctx.fillText(lbl,5*K,0);});
+    ctx.restore();
+  }
+  // Channel label for a MIRROR point. sigma carries residue M-r, so its Farey
+  // channel is floor(M/(M-r)) — genuinely a different sector from its source
+  // point (p=7: at M=9 the source is 1/1 while sigma is 1/4), which is the
+  // whole reason it is worth labelling separately. Violet, matching the mirror
+  // dots, so the two channel families stay distinguishable. Honours the same
+  // 1/n sector filter as the spiral channel labels.
+  function _wDynMirrorLabel(ctx,x,y,sr,pM){
+    if(_wLblMode()!=='channel')return;
+    var mr=pM-sr; if(mr<1||mr>=pM)return;
+    var k=Math.max(1,Math.floor(pM/Math.max(1,mr)));
+    if(typeof _liftLblChan!=='undefined'&&_liftLblChan>0&&k!==_liftLblChan)return;
+    var _lsc=(typeof _liftLblScale!=='undefined')?_liftLblScale:1;
+    var K=(typeof _wExportScale!=='undefined'&&_wExportScale>0)?_wExportScale:1;
+    ctx.save();
+    ctx.font=(8*_lsc*K).toFixed(1)+"px 'JetBrains Mono',monospace";
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.lineWidth=2.2*K;ctx.strokeStyle='rgba(4,4,13,.85)';
+    ctx.fillStyle='rgba(175,150,240,.95)';
+    _wUprightAt(ctx,x,y,function(){ctx.strokeText('1/'+k,5*K,0);ctx.fillText('1/'+k,5*K,0);});
     ctx.restore();
   }
   function _wDynSpiralLabel(ctx,x,y,sr,pM,rich){
@@ -4955,7 +5006,7 @@ function heroToggleTopBars(){
     // the Ring draws a circle; in the flat geometries it's the straight row.
     if(dropoutOn&&spP>=2&&spP<=G&&_dynA(spP)){
       var E1=xy(1,spP),E2=xy(Math.max(1,spP-1),spP);
-      if(E1&&E2){ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.2;
+      if(E1&&E2){ctx.save();ctx.setLineDash([3*_wLiftPx(),3*_wLiftPx()]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.2*_wLiftPx();
         ctx.beginPath();ctx.moveTo(E1[0],E1[1]);ctx.lineTo(E2[0],E2[1]);ctx.stroke();ctx.restore();
         if(_wDropoutLbl())_wDropoutLabel(ctx,E2[0],E2[1],spP,W);}
     }
@@ -4968,7 +5019,7 @@ function heroToggleTopBars(){
           var apr=spDir==='down'?(((apM-(ap%apM))%apM)||apM):(ap%apM);
           if(apr<1||apr>=apM)continue;
           var AP=xy(apr,apM); if(!AP)continue;
-          ctx.fillStyle='rgba(230,56,72,.28)';ctx.beginPath();ctx.arc(AP[0],AP[1],1.5,0,6.2832);ctx.fill();
+          ctx.fillStyle='rgba(230,56,72,.28)';ctx.beginPath();ctx.arc(AP[0],AP[1],1.5*_wLiftPx(),0,6.2832);ctx.fill();
         }
       }
     }
@@ -4980,17 +5031,17 @@ function heroToggleTopBars(){
         var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
         if(sr>=1&&sr<pM){
           var S=xy(sr,pM);
-          if(S){ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
+          if(S){ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6*_wLiftPx(),0,6.2832);ctx.fill();
             if(_wLblMode()==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
             else if(_wLblMode()==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
             else _wSpiralPtLabel(ctx,S[0],S[1],sr,pM,false);
           }
           if(mirrorOn&&pM-sr>=1&&pM-sr<pM){
             var SM=xy(pM-sr,pM);
-            if(SM){ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();
+            if(SM){ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3*_wLiftPx(),0,6.2832);ctx.fill();
               // σ carries its OWN residue M−r, so 'by r' must label M−r here,
               // not sr — otherwise the mirror looks like a duplicate of its source.
-              _wSpiralPtLabel(ctx,SM[0],SM[1],pM-sr,pM,true);}
+              _wSpiralPtLabel(ctx,SM[0],SM[1],pM-sr,pM,true);_wDynMirrorLabel(ctx,SM[0],SM[1],sr,pM);}
           }
         }
       }
@@ -5246,7 +5297,7 @@ function heroToggleTopBars(){
       if(dropoutOn&&spP>=2&&spP<=rings&&_wRingActive(spP)){
         var dMx=_wRingInvert?(rings+1-spP):spP;
         var dR=maxR*(dMx-1)/Math.max(1,rings-1);
-        ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.75)';ctx.lineWidth=1.3;
+        ctx.save();ctx.setLineDash([3*_wLiftPx(),3*_wLiftPx()]);ctx.strokeStyle='rgba(230,56,72,.75)';ctx.lineWidth=1.3*_wLiftPx();
         ctx.beginPath();ctx.arc(cx,cy,dR,0,Math.PI*2);ctx.stroke();ctx.restore();
         if(_wDropoutLbl())_wDropoutLabel(ctx,cx+dR,cy,spP,cx+maxR); // r=0 ray, the p/p residue line
       }
@@ -5259,7 +5310,7 @@ function heroToggleTopBars(){
             if(!_wRingActive(apM))continue;
             var apr=spDir==='down'?(((apM-(ap%apM))%apM)||apM):(ap%apM);
             var apXY=ringXY(apr,apM);
-            ctx.fillStyle='rgba(230,56,72,.28)';ctx.beginPath();ctx.arc(apXY[0],apXY[1],1.5,0,6.2832);ctx.fill();
+            ctx.fillStyle='rgba(230,56,72,.28)';ctx.beginPath();ctx.arc(apXY[0],apXY[1],1.5*_wLiftPx(),0,6.2832);ctx.fill();
           }
         }
       }
@@ -5270,14 +5321,14 @@ function heroToggleTopBars(){
         if(spOn&&spP<pM){
           var sr=spDir==='down'?(((pM-(spP%pM))%pM)||pM):(spP%pM);
           var S=ringXY(sr,pM);
-          ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6,0,6.2832);ctx.fill();
+          ctx.fillStyle='rgba(230,56,72,.95)';ctx.beginPath();ctx.arc(S[0],S[1],2.6*_wLiftPx(),0,6.2832);ctx.fill();
           if(_wLblMode()==='channel')_wDynSpiralLabel(ctx,S[0],S[1],sr,pM);
           else if(_wLblMode()==='outer')_spOut={x:S[0],y:S[1],sr:sr,pM:pM};
           else _wSpiralPtLabel(ctx,S[0],S[1],sr,pM,false);
           if(mirrorOn){
             var SM=ringXY(pM-sr,pM);
-            ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3,0,6.2832);ctx.fill();
-            _wSpiralPtLabel(ctx,SM[0],SM[1],pM-sr,pM,true);
+            ctx.fillStyle='rgba(155,127,232,.85)';ctx.beginPath();ctx.arc(SM[0],SM[1],2.3*_wLiftPx(),0,6.2832);ctx.fill();
+            _wSpiralPtLabel(ctx,SM[0],SM[1],pM-sr,pM,true);_wDynMirrorLabel(ctx,SM[0],SM[1],sr,pM);
           }
         }
         for(var nI=0;nI<nList.length;nI++){
@@ -5632,6 +5683,7 @@ function heroToggleTopBars(){
       if(_spOn||_npOn){
         var spP=(typeof liftSpiralPFor==='function')?liftSpiralPFor(rings):2;
         var mark=function(pr,pM,color,rad){
+          rad=rad*_wLiftPx();
           var pRingR=_wRingR(pM,rings);
           var prD=_wPerRingShiftedR(pr,pM,pM,_wPerRing);
           var th=2*Math.PI*prD/pM+alpha;
@@ -5643,7 +5695,7 @@ function heroToggleTopBars(){
         // Dropout ring — the ring M=p itself, where the spiral prime exits (ℤ/Mℤ)*.
         if(_dropoutOn&&spP>=2&&spP<=rings&&_wRingActive(spP)){
           var dRingR=_wRingR(spP,rings);
-          ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.1;
+          ctx.save();ctx.setLineDash([3*_wLiftPx(),3*_wLiftPx()]);ctx.strokeStyle='rgba(230,56,72,.7)';ctx.lineWidth=1.1*_wLiftPx();
           ctx.beginPath();
           for(var dk=0;dk<=64;dk++){
             var dt=2*Math.PI*dk/64+alpha;
@@ -5679,7 +5731,7 @@ function heroToggleTopBars(){
             else _wSpiralPtLabel(ctx,_sPt[0],_sPt[1],sr,pM,false);
             if(_mirrorOn){
               var _mPt=mark(pM-sr,pM,'rgba(155,127,232,.85)',2.3); // conjugate σ(r)=M−r
-              if(_mPt)_wSpiralPtLabel(ctx,_mPt[0],_mPt[1],pM-sr,pM,true);
+              if(_mPt){_wSpiralPtLabel(ctx,_mPt[0],_mPt[1],pM-sr,pM,true);_wDynMirrorLabel(ctx,_mPt[0],_mPt[1],sr,pM);}
             }
           }
           for(var nI=0;nI<_nList.length;nI++){
@@ -6160,6 +6212,20 @@ function heroToggleTopBars(){
   // One panel, drawn offscreen at `side` px. Mirrors _wRender4KInto's
   // transform stack (rotation, Smith flip, export zoom) but drops pan —
   // a composite panel is a fitted thumbnail, not the live viewport.
+  var _wCompNeedsGain=false;
+  // Same additive re-composite the single-view export uses. Applied PER PANEL
+  // so each one is lifted independently — brightening the assembled sheet
+  // would also brighten the header text and captions.
+  function _wCompApplyGain(oc,side){
+    if(!_wExportGain||_wExportGain===1)return;
+    var c=oc.getContext('2d');
+    var b=document.createElement('canvas'); b.width=side; b.height=side;
+    b.getContext('2d').drawImage(oc,0,0);
+    c.globalCompositeOperation='lighter';
+    var g=_wExportGain-1, steps=Math.ceil(Math.abs(g));
+    for(var i=0;i<steps;i++){ c.globalAlpha=Math.min(1,Math.abs(g)-i); c.drawImage(b,0,0); }
+    c.globalAlpha=1; c.globalCompositeOperation='source-over';
+  }
   function _wCompPanel(view,side,n,drawG){
     var oc=document.createElement('canvas'); oc.width=side; oc.height=side;
     var c=oc.getContext('2d');
@@ -6182,6 +6248,7 @@ function heroToggleTopBars(){
       else if(view==='gauss') drawWGauss(c,side,side,n,drawG);
     }catch(e){}
     _wHitRec=false;
+    _wCompNeedsGain=true;
     if(window._wGoldbachActive&&typeof window._wDrawGoldbach==='function'){
       try{ window._wDrawGoldbach(c,drawG); }catch(e){}
     }
@@ -6199,6 +6266,7 @@ function heroToggleTopBars(){
       for(var i=0;i<steps;i++){ c.globalAlpha=Math.min(1,Math.abs(g)-i); c.drawImage(b,0,0); }
       c.globalAlpha=1; c.globalCompositeOperation='source-over';
     }
+    _wCompApplyGain(oc,side);   // brightness, per panel
     return oc;
   }
 
@@ -7899,10 +7967,10 @@ function heroToggleTopBars(){
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;background:#0c0c22;border:1px solid rgba(155,127,232,.25);padding:12px 14px;margin:0 0 12px;">
       <div style="color:#9b7fe8;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Try any n — step-by-step (C(n) &amp; D(n))</div>
       <span style="color:#a8a294;">n =</span>
-      <button onclick="wCnStep('hero-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="hero-steps-n" min="0" max="500" value="2" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('hero-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
+      <button onclick="wCnStep('hero-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="hero-steps-n" min="0" max="500" value="1" oninput="wCnSteps(+this.value)" style="width:56px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('hero-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <button onclick="wCnSteps(+document.getElementById('hero-steps-n').value)" style="background:rgba(155,127,232,.12);border:1px solid rgba(155,127,232,.5);color:#9b7fe8;font-family:inherit;font-size:9px;padding:4px 12px;cursor:pointer;">Show steps</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
-        <input type="checkbox" id="hero-steps-link" style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('hero-steps-n')?.value||0))"> set ground state (lock to page n)
+        <input type="checkbox" id="hero-steps-link" checked style="accent-color:#3dc8b8;" onchange="wCnSteps(+(document.getElementById('hero-steps-n')?.value||0))"> set ground state (lock to page n)
       </label>
       <div id="hero-steps-out" style="margin-top:8px;line-height:1.9;color:#b8b2a6;"></div>
     </div>
@@ -23417,7 +23485,7 @@ let _pxFn=null; let _pxReRender=null;
     if(_pxReRender) _pxReRender();
   };
   window.pxSetRes=function(px){
-    var v=Math.max(512,Math.min(7680,+px||3840));
+    var v=Math.max(512,Math.min(8192,+px||4096)); // 8192 ceiling, or 8K would clamp to 7680
     if(typeof _wExportSize!=='undefined') _wExportSize=v;
     var lbl=document.getElementById('px-res-lbl');
     if(lbl) lbl.textContent=v+' \u00d7 '+v;
@@ -23444,7 +23512,7 @@ let _pxFn=null; let _pxReRender=null;
     var r=document.getElementById('px-res-row');
     if(r) r.style.display=on?'flex':'none';
     if(on) document.querySelectorAll('.px-res-btn').forEach(function(b){
-      b.classList.toggle('on', +b.dataset.s===(typeof _wExportSize!=='undefined'?_wExportSize:3840));
+      b.classList.toggle('on', +b.dataset.s===(typeof _wExportSize!=='undefined'?_wExportSize:4096));
     });
   }
   function _pxShowGain(on){
@@ -23967,8 +24035,8 @@ function drawStripAverage(overrideG,overrideW){
           <option value="7680x4320">8K — 7680 × 4320</option>
           <option value="2560x1440">1440p — 2560 × 1440</option>
           <option value="1920x1080">1080p — 1920 × 1080</option>
-          <option value="2160x2160">Square 4K — 2160 × 2160</option>
-          <option value="3840x3840" selected>Square 8K — 3840 × 3840 ★</option>
+                    <option value="8192x8192">Square 8K — 8192 × 8192</option>
+          <option value="4096x4096" selected>Square 4K — 4096 × 4096 ★</option>
           <option value="1080x1920">Portrait — 1080 × 1920</option>
           <option value="2400x1350">Presentation — 2400 × 1350</option>
           <option value="4800x2700">Presentation 4K — 4800 × 2700</option>
@@ -24154,9 +24222,9 @@ function drawStripAverage(overrideG,overrideW){
       <div class="px-note" id="px-res-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
         <span style="color:#c8a84a;">Output size</span>
         <button class="px-res-btn" data-s="2048" onclick="pxSetRes(2048)">2K</button>
-        <button class="px-res-btn" data-s="3840" onclick="pxSetRes(3840)">4K</button>
-        <button class="px-res-btn" data-s="7680" onclick="pxSetRes(7680)">8K</button>
-        <span id="px-res-lbl" style="color:#c8a84a;">3840 &times; 3840</span>
+        <button class="px-res-btn" data-s="4096" onclick="pxSetRes(4096)">4K</button>
+        <button class="px-res-btn" data-s="8192" onclick="pxSetRes(8192)">8K</button>
+        <span id="px-res-lbl" style="color:#c8a84a;">4096 &times; 4096</span>
       </div>
       <div class="px-note" id="px-zoom-row" style="display:none;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
         <span style="color:#c8a84a;">Canvas zoom</span>
@@ -25289,6 +25357,54 @@ function _wireCycleSteppers(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_wireCycleSteppers);
 else _wireCycleSteppers();
+</script>
+
+<script>
+// Ground state ships ON at n=1: the checkbox markup alone only sets the box,
+// it does not run the lock. Apply it once after load so the headline, the
+// C(n) panel and the opener n slider all start in agreement.
+(function(){
+  function _wGroundBoot(){
+    try{
+      var el=document.getElementById('top-steps-n');
+      var n=el?(+el.value||1):1;
+      if(typeof wCnSteps==='function') wCnSteps(n);
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(_wGroundBoot,60);});
+  else setTimeout(_wGroundBoot,60);
+})();
+
+// ── Opener fullscreen: fold the reading matter, keep the working controls ──
+// In whole-opener fullscreen the intro question, the C(n)/mode block and the
+// View panel push the canvas off the bottom of a phone. Collapse those three
+// on entry and restore EXACTLY the states they had on exit, so the normal
+// page is left untouched.
+(function(){
+  var IDS=['w-intro-wrap','w-formula-wrap','w-viewopts-dd'];
+  var saved=null;
+  function apply(){
+    var card=document.getElementById('welcome-card');
+    var fs=document.fullscreenElement||document.webkitFullscreenElement;
+    var cardFs=!!fs&&card&&(fs===card||(fs.contains&&fs.contains(card)&&fs!==document.documentElement));
+    if(cardFs){
+      if(saved)return;                       // already folded; don't re-save
+      saved={};
+      IDS.forEach(function(id){
+        var d=document.getElementById(id);
+        if(!d)return; saved[id]=d.open; d.open=false;
+      });
+    } else if(saved){
+      IDS.forEach(function(id){
+        var d=document.getElementById(id);
+        if(d&&saved[id]!==undefined) d.open=saved[id];
+      });
+      saved=null;
+    }
+  }
+  document.addEventListener('fullscreenchange',apply);
+  document.addEventListener('webkitfullscreenchange',apply);
+})();
 </script>
 </body>
 </html>
