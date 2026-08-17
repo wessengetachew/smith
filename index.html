@@ -1061,6 +1061,12 @@ table.dt tbody tr:focus-visible{outline:1px solid rgba(200,168,74,.55);outline-o
 @keyframes wgFadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 @keyframes wgIntroFlash{0%{box-shadow:0 0 0 0 rgba(200,168,74,0);background:rgba(200,168,74,0);}18%{box-shadow:0 0 0 3px rgba(200,168,74,.5);background:rgba(200,168,74,.12);}100%{box-shadow:0 0 0 0 rgba(200,168,74,0);background:rgba(200,168,74,0);}}
 .wg-intro-flash{animation:wgIntroFlash 1.7s ease-out;}
+/* Finite-mode nth-prime picker: a slow persistent pulse for as long as
+   Finite is selected, so the control that now matters (which prime you're
+   truncating at) doesn't just sit there as one more grey box among many —
+   used on both the opener's wm-finite-panel and the hero's finite-panel. */
+@keyframes wgFinitePulse{0%,100%{box-shadow:0 0 0 0 rgba(61,200,184,.25);border-color:rgba(61,200,184,.35);}50%{box-shadow:0 0 9px 2px rgba(61,200,184,.4);border-color:rgba(61,200,184,.85);}}
+.wg-finite-highlight{animation:wgFinitePulse 1.9s ease-in-out infinite;}
 #ws-view-mode-row::-webkit-scrollbar{display:none;}
 /* Keep the 5 view-mode buttons (Cayley/Ring/Grid/Farey/Gauss) together as
    one atomic group — the internal flex-wrap:nowrap means this block never
@@ -1191,7 +1197,7 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
          with the fuller "Try any n" panel inside the Intro dropdown below
          (and the matching copy above the hero's calculator) via wCnSteps. -->
     <div id="w-groundstate-top" style="animation:wgFadeUp .6s .22s both;margin:8px 0 4px;padding:8px 10px;background:rgba(61,200,184,.05);border:1px solid rgba(61,200,184,.18);font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a8a294;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-      <span>C(1) ≈ 0.530711&hellip; is the first step down from certainty — set n below to lock a ground state and watch each later step live.</span>
+      <span id="w-groundtext">C(1) ≈ 0.530711&hellip; is the first step down from certainty — set n below to lock a ground state and watch each later step live.</span>
       <span style="color:#a8a294;">n&nbsp;=</span>
       <button onclick="wCnStep('top-steps-n',-1)" aria-label="decrease n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">−</button><input type="number" id="top-steps-n" min="0" max="500" value="1" oninput="wCnSteps(+this.value)" style="width:50px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#cfc9bc;font-family:inherit;font-size:10px;text-align:center;padding:3px;"><button onclick="wCnStep('top-steps-n',1)" aria-label="increase n" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.35);color:#3dc8b8;font-family:inherit;font-size:10px;width:22px;height:24px;cursor:pointer;padding:0;line-height:1;">+</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:8.5px;color:#3dc8b8;cursor:pointer;" title="Set ground state: lock this n to the page's C(n) — views, live value, and data all follow it">
@@ -1245,25 +1251,15 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       </div>
       <!-- Formula line — mirrors the hero's ζ(2)·∏ formula, mode-aware -->
       <div id="welcome-formula-line" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(200,168,74,.65);letter-spacing:.01em;padding-bottom:6px;"></div>
-      </details>
-      <!-- n slider — max now tracks the lattice size G (was hardcoded to 20) -->
-      <span id="wfs-anchor-n" style="display:none;"></span>
-      <div id="welcome-n-row" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6560;">n</span>
-        <button id="wn-play-btn" onclick="wNPlay()" title="Ping-pong n from 0 to max"
-          style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ N</button>
-        <button onclick="wNextSat()" title="Jump n to the next saturation point (n = p−1)"
-          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">→sat</button>
-        <button onclick="wNStep(-1)" title="n − 1"
-          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">−</button>
-        <input type="range" id="welcome-n-slider" min="0" max="31" step="1" value="1"
-          style="flex:1;max-width:220px;accent-color:#c8a84a;" oninput="wRenderCn()">
-        <button onclick="wNStep(1)" title="n + 1"
-          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">+</button>
-        <span id="welcome-n-disp" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#3dc8b8;min-width:16px;text-align:right;">0</span>
-      </div>
-      
-      <details id="w-dn-block" style="border:1px solid rgba(61,200,184,.18);margin-top:4px;">
+      <!-- D(n) lives INSIDE the C(n) box now, not as a separate detached
+           card below the n-slider — it's the raw-density reading of the
+           same C(n) value shown two lines up, so it belongs in the same
+           bordered area rather than floating on its own with a gap above
+           it. Nesting it here also means it now travels automatically
+           whenever welcome-cn-block gets relocated into canvas fullscreen
+           (it previously wasn't in the topRows list at all, so it just
+           vanished in that mode instead of merely being misplaced). -->
+      <details id="w-dn-block" style="border:1px solid rgba(61,200,184,.18);margin:2px 10px 8px;">
         <summary style="cursor:pointer;padding:5px 10px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(61,200,184,.05);">
           <span style="display:inline-block;transition:transform .15s;font-size:8px;color:#3dc8b8;">▸</span>
           <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3dc8b8;letter-spacing:.06em;">D(n) · BLOCK · SATURATION</span>
@@ -1288,6 +1284,23 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
           </div>
         </div>
       </details>
+      </details>
+      <!-- n slider — max now tracks the lattice size G (was hardcoded to 20) -->
+      <span id="wfs-anchor-n" style="display:none;"></span>
+      <div id="welcome-n-row" style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6560;">n</span>
+        <button id="wn-play-btn" onclick="wNPlay()" title="Ping-pong n from 0 to max"
+          style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.9);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">▶ N</button>
+        <button onclick="wNextSat()" title="Jump n to the next saturation point (n = p−1)"
+          style="background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;">→sat</button>
+        <button onclick="wNStep(-1)" title="n − 1"
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">−</button>
+        <input type="range" id="welcome-n-slider" min="0" max="31" step="1" value="1"
+          style="flex:1;max-width:220px;accent-color:#c8a84a;" oninput="wRenderCn()">
+        <button onclick="wNStep(1)" title="n + 1"
+          style="background:none;border:1px solid rgba(200,168,74,.35);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;">+</button>
+        <span id="welcome-n-disp" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#3dc8b8;min-width:16px;text-align:right;">0</span>
+      </div>
       <!-- Finite primes panel (hidden in asymptotic mode) -->
       <span id="wfs-anchor-finite" style="display:none;"></span>
       <div id="wm-finite-panel" style="display:none;flex-direction:column;gap:6px;background:rgba(61,200,184,.04);border:1px solid rgba(61,200,184,.2);padding:8px 10px;">
@@ -1541,7 +1554,6 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
          filter. Applies to ALL five views (Smith/Ring/Grid/Farey/Gauss), not
          just the one currently shown — mirrors the original project's
          per-modulus checkbox list + "Advanced Modulus Selection" panel. ══ -->
-    <span id="wfs-anchor-adv" style="display:none;"></span>
     <div id="w-adv-section" style="margin:0 0 10px;border:1px solid rgba(155,127,232,.28);border-radius:3px;overflow:hidden;">
       <div onclick="wAdvToggle()" style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:rgba(155,127,232,.07);cursor:pointer;">
         <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(155,127,232,.9);">Advanced — custom rings &amp; χ(r) filter</span>
@@ -1712,30 +1724,18 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
         <button id="ws-smith-zoomout-8" onclick="wSmithSetZoomOut(8)" style="background:rgba(126,200,122,.18);border:1px solid rgba(126,200,122,.7);color:rgba(126,200,122,.95);font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:3px 9px;cursor:pointer;">8×</button>
       </div>
 
-      <!-- The fullscreen-only control bar, its Hide button, and the
-           Show-controls tab are retired — fullscreen no longer relocates
-           anything, so there's nothing left to hide or show. -->
+      <!-- The fullscreen-only control bar (wfs-ctrl-bar) is very much still
+           in use — it's exactly where the relocated View/Mode/Formula/etc.
+           rows land (see the topRows list in _wCanvasFsHandler). What's
+           retired is the Hide/Show-controls pair below: wToggleHideControls
+           is a no-op stub now, so a "Hide" button that did nothing was just
+           confusing dead UI sitting in the bar. Removed outright rather than
+           left disabled, along with the now-empty "Controls — color / size
+           / pins / lift" fold (everything that used to route into it now
+           travels inside the View dropdown itself, see w-viewopts-dd). -->
       <div id="wfs-ctrl-bar" style="flex-direction:column;gap:6px;width:min(94vw,520px);padding:10px 14px;background:rgba(6,6,20,.92);border:1px solid rgba(200,168,74,.25);border-radius:4px;">
-        <div id="wfs-btn-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <button onclick="wToggleHideControls()" title="Hide controls"
-            style="background:none;border:1px solid rgba(255,255,255,.18);color:#a8a294;font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 9px;cursor:pointer;margin-left:auto;">Hide</button>
-        </div>
-        <!-- Collapses the view/color/size/pins/lift/twist controls into one
-             closed-by-default panel on entering canvas-only fullscreen — that
-             block was eating most of the screen before you ever scrolled to
-             the canvas. Starts closed every time fullscreen is (re-)entered;
-             tap to expand when you actually need one of these. -->
-        <details id="wfs-ctrl-collapse" style="background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.2);border-radius:3px;">
-          <summary style="cursor:pointer;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:rgba(200,168,74,.85);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
-            <span style="display:inline-block;transition:transform .15s;">▸</span> Controls — color / size / pins / lift
-          </summary>
-          <style>#wfs-ctrl-collapse[open]>summary>span{transform:rotate(90deg);}</style>
-          <div id="wfs-ctrl-collapse-body" style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(200,168,74,.15);"></div>
-        </details>
+        <div id="wfs-btn-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
       </div>
-      <!-- Always-visible tab to bring controls back after hiding (canvas fullscreen only) -->
-      <button id="wfs-show-btn" onclick="wToggleHideControls()" title="Show controls"
-        style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(6,6,20,.8);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 12px;cursor:pointer;border-radius:3px;z-index:3;">Show controls</button>
     </div>
 
     <!-- ══ SELECTED POINTS — every tapped (r,M), with its facts ══
@@ -2818,16 +2818,22 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       // directly above the formula it switches — stranding it below the
       // Smith/collapse controls (its old spot) let you change the toggle
       // with no visible link to the number it was changing. ──
-      ['w-viewopts-dd','wfs-anchor-viewdd'],          // View dropdown — view picker, Invert/Lift/Link/4K/4K-multi/Send to Hero, all collapsible together
+      ['w-viewopts-dd','wfs-anchor-viewdd'],          // View dropdown — view picker, Invert/Lift/Link/4K/4K-multi/Send to Hero,
+                                                       // Color/Label/Size, Lift Dynamics, Grid-plot, Advanced — everything the
+                                                       // normal page nests inside this one <details> travels as a unit, since
+                                                       // moving the whole element (not the bare inner row) carries its
+                                                       // descendants automatically. Previously this list ALSO had separate
+                                                       // entries for w-colorlabel-row / w-ringlift-ctrl / w-grid-plot-ctrl,
+                                                       // which re-extracted them into the Controls fold below right after
+                                                       // they'd already arrived here correctly — splitting one dropdown into
+                                                       // two. Don't re-add those three; they belong inside this entry only.
       ['ws-mode-row','wfs-anchor-mode'],              // ∞ Asymptotic / Finite ∏ — right above the formula it drives
       ['welcome-cn-block','wfs-anchor-formula'],      // C(n) formula
       ['wm-finite-panel','wfs-anchor-finite'],        // nth-prime picker — only relevant once Finite is on, stays with the toggle
       ['hero-working-dd','wfs-anchor-working'],       // Show Working — right below the formula
       // ── the rest: adjusted while watching the lattice ──
-      ['w-colorlabel-row','wfs-anchor-colorlabel'],   // Color, Label, label size, C(n) lock, pins
-      ['w-pins-dd','wfs-anchor-pins'],                // Selected Points list + CSV
-      ['w-ringlift-ctrl','wfs-anchor-ringlift'],
-      ['w-grid-plot-ctrl','wfs-anchor-gridplot'],
+      ['w-pins-dd','wfs-anchor-pins'],                // Selected Points list + CSV — a sibling of the View dropdown even on
+                                                       // the normal page, not nested inside it, so this one does stay separate
       // ws-perring-dd (per-ring/per-mod "twist") deliberately left out of
       // fullscreen — it's an obscure disambiguation control, not something
       // worth surfacing in the compact fullscreen bar. Still reachable in
@@ -2837,8 +2843,13 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       // ── setup / one-off panels sink below ──
       ['ws-sector-ctrl','wfs-anchor-sector'],
       ['ws-gaps-dd','wfs-anchor-gaps'],
-      ['ws-goldbach-dd','wfs-anchor-goldbach'],
-      ['w-adv-section','wfs-anchor-adv']
+      ['ws-goldbach-dd','wfs-anchor-goldbach']
+      // w-adv-section ("Advanced — Custom Rings & X(R) Filter") deliberately
+      // NOT listed here any more — it's already nested inside w-viewopts-dd
+      // on the normal page (same situation Color/Label/Lift/Grid-plot were
+      // in), so a separate entry here re-extracted it into its own spot
+      // down at the bottom, splitting it away from the View dropdown same
+      // as those three did. Leaving it out lets it travel with the dropdown.
     ];
     // Per-row try/catch: a single throwing insertBefore used to abort the whole
     // forEach, silently stranding every row after it outside the fullscreened
@@ -2851,35 +2862,17 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     // been moved. Three anchors are no longer adjacent to their rows after
     // the panel restructure — ws-view-row, ws-gaps-dd and hero-working-dd —
     // so that "restore" was a genuine reorganisation of the page.
-    // The first five rows (color/label/pins/lift/grid-plot/per-ring twist) are
-    // the ones that used to eat the whole screen above the fold in canvas
-    // fullscreen — they go into the closed-by-default wfs-ctrl-collapse
-    // panel instead of straight into the bar. View stays OUT of the collapse
-    // now — it needs to be visible immediately, not behind a tap.
-    var _wfsCollapseIds={'w-colorlabel-row':1,'w-pins-dd':1,'w-ringlift-ctrl':1,'w-grid-plot-ctrl':1};
-    var collapseWrap=document.getElementById('wfs-ctrl-collapse');
-    var collapseBody=document.getElementById('wfs-ctrl-collapse-body');
+    // The collapse-into-a-closed-panel behaviour (color/label/pins/lift/
+    // grid-plot/per-ring-twist routed into a separate "Controls" fold) is
+    // gone — those rows all ride inside w-viewopts-dd now (or, for Pins,
+    // sit as their own fold directly in the bar, same as the normal page),
+    // so every row in topRows just goes straight into the bar in order.
     if(canvasFs&&bar){
-      if(collapseWrap)collapseWrap.open=false;
-      var _collapsePlaced=false;
       topRows.forEach(function(pair){
         var row=document.getElementById(pair[0]);
         var anchor=document.getElementById(pair[1]);
         if(!row||!anchor)return;
-        try{
-          if(_wfsCollapseIds[pair[0]]&&collapseBody){
-            // Insert the collapse panel itself at THIS point in the sequence
-            // (its first member's turn), not unconditionally first — it used
-            // to always land above view/formula/Show Working regardless of
-            // where those sat in topRows, which is exactly backwards from
-            // "view and the formula at the top" and only got away with it
-            // by coincidence when view happened to be first in the list.
-            if(!_collapsePlaced&&collapseWrap){ bar.insertBefore(collapseWrap,btnRow||bar.firstChild); _collapsePlaced=true; }
-            collapseBody.appendChild(row);
-          } else {
-            bar.insertBefore(row,btnRow||bar.firstChild);
-          }
-        }
+        try{ bar.insertBefore(row,btnRow||bar.firstChild); }
         catch(e){ _fsFailed.push(pair[0]); }
       });
       window._wRowsRelocated=true;
@@ -2893,16 +2886,14 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       });
       window._wRowsRelocated=false;
     }
-    // Verify rather than assume: anything that did not actually land where it
-    // should (bar, or the collapse panel for the six collapsed rows) gets
-    // appended outright. Being in the wrong order beats being invisible.
+    // Verify rather than assume: anything that did not actually land in the
+    // bar gets appended outright. Being in the wrong order beats being
+    // invisible.
     if(canvasFs&&bar){
       topRows.forEach(function(pair){
         var row=document.getElementById(pair[0]);
-        var wantBody=_wfsCollapseIds[pair[0]]&&collapseBody;
-        var target=wantBody?collapseBody:bar;
-        if(row&&row.parentNode!==target){
-          try{ target.appendChild(row); }catch(e){}
+        if(row&&row.parentNode!==bar){
+          try{ bar.appendChild(row); }catch(e){}
         }
       });
     }
@@ -2916,13 +2907,9 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       else if(anchor.parentNode){ anchor.parentNode.insertBefore(row,anchor.nextSibling); }
     })();
     if(cv){cv._W=0;cv._H=0;} // force size recalc on next redraw
-    // Reset hide/show state each time canvas fullscreen is entered/exited
-    var showBtn=document.getElementById('wfs-show-btn');
     var zoomRow=document.getElementById('ws-zoom-ctrl');
     if(bar)bar.style.display=canvasFs?'flex':'none';
     if(zoomRow)zoomRow.style.display='flex';
-    if(showBtn)showBtn.style.display='none';
-    if(wrap)wrap.classList.remove('wfs-controls-hidden');
     wRedrawCanvas();
   }
 
@@ -2977,16 +2964,32 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     var bf=document.getElementById('wm-btn-finite');
     var fp=document.getElementById('wm-finite-panel');
     var ml=document.getElementById('welcome-cn-mode-lbl');
+    var gt=document.getElementById('w-groundtext');
     if(m==='asymptotic'){
       if(ba){ba.style.background='rgba(200,168,74,.18)';ba.style.borderColor='rgba(200,168,74,.7)';ba.style.color='#c8a84a';}
       if(bf){bf.style.background='none';bf.style.borderColor='rgba(61,200,184,.35)';bf.style.color='rgba(61,200,184,.6)';}
       if(fp)fp.style.display='none';
+      if(fp)fp.classList.remove('wg-finite-highlight');
       if(ml)ml.textContent='';
+      // Asymptotic C(1) really is the fixed constant 0.530711… — the
+      // classic "first step down from certainty" framing only makes sense
+      // here, where the Euler product runs over ALL primes.
+      if(gt)gt.textContent='C(1) \u2248 0.530711\u2026 is the first step down from certainty \u2014 set n below to lock a ground state and watch each later step live.';
     } else {
       if(bf){bf.style.background='rgba(61,200,184,.18)';bf.style.borderColor='rgba(61,200,184,.7)';bf.style.color='#3dc8b8';}
       if(ba){ba.style.background='none';ba.style.borderColor='rgba(200,168,74,.35)';ba.style.color='rgba(200,168,74,.6)';}
       if(fp)fp.style.display='flex';
+      if(fp)fp.classList.add('wg-finite-highlight');
       if(ml)ml.textContent='('+_wPrimeK+' primes)';
+      // Finite mode stops the product early, so C(1) is not 0.530711… here
+      // — it's whatever the truncated partial product gives, which changes
+      // with the nth-prime picker below. Naming the actual cutoff prime
+      // keeps this line honest instead of quoting the asymptotic constant
+      // while a completely different value is showing on screen.
+      if(gt){
+        var _gtP=(typeof _wPrimes!=='undefined'&&_wPrimes&&_wPrimeK>0)?_wPrimes[_wPrimeK-1]:null;
+        gt.textContent='C(1) here is a Finite \u220f partial product, truncated at p\u2081'+(_gtP?('='+_gtP):'')+' \u2014 set n below to lock a ground state and watch each later step live.';
+      }
     }
     wRenderCn();
     _wSyncGToFinitePrime();
@@ -3040,6 +3043,12 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     }
     var ml=document.getElementById('welcome-cn-mode-lbl');
     if(ml&&_wMode==='finite')ml.textContent='('+_wPrimeK+' primes)';
+    // Ground-state blurb names the actual cutoff prime — keep it in sync
+    // when the nth-prime picker moves even without a full mode switch.
+    var gt=document.getElementById('w-groundtext');
+    if(gt&&_wMode==='finite'){
+      gt.textContent='C(1) here is a Finite \u220f partial product, truncated at p\u2081='+(_wPrimes[_wPrimeK-1]||'?')+' \u2014 set n below to lock a ground state and watch each later step live.';
+    }
     // Keep the shared global prime count (used by the hero and the "Show
     // Working" table) matching whatever the opener's own stepper says.
     if(_wMode==='finite'&&!window._modeSyncGuard&&typeof setFinitePrimes==='function'){
@@ -9293,6 +9302,7 @@ function setFiniteMode(on){
   if(toggle) toggle.style.borderColor = on ? 'rgba(61,200,184,.5)' : 'rgba(224,80,96,.35)';
   if(toggle) toggle.style.color = on ? 'rgba(61,200,184,.9)' : 'rgba(224,80,96,.9)';
   if(panel) panel.style.display = on ? 'flex' : 'none';
+  if(panel) panel.classList.toggle('wg-finite-highlight', on);
   // Mirror state onto the inline calculator toggle so switching mode is visible
   // right next to C(n)/D(n), not just in the sticky navbar far above.
   const cmt = document.getElementById('calc-mode-toggle');
