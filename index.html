@@ -114,23 +114,10 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
   #wfs-ctrl-bar{width:96vw!important;padding:8px 9px!important;}
 }
 
-/* ── In-page canvas lock (opt-in, no native fullscreen needed): pins the
-   preview canvas near the top of the viewport so it stays visible while the
-   controls below it scroll normally underneath — same idea as the hero's
-   fullscreen "Lock canvas" button, but usable without leaving the page. ── */
-#welcome-teaser-wrap.wcv-locked #welcome-teaser{
-  position:sticky!important;top:var(--wcv-lock-top,8px)!important;
-  z-index:15;background:#04040d;box-shadow:0 10px 26px rgba(0,0,0,.5);
-}
-#welcome-lock-btn.active{
-  background:rgba(200,168,74,.18)!important;border-color:rgba(200,168,74,.8)!important;color:var(--gold)!important;
-}
-/* The in-page lock button pins the canvas to the top of the viewport — but
-   native canvas fullscreen (#welcome-teaser-wrap:fullscreen) already does
-   exactly that by construction, so the button is redundant (and confusing)
-   once you're in fullscreen. Hide it there; ⛶/⤬ alone remains. */
-#welcome-teaser-wrap:fullscreen #welcome-lock-btn,
-#welcome-teaser-wrap:-webkit-full-screen #welcome-lock-btn{display:none;}
+/* Canvas-lock feature removed (the pin button was confusing and duplicated
+   what native fullscreen already does) — the sticky/CSS support for it goes
+   with it. Fullscreen (⛶) is the one way to keep the canvas pinned now. */
+
 
 /* ── MOBILE: two rows ── */
 @media(max-width:700px){
@@ -161,18 +148,6 @@ body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:1
 .w-ctl-grp{display:inline-flex;align-items:center;gap:5px;min-width:0;flex:1 1 200px;}
 .w-ctl-grp>select{flex:1 1 auto;min-width:0;}
 .w-ctl-grp>span:first-child{flex:0 0 auto;white-space:nowrap;}
-
-/* ── In-page canvas lock (opt-in, no native fullscreen needed): pins the
-   preview canvas near the top of the viewport so it stays visible while the
-   controls below it scroll normally underneath — same idea as the hero's
-   fullscreen "Lock canvas" button, but usable without leaving the page. ── */
-#welcome-teaser-wrap.wcv-locked #welcome-teaser{
-  position:sticky!important;top:var(--wcv-lock-top,8px)!important;
-  z-index:15;background:#04040d;box-shadow:0 10px 26px rgba(0,0,0,.5);
-}
-#welcome-lock-btn.active{
-  background:rgba(200,168,74,.18)!important;border-color:rgba(200,168,74,.8)!important;color:var(--gold)!important;
-}
 
 /* ── MOBILE: two rows ── */
 @media(max-width:700px){
@@ -1339,6 +1314,13 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
          canvas most of a screen down, and once a view is set you rarely touch
          it again. Open by default; the summary reports the current state so
          the closed strip still tells you what you are looking at. -->
+    <!-- This anchor sits OUTSIDE the <details>, not inside it — canvas
+         fullscreen relocates the whole dropdown (see wfs-anchor-viewdd in
+         the topRows list below) so it keeps its own collapse/summary
+         behaviour instead of arriving as a bare, always-open button strip.
+         An anchor nested inside the thing being moved would travel away
+         with it and restore-on-exit would have nothing to insertBefore. -->
+    <span id="wfs-anchor-viewdd" style="display:none;"></span>
     <details id="w-viewopts-dd" open style="animation:wgFadeUp .6s .3s both;margin:8px 0 10px;border:1px solid rgba(200,168,74,.22);background:rgba(200,168,74,.03);">
       <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;padding:6px 9px;user-select:none;">
         <span style="display:inline-block;transition:transform .15s;font-size:8px;color:rgba(200,168,74,.85);">&#9656;</span>
@@ -1621,8 +1603,6 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
 
     <div id="welcome-teaser-wrap" style="position:relative;">
       <canvas id="welcome-teaser" width="900" height="900" style="display:block;width:100%;aspect-ratio:1/1;max-width:min(64vh,536px);height:auto;margin:2px auto 12px;border-radius:2px;animation:wgFadeUp .7s .4s both;"></canvas>
-      <button id="welcome-lock-btn" onclick="wToggleCanvasLock()" title="Pin the canvas to the top of the screen so you can scroll through the controls below while still seeing it"
-        style="position:absolute;top:6px;right:34px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(6,6,20,.7);border:1px solid rgba(200,168,74,.4);color:rgba(200,168,74,.85);font-size:11px;cursor:pointer;border-radius:2px;z-index:2;">📌</button>
       <!-- Fullscreen, back on the canvas where it is actually wanted. The
            earlier problem was two DIFFERENT behaviours (a canvas-only
            fullscreen and a whole-opener one) fighting each other — not two
@@ -1747,7 +1727,7 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
              tap to expand when you actually need one of these. -->
         <details id="wfs-ctrl-collapse" style="background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.2);border-radius:3px;">
           <summary style="cursor:pointer;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:rgba(200,168,74,.85);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
-            <span style="display:inline-block;transition:transform .15s;">▸</span> Controls — view / color / size / pins / lift / twist
+            <span style="display:inline-block;transition:transform .15s;">▸</span> Controls — color / size / pins / lift
           </summary>
           <style>#wfs-ctrl-collapse[open]>summary>span{transform:rotate(90deg);}</style>
           <div id="wfs-ctrl-collapse-body" style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(200,168,74,.15);"></div>
@@ -2780,23 +2760,9 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     }
   };
 
-  // Pin the canvas near the top of the viewport in normal page flow (no
-  // native fullscreen required) so it stays visible while the control
-  // panels below it scroll past underneath — mirrors the hero's fullscreen
-  // "Lock canvas" toggle, adapted for the regular scrolling page.
-  window.wToggleCanvasLock=function(){
-    var wrap=document.getElementById('welcome-teaser-wrap');
-    var btn=document.getElementById('welcome-lock-btn');
-    if(!wrap)return;
-    var locked=wrap.classList.toggle('wcv-locked');
-    if(btn){
-      btn.classList.toggle('active',locked);
-      btn.title=locked?'Unpin the canvas':'Pin the canvas to the top of the screen so you can scroll through the controls below while still seeing it';
-    }
-    if(locked){
-      wrap.style.setProperty('--wcv-lock-top','8px');
-    }
-  };
+  // Canvas-lock (pin) button removed — it duplicated fullscreen and confused
+  // more than it helped. wToggleFullscreen (⛶) below is the one way to pin
+  // the canvas now.
   // ── Fullscreen now mirrors the opener exactly: #welcome-card (the whole
   // opener) is the only fullscreen target, and nothing ever gets moved out
   // of its normal position. CSS alone locks the canvas to the top of the
@@ -2840,22 +2806,38 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     var btnRow=document.getElementById('wfs-btn-row');
     // Formula + view-select rows go ABOVE the spin/flip/zoom button row
     var topRows=[
-      // ── reached first: what you adjust while watching the lattice ──
-      ['ws-view-row','wfs-anchor-view'],              // view picker + Link / 4K / 4K-multi / Send to Hero
+      // ── reached first: the View dropdown, then the mode toggle that
+      // changes what the C(n) formula means, then the formula itself, then
+      // Show Working right below the formula it explains — literally top of
+      // the fullscreen bar now, not buried under Lattice/rotation controls.
+      // Moving the whole w-viewopts-dd <details> (not just the bare
+      // ws-view-row div inside it) keeps the view picker collapsible in
+      // fullscreen too — it arrives as the same "▸ View" dropdown as the
+      // normal page, live summary badge included, instead of an always-open
+      // strip of buttons. Asymptotic/Finite has to sit right after it,
+      // directly above the formula it switches — stranding it below the
+      // Smith/collapse controls (its old spot) let you change the toggle
+      // with no visible link to the number it was changing. ──
+      ['w-viewopts-dd','wfs-anchor-viewdd'],          // View dropdown — view picker, Invert/Lift/Link/4K/4K-multi/Send to Hero, all collapsible together
+      ['ws-mode-row','wfs-anchor-mode'],              // ∞ Asymptotic / Finite ∏ — right above the formula it drives
+      ['welcome-cn-block','wfs-anchor-formula'],      // C(n) formula
+      ['wm-finite-panel','wfs-anchor-finite'],        // nth-prime picker — only relevant once Finite is on, stays with the toggle
+      ['hero-working-dd','wfs-anchor-working'],       // Show Working — right below the formula
+      // ── the rest: adjusted while watching the lattice ──
       ['w-colorlabel-row','wfs-anchor-colorlabel'],   // Color, Label, label size, C(n) lock, pins
       ['w-pins-dd','wfs-anchor-pins'],                // Selected Points list + CSV
       ['w-ringlift-ctrl','wfs-anchor-ringlift'],
       ['w-grid-plot-ctrl','wfs-anchor-gridplot'],
-      ['ws-perring-dd','wfs-anchor-perring'],
-      ['ws-smith-ctrl','wfs-anchor-smithctrl'],
+      // ws-perring-dd (per-ring/per-mod "twist") deliberately left out of
+      // fullscreen — it's an obscure disambiguation control, not something
+      // worth surfacing in the compact fullscreen bar. Still reachable in
+      // the normal (non-fullscreen) page.
+      ['ws-smith-ctrl','wfs-anchor-smithctrl'],       // θ rotation/spin/flip — Cayley-view-only, now AFTER
+                                                       // the formula rather than above it
       // ── setup / one-off panels sink below ──
-      ['welcome-cn-block','wfs-anchor-formula'],
-      ['ws-mode-row','wfs-anchor-mode'],
-      ['wm-finite-panel','wfs-anchor-finite'],
       ['ws-sector-ctrl','wfs-anchor-sector'],
       ['ws-gaps-dd','wfs-anchor-gaps'],
       ['ws-goldbach-dd','wfs-anchor-goldbach'],
-      ['hero-working-dd','wfs-anchor-working'],
       ['w-adv-section','wfs-anchor-adv']
     ];
     // Per-row try/catch: a single throwing insertBefore used to abort the whole
@@ -2869,22 +2851,34 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     // been moved. Three anchors are no longer adjacent to their rows after
     // the panel restructure — ws-view-row, ws-gaps-dd and hero-working-dd —
     // so that "restore" was a genuine reorganisation of the page.
-    // The first six rows (view/color/pins/lift/grid-plot/per-ring twist) are
+    // The first five rows (color/label/pins/lift/grid-plot/per-ring twist) are
     // the ones that used to eat the whole screen above the fold in canvas
     // fullscreen — they go into the closed-by-default wfs-ctrl-collapse
-    // panel instead of straight into the bar; everything else is unchanged.
-    var _wfsCollapseIds={'ws-view-row':1,'w-colorlabel-row':1,'w-pins-dd':1,'w-ringlift-ctrl':1,'w-grid-plot-ctrl':1,'ws-perring-dd':1};
+    // panel instead of straight into the bar. View stays OUT of the collapse
+    // now — it needs to be visible immediately, not behind a tap.
+    var _wfsCollapseIds={'w-colorlabel-row':1,'w-pins-dd':1,'w-ringlift-ctrl':1,'w-grid-plot-ctrl':1};
     var collapseWrap=document.getElementById('wfs-ctrl-collapse');
     var collapseBody=document.getElementById('wfs-ctrl-collapse-body');
     if(canvasFs&&bar){
-      if(collapseWrap){ collapseWrap.open=false; bar.insertBefore(collapseWrap,btnRow||bar.firstChild); }
+      if(collapseWrap)collapseWrap.open=false;
+      var _collapsePlaced=false;
       topRows.forEach(function(pair){
         var row=document.getElementById(pair[0]);
         var anchor=document.getElementById(pair[1]);
         if(!row||!anchor)return;
         try{
-          if(_wfsCollapseIds[pair[0]]&&collapseBody) collapseBody.appendChild(row);
-          else bar.insertBefore(row,btnRow||bar.firstChild);
+          if(_wfsCollapseIds[pair[0]]&&collapseBody){
+            // Insert the collapse panel itself at THIS point in the sequence
+            // (its first member's turn), not unconditionally first — it used
+            // to always land above view/formula/Show Working regardless of
+            // where those sat in topRows, which is exactly backwards from
+            // "view and the formula at the top" and only got away with it
+            // by coincidence when view happened to be first in the list.
+            if(!_collapsePlaced&&collapseWrap){ bar.insertBefore(collapseWrap,btnRow||bar.firstChild); _collapsePlaced=true; }
+            collapseBody.appendChild(row);
+          } else {
+            bar.insertBefore(row,btnRow||bar.firstChild);
+          }
         }
         catch(e){ _fsFailed.push(pair[0]); }
       });
@@ -20850,6 +20844,13 @@ const _heroFsPinTopIds=[
   'nbar',            // n controller + Inspect / Hide-text / fullscreen — pinned above the canvas
 ];
 let _heroFsActive=false;
+let _heroFsWasRelocated=false; // guards the restore branch below — without this,
+  // _heroCanvasFsChangeHandler (a document-level listener) fires on EVERY
+  // fullscreen change anywhere on the page, including the OPENER's own
+  // canvas going fullscreen. Since hero-working-dd ("Show Working") is a
+  // single shared element the opener also relocates into its own bar, an
+  // unconditional restore here was yanking it straight back out the instant
+  // the opener placed it — it never had a chance to render there.
 function heroToggleCanvasFs(){
   const wrap=document.getElementById('hero-canvas-fs-wrap');
   if(!wrap)return;
@@ -20878,6 +20879,17 @@ function _heroCanvasFsChangeHandler(){
         const el=document.getElementById(id);
         if(el&&el.parentNode!==bar)bar.appendChild(el);
       });
+      // hero-lat-ctrl-dd (Color/View/G/rotation/zoom/4K/Send to Opener) and
+      // hero-working-dd (Show Working) are <details> that default CLOSED —
+      // on the normal page that's fine since you scroll past them, but
+      // inside fullscreen a closed accordion reads as "the control isn't
+      // here". Open the ones actually needed to drive the canvas without
+      // leaving fullscreen; leave the rest (Goldbach, Sector, etc.) closed
+      // since those are one-off setup panels, not everyday controls.
+      ['hero-lat-ctrl-dd','hero-working-dd'].forEach(function(id){
+        const el=document.getElementById(id);
+        if(el&&el.tagName==='DETAILS')el.open=true;
+      });
       // Move the View switcher + Inspect/Hide-text row into the sticky top bar
       if(topBar){
         _heroFsPinTopIds.forEach(function(id){
@@ -20885,7 +20897,8 @@ function _heroCanvasFsChangeHandler(){
           if(el&&el.parentNode!==topBar)topBar.appendChild(el);
         });
       }
-    }else{
+      _heroFsWasRelocated=true;
+    }else if(_heroFsWasRelocated){
       // Return them to their original location — right after the canvas
       // (marked by hero-fs-restore-anchor), NOT before hero-ctrl, which
       // sits above the canvas and would flip the layout on exit.
@@ -20913,6 +20926,7 @@ function _heroCanvasFsChangeHandler(){
         }
       });
       wrap.classList.remove('hero-fs-hidden');
+      _heroFsWasRelocated=false;
     }
   }
   // Force canvas resize recalc
