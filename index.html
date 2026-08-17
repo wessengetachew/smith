@@ -1197,7 +1197,7 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     </div>
     <details id="w-intro-wrap" open style="position:relative;z-index:1;">
     <summary style="list-style:none;cursor:pointer;user-select:none;display:flex;align-items:flex-start;gap:10px;">
-      <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53071?</div>
+      <div id="welcome-title" style="animation:wgFadeUp .6s .15s both;">Why does this number keep landing near 0.53071…?</div>
       <span class="wi-chev" style="margin-left:auto;flex-shrink:0;font-size:13px;color:rgba(200,168,74,.7);transition:transform .18s;padding-top:6px;">▾</span>
     </summary>
     <style>#w-intro-wrap>summary::-webkit-details-marker{display:none}#w-intro-wrap:not([open]) .wi-chev{transform:rotate(-90deg)}#w-intro-wrap:not([open])>summary #welcome-title{margin-bottom:6px;}</style>
@@ -3295,8 +3295,9 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
     // default n=1 case. When "set ground state (lock to page n)" is on,
     // swap it for the live C(n) value so the headline always matches
     // whatever n the page is actually locked to.
-    // Five decimals, trailing zeros trimmed: C(1)=0.530711820472 reads
-    // 0.53071, but a value like 0.61000 should not show three dead zeros.
+    // Five decimals, trailing zeros trimmed, ellipsis appended (it's a
+    // truncation, not the exact value): C(1)=0.530711820472 reads 0.53071…,
+    // and 0.61000 shows as 0.61… rather than three dead zeros.
     (function(){
       var titleEl=document.getElementById('welcome-title');
       if(!titleEl)return;
@@ -3306,12 +3307,12 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       var fmt5=function(v){
         var t=(+v).toFixed(5);
         if(t.indexOf('.')>=0) t=t.replace(/0+$/,'').replace(/\.$/,'');
-        return t;
+        return t+'…';
       };
       if(locked&&_wMathReady){
         titleEl.textContent='Why does this number keep landing near '+fmt5(val)+'?';
       } else if(!locked){
-        titleEl.textContent='Why does this number keep landing near 0.53071?';
+        titleEl.textContent='Why does this number keep landing near 0.53071…?';
       }
     })();
 
