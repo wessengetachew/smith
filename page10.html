@@ -2539,13 +2539,13 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
                    by this page's own MOD N start/end range) ══ -->
               <div id="cn-ratio-panel" style="margin:4px 0 10px;padding:10px 14px;background:rgba(196,155,56,0.05);border:1px solid rgba(196,155,56,0.3);border-radius:4px;font-family:'Cinzel',serif;">
                 <div onclick="cnTogglePanel()" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer;">
-                  <span id="cn-chevron" style="display:inline-block;transition:transform .15s;font-size:0.55rem;color:var(--gold);">&#9662;</span>
-                  <span style="font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);">C(n) &mdash; live value &amp; survival ratios</span>
+                  <span id="cn-chevron" style="display:inline-block;transition:transform .15s;font-size:0.55rem;color:var(--gold);transform:rotate(-90deg);">&#9662;</span>
+                  <span style="font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);">C(n) &mdash; live value &amp; survival ratios</span><span id="cn-collapsed-hint" style="font-size:0.48rem;color:rgba(160,120,48,0.6);letter-spacing:0.06em;">tap to expand</span>
                   <span style="color:rgba(160,120,48,0.5);">|</span>
                   <span style="font-size:0.56rem;color:#9a8060;">depth n</span>
                   <span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:2px;">
                     <button onclick="cnDepthStep(-1)" title="n − 1" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:#4ecdc4;font-family:inherit;font-size:0.55rem;width:18px;height:19px;cursor:pointer;padding:0;line-height:1;">&minus;</button>
-                    <input id="cn-depth-num" type="number" min="0" max="60" value="1" title="Block length n+1: gcd(r,M+j)=1 required for j=0..n" style="width:32px;background:var(--parchment-deep);color:var(--ink);border:1px solid var(--border);padding:2px 2px;font-family:'Cinzel',serif;font-size:0.58rem;text-align:center;" oninput="cnDepthChange(this.value)">
+                    <input id="cn-depth-num" type="number" min="0" max="60" value="0" title="Block length n+1: gcd(r,M+j)=1 required for j=0..n" style="width:32px;background:var(--parchment-deep);color:var(--ink);border:1px solid var(--border);padding:2px 2px;font-family:'Cinzel',serif;font-size:0.58rem;text-align:center;" oninput="cnDepthChange(this.value)">
                     <button onclick="cnDepthStep(1)" title="n + 1" style="background:rgba(61,200,184,.08);border:1px solid rgba(61,200,184,.4);color:#4ecdc4;font-family:inherit;font-size:0.55rem;width:18px;height:19px;cursor:pointer;padding:0;line-height:1;">+</button>
                     <button id="cn-play-btn" onclick="cnDepthPlayToggle()" title="Animate C(n) DEPTH only: n ramps 0 → (the number in the box). Independent of the prime-spiral ▶ in Lift dynamics — both can run at once." style="background:rgba(200,168,74,.1);border:1px solid rgba(200,168,74,.4);color:var(--gold);font-family:inherit;font-size:0.52rem;padding:2px 7px;cursor:pointer;margin-left:2px;">&#9654;</button>
                     <select id="cn-play-speed" onchange="if(window.cnSetDepthSpeed)cnSetDepthSpeed(this.value)" title="C(n) depth play speed" style="background:var(--parchment-deep);border:1px solid var(--border);color:var(--ink);font-family:inherit;font-size:0.48rem;padding:1px 2px;margin-left:2px;">
@@ -2568,7 +2568,7 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
                   </span>
                   <span id="cn-range-note" style="font-size:0.52rem;color:rgba(160,120,48,0.6);margin-left:auto;"></span>
                 </div>
-                <details id="cn-liftdyn-dd" open style="margin-top:6px;background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.25);">
+                <details id="cn-liftdyn-dd" style="margin-top:6px;display:none;background:rgba(200,168,74,.05);border:1px solid rgba(200,168,74,.25);">
                   <summary onclick="event.stopPropagation()" style="cursor:pointer;padding:5px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:rgba(200,168,74,.08);">
                     <span class="cn-ld-chev" style="display:inline-block;transition:transform .15s;font-size:0.5rem;color:var(--gold);">&#9656;</span>
                     <span style="color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-size:0.5rem;">Lift dynamics — prime spiral</span>
@@ -2595,7 +2595,7 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
                     </span>
                   </div>
                 </details>
-                <div id="cn-body">
+                <div id="cn-body" style="display:none;">
                   <div style="font-size:0.56rem;color:#9a8060;margin:8px 0;">
                     C(<span id="cn-formula-n">1</span>) = &zeta;(2)&middot;&Pi;<sub>p</sub>(1 &minus; min(<span id="cn-formula-np1">2</span>,p)/p&sup2;) =
                     <span id="cn-live-value" style="color:var(--gold);font-size:0.72rem;">&mdash;</span>
@@ -4990,6 +4990,28 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
   var _combinedAngle = 0;
   Object.defineProperty(window, '_combinedAngle', { get: function(){ return _combinedAngle; }, set: function(v){ _combinedAngle=v; } });
 
+  // Return to the DEFAULT split view: Advanced closed, two small canvases,
+  // not collapsed. This is the boot state and what the opener's "Split view"
+  // choice lands on.
+  window.fareyEnterDefaultSplit = function(){
+    var p = document.getElementById('farey-panel');
+    if (p && p.classList.contains('open') && window.toggleFareyPanel) toggleFareyPanel();
+    window._collapsedOn = false;
+    var sv = document.getElementById('farey-split-view');     if (sv) sv.style.display = 'flex';
+    var collV = document.getElementById('farey-collapsed-view'); if (collV) collV.style.display = 'none';
+    var cv = document.getElementById('farey-combined-view');  if (cv) cv.style.display = 'none';
+    var cw = document.getElementById('farey-canvas-wrap');    if (cw) cw.style.display = 'none';
+    var cb = document.getElementById('farey-collapse-btn');
+    if (cb) { cb.textContent = '\u25CB Unit Circle';
+              cb.style.background = 'var(--parchment-dark)';
+              cb.style.color = 'var(--gold)'; }
+    var ab = document.getElementById('f-adv-btn');
+    if (ab) { ab.innerHTML = '&#9660; Advanced';
+              ab.title = 'Advanced \u2014 combined canvas + every view option'; }
+    window._cnSuppressAutoAdv = true;
+    if (window.fareyRedraw) fareyRedraw();
+  };
+
   window.toggleFareyPanel = function(){
     var p    = document.getElementById('farey-panel');
     var root = document.getElementById('farey-root');
@@ -5056,10 +5078,17 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
       syncCombinedSize();
       if (window._advSplitOn) { window.fareyAdvSplitDraw && window.fareyAdvSplitDraw(); } else { drawCombined(); }
       var _advBtn = document.getElementById('f-adv-btn');
-      if (_advBtn) _advBtn.innerHTML = '&#9650; Close';
+      if (_advBtn) { _advBtn.innerHTML = '&#9650; Close Advanced';
+                     _advBtn.title = 'Close Advanced and return to the split view'; }
+      // Once the person is in Advanced, C(n)/spiral may re-open it freely.
+      window._cnSuppressAutoAdv = false;
     } else {
       var _advBtn = document.getElementById('f-adv-btn');
-      if (_advBtn) _advBtn.innerHTML = '&#9660; Advanced';
+      if (_advBtn) { _advBtn.innerHTML = '&#9660; Advanced';
+                     _advBtn.title = 'Advanced \u2014 combined canvas + every view option'; }
+      // Closing by hand is a decision: don't let the C(n)/spiral redraw
+      // yank the panel straight back open.
+      window._cnSuppressAutoAdv = true;
       // Stop auto-rotate on close
       if (window._autoRotateTimer)    { clearInterval(window._autoRotateTimer);    window._autoRotateTimer    = null; }
       if (window._autoRotateTimerOut) { clearInterval(window._autoRotateTimerOut); window._autoRotateTimerOut = null; }
@@ -9212,7 +9241,8 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
     if (typeof drawGapOverlay === 'function') drawGapOverlay();
     var root = document.getElementById('farey-root');
     if (root) root.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    var gapData = (window.analysisResults.gapProducts && window.analysisResults.gapProducts[gaps[0]]) || { count: 0 };
+    var _ar = window.analysisResults;
+    var gapData = (_ar && _ar.gapProducts && _ar.gapProducts[gaps[0]]) || { count: 0 };
     updateOverlayBar(gaps[0], gapData, modN, allPairs.length, allPairs.length);
     if (status) {
       status.textContent = missing.length
@@ -10788,7 +10818,7 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
           if(window.analysisResults && window.analysisResults.percentageContributions &&
              window.analysisResults.percentageContributions[gap] !== undefined){
             var _p = window.analysisResults.percentageContributions[gap];
-            var _g = window.analysisResults.gapProducts[gap];
+            var _g = (window.analysisResults.gapProducts||{})[gap];
             return ' &nbsp;·&nbsp; P₂ = <strong style="color:#a8e6cf;">' + (_g?_g.product.toFixed(5):'?') + '</strong>'
                  + ' &nbsp;(<strong style="color:#ffd700;">' + _p.toFixed(2) + '%</strong> of log ζ(2))';
           } return '';
@@ -10811,7 +10841,7 @@ A unit circle is the set of points satisfying <em>x</em>² + <em>y</em>² = 1 �
       if (window.analysisResults && window.analysisResults.percentageContributions &&
           window.analysisResults.percentageContributions[gap] !== undefined) {
         var _p  = window.analysisResults.percentageContributions[gap];
-        var _g  = window.analysisResults.gapProducts[gap];
+        var _g  = (window.analysisResults.gapProducts||{})[gap];
         if (_g) {
           lines.push('<span style="color:#4a90d9;">Euler product P₂</span>: <strong style="color:#a8e6cf;">' + _g.product.toFixed(8) + '</strong>');
           lines.push('<span style="color:#4a90d9;">log P₂ / log ζ(2)</span>: <strong style="color:#ffd700;">' + _p.toFixed(4) + '%</strong>');
@@ -14027,10 +14057,10 @@ window.tbSendToMain = function() {
             <input type="radio" name="wc-canvas" value="coprime" style="accent-color:#34d399;"> gcd = 1 canvas
           </label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.52rem;color:rgba(255,255,255,0.75);">
-            <input type="radio" name="wc-canvas" value="both" checked style="accent-color:#34d399;"> Combined (gcd=1 + gcd>1)
+            <input type="radio" name="wc-canvas" value="both" style="accent-color:#34d399;"> Combined (gcd=1 + gcd>1)
           </label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.52rem;color:rgba(255,255,255,0.75);">
-            <input type="radio" name="wc-canvas" value="split" style="accent-color:#34d399;"> Split view
+            <input type="radio" name="wc-canvas" value="split" checked style="accent-color:#34d399;"> Split view &mdash; <span style="color:rgba(255,255,255,0.4);font-size:0.46rem;">default</span>
           </label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.52rem;color:rgba(255,255,255,0.75);">
             <input type="radio" name="wc-canvas" value="sacks" style="accent-color:#34d399;"> Sacks spiral
@@ -14069,7 +14099,7 @@ window.tbSendToMain = function() {
 
     <!-- Skip -->
     <div style="text-align:center;">
-      <span onclick="if(window.wcDismiss)wcDismiss()" style="font-size:0.46rem;color:rgba(255,255,255,0.3);cursor:pointer;letter-spacing:0.08em;text-decoration:underline;text-underline-offset:3px;">skip — use default (N=128, gcd=1 view)</span>
+      <span onclick="if(window.wcDismiss)wcDismiss()" style="font-size:0.46rem;color:rgba(255,255,255,0.3);cursor:pointer;letter-spacing:0.08em;text-decoration:underline;text-underline-offset:3px;">skip — use default (N=128, split view)</span>
     </div>
   </div>
 </div>
@@ -14273,7 +14303,7 @@ window.tbSendToMain = function() {
   window.wcDismiss=function(){
     if(_launched)return;_launched=true;
     clearInterval(_timer);
-    _applyAndClose(128, null, 'both', null);
+    _applyAndClose(128, null, 'split', null);
   };
 
   function _applyAndClose(n, gaps, canvasChoice, cnDepth){
@@ -14334,8 +14364,14 @@ window.tbSendToMain = function() {
           if(window.sacksDrawSpiral)window.sacksDrawSpiral(n);
         },600);
       } else if(_ch==='split'){
-        if(window.fareyAdvSplit)fareyAdvSplit();
+        // Default split view (two small canvases), Advanced panel CLOSED so
+        // the "Advanced" button stays visible as the next step.
+        if(window.fareyEnterDefaultSplit)fareyEnterDefaultSplit();
       } else {
+        // Combined/gcd=1 live on the Advanced canvas — open it explicitly
+        // rather than relying on a side effect of the C(n) panel.
+        var _pnl=document.getElementById('farey-panel');
+        if(!(_pnl&&_pnl.classList.contains('open'))&&window.toggleFareyPanel)toggleFareyPanel();
         if(window.fareyCombinedMode)fareyCombinedMode(_ch==='both'?'both':'coprime');
       }
 
@@ -14636,6 +14672,21 @@ function openOpener(){
 // counts are gcd(r,M)=1 (population), the n-step lift gcd(r,M+j)=1 for
 // j=0..n (lift), and lift/gcd (the conditional survival → C(n)).
 (function(){
+  // Split-first boot: suppress the auto-open of Advanced until the person
+  // actually engages this panel (any pointerdown inside it counts).
+  if(window._cnSuppressAutoAdv===undefined) window._cnSuppressAutoAdv = true;
+  function _cnArmAutoAdv(){
+    var p=document.getElementById('cn-ratio-panel');
+    if(p) p.addEventListener('pointerdown',function(ev){
+      // Expanding/collapsing the card is not "engaging C(n)" — only a real
+      // control (depth box, ▶, Canvas, spiral…) should be allowed to pull
+      // the Advanced canvas open.
+      var t=ev.target;
+      if(t && t.closest && t.closest('input,select,button')) window._cnSuppressAutoAdv=false;
+    },true);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_cnArmAutoAdv);
+  else _cnArmAutoAdv();
   var ZETA2 = Math.PI*Math.PI/6;
   var _PZ2 = 0.4522474200410654985; // P(2) = Σ p^-2
   function sieve(lim){var c=new Uint8Array(lim+1),ps=[];for(var i=2;i<=lim;i++){if(!c[i]){ps.push(i);for(var j=i*i;j<=lim;j+=i)c[j]=1;}}return ps;}
@@ -14680,7 +14731,8 @@ function openOpener(){
     var nEl=document.getElementById('cn-depth-num');
     var mStart=Math.max(1,parseInt(startEl&&startEl.value,10)||1);
     var mEnd=Math.max(mStart,parseInt(endEl&&endEl.value,10)||128);
-    var n=Math.max(0,parseInt(nEl&&nEl.value,10)||1);
+    var _nRaw=parseInt(nEl&&nEl.value,10);
+    var n=isNaN(_nRaw)?0:Math.max(0,Math.min(60,_nRaw));
     var c=cnCounts(mStart,mEnd,n);
     var Cn=getCn(n), Dn=Cn/ZETA2;
     setTxt('cn-formula-n', n);
@@ -14710,6 +14762,11 @@ function openOpener(){
     var advPanel = document.getElementById('farey-panel');
     var isAdvOpen = advPanel && advPanel.classList.contains('open');
     if(!isAdvOpen){
+      // Boot state (and any hand-close of Advanced) is split-first: the C(n)
+      // panel must not drag Advanced open on its own, or the "Advanced"
+      // button is replaced by "Close Advanced" before the person ever sees
+      // it. Cleared the moment they touch the C(n) panel.
+      if(window._cnSuppressAutoAdv) return;
       if(typeof toggleFareyPanel==='function'){
         // Engaging C(n)/the spiral auto-opens Advanced. Save and restore the
         // combined mode across that open so turning the feature on can never
@@ -14816,6 +14873,13 @@ function openOpener(){
     var hidden = body.style.display==='none';
     body.style.display = hidden ? '' : 'none';
     if(chev) chev.style.transform = hidden ? '' : 'rotate(-90deg)';
+    // Lift dynamics lives outside cn-body — fold it with the card so
+    // "collapsed" really means collapsed.
+    var ld=document.getElementById('cn-liftdyn-dd');
+    if(ld){ ld.style.display = hidden ? '' : 'none'; if(hidden) ld.open = true; }
+    var hint=document.getElementById('cn-collapsed-hint');
+    if(hint) hint.style.display = hidden ? 'none' : '';
+    if(hidden){ try{ updateCnPanel(); }catch(e){} }
   };
   // ══ ▶ animation — TWO FULLY INDEPENDENT TRANSPORTS ═══════════════════
   //  (a) DEPTH engine   — cnDepthPlayToggle()  drives C(n) depth n
