@@ -3,9 +3,6 @@
 **Live page 1 The Index.html:** https://wessengetachew.github.io/smith/
 
 **A SoME6 submission — interactive visualization suite by Wessen Getachew**
-
-🔗 Live site: [wessengetachew.github.io](https://wessengetachew.github.io)
-
 ---
 
 ## What is C(n)?
