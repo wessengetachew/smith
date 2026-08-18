@@ -1774,6 +1774,11 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
         <div id="w-pins-list" style="max-height:230px;overflow-y:auto;"></div>
       </div>
     </details>
+    <!-- PARTITION AUDIT (see chat) found this one genuinely unreachable in
+         canvas fullscreen: it's a sibling <details>, not nested inside
+         anything already in topRows, and it carries its own interactive
+         "Try any n" stepper — not just static text. -->
+    <span id="wfs-anchor-intro" style="display:none;"></span>
     <details id="w-intro-dd" style="position:relative;z-index:1;">
     <summary style="cursor:pointer;list-style:none;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,168,74,.7);padding:2px 0 6px;user-select:none;">
       <span style="display:inline-block;transition:transform .15s;">▸</span> Intro — what is C(n)?
@@ -1929,6 +1934,10 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       </details>
 
       <!-- Gap Diagonal — Page 5's φ(g)/g strip dynamic, works on all five views -->
+      <!-- PARTITION AUDIT: sibling of ws-sector-ctrl, not a descendant of
+           it, so it was never covered by that entry — genuinely
+           unreachable in canvas fullscreen until now. -->
+      <span id="wfs-anchor-diag" style="display:none;"></span>
       <details id="w-diag-dd" style="margin-top:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);">
         <summary style="cursor:pointer;padding:7px 9px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;">
           <span style="color:rgba(200,168,74,.7);font-size:8px;">▸</span>
@@ -2834,6 +2843,15 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
       // ── the rest: adjusted while watching the lattice ──
       ['w-pins-dd','wfs-anchor-pins'],                // Selected Points list + CSV — a sibling of the View dropdown even on
                                                        // the normal page, not nested inside it, so this one does stay separate
+      // PARTITION AUDIT (full pass over every id in welcome-card, checking
+      // which ones actually end up inside #welcome-teaser-wrap once
+      // fullscreen is entered): two sections turned up completely
+      // unreachable in canvas fullscreen — sibling <details> elements, not
+      // descendants of anything already in this list, so nothing carried
+      // them along. Both have real interactive controls, not just text, so
+      // this wasn't cosmetic. Added here, next to where each already sits
+      // in the normal document flow.
+      ['w-intro-dd','wfs-anchor-intro'],               // "Intro — what is C(n)?" — includes its own "Try any n" stepper
       // ws-perring-dd (per-ring/per-mod "twist") deliberately left out of
       // fullscreen — it's an obscure disambiguation control, not something
       // worth surfacing in the compact fullscreen bar. Still reachable in
@@ -2842,6 +2860,7 @@ window.wSetMode = function(m){ window.__wPendingMode = m; };
                                                        // the formula rather than above it
       // ── setup / one-off panels sink below ──
       ['ws-sector-ctrl','wfs-anchor-sector'],
+      ['w-diag-dd','wfs-anchor-diag'],                // Gap Diagonal stepper — sibling of ws-sector-ctrl, not nested in it
       ['ws-gaps-dd','wfs-anchor-gaps'],
       ['ws-goldbach-dd','wfs-anchor-goldbach']
       // w-adv-section ("Advanced — Custom Rings & X(R) Filter") deliberately
