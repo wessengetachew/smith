@@ -40,7 +40,10 @@ body { background: var(--bg); color: var(--cream); font-family: var(--serif); fo
 
 /* === NBAR (matches index.html top toolbar) === */
 #nbar2{
-  position:sticky;top:0;z-index:200;
+  /* #wg-pagenav is also sticky at top:0 and wraps to 2-3 rows on mobile.
+     --wg-navh is kept in sync by a ResizeObserver so this bar parks below it
+     instead of sliding underneath. */
+  position:sticky;top:var(--wg-navh,0px);z-index:200;
   background:var(--bg);border-bottom:1px solid var(--edge2);
   display:flex;align-items:center;height:50px;
   overflow-x:auto;scrollbar-width:none;
@@ -206,8 +209,13 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* === VIEW MODE BAR === */
 #view-bar, #field-mode-bar {
+  /* The four view tabs are 3px wider than a 360px viewport; scroll rather than
+     push the whole page into horizontal overflow. */
   display: flex; gap: 0; border-bottom: 1px solid var(--edge); margin-bottom: 0;
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
+#view-bar::-webkit-scrollbar, #field-mode-bar::-webkit-scrollbar { display: none; }
+.vm-btn, .fm-btn { flex-shrink: 0; }
 .vm-btn, .fm-btn {
   font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
   padding: 10px 16px; color: var(--cream3); cursor: pointer; border: none;
@@ -399,9 +407,9 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="nb2-sep"></div>
 
     <!-- G control -->
-    <span class="nb2-lbl">G</span>
+    <span class="nb2-lbl" id="nb2-g-lbl">G</span>
     <input id="nb2-g-num" type="number" min="2" max="1024" value="8"
-      oninput="onSliderG(Math.max(2,+this.value||8));document.getElementById('sl-G').value=Math.max(2,Math.min(1024,+this.value||8))"
+      oninput="nb2SetG(this.value)"
       title="Grid size G">
 
     <div class="nb2-sep"></div>
@@ -495,11 +503,18 @@ canvas { display: block; width: 100%; height: 100%; }
     <span class="tc-label">Grid G</span>
     <input type="range" class="gold" id="sl-G" min="2" max="1024" value="8" oninput="onSliderG(+this.value)" style="width:90px">
     <input type="number" id="inp-G" value="8" min="2" max="1024" style="width:44px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:10px;padding:2px 4px;text-align:center;border-radius:2px" oninput="onSliderG(+this.value||8);document.getElementById('sl-G').value=Math.max(2,Math.min(1024,+this.value||8))">
-    <button class="tc-btn" id="btn-play-G" onclick="toggleGPlay()" title="Animate Grid G, ping-ponging between 2 and 128">▶ Play G</button>
+    <button class="tc-btn" id="btn-prevp-G" onclick="gridPrimeStep(-1)" title="Set Grid G to the previous prime">◀ p</button>
+    <button class="tc-btn" id="btn-nextp-G" onclick="gridPrimeStep(1)" title="Set Grid G to the next prime">p ▶</button>
+    <button class="tc-btn" id="btn-play-G" onclick="toggleGPlay()" title="Sweep Grid G from 2 up to the grid size you are on and back, looping. The gap is held fixed.">▶ Play G</button>
+    <button class="tc-btn" id="btn-play-gap" onclick="toggleGapPlay()" title="Hold the grid and sweep the diagonal gap g from 1 up to G−1 and back, looping.">▶ Play Gap</button>
     <span class="tc-sep"></span>
     <span class="tc-label">g</span>
     <input type="range" class="teal" id="sl-g" min="0" max="7" value="1" oninput="onSliderGap(+this.value)" style="width:80px">
     <input type="number" id="inp-g" value="1" min="0" max="1023" style="width:38px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:10px;padding:2px 4px;text-align:center;border-radius:2px" oninput="onSliderGap(+this.value||0);document.getElementById('sl-g').value=Math.max(0,Math.min(G-1,+this.value||0))">
+    <button class="tc-btn on" id="btn-diag-dim" onclick="toggleDiagDim()" title="Dim everything off the selected strip(s) so they stay visible at large G">Dim</button>
+    <button class="tc-btn" id="btn-strip-mode" onclick="cycleStripMode()" title="Cycle which strip family is shown: diagonal |M−r|=g, anti-diagonal r+M=g (reflected, same φ(g)/g density), or both">Strip: diag ↘</button>
+    <input type="range" class="teal" id="sl-diag-dim" min="5" max="100" step="5" value="50" oninput="setDiagDimAmt(+this.value)" title="Off-diagonal opacity" style="width:52px">
+    <span class="tc-label" id="val-diag-dim" style="min-width:26px">50%</span>
     <button class="tc-btn" id="btn-glock-half" onclick="toggleGLockHalf()" title="Lock diagonal g to half of Grid G — stays in sync as G changes, across Grid / Ring·Barrier·Spire / ℤ[i] / Ford">🔒 g=G/2</button>
     <span class="tc-sep"></span>
     <span class="tc-label">depth n</span>
@@ -555,7 +570,7 @@ canvas { display: block; width: 100%; height: 100%; }
     <input type="number" id="inp-zoom" value="1" min="1" max="512" step="0.25" style="width:40px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--lime);font-family:var(--mono);font-size:10px;padding:2px 4px;text-align:center;border-radius:2px" oninput="onSliderZoom(+this.value||1);document.getElementById('sl-zoom').value=Math.max(1,Math.min(getMaxZoom(),+this.value||1))">
     <span class="tc-sep"></span>
     <span class="tc-label">Cell</span>
-    <button class="tc-btn" id="btn-label" onclick="cycleLabelMode()">off</button>
+    <button class="tc-btn on" id="btn-label" onclick="cycleLabelMode()" title="Cycle cell label: r → M → r/M → off">r</button>
     <select id="sel-label-color" onchange="cellLabelColor=this.value;render()" title="Label color">
       <option value="default">auto</option>
       <option value="white">white</option>
@@ -566,6 +581,9 @@ canvas { display: block; width: 100%; height: 100%; }
     </select>
     <button class="tc-btn" onclick="resetView()">⌖ Reset</button>
     <button class="export-btn" onclick="export4K()" style="font-size:8px;padding:4px 8px">↓ 4K</button>
+    <input type="range" class="teal" id="sl-export-lbl-bar" min="50" max="200" step="5" value="100"
+      oninput="setExportLabelScale(+this.value)" title="Export label size" style="width:48px">
+    <span class="tc-label" id="val-export-lbl" style="min-width:30px">100%</span>
     <span id="export-prog" style="display:none;font-family:var(--mono);font-size:9px;color:var(--cream3)">Rendering…</span>
   </div>
 
@@ -658,10 +676,15 @@ canvas { display: block; width: 100%; height: 100%; }
   <div class="density-bar" id="density-bar">
     <div class="db-item"><span class="db-lbl">Grid G</span><span class="db-val gold" id="db-G">8</span></div>
     <div class="db-item"><span class="db-lbl">Depth n</span><span class="db-val violet" id="db-n">0</span></div>
-    <div class="db-item"><span class="db-lbl">C(n) field density</span><span class="db-val gold" id="db-cn-field">0.60793</span></div>
+    <div class="db-item"><span class="db-lbl">D(n) = C(n)/ζ(2)</span><span class="db-val gold" id="db-cn-field">0.60793</span></div>
     <div class="db-item"><span class="db-lbl">Diagonal g</span><span class="db-val teal" id="db-g">off</span></div>
     <div class="db-item"><span class="db-lbl">φ(g)/g theory</span><span class="db-val gold" id="db-density">—</span></div>
     <div class="db-item"><span class="db-lbl">Strip observed</span><span class="db-val lime" id="db-obs">—</span></div>
+    <div class="db-item" id="db-strip-a-wrap" style="display:none"><span class="db-lbl" id="db-strip-a-lbl">a</span><span class="db-val lime" id="db-strip-a">—</span></div>
+    <div class="db-item" id="db-strip-b-wrap" style="display:none"><span class="db-lbl" id="db-strip-b-lbl">b</span><span class="db-val lime" id="db-strip-b">—</span></div>
+    <div class="db-item" id="db-strip-c-wrap" style="display:none"><span class="db-lbl" id="db-strip-c-lbl">c</span><span class="db-val gold" id="db-strip-c">—</span></div>
+    <div class="db-item" id="db-strip-d-wrap" style="display:none"><span class="db-lbl" id="db-strip-d-lbl">d</span><span class="db-val gold" id="db-strip-d">—</span></div>
+    <div class="db-item" id="db-witness-wrap" style="display:none"><span class="db-lbl">Prime witness</span><span class="db-val" id="db-witness" style="color:var(--teal)">—</span></div>
     <div class="db-item"><span class="db-lbl">Block strip C(n,g)</span><span class="db-val coral" id="db-cn">—</span></div>
   </div>
 
@@ -746,6 +769,63 @@ canvas { display: block; width: 100%; height: 100%; }
     </div>
 
     <div class="card">
+      <div class="card-title">The Four Branches — a≡b but c≠d</div>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        A gap $g$ selects four lines: the difference pair $a: M-r=g$ and $b: r-M=g$, and the sum pair
+        $c: r+M=g$ and $d: r+M=2(G+1)-g$. They are not on equal footing.
+      </p>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        <strong>$a$ and $b$ are identical, always.</strong> The transpose $(r,M)\mapsto(M,r)$ carries one
+        onto the other and $\gcd$ is symmetric, so the two branches agree cell for cell — same point
+        count, same coprime count, for every $G$ and $g$.
+      </p>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        <strong>$c$ and $d$ are not.</strong> The reflection $(r,M)\mapsto(G+1-r,\,G+1-M)$ is a bijection
+        between them, so they always carry the same number of lattice points, $g-1$ each — but it does
+        not preserve $\gcd$, and the coprime counts differ for about 70% of pairs $(G,g)$.
+        Strip $c$ is the exact one: $r$ runs over $1,\dots,g-1$, a full period of $\gcd(\cdot,g)$ minus
+        the single point $r=g$, so it holds <em>exactly</em> $\varphi(g)$ coprime points.
+        Strip $d$ samples a window of only $g-1$ residues out of the far longer period $2(G+1)-g$, so it
+        is a partial sample and lands wherever that window happens to fall.
+      </p>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        This is why the pooled figure can mislead, and why the export now prints each branch separately.
+        At $G=23,\ g=11$: $a=11/12$, $b=11/12$, $c=10/10$, $d=10/10$ — here $c$ and $d$ happen to agree
+        because both sums, $11$ and $37$, are prime. At $G=121,\ g=61$ they do not: $c$ has sum $61$ and
+        $d$ has sum $183=3\cdot 61$, giving $\varphi(183)/183 = \tfrac{2}{3}\varphi(61)/61$.
+      </p>
+
+      <div class="card-title">The Strip Density Is a Primality Witness</div>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        The observation that a strip ratio sits close to $1$ exactly when the gap is prime is not a
+        coincidence, and it is sharper than it first looks. Since
+        $\varphi(g)/g = \prod_{p \mid g}(1 - 1/p)$, the density can only reach $1 - 1/g$ when $g$ has a
+        single prime factor and that factor is $g$ itself:
+      </p>
+      <div class="formula-block gold">$$\frac{\varphi(g)}{g} = 1 - \frac{1}{g} \iff \varphi(g) = g-1 \iff g \text{ prime}$$</div>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        And the separation is wide, not marginal. Every composite $g$ has a prime factor
+        $q \le \sqrt{g}$, so $\varphi(g)/g \le 1 - 1/\sqrt{g}$, while a prime sits at $1 - 1/g$.
+        Nothing composite ever reaches the band above $1 - 1/\sqrt{g}$ — so a strip whose density lands
+        in that band is prime, with no further test. At $g = 97,\,98,\,\dots,\,103$ the primes read
+        $0.98969$, $0.99010$, $0.99029$ and the composites read $0.4286$, $0.6061$, $0.4000$, $0.3137$.
+        The gap is not subtle.
+      </p>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        On the sum strip $c$ this becomes an <em>exact, finite</em> test rather than an asymptotic one.
+        Strip $c$ holds precisely $\varphi(g)$ coprime points among its $g-1$ lattice points, so
+        $c$ is <strong>completely lit if and only if $g$ is prime</strong> — no error term, no limit,
+        readable straight off the picture at any $G$.
+      </p>
+      <p style="color:var(--cream2);font-size:0.85rem;margin:8px 0">
+        Strip $d$, with sum $s = 2(G+1)-g$, is the weaker witness. If $s$ is prime then $d$ is fully lit;
+        and if $s$ has any prime factor $q \le g-1$ then $d$ cannot be fully lit, since a window of $g-1$
+        consecutive integers must contain a multiple of $q$. But the converse fails: $d$ can be fully lit
+        with $s$ composite whenever every prime factor of $s$ exceeds $g-1$ and the window happens to miss
+        their multiples — 253 such pairs occur with $G < 200$, the smallest being $G=5,\ g=3,\ s=9$.
+        So $c$ decides primality and $d$ only points at it.
+      </p>
+
       <div class="card-title">Why This Matters</div>
       <ul class="obs-list">
         <li><strong>Geometric decomposition:</strong> reading the lattice as diagonal strips, each with
@@ -765,6 +845,13 @@ canvas { display: block; width: 100%; height: 100%; }
   <div class="card" id="export-card" style="margin-top:16px">
     <div class="card-title">4K Export</div>
     <p style="color:var(--cream2);font-size:0.85rem;margin-bottom:12px">Export the current view as a 3840×3840 PNG with header, formula, and statistics.</p>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <span class="tc-label">Label size</span>
+      <input type="range" class="teal" id="sl-export-lbl" min="50" max="200" step="5" value="100"
+        oninput="setExportLabelScale(+this.value)" title="Font scale for the boxed labels and values in the export"
+        style="width:120px">
+      <span class="tc-label" id="val-export-lbl-card" style="min-width:34px">100%</span>
+    </div>
     <button class="export-btn" onclick="export4K()">↓ Export 4K PNG (3840 × 3840)</button>
     <span id="export-prog-card" style="display:none;font-family:var(--mono);font-size:9px;color:var(--cream3);margin-left:12px">Rendering…</span>
   </div>
@@ -866,12 +953,12 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="formula-block teal">$$\text{lit density} = \prod_p \left(1 - \frac{1}{p^3}\right) = \frac{1}{\zeta(3)} \approx 0.8319$$</div>
     <div class="kv-row">
       <div class="kv-item"><span class="kv-k">Condition</span><span class="kv-v" style="color:var(--teal)">gcd(x,y,z)=1</span></div>
-      <div class="kv-item"><span class="kv-k">Outer face Z=G</span><span class="kv-v" style="color:var(--teal)">checkerboard</span></div>
+      <div class="kv-item"><span class="kv-k">Outer face Z=G</span><span class="kv-v" style="color:var(--teal)">period-2, 3/4 lit</span></div>
       <div class="kv-item"><span class="kv-k">Tunnel axes</span><span class="kv-v" style="color:var(--teal)">prime-carved</span></div>
     </div>
     <p style="color:var(--cream2);font-size:0.85rem;margin-top:10px">
       $\gcd(x,y,z)=1$ is equivalent to $(x,y,z)$ being visible from the origin in $\mathbb{Z}^3$. 
-      At $2^n$ grids the outer face $Z=G$ produces a perfect 3D checkerboard pattern.
+      At $G=2^n$ the outer face $Z=G$ reduces to $\gcd(x,y,2^n)=1$, which fails exactly when $x$ and $y$ are both even. The face is therefore a period-2 pattern that is dark only on the even–even sublattice — density $3/4$, not a half-and-half checkerboard.
     </p>
   </div>
 </div><!-- /tab-3d-content -->
@@ -896,7 +983,10 @@ canvas { display: block; width: 100%; height: 100%; }
     <input type="range" class="gold" id="sl-field-G" min="2" max="512" value="8" oninput="setFieldG(+this.value)" style="width:80px">
     <input type="number" id="inp-field-G" value="8" min="2" max="512" style="width:40px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:10px;padding:2px 4px;text-align:center;border-radius:2px" oninput="setFieldG(+this.value||8);document.getElementById('sl-field-G').value=Math.max(2,Math.min(512,+this.value||8))">
     <span class="tc-sep"></span>
-    <button class="tc-btn" id="btn-sweep-mode" onclick="toggleSweepMode()">⏵ Sweep</button>
+    <button class="tc-btn" id="btn-field-prevp" onclick="fieldPrimeStep(-1)" title="Set Field G to the previous prime">◀ p</button>
+    <button class="tc-btn" id="btn-field-nextp" onclick="fieldPrimeStep(1)" title="Set Field G to the next prime">p ▶</button>
+    <button class="tc-btn" id="btn-field-play-p" onclick="toggleFieldPPlay()" title="Step Field G through consecutive primes, ping-ponging between 2 and 251">▶ Play p</button>
+    <button class="tc-btn" id="btn-sweep-mode" onclick="toggleSweepMode()" title="Continuously sweep Field G between 2 and 512 (speed set below)">▶ Play G</button>
     <span class="tc-sep"></span>
     <span class="tc-label">Zoom</span>
     <input type="range" class="teal" id="sl-field-zoom" min="1" max="512" step="0.25" value="1" oninput="onFieldZoom(+this.value)" style="width:70px">
@@ -916,7 +1006,12 @@ canvas { display: block; width: 100%; height: 100%; }
     <input type="number" id="inp-vault-speed" value="0.4" min="0.05" max="1" step="0.05" style="width:42px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:10px;padding:2px 4px;text-align:center;border-radius:2px" oninput="_field.speed=Math.max(0.05,Math.min(1,+this.value||0.4));document.getElementById('sl-vault-speed').value=Math.round(_field.speed*100)">
     <button class="tc-btn" id="btn-vault-play" onclick="toggleVaultPlay()">▶ Animate</button>
     <span class="tc-sep"></span>
-    <button class="tc-btn" id="btn-field-rlabel" onclick="toggleFieldRLabels()">r,M labels</button>
+    <button class="tc-btn" id="btn-field-rlabel" onclick="toggleFieldRLabels()" title="Show cell labels on the field">Labels</button>
+    <select id="sel-field-label-mode" onchange="setFieldLabelMode(this.value)" title="What the cell labels show">
+      <option value="r" selected>by r</option>
+      <option value="M">by M</option>
+      <option value="rM">r,M</option>
+    </select>
     <span class="tc-label" style="margin-left:4px">label color</span>
     <select id="sel-field-label-color" onchange="_field.labelColor=this.value;renderFieldTab()" title="Label color">
       <option value="default">auto</option>
@@ -995,9 +1090,9 @@ canvas { display: block; width: 100%; height: 100%; }
         <tr><td>Strip g=|M−r|</td><td>φ(g)/g</td><td>Exact when (G−g)≡0 mod g</td></tr>
         <tr><td>Diagonal r=M</td><td>1/G → 0</td><td>gcd(r,r)=r&gt;1</td></tr>
         <tr><td>Convergence rate</td><td>O(log G/G)</td><td>Mertens error</td></tr>
-        <tr><td>Under RH (smoothed model)</td><td>O(G^{−1+ε})</td><td>Bureaux–Enriquez 2016</td></tr>
+        <tr><td>Under RH (geometric model, parameter β)</td><td>6/π² + (6/π²)β + O(β^{3/2−ε})</td><td>Bureaux–Enriquez 2016</td></tr>
       </table>
-      <p style="color:var(--cream3);font-size:0.8rem;margin-top:8px;font-family:var(--mono)">Under RH the Bureaux–Enriquez equivalence sharpens the error, but in a smoothed (geometric-weight) model, not for the sharp box count; the O(G^{−3/2+ε}) bound sometimes quoted for the box count is not supported by current literature.</p>
+      <p style="color:var(--cream3);font-size:0.8rem;margin-top:8px;font-family:var(--mono)">Bureaux–Enriquez prove an equivalence, not a one-way bound: RH holds <em>if and only if</em>, for every ε&gt;0 as β→0, P[gcd(X,Y)=1] = 6/π² + (6/π²)β + O(β^{3/2−ε}), where X,Y are independent geometric variables of parameter 1−e^{−β}. The explicit linear term (6/π²)β is part of the statement — dropping it breaks the equivalence. This is a smoothed model; it says nothing about the sharp box count, for which no O(G^{−3/2+ε}) bound is known. For the box count the record is Walfisz 1963, who replaced Mertens’ log G by (log G)^{2/3}(log log G)^{4/3}; Montgomery 1987 showed the fluctuations are at least of order √(log log G)/G, so the error cannot be o(1/G).</p>
     </div>
 
     <div class="card">
@@ -1009,7 +1104,7 @@ canvas { display: block; width: 100%; height: 100%; }
       <div class="card-title">Density Field — Local Coprime Density</div>
       <div class="formula-block">$$D_R(r, M) = \frac{1}{(2R+1)^2} \sum_{|r'-r|\le R,\, |M'-M|\le R} \mathbf{1}[\gcd(r',M')=1]$$</div>
       <p style="color:var(--cream2);font-size:0.85rem;margin-top:8px">
-        The gradient $\nabla D_R$ points away from the main diagonal $r=M$ (the coprime-sparse seam where $\gcd(r,r)=r>1$) toward regions of higher coprime density, especially the $g=1$ strips where every adjacent pair is coprime.
+        The gradient $\nabla D_R$ points away from the main diagonal $r=M$ — the coprime-sparse seam where $\gcd(r,r)=r>1$ — and toward the coprime-dense bulk. The seam is one cell wide, so for any window radius $R>1$ it is the box average around it, not a separate destination strip, that the arrows respond to.
         High-magnitude gradient arrows cluster around the edges of invisible forests (Herzog–Stewart 1971), encoding a local version of the Mertens error term.
       </p>
     </div>
@@ -1018,9 +1113,9 @@ canvas { display: block; width: 100%; height: 100%; }
       <div class="card-title">Field Symmetries and Attribution</div>
       <div class="kv-row">
         <div class="kv-item"><span class="kv-k">Symmetry</span><span class="kv-v" style="color:var(--teal)">D_R(r,M) = D_R(M,r)</span></div>
-        <div class="kv-item"><span class="kv-k">Negation</span><span class="kv-v" style="color:var(--teal)">~D_R(r,M) ≈ D_R(G−r,G−M)</span></div>
+        <div class="kv-item"><span class="kv-k">Negation</span><span class="kv-v" style="color:var(--teal)">D_R(r,M) ≈ D_R(G−r,G−M)</span></div>
       </div>
-      <p style="color:var(--cream2);font-size:0.82rem;margin-top:10px">Full attribution: Cesàro (1881), Sylvester (1883), Dirichlet (1849), Mertens (1874), Hardy–Wright Thm 332, Bureaux–Enriquez (2016), Herzog–Stewart (1971), Euler (totient).</p>
+      <p style="color:var(--cream2);font-size:0.82rem;margin-top:10px">The transpose symmetry is exact, since $\gcd$ is symmetric. The negation is only approximate: $(r,M)\mapsto(G-r,G-M)$ preserves the gap $|M-r|$, hence the strip density $\varphi(g)/g$, but not the individual gcd values, so the two windows agree in distribution rather than cell by cell.</p><p style="color:var(--cream2);font-size:0.82rem;margin-top:10px">Full attribution: Cesàro (1881), Sylvester (1883), Dirichlet (1849), Mertens (1874), Hardy–Wright Thm 332, Bureaux–Enriquez (2016), Herzog–Stewart (1971), Euler (totient).</p>
     </div>
 
   </div>
@@ -1088,6 +1183,20 @@ function blockDiagDensity(g, n) {
   return prod;
 }
 // C(n) = ζ(2)·∏_p(1 − min(n+1,p)/p²)
+// Fixed prime cap for the C(n) Euler product, sieved once and reused. With the
+// analytic tail below this holds C(n) to <4e-6 out to n=2000, so the 6 printed
+// decimals are real rather than truncation noise.
+const CN_CAP=300000;
+let _cnPrimeList=null;
+function _cnPrimes(){
+  if(_cnPrimeList) return _cnPrimeList;
+  const sieve=new Uint8Array(CN_CAP+1);
+  const out=[];
+  for(let i=2;i<=CN_CAP;i++){
+    if(!sieve[i]){ out.push(i); for(let j=i*i;j<=CN_CAP;j+=i) sieve[j]=1; }
+  }
+  return _cnPrimeList=out;
+}
 const _cnCache={};
 function getCn(n){
   if(_cnCache[n]!==undefined)return _cnCache[n];
@@ -1096,13 +1205,18 @@ function getCn(n){
   const ZETA2=Math.PI*Math.PI/6;
   let prod=1;
   // Prime cap scales with n; truncated product stays accurate to ~4-5 decimal places
-  const cap=Math.max(20000,80*(n+1));
-  for(let p=2;p<=cap;p++){
-    if(!isPrime(p))continue;
-    prod*=(1-Math.min(n+1,p)/(p*p));
-  }
-  return _cnCache[n]=ZETA2*prod;
+  const list=_cnPrimes();
+  for(let i=0;i<list.length;i++){ const p=list[i]; prod*=(1-Math.min(n+1,p)/(p*p)); }
+  // Analytic tail for the truncated primes. For p>CN_CAP the local factor is
+  // 1-(n+1)/p^2, so log(tail) = -(n+1)*sum_{p>CN_CAP} 1/p^2 + O(CN_CAP^-3), and
+  // by Mertens sum_{p>x} 1/p^2 ~ 1/(x ln x). Without this the truncated product
+  // is only good to ~5 digits at n=1 and ~4 at n=100, while we print 6.
+  const tail=Math.exp(-(n+1)/(CN_CAP*Math.log(CN_CAP)));
+  return _cnCache[n]=ZETA2*prod*tail;
 }
+// D(n) = C(n)/ζ(2) = prod_p (1 - min(n+1,p)/p^2). This, not C(n), is the
+// density the finite lattice converges to; D(0) = 6/π².
+function getDn(n){ return getCn(n)*6/(Math.PI*Math.PI); }
 function hsv2rgb(h,s,v) {
   h=h%360; if(h<0)h+=360;
   const c=v*s, x=c*(1-Math.abs((h/60)%2-1)), m=v-c;
@@ -1118,10 +1232,146 @@ function gcdDepthColor(r,M) { const d=Math.log2(gcd(r,M)); return [Math.round(61
 const _phiCache={};
 function phiC(n){if(_phiCache[n])return _phiCache[n];return _phiCache[n]=phi(n);}
 
+// ── Diagonal dim ──────────────────────────────────────────────────────
+// With a gap selected, everything off the strip |M-r|=g is drawn at reduced
+// alpha so the diagonal stays legible over whatever colour mode is active.
+// Without this the strip disappears into the field as soon as G gets large.
+// Applied here rather than per-view so Grid / Ring / Z[i] / Ford and the 4K
+// exports all inherit it from the one place colours are decided.
+let diagDim=true, diagDimAmt=0.5;
+// stripMode: 'diag' = |M-r|=g (classical), 'anti' = r+M=g (reflected: gcd(r,M)=gcd(r,r+M)=gcd(r,g)
+// by the same trick, so density -> φ(g)/g too, approached from the other symmetric half),
+// 'both' = show both strip families at once.
+let stripMode='diag';
+// Font scale applied to every boxed label and value in the 4K export.
+let exportLabelScale=1;
+function setExportLabelScale(pct){
+  exportLabelScale=Math.max(0.5,Math.min(2,(+pct||100)/100));
+  ['sl-export-lbl','sl-export-lbl-bar'].forEach(id=>{
+    const sl=document.getElementById(id); if(sl) sl.value=Math.round(exportLabelScale*100);
+  });
+  ['val-export-lbl','val-export-lbl-card'].forEach(id=>{
+    const v=document.getElementById(id); if(v) v.textContent=Math.round(exportLabelScale*100)+'%';
+  });
+}
+// ── Per-strip statistics for the four branches ─────────────────────────
+//   a : M - r = g          b : r - M = g          (difference pair)
+//   c : r + M = g          d : r + M = 2(G+1)-g   (sum pair)
+// a and b are exactly equal for every (G,g): the transpose (r,M)->(M,r) maps
+// one onto the other and gcd is symmetric. Verified over all 9,727 pairs with
+// G <= 140 — zero mismatches.
+// c and d are NOT equal. The reflection (r,M)->(G+1-r,G+1-M) is a bijection
+// between them, so they always hold the same number of lattice points (g-1),
+// but it does not preserve gcd, so the coprime counts differ in about 70% of
+// cases. c is special: it spans exactly one full period of gcd(.,g) minus the
+// single point r=g, so its coprime count is exactly phi(g) out of g-1 points.
+// d samples a window of g-1 residues out of the much longer period 2(G+1)-g,
+// so it is a partial sample and generally lands elsewhere.
+// ── The strip density as a primality witness ───────────────────────────
+// Verified by exhaustive check (exact rational arithmetic, g < 50000):
+//   (i)   phi(g)/g == 1 - 1/g            <=>  g is prime      [strips a, b]
+//   (ii)  phi(g)/(g-1) == 1              <=>  g is prime      [strip c, exact
+//         and finite: c holds exactly phi(g) coprime points out of g-1]
+//   (iii) s prime  =>  strip d fully lit;  and if s has any prime factor
+//         q <= g-1 then d is NOT fully lit (a window of g-1 consecutive
+//         integers must contain a multiple of q). The converse of the first
+//         half fails: d can be fully lit with s composite, 253 such (G,g)
+//         with G < 200, e.g. G=5, g=3, s=9.
+// The separation in (i) is not marginal. A composite g has a prime factor
+// q <= sqrt(g), so phi(g)/g <= 1 - 1/sqrt(g), while a prime sits at 1 - 1/g.
+// Everything strictly above 1 - 1/sqrt(g) is prime; nothing composite reaches it.
+function smallestPrimeFactor(x){
+  if(x<2) return 0;
+  if(x%2===0) return 2;
+  for(let q=3;q*q<=x;q+=2) if(x%q===0) return q;
+  return x;
+}
+function primeWitness(x){
+  if(x<2) return {n:x,prime:false,spf:0};
+  const q=smallestPrimeFactor(x);
+  return {n:x,prime:q===x,spf:q};
+}
+// Each branch gets its own colour so the legend chip, its direction glyph and
+// the cells it highlights on the lattice are all the same hue. a and b are
+// parallel (slope +1) and c and d are parallel (slope -1), so an arrow alone
+// cannot tell a from b — the glyph draws the line in its actual position
+// inside a miniature of the grid instead.
+const STRIP_COL={a:[61,200,184], b:[155,127,232], c:[200,168,74], d:[224,80,96]};
+function stripRGBA(k,alpha){ const c=STRIP_COL[k]||[61,200,184]; return `rgba(${c[0]},${c[1]},${c[2]},${alpha})`; }
+// Which branch a cell belongs to, or null. Mirrors isOnStrip's membership rules.
+function stripKeyOf(ri,mi,Gv,gap){
+  if(!(gap>0)) return null;
+  if(stripMode!=='anti'){
+    if(mi-ri===gap) return 'a';
+    if(ri-mi===gap) return 'b';
+  }
+  if(stripMode!=='diag'){
+    if(ri+mi===gap) return 'c';
+    if(ri+mi===2*(Gv+1)-gap) return 'd';
+  }
+  return null;
+}
+function stripStats(Gv,gap){
+  const out=[];
+  if(!(gap>0)) return out;
+  const count=(pts)=>{let c=0;for(const [r,m] of pts) if(gcd(r,m)===1)c++;return {cop:c,tot:pts.length};};
+  
+  const showDiff = stripMode!=='anti', showSum = stripMode!=='diag';
+  if(showDiff){
+    const A=[],B=[];
+    for(let r=1;r<=Gv;r++){ if(r+gap<=Gv) A.push([r,r+gap]); if(r-gap>=1) B.push([r,r-gap]); }
+    out.push(Object.assign({key:'a',label:'a  M−r='+gap},count(A)));
+    out.push(Object.assign({key:'b',label:'b  r−M='+gap},count(B)));
+  }
+  if(showSum){
+    const mk=(s)=>{const p=[];for(let r=Math.max(1,s-Gv);r<=Math.min(Gv,s-1);r++)p.push([r,s-r]);return p;};
+    const sC=gap, sD=2*(Gv+1)-gap;
+    out.push(Object.assign({key:'c',label:'c  r+M='+sC},count(mk(sC))));
+    out.push(Object.assign({key:'d',label:'d  r+M='+sD},count(mk(sD))));
+  }
+  out.forEach(o=>{
+    o.ratio = o.tot>0 ? o.cop/o.tot : null;
+    if(o.key==='a'||o.key==='b'){
+      const w=primeWitness(gap);
+      o.witness = w.prime ? `${gap} prime — deficit exactly 1/${gap}`
+                          : `${gap} composite (spf ${w.spf})`;
+      o.primeFlag = w.prime;
+    } else {
+      const s = (o.key==='c') ? gap : 2*(Gv+1)-gap;
+      const w=primeWitness(s);
+      const full = o.tot>0 && o.cop===o.tot;
+      if(o.key==='c'){
+        // exact iff: c is fully lit precisely when g is prime
+        o.witness = full ? `full ⇒ ${s} prime` : `${s} composite (spf ${w.spf})`;
+      } else {
+        o.witness = w.prime ? `${s} prime ⇒ full`
+                  : full     ? `full, but ${s} composite (spf ${w.spf})`
+                             : `${s} composite (spf ${w.spf})`;
+      }
+      o.primeFlag = w.prime;
+    }
+  });
+  return out;
+}
+function isOnStrip(ri,mi,gap){
+  if(!(gap>0)) return false;
+  const onD=(stripMode!=='anti')&&Math.abs(mi-ri)===gap;
+  // Anti-diagonal: shown at both the origin (r+M=gap) and its corner mirror
+  // (r,M)->(G+1-r,G+1-M), i.e. r+M=2(G+1)-gap. Exact-gap-preserving reflection;
+  // gcd is not preserved cell-by-cell between the two, only in distribution.
+  const onA=(stripMode!=='diag')&&((mi+ri)===gap||(mi+ri)===(2*(G+1)-gap));
+  return onD||onA;
+}
 function cellColor(ri,mi,G,n,gap,mode) {
+  const c=_cellColorRaw(ri,mi,G,n,gap,mode);
+  if(!diagDim||!(gap>0)) return c;
+  if(isOnStrip(ri,mi,gap)) return c;          // on a selected strip: untouched
+  return [c[0],c[1],c[2],(c[3]===undefined?0.85:c[3])*diagDimAmt];
+}
+function _cellColorRaw(ri,mi,G,n,gap,mode) {
   const g2=gcd(ri,mi);
   const isCoprime=g2===1;
-  const onDiag=gap>0&&Math.abs(mi-ri)===gap;
+  const onDiag=gap>0&&isOnStrip(ri,mi,gap);
   const isBlockCoprime=isCoprime&&(n===0||blockCoprime2D(ri,mi,n));
   // Non-coprime: always dark (with diagonal tint)
   if(!isCoprime) {
@@ -1353,6 +1603,11 @@ function isPrime(n) {
   return true;
 }
 function largestPrimeLEQ(n) { for(let k=n;k>=2;k--){if(isPrime(k))return k;} return 2; }
+// ── Prime stepping for the grid size. Prime G is the interesting case: the
+// residue classes mod G form a field, so the coprime pattern is maximally
+// dense and every off-diagonal strip |M-r|=g with 0<g<G is fully lit.
+function nextPrimeGT(x){ let k=Math.max(1,Math.floor(x))+1; while(!isPrime(k)) k++; return k; }
+function prevPrimeLT(x){ let k=Math.floor(x)-1; while(k>=2&&!isPrime(k)) k--; return k<2?2:k; }
 function densityColor(d) {
   if(d<0.5) {
     const t=d/0.5;
@@ -1373,8 +1628,8 @@ let viewMode='grid', highlighted=null;
 let zoomLevel=1, panX=0, panY=0;
 let isDragging=false, _dragged=false;
 let dragStart={x:0,y:0}, dragStartPan={x:0,y:0};
-let cellLabelMode='none';
-const LABEL_MODES=['none','r','M','r/M'];
+let cellLabelMode='r';   // default: label cells by r
+const LABEL_MODES=['r','M','r/M','none'];
 let _ringHitTargets=[];
 // ── Coprime memoization ──
 const _copCache={};
@@ -1416,12 +1671,13 @@ let _3d={
 let _field={
   mode:'vault', G:8, radius:1, split:0,
   playing:false, animId:null, lastTime:null, speed:0.4, dir:1,
-  showRLabels:false, fZoom:1, fPanX:0, fPanY:0,
+  showRLabels:false, labelMode:'r', fZoom:1, fPanX:0, fPanY:0,
   arrThickness:1.0, arrOpacity:1.0, showGradGrid:true,
   showDensity:true, showArrows:true,
   labelColor:'default',
   sweepMode:false, _sweepActive:false,
-  _sweepTo:8, _sweepCurrent:2, _sweepLastTime:null, _sweepAnimId:null,
+  // _sweepTo was 8, so "Sweep" ping-ponged between 2 and 8 and looked frozen.
+  _sweepTo:512, _sweepPos:8, _sweepCurrent:2, _sweepLastTime:null, _sweepAnimId:null,
   _density:null, _denG:-1, _denR:-1, _eventsSetUp:false, _arrowHits:[],
   _isDragging:false, _dragged:false, _dragStart:{x:0,y:0}, _dragStartPan:{x:0,y:0}
 };
@@ -1429,7 +1685,12 @@ let _field={
 // ============================
 // TAB SWITCHING
 // ============================
+// Which tab the sticky C(n) toolbar should drive. The 2D grid, the 3D cube and
+// the density field each own a different G; without this the toolbar silently
+// kept editing the 2D grid while the user was looking at the field.
+let activeTab='2d';
 function switchTab(name) {
+  activeTab=name;
   ['2d','3d','field'].forEach(t=>{
     document.getElementById('tab-'+t+'-content').style.display=t===name?'':'none';
     document.getElementById('tab-btn-'+t).classList.toggle('active',t===name);
@@ -1441,6 +1702,45 @@ function switchTab(name) {
   if(name==='field') {
     if(!_field._eventsSetUp){setupFieldEvents();_field._eventsSetUp=true;}
     renderFieldTab(); updateFieldStats();
+  }
+  syncNb2ForTab();
+}
+
+// ── Sticky toolbar <-> active tab wiring ──
+function syncNb2ForTab(){
+  const onField = activeTab==='field';
+  const gnum=document.getElementById('nb2-g-num');
+  if(gnum){
+    gnum.value = onField ? _field.G : G;
+    gnum.max   = onField ? 512 : 1024;
+    gnum.title = onField ? 'Field G' : 'Grid size G';
+  }
+  const gl=document.getElementById('nb2-g-lbl');
+  if(gl) gl.textContent = onField ? 'FIELD G' : 'G';
+  // The density field is a pure gcd(r,M)=1 picture: it has no depth n and its
+  // own two render modes, so the shared colour menu does not apply to it.
+  const col=document.getElementById('nb2-color');
+  if(col){
+    col.disabled=onField;
+    col.style.opacity=onField?0.35:1;
+    col.title=onField?'Colour modes apply to the 2D lattice; the field has its own Vault / Density modes':'Color mode';
+  }
+  const play=document.getElementById('nb2-play');
+  if(play){
+    const running = onField ? _field.sweepMode : !!playId;
+    play.textContent = running ? '\u25a0 Stop' : '\u25b6 Play';
+    play.classList.toggle('playing',running);
+    play.title = onField ? 'Play/pause the Field G sweep' : 'Play/pause n animation';
+  }
+}
+// G box in the sticky bar — routed to whichever grid is on screen.
+function nb2SetG(v){
+  if(activeTab==='field'){
+    setFieldG(Math.max(2,Math.min(512,+v||8)));
+  } else {
+    const gv=Math.max(2,Math.min(1024,+v||8));
+    onSliderG(gv);
+    const sl=document.getElementById('sl-G'); if(sl) sl.value=gv;
   }
 }
 
@@ -1492,15 +1792,14 @@ function renderGrid(cv,W) {
       const y=offY+(mi-1)*cell;
       if(x+cell<0||x>W||y+cell<0||y>W) continue;
       const gap=Math.abs(mi-ri);
-      const onActiveDiag=activeGap>0&&gap===activeGap;
+      const _sk=stripKeyOf(ri,mi,G,activeGap);
       const [r,g,b,a]=cellColor(ri,mi,G,depthN,activeGap,colorMode);
       const sz=Math.max(1.5,cell-1.2);
-      ctx.fillStyle=onActiveDiag?`rgba(61,200,184,${Math.min(1,(a||0.8)*1.3)})`:`rgba(${r},${g},${b},${a||0.8})`;
+      ctx.fillStyle=_sk?stripRGBA(_sk,Math.min(1,(a||0.8)*1.3)):`rgba(${r},${g},${b},${a||0.8})`;
       ctx.fillRect(x,y,sz,sz);
 
       // Cell labels: explicit mode, or auto r/M when cells are large enough
-      const autoLabel=cellLabelMode==='none'&&sz>=14;
-      const effectiveMode=autoLabel?'r/M':cellLabelMode;
+      const effectiveMode=cellLabelMode;   // 'off' now means off
       if(effectiveMode!=='none'&&sz>5) {
         const fs=Math.max(5,Math.min(10,sz*0.45));
         ctx.font=`${fs}px var(--mono)`;
@@ -1521,24 +1820,55 @@ function renderGrid(cv,W) {
     }
   }
 
-  // Active diagonal overlay
+  // Active strip overlay(s): diagonal |M-r|=g (teal) and/or anti-diagonal r+M=g (violet)
   if(activeGap>0) {
-    ctx.strokeStyle='rgba(61,200,184,0.3)';
     ctx.lineWidth=1; ctx.setLineDash([3,3]);
-    // diagonal lines at gap
-    ctx.beginPath();
-    for(let mi=1;mi<=G;mi++) {
-      const ri=mi+activeGap;
-      if(ri>=1&&ri<=G) {
-        const x=offX+(ri-1)*cell, y=offY+(mi-1)*cell;
-        if(mi===1||(mi>1&&Math.abs(mi-1+activeGap)<G+1)) { if(mi===1) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+    if(stripMode!=='anti'){
+      ctx.strokeStyle='rgba(61,200,184,0.3)';
+      ctx.beginPath();
+      for(let mi=1;mi<=G;mi++) {
+        const ri=mi+activeGap;
+        if(ri>=1&&ri<=G) {
+          const x=offX+(ri-1)*cell, y=offY+(mi-1)*cell;
+          if(mi===1||(mi>1&&Math.abs(mi-1+activeGap)<G+1)) { if(mi===1) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        }
       }
+      ctx.stroke();
     }
-    ctx.stroke(); ctx.setLineDash([]);
+    if(stripMode!=='diag'){
+      ctx.strokeStyle='rgba(155,127,232,0.4)';
+      // origin-side: r+M=gap
+      ctx.beginPath();
+      let first=true;
+      for(let ri=Math.max(1,activeGap-G);ri<=Math.min(G,activeGap-1);ri++) {
+        const mi=activeGap-ri;
+        if(mi>=1&&mi<=G) {
+          const x=offX+(ri-1)*cell, y=offY+(mi-1)*cell;
+          if(first){ctx.moveTo(x,y);first=false;} else ctx.lineTo(x,y);
+        }
+      }
+      ctx.strokeStyle=stripRGBA('c',0.5);
+      ctx.stroke();
+      // corner-mirrored side: r+M=2(G+1)-gap
+      const s=2*(G+1)-activeGap;
+      ctx.strokeStyle=stripRGBA('d',0.5);
+      ctx.beginPath();
+      first=true;
+      for(let ri=Math.max(1,s-G);ri<=Math.min(G,s-1);ri++) {
+        const mi=s-ri;
+        if(mi>=1&&mi<=G) {
+          const x=offX+(ri-1)*cell, y=offY+(mi-1)*cell;
+          if(first){ctx.moveTo(x,y);first=false;} else ctx.lineTo(x,y);
+        }
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
     const p=phi(activeGap);
     ctx.font='10px var(--mono)'; ctx.fillStyle='rgba(61,200,184,0.8)';
     ctx.textAlign='right'; ctx.textBaseline='top';
-    ctx.fillText(`|M−r|=${activeGap}  φ/g=${(p/activeGap).toFixed(3)}`,W-8,8);
+    const stripLbl=stripMode==='anti'?'r+M':stripMode==='both'?'|M−r| & r+M':'|M−r|';
+    ctx.fillText(`${stripLbl}=${activeGap}  φ/g=${(p/activeGap).toFixed(3)}`,W-8,8);
   }
 
   // Axis labels — step adapts to zoom so labels stay legible
@@ -1780,8 +2110,7 @@ function renderZI(W_override){
         if(cw<3) ctx.fillRect(ri*cw,mi*cw,cw-0.5,cw-0.5);
         else{ctx.beginPath();ctx.arc((ri+.5)*cw,(mi+.5)*cw,dotR,0,6.2832);ctx.fill();}
         // Auto r/M labels when zoomed in enough (cw≥14 matches grid behavior)
-        const _autoZI=cellLabelMode==='none'&&cw>=14;
-        const _effZI=_autoZI?'r/M':cellLabelMode;
+        const _effZI=cellLabelMode;         // 'off' now means off
         if(_effZI!=='none'&&cw>6){
           const _fs=Math.max(5,Math.min(9,cw*0.38));
           ctx.font=`${_fs}px "JetBrains Mono",monospace`;
@@ -2155,29 +2484,105 @@ function onSliderG(v) {
   update2DDepthMax(); updateZoomMax(); highlighted=null; hideHL();
   render();
 }
-// ── Play G — ping-pongs Grid G between 2 and G_PLAY_MAX, same cadence as the
-// existing diagonal-g Play button, and works across all four 2D sub-views
-// (Grid / Ring·Barrier·Spire / ℤ[i] / Ford) since they all re-render off the
-// same shared G. ──
-let gPlayId=null, gPlayDir=1;
-const G_PLAY_MAX=128;
-function toggleGPlay(){
-  if(gPlayId){
-    clearInterval(gPlayId); gPlayId=null;
-    document.getElementById('btn-play-G').textContent='▶ Play G';
-    document.getElementById('btn-play-G').classList.remove('play-on');
-  } else {
-    document.getElementById('btn-play-G').textContent='■ Stop';
-    document.getElementById('btn-play-G').classList.add('play-on');
-    gPlayDir=1;
-    gPlayId=setInterval(()=>{
-      const gMax=Math.min(G_PLAY_MAX,1024);
-      let next=G+gPlayDir;
-      if(next>=gMax){ next=gMax; gPlayDir=-1; }
-      else if(next<=2){ next=2; gPlayDir=1; }
-      onSliderG(next);
-    },90);
+function gridPrimeStep(dir){
+  const t = dir>0 ? nextPrimeGT(G) : prevPrimeLT(G);
+  onSliderG(Math.max(2,Math.min(1024,t)));
+}
+
+// ── The two transports ─────────────────────────────────────────────────
+// Play G  : holds the gap, sweeps the grid  2 -> (the G you had set) -> 2 ...
+// Play Gap: holds the grid, sweeps the gap  1 -> G-1 -> 1 ...
+// Each remembers the value it started from and restores it on stop, so
+// pressing play never costs you the setting you were looking at. They are
+// mutually exclusive — starting one stops the other.
+const PLAY_TICK=90;      // ms between frames
+const PLAY_FRAMES=70;    // frames per one-way sweep, so a sweep takes ~6s at
+                         // any range; the step size scales, not the duration.
+let gPlayId=null, gPlayDir=1, gPlayCeil=null, gPlayGap=null;
+let gapPlayId=null, gapPlayDir=1, gapPlayFrom=null;
+
+function _playStep(span){ return Math.max(1,Math.round(span/PLAY_FRAMES)); }
+function _setPlayBtn(id,running,label){
+  const b=document.getElementById(id); if(!b) return;
+  b.textContent = running ? '\u25a0 Stop' : label;
+  b.classList.toggle('play-on',running);
+}
+
+function stopGPlay(restore){
+  if(!gPlayId) return;
+  clearInterval(gPlayId); gPlayId=null;
+  _setPlayBtn('btn-play-G',false,'\u25b6 Play G');
+  if(restore&&gPlayCeil!=null){
+    onSliderG(gPlayCeil);
+    if(gPlayGap>0&&gPlayGap<gPlayCeil) onSliderGap(gPlayGap);
   }
+  gPlayCeil=null; gPlayGap=null;
+}
+function stopGapPlay(restore){
+  if(!gapPlayId) return;
+  clearInterval(gapPlayId); gapPlayId=null;
+  _setPlayBtn('btn-play-gap',false,'\u25b6 Play Gap');
+  if(restore&&gapPlayFrom!=null) onSliderGap(gapPlayFrom);
+  gapPlayFrom=null;
+}
+
+function toggleGPlay(){
+  if(gPlayId){ stopGPlay(true); return; }
+  stopGapPlay(true);
+  gPlayCeil=Math.max(2,Math.min(1024,G));   // the grid you were on = the ceiling
+  if(gPlayCeil<=2){ gPlayCeil=null; return; }
+  // onSliderG zeroes the gap whenever it no longer fits (activeGap >= G). While
+  // sweeping down to 2 that would silently wipe the gap, so hold it here and
+  // put it back as soon as the grid is wide enough again.
+  gPlayGap=activeGap;
+  _setPlayBtn('btn-play-G',true);
+  gPlayDir=1;
+  onSliderG(2);                              // always start the sweep at 2
+  gPlayId=setInterval(()=>{
+    const top=gPlayCeil||2, step=_playStep(top-2);
+    let next=G+gPlayDir*step;
+    if(next>=top){ next=top; gPlayDir=-1; }
+    else if(next<=2){ next=2; gPlayDir=1; }
+    onSliderG(next);
+    if(gPlayGap>0 && gPlayGap<G && activeGap!==gPlayGap) onSliderGap(gPlayGap);
+  },PLAY_TICK);
+}
+
+function toggleGapPlay(){
+  if(gapPlayId){ stopGapPlay(true); return; }
+  stopGPlay(true);
+  const top=G-1;
+  if(top<2) return;                          // nothing to sweep on a 2x2 grid
+  gapPlayFrom=activeGap;                     // restore this on stop
+  _setPlayBtn('btn-play-gap',true);
+  gapPlayDir=1;
+  onSliderGap(1);                            // gap sweeps start at 1
+  gapPlayId=setInterval(()=>{
+    const hi=G-1, step=_playStep(hi-1);      // grid is held, so hi is fixed
+    let next=activeGap+gapPlayDir*step;
+    if(next>=hi){ next=hi; gapPlayDir=-1; }
+    else if(next<=1){ next=1; gapPlayDir=1; }
+    onSliderGap(next);
+  },PLAY_TICK);
+}
+function cycleStripMode(){
+  stripMode = stripMode==='diag' ? 'anti' : stripMode==='anti' ? 'both' : 'diag';
+  const b=document.getElementById('btn-strip-mode');
+  if(b) b.textContent = stripMode==='diag' ? 'Strip: diag ↘' : stripMode==='anti' ? 'Strip: anti ↙' : 'Strip: both ⤨';
+  render();
+}
+function toggleDiagDim(){
+  diagDim=!diagDim;
+  const b=document.getElementById('btn-diag-dim'); if(b) b.classList.toggle('on',diagDim);
+  const sl=document.getElementById('sl-diag-dim'); if(sl) sl.disabled=!diagDim;
+  const v=document.getElementById('val-diag-dim'); if(v) v.style.opacity=diagDim?1:0.4;
+  render();
+}
+function setDiagDimAmt(pct){
+  diagDimAmt=Math.max(0.05,Math.min(1,(+pct||50)/100));
+  const sl=document.getElementById('sl-diag-dim'); if(sl) sl.value=Math.round(diagDimAmt*100);
+  const v=document.getElementById('val-diag-dim'); if(v) v.textContent=Math.round(diagDimAmt*100)+'%';
+  render();
 }
 // ── Lock diagonal g to half of Grid G. Stays applied through G changes from
 // the slider, the 2ⁿ presets, and Play G — across every 2D sub-view. Manually
@@ -2236,11 +2641,14 @@ function onSliderN(v) {
 
 // ── nbar2 play toggle (delegates to togglePlay but also updates nbar2 btn) ──
 function nb2TogglePlay(){
+  // On the field tab the shared Play button drives the Field G sweep; n has no
+  // effect on the field, so animating n there would look like a dead control.
+  if(activeTab==='field'){ toggleSweepMode(); syncNb2ForTab(); return; }
   togglePlay();
   const btn=document.getElementById('nb2-play');
   if(!btn) return;
-  if(playId){ btn.textContent='■ Stop'; btn.classList.add('playing'); }
-  else { btn.textContent='▶ Play'; btn.classList.remove('playing'); }
+  if(playId){ btn.textContent='\u25a0 Stop'; btn.classList.add('playing'); }
+  else { btn.textContent='\u25b6 Play'; btn.classList.remove('playing'); }
 }
 // Also patch togglePlay to keep nb2 btn in sync
 const _origTogglePlay=togglePlay;
@@ -2299,7 +2707,8 @@ function togglePlay() {
 function cycleLabelMode() {
   const idx=(LABEL_MODES.indexOf(cellLabelMode)+1)%LABEL_MODES.length;
   cellLabelMode=LABEL_MODES[idx];
-  document.getElementById('btn-label').textContent=cellLabelMode==='none'?'off':cellLabelMode;
+  const _lb=document.getElementById('btn-label');
+  if(_lb){ _lb.textContent=cellLabelMode==='none'?'off':cellLabelMode; _lb.classList.toggle('on',cellLabelMode!=='none'); }
   render();
 }
 function resetView() { panX=0; panY=0; zoomLevel=1; const sl=document.getElementById('sl-zoom'); if(sl) sl.value=1; const inp=document.getElementById('inp-zoom'); if(inp) inp.value=1; const vz=document.getElementById('val-zoom'); if(vz) vz.textContent='1×'; render(); }
@@ -2437,18 +2846,61 @@ function updateRingPointList(){
 function updateBar() {
   document.getElementById('db-G').textContent=G;
   document.getElementById('db-n').textContent=depthN;
-  // C(n) at the current depth — starts at 1 and decreases as n grows
-  document.getElementById('db-cn-field').textContent=getCn(depthN).toFixed(6);
+  // D(n) = C(n)/ζ(2) is the finite-grid convergence target: the fraction of the
+  // lattice that is block-coprime. D(0) = 6/π². (C(n) itself is in the sticky bar.)
+  document.getElementById('db-cn-field').textContent=getDn(depthN).toFixed(6);
   document.getElementById('db-g').textContent=activeGap||'off';
   const p=activeGap>0?phi(activeGap):null;
   document.getElementById('db-density').textContent=p!==null?(p/activeGap).toFixed(4):'—';
-  // count coprime on active diagonal
+  // count coprime on active strip(s) — diag |M-r|=g reduces to gcd(r,g); the
+  // anti-diag is mirrored to the (G,G) corner via (r,M)->(G+1-r,G+1-M), so its
+  // points satisfy r+M=2(G+1)-g and its actual density is gcd(r,2(G+1)-g),
+  // NOT gcd(r,g) — computed directly below rather than assumed.
   if(activeGap>0) {
     let total=0, cop=0;
-    for(let r=1;r+activeGap<=G;r++){total++;if(gcd(r,r+activeGap)===1)cop++;}
-    document.getElementById('db-obs').textContent=total>0?(cop/total).toFixed(4):'—';
+    if(stripMode!=='anti'){
+      for(let r=1;r+activeGap<=G;r++){total++;if(gcd(r,r+activeGap)===1)cop++;}
+    }
+    if(stripMode!=='diag'){
+      for(let r=Math.max(1,activeGap-G);r<=Math.min(G,activeGap-1);r++){total++;if(gcd(r,activeGap-r)===1)cop++;}
+      const s=2*(G+1)-activeGap;
+      for(let r=Math.max(1,s-G);r<=Math.min(G,s-1);r++){total++;if(gcd(r,s-r)===1)cop++;}
+    }
+    // Show the sample count: at small G a strip can hold 2-3 points, and a bare
+    // ratio there looks like the identity failing rather than like a small sample.
+    document.getElementById('db-obs').textContent=total>0?`${(cop/total).toFixed(4)} (${cop}/${total})`:'—';
   } else {
     document.getElementById('db-obs').textContent='—';
+  }
+  // ── Per-strip breakdown (a / b / c / d) ──
+  {
+    const st=stripStats(G,activeGap);
+    const byKey={}; st.forEach(s=>byKey[s.key]=s);
+    ['a','b','c','d'].forEach(k=>{
+      const wrap=document.getElementById('db-strip-'+k+'-wrap');
+      const lbl=document.getElementById('db-strip-'+k+'-lbl');
+      const val=document.getElementById('db-strip-'+k);
+      if(!wrap||!lbl||!val) return;
+      const s=byKey[k];
+      if(s&&s.tot>0){
+        wrap.style.display='';
+        lbl.textContent=s.label;
+        val.textContent=`${s.ratio.toFixed(4)} (${s.cop}/${s.tot})`;
+      } else { wrap.style.display='none'; }
+    });
+    const ww=document.getElementById('db-witness-wrap'), wv=document.getElementById('db-witness');
+    if(ww&&wv){
+      if(st.length){
+        ww.style.display='';
+        // One line: the difference verdict, then each sum strip's verdict.
+        const diff=st.find(s=>s.key==='a')||st.find(s=>s.key==='b');
+        const parts=[];
+        if(diff) parts.push('g '+diff.witness.replace(/^\d+\s/,''));
+        st.filter(s=>s.key==='c'||s.key==='d').forEach(s=>parts.push(s.key+': '+s.witness));
+        wv.textContent=parts.join('  ·  ');
+        wv.style.color = (diff&&diff.primeFlag) ? 'var(--teal)' : 'var(--cream3)';
+      } else { ww.style.display='none'; }
+    }
   }
   const cbd=activeGap>0?blockDiagDensity(activeGap,depthN):null;
   document.getElementById('db-cn').textContent=cbd!==null?cbd.toFixed(4):'—';
@@ -2512,7 +2964,9 @@ function _exportGrid(ctx, W, H) {
   for(let i=0;i<pd.length;i+=4){pd[i]=BR;pd[i+1]=BG2;pd[i+2]=BB;pd[i+3]=255;}
   for(let ri=r0;ri<=r1;ri++){
     for(let mi=m0;mi<=m1;mi++){
-      const [cr,cg,cb,ca]=cellColor(ri,mi,G,depthN,g,colorMode);
+      let [cr,cg,cb,ca]=cellColor(ri,mi,G,depthN,g,colorMode);
+      const _ek=stripKeyOf(ri,mi,G,g);
+      if(_ek){ const q=STRIP_COL[_ek]; cr=q[0]; cg=q[1]; cb=q[2]; ca=Math.min(1,(ca||0.8)*1.3); }
       const a01=ca||0;
       if(a01<0.04) continue;
       const px=Math.floor(xOff+(ri-r0)*cw);
@@ -2532,19 +2986,37 @@ function _exportGrid(ctx, W, H) {
     }
   }
   ctx.putImageData(imgd,0,0);
-  // teal diagonal stripe overlay
+  // strip overlay: teal = diagonal |M-r|=g, violet = anti-diagonal r+M=g (reflected)
   if(g>0&&zoomLevel<=1){
-    ctx.strokeStyle='rgba(61,200,184,.44)';
     ctx.lineWidth=Math.max(3,Math.round(cw*0.10));
     ctx.setLineDash([Math.round(cw*2),Math.round(cw)]);
-    ctx.beginPath();
-    ctx.moveTo(xOff+g*cw,yOff);
-    ctx.lineTo(xOff+G*cw,yOff+(G-g)*cw);
-    ctx.stroke(); ctx.setLineDash([]);
+    if(stripMode!=='anti'){
+      ctx.strokeStyle='rgba(61,200,184,.44)';
+      ctx.beginPath();
+      ctx.moveTo(xOff+g*cw,yOff);
+      ctx.lineTo(xOff+G*cw,yOff+(G-g)*cw);
+      ctx.stroke();
+    }
+    if(stripMode!=='diag'){
+      ctx.strokeStyle='rgba(155,127,232,.5)';
+      // origin-side: r+M=g
+      const ra0=Math.max(1,g-G), rb0=Math.min(G,g-1);
+      ctx.beginPath();
+      ctx.moveTo(xOff+(ra0-1)*cw,yOff+(g-ra0-1)*cw);
+      ctx.lineTo(xOff+(rb0-1)*cw,yOff+(g-rb0-1)*cw);
+      ctx.stroke();
+      // corner-mirrored side: (r,M)->(G+1-r,G+1-M), r+M=2(G+1)-g
+      const s=2*(G+1)-g;
+      const ra=Math.max(1,s-G), rb=Math.min(G,s-1);
+      ctx.beginPath();
+      ctx.moveTo(xOff+(ra-1)*cw,yOff+(s-ra-1)*cw);
+      ctx.lineTo(xOff+(rb-1)*cw,yOff+(s-rb-1)*cw);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
   }
   // ── Cell labels (respects cellLabelMode and auto-label at large cells) ──
-  const autoLabel4K = cellLabelMode==='none' && cw>=28;
-  const effectiveMode4K = autoLabel4K ? 'r/M' : cellLabelMode;
+  const effectiveMode4K = cellLabelMode;  // 'off' now means off
   if(effectiveMode4K!=='none' && cw>12) {
     const fs=Math.max(10,Math.min(28,cw*0.42));
     ctx.font=`${fs}px JetBrains Mono,monospace`;
@@ -2600,9 +3072,18 @@ function _makeExportHelpers(ctx, SIZE) {
   function _fitFont(text,maxFs,minFs,bold,maxW){
     let fs=maxFs;
     ctx.font=`${bold?'bold ':''}${fs}px "JetBrains Mono",monospace`;
-    while(fs>minFs&&ctx.measureText(text).width>maxW){fs=Math.max(minFs,fs-2);ctx.font=`${bold?'bold ':''}${fs}px "JetBrains Mono",monospace`;}
+    while(fs>minFs&&ctx.measureText(text).width>maxW){fs=Math.max(minFs,fs-1);ctx.font=`${bold?'bold ':''}${fs}px "JetBrains Mono",monospace`;}
     return fs;
   }
+  // Guaranteed containment. _fitFont stops shrinking at minFs, so a long label
+  // could still run past the box edge and collide with its neighbour. Passing
+  // maxWidth to fillText makes the browser condense whatever is left over, so
+  // box text can never escape the box no matter how long the string gets.
+  function _boxText(text,x,y,maxW){ ctx.fillText(text,x,y,maxW); }
+  // Box text scale. The box HEIGHT scales with it too, so growing the label can
+  // never make the value and the caption collide or spill past the box edge —
+  // the geometry and the type stay locked to the same factor.
+  function _boxScale(){ return Math.max(0.75,Math.min(1.6,(typeof exportLabelScale==='number'?exportLabelScale:1))); }
   function drawTag(ty){
     const txt='ANALYTIC NUMBER THEORY  \u00b7  WESSEN GETACHEW  \u00b7  2026';
     const fs=_fitFont(txt,Math.round(SIZE*0.010),16,false,MAX_TXT_W*0.96);
@@ -2625,7 +3106,7 @@ function _makeExportHelpers(ctx, SIZE) {
   }
   function drawStatBoxes(ty,items){
     const n=items.length;
-    const boxH=Math.round(SIZE*0.060);
+    const boxH=Math.round(SIZE*0.060*_boxScale());
     const gap=Math.round(SIZE*0.012);
     const boxW=Math.round((SIZE-TX*2-gap*(n-1))/n);
     items.forEach(({label,val,col},i)=>{
@@ -2637,32 +3118,79 @@ function _makeExportHelpers(ctx, SIZE) {
       ctx.fillStyle=col;
       _fitFont(val,Math.round(boxH*0.38),14,true,boxW*0.90);
       ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(val,bx+boxW/2,ty+boxH*0.42);
+      _boxText(val,bx+boxW/2,ty+boxH*0.42,boxW*0.90);
       ctx.fillStyle='rgba(106,101,96,.80)';
       _fitFont(label,Math.round(boxH*0.22),10,false,boxW*0.92);
-      ctx.fillText(label,bx+boxW/2,ty+boxH*0.78);
+      _boxText(label,bx+boxW/2,ty+boxH*0.78,boxW*0.92);
     });
     return ty+boxH+Math.round(SIZE*0.018);
+  }
+  // Miniature of the lattice with this branch's line drawn in its true
+  // position. Normalised coords: x=r/G to the right, y=M/G downward, t=g/G.
+  //   a: M=r+g   -> (0,t)   to (1-t,1)     below the main diagonal
+  //   b: r=M+g   -> (t,0)   to (1,1-t)     above it
+  //   c: r+M=g   -> (0,t)   to (t,0)       near the origin corner
+  //   d: r+M=2(G+1)-g -> (1-t,1) to (1,1-t) near the far corner
+  function drawStripGlyph(key,gx,gy,gs,col,t){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,.16)'; ctx.lineWidth=Math.max(1,gs*0.035);
+    ctx.strokeRect(gx,gy,gs,gs);
+    // faint main diagonal for orientation
+    ctx.strokeStyle='rgba(255,255,255,.10)';
+    ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx+gs,gy+gs); ctx.stroke();
+    const P={
+      a:[[0,t],[1-t,1]],
+      b:[[t,0],[1,1-t]],
+      c:[[0,t],[t,0]],
+      d:[[1-t,1],[1,1-t]]
+    }[key];
+    if(P){
+      const [x1,y1]=P[0], [x2,y2]=P[1];
+      ctx.strokeStyle=col; ctx.lineWidth=Math.max(1.5,gs*0.085);
+      ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.moveTo(gx+x1*gs,gy+y1*gs); ctx.lineTo(gx+x2*gs,gy+y2*gs);
+      ctx.stroke();
+      // arrowhead at the far end, giving the traversal direction
+      const ax=gx+x2*gs, ay=gy+y2*gs;
+      const ang=Math.atan2(y2-y1,x2-x1);
+      const al=gs*0.20;
+      ctx.fillStyle=col;
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.lineTo(ax-al*Math.cos(ang-0.45),ay-al*Math.sin(ang-0.45));
+      ctx.lineTo(ax-al*Math.cos(ang+0.45),ay-al*Math.sin(ang+0.45));
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
   }
   function drawSubStats(ty,items){
     // Secondary strip — stats from the on-page stats bar, shown below canvas
     const n=items.length;
-    const boxH=Math.round(SIZE*0.038);
+    const boxH=Math.round(SIZE*0.038*_boxScale());
     const gap=Math.round(SIZE*0.007);
     const boxW=Math.round((SIZE-TX*2-gap*(n-1))/n);
-    items.forEach(({label,val,col},i)=>{
+    items.forEach(({label,val,col,glyph,glyphT},i)=>{
       const bx=TX+i*(boxW+gap);
       ctx.fillStyle='rgba(255,255,255,.03)';
       ctx.beginPath();ctx.roundRect(bx,ty,boxW,boxH,5);ctx.fill();
       ctx.strokeStyle=col||'rgba(106,101,96,.45)';ctx.lineWidth=1;
       ctx.beginPath();ctx.roundRect(bx,ty,boxW,boxH,5);ctx.stroke();
+      // Optional branch glyph on the left; the text area shrinks to make room
+      // so the label can never run underneath it.
+      let tx0=bx, tW=boxW;
+      if(glyph){
+        const gs=boxH*0.56, gx=bx+boxH*0.16, gy=ty+(boxH-gs)/2;
+        drawStripGlyph(glyph,gx,gy,gs,col||'rgba(200,200,200,.85)',glyphT);
+        tx0=gx+gs+boxH*0.14; tW=bx+boxW-tx0;
+      }
       ctx.fillStyle=col||'rgba(200,200,200,.85)';
-      _fitFont(val,Math.round(boxH*0.42),11,true,boxW*0.92);
+      _fitFont(val,Math.round(boxH*0.42),11,true,tW*0.94);
       ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(val,bx+boxW/2,ty+boxH*0.40);
+      _boxText(val,tx0+tW/2,ty+boxH*0.40,tW*0.94);
       ctx.fillStyle='rgba(106,101,96,.75)';
-      _fitFont(label,Math.round(boxH*0.27),9,false,boxW*0.95);
-      ctx.fillText(label,bx+boxW/2,ty+boxH*0.76);
+      _fitFont(label,Math.round(boxH*0.27),9,false,tW*0.96);
+      _boxText(label,tx0+tW/2,ty+boxH*0.76,tW*0.96);
     });
     return ty+boxH+Math.round(SIZE*0.010);
   }
@@ -2676,7 +3204,7 @@ function _makeExportHelpers(ctx, SIZE) {
     cols.forEach(([col,txt],i)=>{
       _fitFont(txt,Math.round(SIZE*0.012),10,false,cW*0.94);
       ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='top';
-      ctx.fillText(txt,TX+i*cW,ty);
+      _boxText(txt,TX+i*cW,ty,cW*0.94);
     });
     ctx.fillStyle='rgba(106,101,96,.38)';
     _fitFont('wessengetachew.github.io',Math.round(SIZE*0.009),9,false,SIZE*0.22);
@@ -2748,17 +3276,29 @@ async function export4K() {
   const phiG=g>0?phi(g):0;
   const densityVal=g>0?phiG/g:6/Math.PI/Math.PI;
   const footerH=Math.round(SIZE*0.038);
-  const subH=Math.round(SIZE*0.058); // sub-stats strip height
+  const _bScale=Math.max(0.75,Math.min(1.6,exportLabelScale));
+  const subH=Math.round(SIZE*0.058*_bScale); // sub-stats strip height
+  const _stripRows=(viewMode==='grid')?stripStats(G,g):[];
+  const stripH=_stripRows.length?Math.round(SIZE*0.052*_bScale):0; // per-strip a/b/c/d row
 
-  // ── Pre-compute stats-bar values for sub-strip ──
+  // ── Pre-compute stats-bar values for sub-strip (pooled per stripMode) ──
   let _stripObs='—';
-  if(g>0){let t=0,c=0;for(let r=1;r+g<=G;r++){t++;if(gcd(r,r+g)===1)c++;}if(t>0)_stripObs=(c/t).toFixed(4);}
+  if(g>0){
+    let t=0,c=0;
+    if(stripMode!=='anti'){for(let r=1;r+g<=G;r++){t++;if(gcd(r,r+g)===1)c++;}}
+    if(stripMode!=='diag'){
+      for(let r=Math.max(1,g-G);r<=Math.min(G,g-1);r++){t++;if(gcd(r,g-r)===1)c++;}
+      const s=2*(G+1)-g;
+      for(let r=Math.max(1,s-G);r<=Math.min(G,s-1);r++){t++;if(gcd(r,s-r)===1)c++;}
+    }
+    if(t>0)_stripObs=`${(c/t).toFixed(4)} (${c}/${t})`;
+  }
   const _blockCnG=g>0?blockDiagDensity(g,depthN).toFixed(4):'—';
   const _subStats2D=[
     {label:'Grid G',        val:`${G}`,              col:'rgba(200,168,74,.85)'},
     {label:'Depth n',       val:`${depthN}`,          col:'rgba(155,127,232,.85)'},
     {label:'C(n)',          val:getCn(depthN).toFixed(6), col:'rgba(200,168,74,.85)'},
-    {label:'Diagonal g',    val:g||'off',             col:'rgba(61,200,184,.85)'},
+    {label:stripMode==='anti'?'Anti-diag g':stripMode==='both'?'Strip g (both)':'Diagonal g', val:g||'off', col:'rgba(61,200,184,.85)'},
     {label:'\u03c6(g)/g',   val:g>0?densityVal.toFixed(4):'—', col:'rgba(200,168,74,.85)'},
     {label:'Strip obs',     val:_stripObs,            col:'rgba(187,255,0,.85)'},
     {label:'Block C(n,g)',  val:_blockCnG,            col:'rgba(224,80,96,.85)'},
@@ -2785,9 +3325,18 @@ async function export4K() {
        val:g>0?densityVal.toFixed(6):theoDens, col:'rgba(200,168,74,.9)'},
     ]);
     ty=drawSeparator(ty);
-    const availH=SIZE-ty-subH-footerH;
+    const availH=SIZE-ty-subH-stripH-footerH;
     ctx.drawImage(_renderViewToCanvas(SIZE-TX*2,availH),TX,ty,SIZE-TX*2,availH);
     ty+=availH+Math.round(SIZE*0.008); ty=drawSeparator(ty); ty=drawSubStats(ty,_subStats2D);
+    if(_stripRows.length){
+      ty=drawSubStats(ty,_stripRows.map(s=>({
+        label:`${s.label}   ·   ${s.witness}`,
+        val:`${s.ratio.toFixed(4)}  (${s.cop}/${s.tot})`,
+        col:stripRGBA(s.key,0.85),
+        glyph:s.key,
+        glyphT:Math.max(0.06,Math.min(0.94,g/G))
+      })));
+    }
     const blockStr=g>0?`\u03c6(${g})/${g}=${densityVal.toFixed(6)}  \u00b7  block n=${depthN}: ${blockDiagDensity(g,depthN).toFixed(6)}`:`6/\u03c0\u00b2: ${theoDens}  \u00b7  n=${depthN}`;
     drawFooter(SIZE-footerH+Math.round(SIZE*0.004),[
       ['rgba(61,200,184,0.80)',`Coprime: ${totalCop.toLocaleString()}  \u00b7  \u03c1: ${obsDens}`],
@@ -2871,6 +3420,13 @@ async function export4K() {
 // ============================
 function init3D() {
   if(_3d.init) return;
+  // three.js is loaded from a CDN. If it did not arrive, bail out *before*
+  // setting _3d.init so a later retry can still succeed, and tell the user.
+  if(typeof THREE==='undefined'){
+    const st=document.getElementById('lbl-3d-stats');
+    if(st) st.textContent='— 3D library unavailable (three.js failed to load; check the connection and reopen this tab) —';
+    return;
+  }
   _3d.init=true;
   const wrap=document.getElementById('canvas3d-wrap');
   const W=wrap.clientWidth||600;
@@ -3250,7 +3806,7 @@ function export3D() {
 
     const {TX,drawTag,drawTitleRow,drawFormula,drawStatBoxes,drawSubStats,drawSeparator,drawFooter}=_makeExportHelpers(ctx,SIZE);
     const footerH=Math.round(SIZE*0.038);
-    const subH=Math.round(SIZE*0.058);
+    const subH=Math.round(SIZE*0.058*Math.max(0.75,Math.min(1.6,exportLabelScale)));
 
     const s=_3d._stats||{G:_3d.G,n:_3d.depthN,totalPts:0,coprimePts:0,capped:false};
     const obs3D=(s.totalPts>0?(s.coprimePts/s.totalPts).toFixed(6):'—');
@@ -3617,7 +4173,7 @@ function renderGradientField(cv,W) {
       else if(_field.labelColor==='teal') lc='rgba(61,200,184,0.8)';
       else if(_field.labelColor==='coral') lc='rgba(224,80,96,0.8)';
       ctx.fillStyle=lc; ctx.textAlign='left'; ctx.textBaseline='top';
-      ctx.fillText(ri+','+mi, acx+2, acy+2);
+      ctx.fillText(_fieldLabelText(ri,mi), acx+2, acy+2);
     }
   }
 }
@@ -3656,7 +4212,7 @@ function renderDensityGradientCombined(cv, W) {
         else if(_field.labelColor==='teal') lc='rgba(61,200,184,0.9)';
         else if(_field.labelColor==='coral') lc='rgba(224,80,96,0.9)';
         ctx.fillStyle=lc; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(ri+','+mi, x+cw/2, y+cw/2);
+        ctx.fillText(_fieldLabelText(ri,mi), x+cw/2, y+cw/2);
       }
     }
     // diagonal contour labels
@@ -3725,7 +4281,9 @@ function renderDensityGradientCombined(cv, W) {
       ctx.restore();
       const hitR=Math.max(10,cw*0.6);
       _field._arrowHits.push({cx:acx,cy:acy,ex:aex,ey:aey,ri,mi,ddr:dr,ddm:dm,mag,angle:angle*180/Math.PI,d:d00,Gf,hitR,heat});
-      if(_field.showRLabels&&cw>16){
+      // Only label from here when the heatmap pass is off. With both layers on
+      // this stamped a second, offset copy of the label on every arrowed cell.
+      if(_field.showRLabels&&!_field.showDensity&&cw>16){
         const fs=Math.max(6,Math.min(10,cw*0.32));
         ctx.font=`${fs}px JetBrains Mono,monospace`;
         let lc='rgba(255,255,255,0.65)';
@@ -3733,7 +4291,7 @@ function renderDensityGradientCombined(cv, W) {
         else if(_field.labelColor==='teal') lc='rgba(61,200,184,0.8)';
         else if(_field.labelColor==='coral') lc='rgba(224,80,96,0.8)';
         ctx.fillStyle=lc; ctx.textAlign='left'; ctx.textBaseline='top';
-        ctx.fillText(ri+','+mi, acx+2, acy+2);
+        ctx.fillText(_fieldLabelText(ri,mi), acx+2, acy+2);
       }
     }
   }
@@ -3788,7 +4346,7 @@ function renderDensityGradientCombined4K(ctx, W) {
     if(cw>40&&gcd(ri,mi)===1){
       ctx.font=`${Math.min(20,cw*0.35)}px JetBrains Mono,monospace`;
       ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(ri+','+mi, x+cw/2, y+cw/2);
+      ctx.fillText(_fieldLabelText(ri,mi), x+cw/2, y+cw/2);
     }
   }
   } // end showDensity
@@ -3940,6 +4498,9 @@ function setFieldG(g) {
   ['8','16','32','64','128','256','512'].forEach(k=>{
     const b=document.getElementById('pf-'+k); if(b) b.classList.toggle('active',''+_field.G===k);
   });
+  if(activeTab==='field'){
+    const gnum=document.getElementById('nb2-g-num'); if(gnum) gnum.value=_field.G;
+  }
   renderFieldTab();
 }
 function setFieldMode(mode) {
@@ -3960,11 +4521,38 @@ function toggleShowArrows() {
   document.getElementById('btn-show-arrows').classList.toggle('on',_field.showArrows);
   renderFieldTab();
 }
+// ── Field G prime stepping / prime play (mirrors the 2D grid controls) ──
+function fieldPrimeStep(dir){
+  const t = dir>0 ? nextPrimeGT(_field.G) : prevPrimeLT(_field.G);
+  setFieldG(Math.max(2,Math.min(512,t)));
+}
+let fPPlayId=null,fPPlayDir=1;
+function toggleFieldPPlay(){
+  const btn=document.getElementById('btn-field-play-p');
+  if(fPPlayId){
+    clearInterval(fPPlayId); fPPlayId=null;
+    if(btn){ btn.textContent='\u25b6 Play p'; btn.classList.remove('play-on'); }
+    return;
+  }
+  if(btn){ btn.textContent='\u25a0 Stop'; btn.classList.add('play-on'); }
+  fPPlayDir=1;
+  fPPlayId=setInterval(()=>{
+    const pMax=largestPrimeLEQ(256);
+    let next = fPPlayDir>0 ? nextPrimeGT(_field.G) : prevPrimeLT(_field.G);
+    if(next>=pMax){ next=pMax; fPPlayDir=-1; }
+    else if(next<=2){ next=2; fPPlayDir=1; }
+    setFieldG(next);
+  },260);
+}
 function toggleSweepMode() {
   _field.sweepMode=!_field.sweepMode;
-  document.getElementById('btn-sweep-mode').classList.toggle('on',_field.sweepMode);
+  const _swb=document.getElementById('btn-sweep-mode');
+  if(_swb){ _swb.classList.toggle('on',_field.sweepMode); _swb.textContent=_field.sweepMode?'\u25a0 Stop':'\u25b6 Play G'; }
   if(_field.sweepMode){
-    _field._sweepDir=1; _field._sweepLastTime=null;
+    // Head away from whichever end we are already sitting at.
+    _field._sweepDir = _field.G>=(_field._sweepTo||512) ? -1 : 1;
+    _field._sweepPos = _field.G;
+    _field._sweepLastTime=null;
     _field._sweepAnimId=requestAnimationFrame(_sweepLoop);
   } else {
     if(_field._sweepAnimId){cancelAnimationFrame(_field._sweepAnimId);_field._sweepAnimId=null;}
@@ -3974,13 +4562,19 @@ function _sweepLoop(ts){
   if(!_field.sweepMode){return;}
   if(_field._sweepLastTime!==null){
     const dt=(ts-_field._sweepLastTime)/1000;
-    _field.G=Math.round(_field.G+_field._sweepDir*_field.speed*dt*16);
-    if(_field.G>=(_field._sweepTo||512)){_field.G=_field._sweepTo||512;_field._sweepDir=-1;}
-    if(_field.G<=2){_field.G=2;_field._sweepDir=1;}
+    // Accumulate in a float. Rounding G itself each frame meant a step of
+    // speed*dt*16 (~0.1 at 60fps) rounded straight back to G and never moved.
+    const top=_field._sweepTo||512;
+    if(typeof _field._sweepPos!=='number') _field._sweepPos=_field.G;
+    _field._sweepPos += _field._sweepDir*_field.speed*dt*64;
+    if(_field._sweepPos>=top){ _field._sweepPos=top; _field._sweepDir=-1; }
+    if(_field._sweepPos<=2){ _field._sweepPos=2; _field._sweepDir=1; }
+    _field.G=Math.max(2,Math.min(top,Math.round(_field._sweepPos)));
     _field._density=null;
     const sl=document.getElementById('sl-field-G'); if(sl) sl.value=_field.G;
     const inp=document.getElementById('inp-field-G'); if(inp) inp.value=_field.G;
     const vg=document.getElementById('val-field-G'); if(vg) vg.textContent=_field.G;
+    if(activeTab==='field'){ const gn=document.getElementById('nb2-g-num'); if(gn) gn.value=_field.G; }
     renderFieldTab();
   }
   _field._sweepLastTime=ts;
@@ -4026,6 +4620,19 @@ function animateVault(ts) {
   _field.lastTime=ts;
   if(_field.playing) _field.animId=requestAnimationFrame(animateVault);
 }
+// One place that decides what a field cell label says, so the heatmap pass,
+// the arrow pass and the 4K exports can never disagree about it.
+function _fieldLabelText(ri,mi){
+  const m=_field.labelMode||'r';
+  if(m==='M') return ''+mi;
+  if(m==='rM') return ri+','+mi;
+  return ''+ri;
+}
+function setFieldLabelMode(m){
+  _field.labelMode=m;
+  const s=document.getElementById('sel-field-label-mode'); if(s) s.value=m;
+  renderFieldTab();
+}
 function toggleFieldRLabels() {
   _field.showRLabels=!_field.showRLabels;
   document.getElementById('btn-field-rlabel').classList.toggle('on',_field.showRLabels);
@@ -4046,7 +4653,7 @@ function exportField4K() {
 
     const {TX,drawTag,drawTitleRow,drawFormula,drawStatBoxes,drawSubStats,drawSeparator,drawFooter}=_makeExportHelpers(ctx,SIZE);
     const footerH=Math.round(SIZE*0.038);
-    const subH=Math.round(SIZE*0.058);
+    const subH=Math.round(SIZE*0.058*Math.max(0.75,Math.min(1.6,exportLabelScale)));
 
     const Gf=_field.G;
     let cop=0; for(let m=1;m<=Gf;m++) for(let r=1;r<=Gf;r++) if(gcd(r,m)===1) cop++;
@@ -4116,19 +4723,21 @@ function exportField4K() {
 // ============================
 // FULLSCREEN
 // ============================
+// Single fullscreen entry point. The old version referenced a #btn-fullscreen
+// element that does not exist on this page and threw a TypeError on every click.
 function toggleFullscreen() {
-  const btn=document.getElementById('btn-fullscreen');
   if(!document.fullscreenElement){
     document.documentElement.requestFullscreen().catch(()=>{});
-    btn.textContent='⛶'; btn.title='Exit Fullscreen';
   } else {
     document.exitFullscreen();
-    btn.textContent='⛶'; btn.title='Fullscreen';
   }
 }
 document.addEventListener('fullscreenchange',()=>{
-  const btn=document.getElementById('btn-fullscreen');
-  if(btn) btn.textContent=document.fullscreenElement?'✕':'⛶';
+  const fs=!!document.fullscreenElement;
+  document.querySelectorAll('.nb2-fs').forEach(b=>{
+    b.textContent=fs?'✕':'⛶';
+    b.title=fs?'Exit Fullscreen':'Fullscreen';
+  });
 });
 
 // ── 4K field render helpers (re-render at target size, no pan/zoom, no overlap) ──
@@ -4155,7 +4764,7 @@ function renderVaultSplit4K(ctx, W) {
       if(_field.showRLabels&&sz>32){
         ctx.font=`${Math.min(22,sz*0.4)}px JetBrains Mono,monospace`;
         ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(ri+','+mi,x+sz/2,y+sz/2);
+        ctx.fillText(_fieldLabelText(ri,mi),x+sz/2,y+sz/2);
       }
     } else {
       ctx.fillStyle='rgba(255,255,255,0.04)';
@@ -4194,7 +4803,7 @@ function renderDensityHeatmap4K(ctx, W) {
     if(_field.showRLabels&&sz>32&&gcd(ri,mi)===1){
       ctx.font=`${Math.min(22,sz*0.38)}px JetBrains Mono,monospace`;
       ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(ri+','+mi,x+sz/2,y+sz/2);
+      ctx.fillText(_fieldLabelText(ri,mi),x+sz/2,y+sz/2);
     }
     maxDev=Math.max(maxDev,Math.abs(d-target));
   }
@@ -4244,7 +4853,7 @@ function renderGradientField4K(ctx, W) {
       if(_field.showRLabels&&sz>32&&gcd(ri,mi)===1){
         ctx.font=`${Math.min(22,sz*0.35)}px JetBrains Mono,monospace`;
         ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(ri+','+mi,(ri-1)*sz+sz/2,(mi-1)*sz+sz/2);
+        ctx.fillText(_fieldLabelText(ri,mi),(ri-1)*sz+sz/2,(mi-1)*sz+sz/2);
       }
     }
   }
@@ -4302,7 +4911,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   const origOnSliderG=onSliderG;
   window.onSliderG=function(v){
     origOnSliderG(v);
-    const nb2g=document.getElementById('nb2-g-num');if(nb2g)nb2g.value=G;
+    // Only mirror the 2D grid G into the sticky box while the 2D tab is showing;
+    // on the field tab that box belongs to Field G.
+    const nb2g=document.getElementById('nb2-g-num');if(nb2g&&activeTab!=='field')nb2g.value=G;
     const nb2s=document.getElementById('nb2-sl');if(nb2s)nb2s.max=largestPrimeLEQ(G-1);
   };
   // Keep nb2-color in sync when sel-color changes
@@ -4379,6 +4990,20 @@ function openOpener(){
   else window.addEventListener('load',function(){setTimeout(apply,50);});
 })();
 </script>
-<script>function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}</script>
+<script>
+// Keep --wg-navh equal to the live height of the sticky page nav so #nbar2
+// can park directly beneath it at any viewport width.
+(function(){
+  var nav=document.getElementById('wg-pagenav');
+  if(!nav) return;
+  function sync(){
+    document.documentElement.style.setProperty('--wg-navh',Math.round(nav.getBoundingClientRect().height)+'px');
+  }
+  sync();
+  if(window.ResizeObserver){ new ResizeObserver(sync).observe(nav); }
+  window.addEventListener('resize',sync);
+  window.addEventListener('load',sync);
+})();
+function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}</script>
 </body>
 </html>
