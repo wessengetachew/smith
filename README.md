@@ -2,7 +2,7 @@
 
 **Live page 1 The Index.html:** https://wessengetachew.github.io/smith/
 
-**A SoME6 submission — interactive visualization suite by Wessen Getachew**
+**A SoME submission — interactive visualization suite by Wessen Getachew**
 ---
 
 ## What is C(n)?
