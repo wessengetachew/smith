@@ -127,6 +127,12 @@ canvas.plot{width:100%;background:var(--bg2);border:1px solid var(--edge);displa
 .skybox{background:rgba(74,158,255,.06);border-left:3px solid var(--sky);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
 .pinkbox{background:rgba(255,107,157,.06);border-left:3px solid var(--pink);padding:12px 14px;font-size:.82rem;color:var(--cream2);margin:10px 0;}
 </style>
+
+<style id="wgc-hide-chips">
+/* Page chips and the in-bar Opener now live inside the Contents panel. */
+#wg-pagenav > a{display:none !important;}
+#wg-pagenav{gap:6px;}
+</style>
 </head>
 <body>
 
@@ -1188,6 +1194,9 @@ function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else 
     + 'border-bottom:1px solid rgba(255,255,255,.06);}'
     + '.wgc-row:hover{background:rgba(255,255,255,.045);}'
     + '.wgc-row.wgc-cur{background:rgba(200,168,74,.09);}'
+    + '.wgc-row.wgc-opener{margin-top:10px;border-top:1px solid rgba(255,255,255,.14);'
+    + 'border-bottom:none;background:rgba(242,168,74,.05);}'
+    + '.wgc-row.wgc-opener:hover{background:rgba(242,168,74,.11);}'
     + ".wgc-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;"
     + 'border:1px solid;padding:3px 7px;flex-shrink:0;min-width:38px;text-align:center;}'
     + '.wgc-txt{display:flex;flex-direction:column;gap:2px;}'
@@ -1219,7 +1228,7 @@ function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else 
       + '<p id="wgc-sub">Fifteen pages. Page 1 is the guided walkthrough and the place to '
       + 'start; page 2 is the full explorer. Everything after that is independent \u2014 '
       + 'read in any order.</p>'
-      + '<a class="wgc-row" href="index.html"><span class="wgc-tag" style="color:#c8a84a;border-color:#c8a84a59;">P1</span><span class="wgc-txt"><b style="color:#c8a84a;">How C(n) Works</b><i>Guided walkthrough — start here</i></span></a><a class="wgc-row" href="page2.html"><span class="wgc-tag" style="color:#7ec87a;border-color:#7ec87a59;">P2</span><span class="wgc-txt"><b style="color:#7ec87a;">C(n) Block-Coprime Density</b><i>The full interactive explorer: six lattice views</i></span></a><a class="wgc-row" href="page3.html"><span class="wgc-tag" style="color:#9b7fe8;border-color:#9b7fe859;">P3</span><span class="wgc-txt"><b style="color:#9b7fe8;">Color &amp; Label Modes</b><i>What every pixel encodes</i></span></a><a class="wgc-row" href="page4.html"><span class="wgc-tag" style="color:#4a9eff;border-color:#4a9eff59;">P4</span><span class="wgc-txt"><b style="color:#4a9eff;">The Prime Filter</b><i>Sieve-of-Eratosthenes view of block-coprimality</i></span></a><a class="wgc-row" href="page5.html"><span class="wgc-tag" style="color:#3dc8b8;border-color:#3dc8b859;">P5</span><span class="wgc-txt"><b style="color:#3dc8b8;">Gap Diagonal Identity</b><i>Diagonal strips and the gap structure</i></span></a><a class="wgc-row" href="page6.html"><span class="wgc-tag" style="color:#e05060;border-color:#e0506059;">P6</span><span class="wgc-txt"><b style="color:#e05060;">Strip Correlations</b><i>Where independence breaks down</i></span></a><a class="wgc-row" href="page7.html"><span class="wgc-tag" style="color:#ff8c42;border-color:#ff8c4259;">P7</span><span class="wgc-txt"><b style="color:#ff8c42;">Multi-Block Density C(n₁,n₂)</b><i>Prime gaps: twin, cousin, sexy</i></span></a><a class="wgc-row" href="page8.html"><span class="wgc-tag" style="color:#ff2fd0;border-color:#ff2fd059;">P8</span><span class="wgc-txt"><b style="color:#ff2fd0;">k-Block Density C(n₁,…,nₖ)</b><i>Prime constellations and k-tuples</i></span></a><a class="wgc-row" href="page9.html"><span class="wgc-tag" style="color:#d2691e;border-color:#d2691e59;">P9</span><span class="wgc-txt"><b style="color:#d2691e;">Character-Twisted Density</b><i>Dirichlet characters C_χ(n)</i></span></a><a class="wgc-row" href="page10.html"><span class="wgc-tag" style="color:#a855f7;border-color:#a855f759;">P10</span><span class="wgc-txt"><b style="color:#a855f7;">Farey &amp; Unit Circle</b><i>Modular residue rings</i></span></a><a class="wgc-row" href="page11.html"><span class="wgc-tag" style="color:#f2c14e;border-color:#f2c14e59;">P11</span><span class="wgc-txt"><b style="color:#f2c14e;">Farey Summatory Function</b><i>Counting Farey fractions</i></span></a><a class="wgc-row wgc-cur" href="page12.html"><span class="wgc-tag" style="color:#ff6b9d;border-color:#ff6b9d59;">P12</span><span class="wgc-txt"><b style="color:#ff6b9d;">The Prime Spiral</b><i>Winding r ≡ ±p (mod M) — explains the radial view</i></span></a><a class="wgc-row" href="page13.html"><span class="wgc-tag" style="color:#06b6d4;border-color:#06b6d459;">P13</span><span class="wgc-txt"><b style="color:#06b6d4;">Gauss Circle ↔ Farey Bridge</b><i>Lattice point counting</i></span></a><a class="wgc-row" href="page14.html"><span class="wgc-tag" style="color:#ef4444;border-color:#ef444459;">P14</span><span class="wgc-txt"><b style="color:#ef4444;">ζ(½ + it) Critical-Line Spiral</b><i>The zeta function on the critical line</i></span></a><a class="wgc-row" href="page15.html"><span class="wgc-tag" style="color:#4ade80;border-color:#4ade8059;">P15</span><span class="wgc-txt"><b style="color:#4ade80;">Sector-Graded Discrepancy</b><i>Farey discrepancy by sector</i></span></a>'
+      + '<a class="wgc-row" href="index.html"><span class="wgc-tag" style="color:#c8a84a;border-color:#c8a84a59;">P1</span><span class="wgc-txt"><b style="color:#c8a84a;">How C(n) Works</b><i>Guided walkthrough — start here</i></span></a><a class="wgc-row" href="page2.html"><span class="wgc-tag" style="color:#7ec87a;border-color:#7ec87a59;">P2</span><span class="wgc-txt"><b style="color:#7ec87a;">C(n) Block-Coprime Density</b><i>The full interactive explorer: six lattice views</i></span></a><a class="wgc-row" href="page3.html"><span class="wgc-tag" style="color:#9b7fe8;border-color:#9b7fe859;">P3</span><span class="wgc-txt"><b style="color:#9b7fe8;">Color &amp; Label Modes</b><i>What every pixel encodes</i></span></a><a class="wgc-row" href="page4.html"><span class="wgc-tag" style="color:#4a9eff;border-color:#4a9eff59;">P4</span><span class="wgc-txt"><b style="color:#4a9eff;">The Prime Filter</b><i>Sieve-of-Eratosthenes view of block-coprimality</i></span></a><a class="wgc-row" href="page5.html"><span class="wgc-tag" style="color:#3dc8b8;border-color:#3dc8b859;">P5</span><span class="wgc-txt"><b style="color:#3dc8b8;">Gap Diagonal Identity</b><i>Diagonal strips and the gap structure</i></span></a><a class="wgc-row" href="page6.html"><span class="wgc-tag" style="color:#e05060;border-color:#e0506059;">P6</span><span class="wgc-txt"><b style="color:#e05060;">Strip Correlations</b><i>Where independence breaks down</i></span></a><a class="wgc-row" href="page7.html"><span class="wgc-tag" style="color:#ff8c42;border-color:#ff8c4259;">P7</span><span class="wgc-txt"><b style="color:#ff8c42;">Multi-Block Density C(n₁,n₂)</b><i>Prime gaps: twin, cousin, sexy</i></span></a><a class="wgc-row" href="page8.html"><span class="wgc-tag" style="color:#ff2fd0;border-color:#ff2fd059;">P8</span><span class="wgc-txt"><b style="color:#ff2fd0;">k-Block Density C(n₁,…,nₖ)</b><i>Prime constellations and k-tuples</i></span></a><a class="wgc-row" href="page9.html"><span class="wgc-tag" style="color:#d2691e;border-color:#d2691e59;">P9</span><span class="wgc-txt"><b style="color:#d2691e;">Character-Twisted Density</b><i>Dirichlet characters C_χ(n)</i></span></a><a class="wgc-row" href="page10.html"><span class="wgc-tag" style="color:#a855f7;border-color:#a855f759;">P10</span><span class="wgc-txt"><b style="color:#a855f7;">Farey &amp; Unit Circle</b><i>Modular residue rings</i></span></a><a class="wgc-row" href="page11.html"><span class="wgc-tag" style="color:#f2c14e;border-color:#f2c14e59;">P11</span><span class="wgc-txt"><b style="color:#f2c14e;">Farey Summatory Function</b><i>Counting Farey fractions</i></span></a><a class="wgc-row wgc-cur" href="page12.html"><span class="wgc-tag" style="color:#ff6b9d;border-color:#ff6b9d59;">P12</span><span class="wgc-txt"><b style="color:#ff6b9d;">The Prime Spiral</b><i>Winding r ≡ ±p (mod M) — explains the radial view</i></span></a><a class="wgc-row" href="page13.html"><span class="wgc-tag" style="color:#06b6d4;border-color:#06b6d459;">P13</span><span class="wgc-txt"><b style="color:#06b6d4;">Gauss Circle ↔ Farey Bridge</b><i>Lattice point counting</i></span></a><a class="wgc-row" href="page14.html"><span class="wgc-tag" style="color:#ef4444;border-color:#ef444459;">P14</span><span class="wgc-txt"><b style="color:#ef4444;">ζ(½ + it) Critical-Line Spiral</b><i>The zeta function on the critical line</i></span></a><a class="wgc-row" href="page15.html"><span class="wgc-tag" style="color:#4ade80;border-color:#4ade8059;">P15</span><span class="wgc-txt"><b style="color:#4ade80;">Sector-Graded Discrepancy</b><i>Farey discrepancy by sector</i></span></a><a class="wgc-row wgc-opener" href="#" data-here="no"><span class="wgc-tag" style="color:#f2a84a;border-color:#f2a84a59;">▶</span><span class="wgc-txt"><b style="color:#f2a84a;">Opener</b><i>The animated welcome teaser — opens on Page 2</i></span></a>'
       + '</div>';
     document.body.appendChild(p);
 
@@ -1229,6 +1238,21 @@ function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else 
     p.addEventListener('click', function(e){ if(e.target === p) close(); });
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape' && p.classList.contains('open')) close();
+    });
+
+    // Opener row: on the explorer just open the teaser; from any other page
+    // set the handshake flag the explorer already listens for and navigate in
+    // this tab (no new window).
+    var op = p.querySelector('.wgc-opener');
+    if(op) op.addEventListener('click', function(e){
+      e.preventDefault();
+      if(op.getAttribute('data-here') === 'yes'){
+        close();
+        if(typeof window.openWelcome === 'function') window.openWelcome();
+        return;
+      }
+      try{ sessionStorage.setItem('wg_open_opener','1'); }catch(err){}
+      window.location.href = 'page2.html';
     });
     return true;
   }
