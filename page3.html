@@ -12,21 +12,21 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},opt
 <style>
 :root{
   --bg:#04040d;--bg1:#07071a;--bg2:#0c0c22;
-  --cream:#ddd8cc;--cream2:#b8b2a6;--cream3:#6a6560;
+  --cream:#ddd8cc;--cream2:#b8b2a6;--cream3:#89837a;
   --gold:#c8a84a;--teal:#3dc8b8;--coral:#e05060;--violet:#9b7fe8;--lime:#7ec87a;
   --edge:rgba(255,255,255,.07);--edge2:rgba(255,255,255,.13);
   --mono:'JetBrains Mono',monospace;--serif:'Spectral',serif;--disp:'Cinzel',serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:11px;}
+body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:13px;}
 a{color:var(--teal);text-decoration:none;}
 a:hover{text-decoration:underline;}
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px;}
 
 /* ── HERO ── */
 #p4-hero{padding:56px 0 34px;border-bottom:1px solid var(--edge2);background:linear-gradient(180deg,var(--bg1) 0%,var(--bg) 100%);}
-.eyebrow{font-family:var(--mono);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--violet);margin-bottom:12px;}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--violet);margin-bottom:12px;}
 h1{font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,4vw,2.3rem);letter-spacing:.06em;color:var(--cream);}
 h1 b{color:var(--gold);font-weight:500;}
 .lede{font-family:var(--serif);font-weight:300;font-size:13.5px;line-height:1.75;color:var(--cream2);max-width:760px;margin-top:16px;}
@@ -35,33 +35,33 @@ h1 b{color:var(--gold);font-weight:500;}
 /* ── SCOPE MAP ── */
 #scope-map{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
 .scope-card{flex:1;min-width:230px;border:1px solid var(--edge2);background:var(--bg1);padding:13px 15px;}
-.scope-card h3{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;}
+.scope-card h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;}
 .scope-card p{font-family:var(--serif);font-weight:300;font-size:11.5px;line-height:1.6;color:var(--cream2);}
-.scope-card code{color:var(--cream);font-size:9px;}
+.scope-card code{color:var(--cream);font-size:10.5px;}
 .sc-op h3{color:var(--gold);}.sc-he h3{color:var(--teal);}.sc-gl h3{color:var(--violet);}
 
 /* ── SECTIONS ── */
 section{padding:40px 0 8px;}
 h2{font-family:var(--disp);font-weight:400;font-size:1.15rem;letter-spacing:.1em;color:var(--gold);margin-bottom:6px;}
-h2 .h2tag{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--cream3);vertical-align:middle;margin-left:10px;}
+h2 .h2tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--cream3);vertical-align:middle;margin-left:10px;}
 .secnote{font-family:var(--serif);font-weight:300;font-size:12px;line-height:1.7;color:var(--cream2);max-width:780px;margin-bottom:20px;}
-.secnote code{font-size:9px;color:var(--cream);background:var(--bg2);padding:1px 4px;border:1px solid var(--edge);}
-h4.grp{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:24px 0 8px;border-bottom:1px solid var(--edge);padding-bottom:5px;}
+.secnote code{font-size:10.5px;color:var(--cream);background:var(--bg2);padding:1px 4px;border:1px solid var(--edge);}
+h4.grp{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:24px 0 8px;border-bottom:1px solid var(--edge);padding-bottom:5px;}
 
 /* ── MODE ROWS ── */
 .mode{display:grid;grid-template-columns:224px 1fr;gap:0 20px;border:1px solid var(--edge);border-left:2px solid var(--edge2);background:var(--bg1);margin-bottom:8px;padding:10px 14px 11px;min-width:0;}
 .mode:hover{border-left-color:var(--gold);}
 .m-head{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 .m-name{font-family:var(--mono);font-size:10.5px;color:var(--cream);letter-spacing:.03em;}
-.m-id{font-family:var(--mono);font-size:8px;color:var(--cream3);}
+.m-id{font-family:var(--mono);font-size:10px;color:var(--cream3);}
 .m-scopes{margin-left:auto;display:flex;gap:4px;}
-.chip{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border:1px solid;}
+.chip{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border:1px solid;}
 .chip.op{color:var(--gold);border-color:rgba(200,168,74,.45);}
 .chip.he{color:var(--teal);border-color:rgba(61,200,184,.45);}
 .chip.gl{color:var(--violet);border-color:rgba(155,127,232,.45);}
 .m-sw{align-self:start;}
 .m-sw canvas{display:block;width:100%;max-width:224px;aspect-ratio:1;height:auto;image-rendering:pixelated;border:1px solid var(--edge);}
-.m-sw .swcap{font-family:var(--mono);font-size:7px;color:var(--cream3);margin-top:3px;letter-spacing:.05em;}
+.m-sw .swcap{font-family:var(--mono);font-size:10px;color:var(--cream3);margin-top:3px;letter-spacing:.05em;}
 .m-body{font-family:var(--serif);font-weight:300;font-size:12px;line-height:1.65;color:var(--cream2);}
 .m-body{min-width:0;}
 .m-body .frm{display:block;font-size:12.5px;color:var(--cream);margin-bottom:5px;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:2px;}
@@ -80,49 +80,49 @@ body{overflow-x:hidden;}
 
 /* ── LABEL TABLES ── */
 table.lbl{width:100%;border-collapse:collapse;margin-bottom:22px;}
-table.lbl th{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--edge2);}
+table.lbl th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--edge2);}
 table.lbl td{font-family:var(--serif);font-weight:300;font-size:12px;line-height:1.55;color:var(--cream2);padding:7px 10px;border-bottom:1px solid var(--edge);vertical-align:top;}
 table.lbl td:first-child{font-family:var(--mono);font-size:9.5px;color:var(--cream);white-space:nowrap;}
-table.lbl td:nth-child(2){font-family:var(--mono);font-size:9px;color:var(--gold);white-space:nowrap;}
+table.lbl td:nth-child(2){font-family:var(--mono);font-size:10.5px;color:var(--gold);white-space:nowrap;}
 
 /* ── MASTER BAR — global view / n / C(n) / χ filter ── */
 #master-bar{position:sticky;top:44px;z-index:150;background:rgba(4,4,13,.97);border:1px solid rgba(200,168,74,.28);border-left:2px solid var(--gold);margin:18px 0 0;padding:9px 14px;backdrop-filter:blur(4px);}
 #master-bar .mb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-#master-bar .mb-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
-#master-bar .mb-sub{font-family:var(--mono);font-size:8px;color:var(--cream3);white-space:nowrap;}
-#master-bar select{background:var(--bg2);border:1px solid rgba(200,168,74,.35);color:var(--gold);font-family:var(--mono);font-size:8px;padding:2px 5px;cursor:pointer;outline:none;}
+#master-bar .mb-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+#master-bar .mb-sub{font-family:var(--mono);font-size:10px;color:var(--cream3);white-space:nowrap;}
+#master-bar select{background:var(--bg2);border:1px solid rgba(200,168,74,.35);color:var(--gold);font-family:var(--mono);font-size:10px;padding:2px 5px;cursor:pointer;outline:none;}
 #master-bar input[type=range]{accent-color:var(--gold);width:110px;height:10px;}
-#master-bar .mb-cn{font-family:var(--mono);font-size:9px;color:var(--teal);white-space:nowrap;}
+#master-bar .mb-cn{font-family:var(--mono);font-size:10.5px;color:var(--teal);white-space:nowrap;}
 #master-bar .mb-cn b{color:var(--cream);font-weight:500;}
 #master-bar .mb-sep{width:1px;height:16px;background:var(--edge2);flex-shrink:0;}
-#mb-adv-toggle{background:none;border:1px solid rgba(155,127,232,.45);color:var(--violet);font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;cursor:pointer;margin-left:auto;}
+#mb-adv-toggle{background:none;border:1px solid rgba(155,127,232,.45);color:var(--violet);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;cursor:pointer;margin-left:auto;}
 #mb-adv-toggle:hover{background:rgba(155,127,232,.1);}
-.mbz-btn{background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:7.5px;padding:2px 7px;cursor:pointer;}
+.mbz-btn{background:none;border:1px solid rgba(126,200,122,.4);color:rgba(126,200,122,.85);font-family:var(--mono);font-size:10px;padding:2px 7px;cursor:pointer;}
 .mbz-btn:hover{background:rgba(126,200,122,.12);}
 .mbz-btn.active{background:rgba(126,200,122,.2);border-color:#7ec87a;color:#7ec87a;}
-.lockbtn{background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:var(--mono);font-size:7.5px;padding:2px 8px;cursor:pointer;}
+.lockbtn{background:none;border:1px solid rgba(155,127,232,.4);color:rgba(155,127,232,.85);font-family:var(--mono);font-size:10px;padding:2px 8px;cursor:pointer;}
 .lockbtn:hover{background:rgba(155,127,232,.12);}
 .lockbtn.on{background:rgba(155,127,232,.22);border-color:#9b7fe8;color:#9b7fe8;}
 #mb-adv{display:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--edge);}
-#mb-adv .adv-title{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin-bottom:7px;}
-#mb-adv label{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:rgba(200,168,74,.9);cursor:pointer;margin-right:14px;}
+#mb-adv .adv-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin-bottom:7px;}
+#mb-adv label{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:rgba(200,168,74,.9);cursor:pointer;margin-right:14px;}
 #mb-adv label.van{color:var(--cream2);}
 #mb-adv input[type=checkbox]{accent-color:var(--gold);}
 #mb-adv .rings-row{margin-top:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-#mb-adv input[type=text]{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:8px;padding:3px 7px;width:210px;outline:none;}
+#mb-adv input[type=text]{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:10px;padding:3px 7px;width:210px;outline:none;}
 #mb-adv input[type=text]:focus{border-color:rgba(155,127,232,.6);}
 
 /* ── SWATCH CONTROLS (view switch + G slider) ── */
 .sw-ctl{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;max-width:224px;}
-.sw-ctl select{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:7.5px;padding:2px 4px;cursor:pointer;outline:none;}
+.sw-ctl select{background:var(--bg2);border:1px solid var(--edge2);color:var(--cream);font-family:var(--mono);font-size:10px;padding:2px 4px;cursor:pointer;outline:none;}
 .sw-ctl input[type=range]{flex:1;min-width:60px;accent-color:var(--gold);height:10px;}
-.sw-ctl .gv{font-family:var(--mono);font-size:7.5px;color:var(--gold);min-width:26px;text-align:right;}
+.sw-ctl .gv{font-family:var(--mono);font-size:10px;color:var(--gold);min-width:26px;text-align:right;}
 @media(max-width:760px){.sw-ctl{max-width:min(320px,100%);margin-left:auto;margin-right:auto;}}
 
 /* ── APPLY-ON-PAGE-1 strip ── */
 .m-apply{grid-column:1/-1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;padding-top:8px;border-top:1px solid var(--edge);}
-.m-apply .ap-lbl{font-family:var(--mono);font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream3);margin-right:2px;}
-.m-apply a{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border:1px solid;text-decoration:none;transition:all .15s;white-space:nowrap;}
+.m-apply .ap-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream3);margin-right:2px;}
+.m-apply a{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border:1px solid;text-decoration:none;transition:all .15s;white-space:nowrap;}
 .m-apply a.op{color:var(--gold);border-color:rgba(200,168,74,.4);}
 .m-apply a.op:hover{background:rgba(200,168,74,.12);border-color:var(--gold);text-decoration:none;}
 .m-apply a.he{color:var(--teal);border-color:rgba(61,200,184,.4);}
@@ -132,7 +132,7 @@ table.lbl td:nth-child(2){font-family:var(--mono);font-size:9px;color:var(--gold
 .m-apply a.p2{color:var(--lime);border-color:rgba(126,200,122,.4);}
 .m-apply a.p2:hover{background:rgba(126,200,122,.12);border-color:var(--lime);text-decoration:none;}
 
-footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--cream3);}
+footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--cream3);}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
 </style>
 </head>
@@ -142,8 +142,8 @@ footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;fon
 <script>
 (function(){
   var links=[
-   ['index.html','P1','C(n) Block-Coprime Density — Page 1','#c8a84a'],
-   ['page2.html','P2','How C(n) Works — Guided Walkthrough — Page 2','#7ec87a'],
+   ['index.html','P1','How C(n) Works — Guided Walkthrough — Page 1','#c8a84a'],
+   ['page2.html','P2','C(n) — Block-Coprime Density Explorer — Page 2','#7ec87a'],
    ['page3.html','P3','Color & Label Modes — The Mathematics — Page 3','#9b7fe8'],
    ['page4.html','P4','The Prime Filter — Sieve View — Page 4','#4a9eff'],
    ['page5.html','P5','Gap Diagonal Identity — Page 5','#3dc8b8'],
@@ -163,19 +163,19 @@ footer{border-top:1px solid var(--edge2);margin-top:50px;padding:26px 0 40px;fon
   bar+='<span style="font-family:\'Cinzel\',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>';
   links.forEach(function(L){var href=L[0],lab=L[1],ti=L[2],c=L[3];var cur=(href==='page3.html');
     if(href==='#opener'){
-      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
+      bar+='<a href="#" onclick="openOpener();return false;" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';
     }
-    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
-    else{bar+='<a href="'+href+'" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
+    else if(cur){bar+='<a href="'+href+'" title="'+ti+' (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:'+c+'22;border:1px solid '+c+';color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">'+lab+'</a>';}
+    else{bar+='<a href="'+href+'" title="'+ti+'" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid '+c+'59;color:'+c+';text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background=\''+c+'14\';this.style.borderColor=\''+c+'\'" onmouseout="this.style.background=\'transparent\';this.style.borderColor=\''+c+'59\'">'+lab+'</a>';}
   });
-  bar+='<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;">\u26f6 Full</button>';
+  bar+='<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:\'JetBrains Mono\',monospace;flex-shrink:0;white-space:nowrap;">\u26f6 Full</button>';
   bar+='</div>';
   document.write(bar);
 })();
 function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}
 function openOpener(){
   sessionStorage.setItem('wg_open_opener','1');
-  window.open('index.html','_blank');
+  window.open('page2.html','_blank');
 }
 </script>
 
@@ -225,7 +225,7 @@ function openOpener(){
     <div class="mb-sep"></div>
     <span class="mb-cn">\(C(n)=\zeta(2)\prod_p\Big(1-\tfrac{\min(n+1,\,p)}{p^2}\Big)\) = <b id="mb-cn-val">…</b></span>
     <div class="mb-sep"></div>
-    <label style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:8px;color:var(--gold);cursor:pointer;"><input type="checkbox" id="mb-labels" checked> Labels</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;color:var(--gold);cursor:pointer;"><input type="checkbox" id="mb-labels" checked> Labels</label>
     <select id="mb-label-content" title="What the label prints">
       <option value="r" selected>r</option>
       <option value="M">M</option>
@@ -571,7 +571,7 @@ const APPLY_VALS={
 };
 const APPLY_PARAM={op:'wcm',he:'hcm',gl:'gcm',p2:'pcm'};
 const APPLY_NAME={op:'Opener',he:'Hero',gl:'Global',p2:'Page 5'};
-const APPLY_FILE={op:'index.html',he:'index.html',gl:'index.html',p2:'page5.html'};
+const APPLY_FILE={op:'page2.html',he:'page2.html',gl:'page2.html',p2:'page5.html'};
 // Per-scope canvas-state params, appended alongside the color-mode param so the
 // destination switches to the same view/G/n this swatch is currently showing —
 // not just the color. index.html already understands wv/wg/wn (Opener) and
@@ -804,7 +804,7 @@ function makeRow(m){
         </select>
         <input id="${id}-g" type="range" min="1" max="${GMAX}" value="${GMAX}" step="1" title="Lattice size G (max ${GMAX} — twin prime with 107)">
         <span class="gv" id="${id}-gv">${GMAX}</span>
-        <button id="${id}-play" class="lockbtn" title="Animate this swatch's G slider" style="padding:1px 6px;font-size:7px;">▶</button>
+        <button id="${id}-play" class="lockbtn" title="Animate this swatch's G slider" style="padding:1px 6px;font-size:10px;">▶</button>
       </div>
       <div class="swcap" id="${id}-cap"></div>
     </div>
@@ -923,6 +923,89 @@ function makeRow(m){
     }
     redrawAll();
   });
+})();
+</script>
+
+<!-- ── CONTENTS DIRECTORY ──────────────────────────────────────────────────
+     Reviewers asked for "a directory for what's in all the pages". The P1..P15
+     chip bar was already a directory, but the descriptive titles lived only in
+     title= tooltips, which do not exist on touch devices. This surfaces them. -->
+<script>
+(function(){
+  var CSS = '#wgc-btn{display:inline-flex;align-items:center;padding:4px 10px;height:28px;'
+    + 'font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;'
+    + 'background:transparent;border:1px solid rgba(200,168,74,.45);color:#c8a84a;'
+    + "font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;}"
+    + '#wgc-btn:hover{background:rgba(200,168,74,.12);border-color:#c8a84a;}'
+    + '#wgc-panel{display:none;position:fixed;inset:0;z-index:100001;background:rgba(3,3,9,.9);'
+    + '-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:24px 16px;overflow-y:auto;}'
+    + '#wgc-panel.open{display:block;}'
+    + '#wgc-inner{max-width:720px;margin:0 auto;background:#07071a;border:1px solid rgba(255,255,255,.14);padding:22px 20px 24px;}'
+    + '#wgc-head{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;}'
+    + "#wgc-head h2{font-family:'Cinzel',serif;font-size:17px;color:#c8a84a;letter-spacing:.1em;font-weight:500;margin:0;}"
+    + '#wgc-close{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.25);color:#b8b2a6;'
+    + 'font-size:15px;width:28px;height:28px;cursor:pointer;line-height:1;}'
+    + "#wgc-sub{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#89837a;margin:0 0 16px;line-height:1.6;}"
+    + '.wgc-row{display:flex;gap:12px;align-items:flex-start;padding:9px 8px;text-decoration:none;'
+    + 'border-bottom:1px solid rgba(255,255,255,.06);}'
+    + '.wgc-row:hover{background:rgba(255,255,255,.045);}'
+    + '.wgc-row.wgc-cur{background:rgba(200,168,74,.09);}'
+    + ".wgc-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;"
+    + 'border:1px solid;padding:3px 7px;flex-shrink:0;min-width:38px;text-align:center;}'
+    + '.wgc-txt{display:flex;flex-direction:column;gap:2px;}'
+    + ".wgc-txt b{font-family:'Spectral',serif;font-size:14.5px;font-weight:500;line-height:1.3;}"
+    + ".wgc-txt i{font-family:'JetBrains Mono',monospace;font-style:normal;font-size:11.5px;color:#89837a;line-height:1.5;}"
+    + '@media(max-width:600px){#wgc-inner{padding:18px 14px 20px;}.wgc-txt b{font-size:13.5px;}}';
+
+  function build(){
+    var bar = document.getElementById('wg-pagenav');
+    if(!bar || document.getElementById('wgc-btn')) return !!bar;
+
+    var st = document.createElement('style'); st.textContent = CSS;
+    document.head.appendChild(st);
+
+    var btn = document.createElement('button');
+    btn.id = 'wgc-btn'; btn.type = 'button';
+    btn.textContent = '\u2630 Contents';
+    btn.title = 'All 15 pages, with what each one covers';
+    // sit immediately after the WESSEN GETACHEW wordmark, before the chips
+    var first = bar.querySelector('span');
+    if(first && first.nextSibling) bar.insertBefore(btn, first.nextSibling);
+    else bar.appendChild(btn);
+
+    var p = document.createElement('div');
+    p.id = 'wgc-panel';
+    p.innerHTML = '<div id="wgc-inner">'
+      + '<div id="wgc-head"><h2>Contents</h2>'
+      + '<button id="wgc-close" type="button" aria-label="Close">\u00d7</button></div>'
+      + '<p id="wgc-sub">Fifteen pages. Page 1 is the guided walkthrough and the place to '
+      + 'start; page 2 is the full explorer. Everything after that is independent \u2014 '
+      + 'read in any order.</p>'
+      + '<a class="wgc-row" href="index.html"><span class="wgc-tag" style="color:#c8a84a;border-color:#c8a84a59;">P1</span><span class="wgc-txt"><b style="color:#c8a84a;">How C(n) Works</b><i>Guided walkthrough — start here</i></span></a><a class="wgc-row" href="page2.html"><span class="wgc-tag" style="color:#7ec87a;border-color:#7ec87a59;">P2</span><span class="wgc-txt"><b style="color:#7ec87a;">C(n) Block-Coprime Density</b><i>The full interactive explorer: six lattice views</i></span></a><a class="wgc-row wgc-cur" href="page3.html"><span class="wgc-tag" style="color:#9b7fe8;border-color:#9b7fe859;">P3</span><span class="wgc-txt"><b style="color:#9b7fe8;">Color &amp; Label Modes</b><i>What every pixel encodes</i></span></a><a class="wgc-row" href="page4.html"><span class="wgc-tag" style="color:#4a9eff;border-color:#4a9eff59;">P4</span><span class="wgc-txt"><b style="color:#4a9eff;">The Prime Filter</b><i>Sieve-of-Eratosthenes view of block-coprimality</i></span></a><a class="wgc-row" href="page5.html"><span class="wgc-tag" style="color:#3dc8b8;border-color:#3dc8b859;">P5</span><span class="wgc-txt"><b style="color:#3dc8b8;">Gap Diagonal Identity</b><i>Diagonal strips and the gap structure</i></span></a><a class="wgc-row" href="page6.html"><span class="wgc-tag" style="color:#e05060;border-color:#e0506059;">P6</span><span class="wgc-txt"><b style="color:#e05060;">Strip Correlations</b><i>Where independence breaks down</i></span></a><a class="wgc-row" href="page7.html"><span class="wgc-tag" style="color:#ff8c42;border-color:#ff8c4259;">P7</span><span class="wgc-txt"><b style="color:#ff8c42;">Multi-Block Density C(n₁,n₂)</b><i>Prime gaps: twin, cousin, sexy</i></span></a><a class="wgc-row" href="page8.html"><span class="wgc-tag" style="color:#ff2fd0;border-color:#ff2fd059;">P8</span><span class="wgc-txt"><b style="color:#ff2fd0;">k-Block Density C(n₁,…,nₖ)</b><i>Prime constellations and k-tuples</i></span></a><a class="wgc-row" href="page9.html"><span class="wgc-tag" style="color:#d2691e;border-color:#d2691e59;">P9</span><span class="wgc-txt"><b style="color:#d2691e;">Character-Twisted Density</b><i>Dirichlet characters C_χ(n)</i></span></a><a class="wgc-row" href="page10.html"><span class="wgc-tag" style="color:#a855f7;border-color:#a855f759;">P10</span><span class="wgc-txt"><b style="color:#a855f7;">Farey &amp; Unit Circle</b><i>Modular residue rings</i></span></a><a class="wgc-row" href="page11.html"><span class="wgc-tag" style="color:#f2c14e;border-color:#f2c14e59;">P11</span><span class="wgc-txt"><b style="color:#f2c14e;">Farey Summatory Function</b><i>Counting Farey fractions</i></span></a><a class="wgc-row" href="page12.html"><span class="wgc-tag" style="color:#ff6b9d;border-color:#ff6b9d59;">P12</span><span class="wgc-txt"><b style="color:#ff6b9d;">The Prime Spiral</b><i>Winding r ≡ ±p (mod M) — explains the radial view</i></span></a><a class="wgc-row" href="page13.html"><span class="wgc-tag" style="color:#06b6d4;border-color:#06b6d459;">P13</span><span class="wgc-txt"><b style="color:#06b6d4;">Gauss Circle ↔ Farey Bridge</b><i>Lattice point counting</i></span></a><a class="wgc-row" href="page14.html"><span class="wgc-tag" style="color:#ef4444;border-color:#ef444459;">P14</span><span class="wgc-txt"><b style="color:#ef4444;">ζ(½ + it) Critical-Line Spiral</b><i>The zeta function on the critical line</i></span></a><a class="wgc-row" href="page15.html"><span class="wgc-tag" style="color:#4ade80;border-color:#4ade8059;">P15</span><span class="wgc-txt"><b style="color:#4ade80;">Sector-Graded Discrepancy</b><i>Farey discrepancy by sector</i></span></a>'
+      + '</div>';
+    document.body.appendChild(p);
+
+    function close(){ p.classList.remove('open'); }
+    btn.addEventListener('click', function(){ p.classList.toggle('open'); });
+    p.querySelector('#wgc-close').addEventListener('click', close);
+    p.addEventListener('click', function(e){ if(e.target === p) close(); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && p.classList.contains('open')) close();
+    });
+    return true;
+  }
+
+  // The nav bar is static markup on some pages and script-built on others,
+  // so poll briefly rather than assuming it exists at DOMContentLoaded.
+  function boot(){
+    if(build()) return;
+    var n = 0, t = setInterval(function(){
+      if(build() || ++n > 40) clearInterval(t);
+    }, 50);
+  }
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 </body>

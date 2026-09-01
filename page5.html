@@ -21,7 +21,7 @@ window.MathJax = {
   --bg2:   #0c0c22;
   --cream: #ddd8cc;
   --cream2:#b8b2a6;
-  --cream3:#6a6560;
+  --cream3:#89837a;
   --gold:  #c8a84a;
   --gold2: rgba(200,168,74,.12);
   --teal:  #3dc8b8;
@@ -55,7 +55,7 @@ body { background: var(--bg); color: var(--cream); font-family: var(--serif); fo
 }
 .nb2-brand{font-family:var(--disp);font-size:.7rem;color:var(--gold);letter-spacing:.14em;flex-shrink:0;margin-right:6px;}
 .nb2-sep{width:1px;height:22px;background:var(--edge2);margin:0 8px;flex-shrink:0;}
-.nb2-lbl{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream3);flex-shrink:0;margin-right:5px;}
+.nb2-lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream3);flex-shrink:0;margin-right:5px;}
 .nb2-step{
   width:26px;height:26px;display:flex;align-items:center;justify-content:center;
   background:none;border:1px solid var(--edge2);color:var(--teal);cursor:pointer;
@@ -77,23 +77,23 @@ body { background: var(--bg); color: var(--cream); font-family: var(--serif); fo
   color:var(--gold);font-family:var(--mono);font-size:12px;font-weight:500;
   padding:2px 4px;outline:none;text-align:center;flex-shrink:0;
 }
-#nb2-cn{font-family:var(--mono);font-size:9px;color:var(--gold);white-space:nowrap;flex-shrink:0;padding:0 4px;}
+#nb2-cn{font-family:var(--mono);font-size:10.5px;color:var(--gold);white-space:nowrap;flex-shrink:0;padding:0 4px;}
 #nb2-play{
   padding:4px 12px;height:28px;background:rgba(200,168,74,.08);
   border:1px solid rgba(200,168,74,.3);color:var(--gold);
-  font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
   cursor:pointer;flex-shrink:0;transition:background .1s;white-space:nowrap;
 }
 #nb2-play:hover{background:rgba(200,168,74,.16);}
 #nb2-play.playing{background:rgba(224,80,96,.12);border-color:rgba(224,80,96,.35);color:var(--coral);}
 #nb2-color{
   background:rgba(255,255,255,.04);border:1px solid var(--edge2);
-  color:var(--cream);font-family:var(--mono);font-size:8px;padding:2px 5px;
+  color:var(--cream);font-family:var(--mono);font-size:10px;padding:2px 5px;
   cursor:pointer;outline:none;flex-shrink:0;max-width:140px;
 }
 .nb2-link{
   display:inline-flex;align-items:center;padding:4px 10px;height:28px;
-  font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
   cursor:pointer;transition:all .15s;background:transparent;text-decoration:none;
   flex-shrink:0;white-space:nowrap;
 }
@@ -362,24 +362,24 @@ canvas { display: block; width: 100%; height: 100%; }
 <body>
 <div id="wg-pagenav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 14px;background:#04040d;border-bottom:1px solid rgba(255,255,255,.13);font-family:'JetBrains Mono',monospace;">
 <span style="font-family:'Cinzel',serif;font-size:.7rem;color:#c8a84a;letter-spacing:.14em;margin-right:8px;flex-shrink:0;">WESSEN GETACHEW</span>
-<a href="index.html" target="_blank" title="C(n) Block-Coprime Density — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #c8a84a59;color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='#c8a84a59'">P1</a>
-<a href="page2.html" target="_blank" title="How C(n) Works — Guided Walkthrough — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P2</a>
-<a href="page3.html" target="_blank" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
-<a href="page4.html" target="_blank" title="The Prime Filter — Sieve View — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P4</a>
-<a href="page5.html" title="Gap Diagonal Identity — Page 5 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;background:#3dc8b822;border:1px solid #3dc8b8;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P5</a>
-<a href="page6.html" target="_blank" title="Strip Correlations — Where Independence Breaks — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P6</a>
-<a href="page7.html" target="_blank" title="Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P7</a>
-<a href="page8.html" target="_blank" title="k-Block Coprime Density — Prime Constellations &amp; k-Tuples — Page 8" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P8</a>
-<a href="page9.html" target="_blank" title="Dirichlet Character-Twisted Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #d2691e59;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#d2691e14';this.style.borderColor='#d2691e'" onmouseout="this.style.background='transparent';this.style.borderColor='#d2691e59'">P9</a>
-<a href="page10.html" target="_blank" title="Farey &amp; Unit Circle — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P10</a>
-<a href="page11.html" target="_blank" title="Farey Sequence Summatory Function — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P11</a>
-<a href="page12.html" target="_blank" title="The Prime Spiral — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff6b9d59;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff6b9d14';this.style.borderColor='#ff6b9d'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff6b9d59'">P12</a>
-<a href="page13.html" target="_blank" title="Gauss Circle ↔ Wessen Bridge — Page 13" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #06b6d459;color:#06b6d4;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#06b6d414';this.style.borderColor='#06b6d4'" onmouseout="this.style.background='transparent';this.style.borderColor='#06b6d459'">P13</a>
-<a href="page14.html" target="_blank" title="ζ(½+it) — Critical-Line Spiral — Page 14" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ef444459;color:#ef4444;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ef444414';this.style.borderColor='#ef4444'" onmouseout="this.style.background='transparent';this.style.borderColor='#ef444459'">½+it</a>
-<a href="page15.html" target="_blank" title="Sector-Graded Farey Discrepancy — Page 15" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4ade8059;color:#4ade80;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4ade8014';this.style.borderColor='#4ade80'" onmouseout="this.style.background='transparent';this.style.borderColor='#4ade8059'">P15</a>
+<a href="index.html" title="How C(n) Works — Guided Walkthrough — Page 1" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #c8a84a59;color:#c8a84a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#c8a84a14';this.style.borderColor='#c8a84a'" onmouseout="this.style.background='transparent';this.style.borderColor='#c8a84a59'">P1</a>
+<a href="page2.html" title="C(n) — Block-Coprime Density Explorer — Page 2" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #7ec87a59;color:#7ec87a;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#7ec87a14';this.style.borderColor='#7ec87a'" onmouseout="this.style.background='transparent';this.style.borderColor='#7ec87a59'">P2</a>
+<a href="page3.html" title="Color &amp; Label Modes — The Mathematics — Page 3" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #9b7fe859;color:#9b7fe8;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#9b7fe814';this.style.borderColor='#9b7fe8'" onmouseout="this.style.background='transparent';this.style.borderColor='#9b7fe859'">P3</a>
+<a href="page4.html" title="The Prime Filter — Sieve View — Page 4" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4a9eff59;color:#4a9eff;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4a9eff14';this.style.borderColor='#4a9eff'" onmouseout="this.style.background='transparent';this.style.borderColor='#4a9eff59'">P4</a>
+<a href="page5.html" title="Gap Diagonal Identity — Page 5 (current)" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#3dc8b822;border:1px solid #3dc8b8;color:#3dc8b8;text-decoration:none;flex-shrink:0;white-space:nowrap;font-weight:600;">P5</a>
+<a href="page6.html" title="Strip Correlations — Where Independence Breaks — Page 6" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">P6</a>
+<a href="page7.html" title="Multi-Block Coprime Density — Prime Gaps (Twin/Cousin/Sexy) — Page 7" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff8c4259;color:#ff8c42;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff8c4214';this.style.borderColor='#ff8c42'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff8c4259'">P7</a>
+<a href="page8.html" title="k-Block Coprime Density — Prime Constellations &amp; k-Tuples — Page 8" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff2fd059;color:#ff2fd0;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff2fd014';this.style.borderColor='#ff2fd0'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff2fd059'">P8</a>
+<a href="page9.html" title="Dirichlet Character-Twisted Density — Page 9" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #d2691e59;color:#d2691e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#d2691e14';this.style.borderColor='#d2691e'" onmouseout="this.style.background='transparent';this.style.borderColor='#d2691e59'">P9</a>
+<a href="page10.html" title="Farey &amp; Unit Circle — Page 10" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #a855f759;color:#a855f7;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#a855f714';this.style.borderColor='#a855f7'" onmouseout="this.style.background='transparent';this.style.borderColor='#a855f759'">P10</a>
+<a href="page11.html" title="Farey Sequence Summatory Function — Page 11" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #f2c14e59;color:#f2c14e;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#f2c14e14';this.style.borderColor='#f2c14e'" onmouseout="this.style.background='transparent';this.style.borderColor='#f2c14e59'">P11</a>
+<a href="page12.html" title="The Prime Spiral — Page 12" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ff6b9d59;color:#ff6b9d;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ff6b9d14';this.style.borderColor='#ff6b9d'" onmouseout="this.style.background='transparent';this.style.borderColor='#ff6b9d59'">P12</a>
+<a href="page13.html" title="Gauss Circle ↔ Wessen Bridge — Page 13" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #06b6d459;color:#06b6d4;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#06b6d414';this.style.borderColor='#06b6d4'" onmouseout="this.style.background='transparent';this.style.borderColor='#06b6d459'">P13</a>
+<a href="page14.html" title="ζ(½+it) — Critical-Line Spiral — Page 14" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #ef444459;color:#ef4444;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#ef444414';this.style.borderColor='#ef4444'" onmouseout="this.style.background='transparent';this.style.borderColor='#ef444459'">½+it</a>
+<a href="page15.html" title="Sector-Graded Farey Discrepancy — Page 15" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #4ade8059;color:#4ade80;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#4ade8014';this.style.borderColor='#4ade80'" onmouseout="this.style.background='transparent';this.style.borderColor='#4ade8059'">P15</a>
 
-<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
-<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
+<button onclick="wgFS()" title="Toggle fullscreen" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid rgba(232,227,219,.3);color:rgba(232,227,219,.75);font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;">⛶ Full</button>
+<a href="#" onclick="openOpener();return false;" title="Open the Welcome / Opener Teaser on the home page" style="display:inline-flex;align-items:center;padding:4px 10px;height:28px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;background:transparent;border:1px solid #e0506059;color:#e05060;text-decoration:none;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.background='#e0506014';this.style.borderColor='#e05060'" onmouseout="this.style.background='transparent';this.style.borderColor='#e0506059'">Opener</a>
 </div>
 <!-- ══════════ STICKY NBAR (matches index.html) ══════════ -->
 <nav id="nbar2">
@@ -388,7 +388,7 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="nb2-sep">
         
   </div>
-    <span class="nb2-lbl" style="color:var(--teal);letter-spacing:.06em;font-size:9px;">Page 5</span>
+    <span class="nb2-lbl" style="color:var(--teal);letter-spacing:.06em;font-size:10.5px;">Page 5</span>
     <div class="nb2-sep"></div>
 
     <!-- depth n controls -->
@@ -580,11 +580,11 @@ canvas { display: block; width: 100%; height: 100%; }
       <option value="black">black</option>
     </select>
     <button class="tc-btn" onclick="resetView()">⌖ Reset</button>
-    <button class="export-btn" onclick="export4K()" style="font-size:8px;padding:4px 8px">↓ 4K</button>
+    <button class="export-btn" onclick="export4K()" style="font-size:10px;padding:4px 8px">↓ 4K</button>
     <input type="range" class="teal" id="sl-export-lbl-bar" min="50" max="200" step="5" value="100"
       oninput="setExportLabelScale(+this.value)" title="Export label size" style="width:48px">
     <span class="tc-label" id="val-export-lbl" style="min-width:30px">100%</span>
-    <span id="export-prog" style="display:none;font-family:var(--mono);font-size:9px;color:var(--cream3)">Rendering…</span>
+    <span id="export-prog" style="display:none;font-family:var(--mono);font-size:10.5px;color:var(--cream3)">Rendering…</span>
   </div>
 
   <!-- View mode bar -->
@@ -600,7 +600,7 @@ canvas { display: block; width: 100%; height: 100%; }
     <span class="tc-label">M max</span>
     <input type="range" class="gold" id="sl-spire-m" min="4" max="200" value="50" step="1"
       oninput="spireM=+this.value;document.getElementById('inp-spire-m').value=this.value;render();" style="width:90px">
-    <input type="number" id="inp-spire-m" value="50" min="4" max="200" style="width:40px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center;border-radius:2px" oninput="spireM=Math.max(4,Math.min(200,+this.value||50));document.getElementById('sl-spire-m').value=spireM;render()">
+    <input type="number" id="inp-spire-m" value="50" min="4" max="200" style="width:40px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center;border-radius:2px" oninput="spireM=Math.max(4,Math.min(200,+this.value||50));document.getElementById('sl-spire-m').value=spireM;render()">
     <span class="tc-sep"></span>
     <span class="tc-label">Prime p</span>
     <div id="spire-prime-chips" style="display:flex;flex-wrap:wrap;gap:3px;max-width:300px;"></div>
@@ -608,16 +608,16 @@ canvas { display: block; width: 100%; height: 100%; }
     <span class="tc-label">Barrier 1/n</span>
     <input type="range" class="teal" id="sl-spire-bn" min="2" max="12" value="2" step="1"
       oninput="spireBarrierN=+this.value;document.getElementById('inp-spire-bn').value=this.value;render();" style="width:70px">
-    <input type="number" id="inp-spire-bn" value="2" min="2" max="12" style="width:34px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center;border-radius:2px" oninput="spireBarrierN=Math.max(2,Math.min(12,+this.value||2));document.getElementById('sl-spire-bn').value=spireBarrierN;render()">
+    <input type="number" id="inp-spire-bn" value="2" min="2" max="12" style="width:34px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center;border-radius:2px" oninput="spireBarrierN=Math.max(2,Math.min(12,+this.value||2));document.getElementById('sl-spire-bn').value=spireBarrierN;render()">
     <span class="tc-sep"></span>
     <span class="tc-label">δ twist</span>
     <input type="range" class="violet" id="sl-spire-delta" min="0" max="200" value="0" step="1"
       oninput="spireDelta=+this.value/200;document.getElementById('inp-spire-delta').value=spireDelta.toFixed(3);render();" style="width:80px">
-    <input type="number" id="inp-spire-delta" value="0.000" min="0" max="1" step="0.001" style="width:52px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center;border-radius:2px" oninput="spireDelta=Math.max(0,Math.min(1,+this.value||0));document.getElementById('sl-spire-delta').value=Math.round(spireDelta*200);render()">
-    <span style="font-size:8px;color:var(--cream3)">a/b:</span>
-    <input type="number" id="inp-twist-a" value="0" min="0" max="99" style="width:34px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center">
-    <span style="font-size:9px;color:var(--cream3)">/</span>
-    <input type="number" id="inp-twist-b" value="1" min="1" max="99" style="width:34px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center">
+    <input type="number" id="inp-spire-delta" value="0.000" min="0" max="1" step="0.001" style="width:52px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center;border-radius:2px" oninput="spireDelta=Math.max(0,Math.min(1,+this.value||0));document.getElementById('sl-spire-delta').value=Math.round(spireDelta*200);render()">
+    <span style="font-size:10px;color:var(--cream3)">a/b:</span>
+    <input type="number" id="inp-twist-a" value="0" min="0" max="99" style="width:34px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center">
+    <span style="font-size:10.5px;color:var(--cream3)">/</span>
+    <input type="number" id="inp-twist-b" value="1" min="1" max="99" style="width:34px;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--violet);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center">
     <button class="tc-btn" onclick="setSpireTwistFrac()" style="padding:3px 7px">Set</button>
     <span class="tc-sep"></span>
     <button class="tc-btn on"  id="btn-spire-lifts"   onclick="spireLifts=!spireLifts;this.classList.toggle('on',spireLifts);render()">Lifts ✓</button>
@@ -637,17 +637,17 @@ canvas { display: block; width: 100%; height: 100%; }
     <span class="tc-label">Max q</span>
     <input type="range" class="gold" id="sl-ford-q" min="4" max="60" value="20" step="1"
       oninput="fordMaxQ=+this.value;document.getElementById('inp-ford-q').value=this.value;render();" style="width:80px">
-    <input type="number" id="inp-ford-q" value="20" min="4" max="60" style="width:38px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center;border-radius:2px" oninput="fordMaxQ=Math.max(4,Math.min(60,+this.value||20));document.getElementById('sl-ford-q').value=fordMaxQ;render()">
+    <input type="number" id="inp-ford-q" value="20" min="4" max="60" style="width:38px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--gold);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center;border-radius:2px" oninput="fordMaxQ=Math.max(4,Math.min(60,+this.value||20));document.getElementById('sl-ford-q').value=fordMaxQ;render()">
     <span class="tc-sep"></span>
     <span class="tc-label">Sectors</span>
     <input type="range" class="teal" id="sl-ford-sectors" min="2" max="10" value="6" step="1"
       oninput="fordSectors=+this.value;document.getElementById('inp-ford-sectors').value=this.value;render();" style="width:70px">
-    <input type="number" id="inp-ford-sectors" value="6" min="2" max="10" style="width:34px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center;border-radius:2px" oninput="fordSectors=Math.max(2,Math.min(10,+this.value||6));document.getElementById('sl-ford-sectors').value=fordSectors;render()">
+    <input type="number" id="inp-ford-sectors" value="6" min="2" max="10" style="width:34px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center;border-radius:2px" oninput="fordSectors=Math.max(2,Math.min(10,+this.value||6));document.getElementById('sl-ford-sectors').value=fordSectors;render()">
     <span class="tc-sep"></span>
     <span class="tc-label">Depth</span>
     <input type="range" class="teal" id="sl-ford-depth" min="1" max="8" value="5" step="1"
       oninput="fordTreeDepth=+this.value;document.getElementById('inp-ford-depth').value=this.value;render();" style="width:70px">
-    <input type="number" id="inp-ford-depth" value="5" min="1" max="8" style="width:34px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:9px;padding:2px 4px;text-align:center;border-radius:2px" oninput="fordTreeDepth=Math.max(1,Math.min(8,+this.value||5));document.getElementById('sl-ford-depth').value=fordTreeDepth;render()">
+    <input type="number" id="inp-ford-depth" value="5" min="1" max="8" style="width:34px;background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--teal);font-family:var(--mono);font-size:10.5px;padding:2px 4px;text-align:center;border-radius:2px" oninput="fordTreeDepth=Math.max(1,Math.min(8,+this.value||5));document.getElementById('sl-ford-depth').value=fordTreeDepth;render()">
     <span class="tc-sep"></span>
     <button class="tc-btn on" id="btn-ford-circles" onclick="fordCircles=!fordCircles;this.classList.toggle('on',fordCircles);render()">Ford Circles</button>
     <button class="tc-btn on" id="btn-ford-trees"   onclick="fordTrees=!fordTrees;this.classList.toggle('on',fordTrees);render()">Sector Trees</button>
@@ -658,13 +658,13 @@ canvas { display: block; width: 100%; height: 100%; }
 
   <!-- Ring point list (combined view) -->
   <div id="ring-point-list" style="display:none;max-height:160px;overflow-y:auto;background:rgba(4,4,16,.97);border:1px solid var(--edge);border-top:none;padding:8px 12px;scrollbar-width:thin;">
-    <div style="font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:10px;">
+    <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:10px;">
       Ring Points
-      <span id="ring-pt-count" style="color:var(--cream3);font-weight:normal;text-transform:none;letter-spacing:0;font-size:8.5px;"></span>
+      <span id="ring-pt-count" style="color:var(--cream3);font-weight:normal;text-transform:none;letter-spacing:0;font-size:10px;"></span>
       <button onclick="document.getElementById('ring-point-list').style.display='none';"
-        style="margin-left:auto;background:none;border:1px solid var(--edge);color:var(--cream3);font-family:var(--mono);font-size:7px;padding:1px 6px;cursor:pointer">✕</button>
+        style="margin-left:auto;background:none;border:1px solid var(--edge);color:var(--cream3);font-family:var(--mono);font-size:10px;padding:1px 6px;cursor:pointer">✕</button>
     </div>
-    <div id="ring-pt-table" style="font-family:var(--mono);font-size:8.5px;color:var(--cream2);line-height:2"></div>
+    <div id="ring-pt-table" style="font-family:var(--mono);font-size:10px;color:var(--cream2);line-height:2"></div>
   </div>
 
   <!-- Canvas -->
@@ -853,7 +853,7 @@ canvas { display: block; width: 100%; height: 100%; }
       <span class="tc-label" id="val-export-lbl-card" style="min-width:34px">100%</span>
     </div>
     <button class="export-btn" onclick="export4K()">↓ Export 4K PNG (3840 × 3840)</button>
-    <span id="export-prog-card" style="display:none;font-family:var(--mono);font-size:9px;color:var(--cream3);margin-left:12px">Rendering…</span>
+    <span id="export-prog-card" style="display:none;font-family:var(--mono);font-size:10.5px;color:var(--cream3);margin-left:12px">Rendering…</span>
   </div>
 
   <!-- Share quote -->
@@ -945,7 +945,7 @@ canvas { display: block; width: 100%; height: 100%; }
   <div id="lbl-3d-stats">— initializing —</div>
   <div style="padding:8px 0">
     <button class="export-btn" id="btn-3d-export" onclick="export3D()">↓ Export 4K PNG</button>
-    <span id="export-3d-prog" style="display:none;font-family:var(--mono);font-size:9px;color:var(--cream3);margin-left:10px">Rendering…</span>
+    <span id="export-3d-prog" style="display:none;font-family:var(--mono);font-size:10.5px;color:var(--cream3);margin-left:10px">Rendering…</span>
   </div>
 
   <div class="card" style="margin-top:16px">
@@ -1020,8 +1020,8 @@ canvas { display: block; width: 100%; height: 100%; }
       <option value="teal">teal</option>
       <option value="coral">coral</option>
     </select>
-    <button class="export-btn" onclick="exportField4K()" style="font-size:8px;padding:4px 8px">↓ 4K</button>
-    <span id="export-field-prog" style="display:none;font-family:var(--mono);font-size:9px;color:var(--cream3)">Rendering…</span>
+    <button class="export-btn" onclick="exportField4K()" style="font-size:10px;padding:4px 8px">↓ 4K</button>
+    <span id="export-field-prog" style="display:none;font-family:var(--mono);font-size:10.5px;color:var(--cream3)">Rendering…</span>
   </div>
 
   <div id="field-mode-bar">
@@ -1060,7 +1060,7 @@ canvas { display: block; width: 100%; height: 100%; }
 
   <!-- Gradient arrow panel -->
   <div id="grad-arrow-panel">
-    <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Gradient Arrow Detail</div>
+    <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Gradient Arrow Detail</div>
     <div style="display:flex;gap:20px;flex-wrap:wrap">
       <canvas id="grad-arrow-diagram" width="120" height="120" style="border:1px solid var(--edge);flex-shrink:0"></canvas>
       <div style="flex:1">
@@ -2829,13 +2829,13 @@ function updateRingPointList(){
       });
   }
   if(count) count.textContent=`${rows.length} pts`;
-  const hdr=`<div style="display:grid;grid-template-columns:32px 32px 90px 26px 1fr;gap:2px 8px;opacity:.45;font-size:7.5px;letter-spacing:.1em;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px"><span>M</span><span>r</span><span>layer</span><span>lift</span><span>note</span></div>`;
+  const hdr=`<div style="display:grid;grid-template-columns:32px 32px 90px 26px 1fr;gap:2px 8px;opacity:.45;font-size:10px;letter-spacing:.1em;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px"><span>M</span><span>r</span><span>layer</span><span>lift</span><span>note</span></div>`;
   const body=rows.map(({M,r,layer,lifted,col,note})=>
     `<div style="display:grid;grid-template-columns:32px 32px 90px 26px 1fr;gap:2px 8px;line-height:1.8">
       <span style="color:${col}">${M}</span><span style="color:${col}">${r}</span>
-      <span style="color:rgba(184,178,166,.65);font-size:8px">${layer}</span>
+      <span style="color:rgba(184,178,166,.65);font-size:10px">${layer}</span>
       <span style="${lifted?'color:var(--teal)':'color:var(--coral)'}">${lifted?'✓':'✗'}</span>
-      <span style="color:var(--gold);font-size:8px">${note}</span></div>`
+      <span style="color:var(--gold);font-size:10px">${note}</span></div>`
   ).join('');
   table.innerHTML=hdr+body;
 }
@@ -4945,7 +4945,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <script>
 function openOpener(){
   sessionStorage.setItem('wg_open_opener','1');
-  window.open('index.html','_blank');
+  window.open('page2.html','_blank');
 }
 </script>
 <script>
@@ -5005,5 +5005,88 @@ function openOpener(){
   window.addEventListener('load',sync);
 })();
 function wgFS(){var d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){});}}</script>
+
+<!-- ── CONTENTS DIRECTORY ──────────────────────────────────────────────────
+     Reviewers asked for "a directory for what's in all the pages". The P1..P15
+     chip bar was already a directory, but the descriptive titles lived only in
+     title= tooltips, which do not exist on touch devices. This surfaces them. -->
+<script>
+(function(){
+  var CSS = '#wgc-btn{display:inline-flex;align-items:center;padding:4px 10px;height:28px;'
+    + 'font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;'
+    + 'background:transparent;border:1px solid rgba(200,168,74,.45);color:#c8a84a;'
+    + "font-family:'JetBrains Mono',monospace;flex-shrink:0;white-space:nowrap;}"
+    + '#wgc-btn:hover{background:rgba(200,168,74,.12);border-color:#c8a84a;}'
+    + '#wgc-panel{display:none;position:fixed;inset:0;z-index:100001;background:rgba(3,3,9,.9);'
+    + '-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:24px 16px;overflow-y:auto;}'
+    + '#wgc-panel.open{display:block;}'
+    + '#wgc-inner{max-width:720px;margin:0 auto;background:#07071a;border:1px solid rgba(255,255,255,.14);padding:22px 20px 24px;}'
+    + '#wgc-head{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;}'
+    + "#wgc-head h2{font-family:'Cinzel',serif;font-size:17px;color:#c8a84a;letter-spacing:.1em;font-weight:500;margin:0;}"
+    + '#wgc-close{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.25);color:#b8b2a6;'
+    + 'font-size:15px;width:28px;height:28px;cursor:pointer;line-height:1;}'
+    + "#wgc-sub{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#89837a;margin:0 0 16px;line-height:1.6;}"
+    + '.wgc-row{display:flex;gap:12px;align-items:flex-start;padding:9px 8px;text-decoration:none;'
+    + 'border-bottom:1px solid rgba(255,255,255,.06);}'
+    + '.wgc-row:hover{background:rgba(255,255,255,.045);}'
+    + '.wgc-row.wgc-cur{background:rgba(200,168,74,.09);}'
+    + ".wgc-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;"
+    + 'border:1px solid;padding:3px 7px;flex-shrink:0;min-width:38px;text-align:center;}'
+    + '.wgc-txt{display:flex;flex-direction:column;gap:2px;}'
+    + ".wgc-txt b{font-family:'Spectral',serif;font-size:14.5px;font-weight:500;line-height:1.3;}"
+    + ".wgc-txt i{font-family:'JetBrains Mono',monospace;font-style:normal;font-size:11.5px;color:#89837a;line-height:1.5;}"
+    + '@media(max-width:600px){#wgc-inner{padding:18px 14px 20px;}.wgc-txt b{font-size:13.5px;}}';
+
+  function build(){
+    var bar = document.getElementById('wg-pagenav');
+    if(!bar || document.getElementById('wgc-btn')) return !!bar;
+
+    var st = document.createElement('style'); st.textContent = CSS;
+    document.head.appendChild(st);
+
+    var btn = document.createElement('button');
+    btn.id = 'wgc-btn'; btn.type = 'button';
+    btn.textContent = '\u2630 Contents';
+    btn.title = 'All 15 pages, with what each one covers';
+    // sit immediately after the WESSEN GETACHEW wordmark, before the chips
+    var first = bar.querySelector('span');
+    if(first && first.nextSibling) bar.insertBefore(btn, first.nextSibling);
+    else bar.appendChild(btn);
+
+    var p = document.createElement('div');
+    p.id = 'wgc-panel';
+    p.innerHTML = '<div id="wgc-inner">'
+      + '<div id="wgc-head"><h2>Contents</h2>'
+      + '<button id="wgc-close" type="button" aria-label="Close">\u00d7</button></div>'
+      + '<p id="wgc-sub">Fifteen pages. Page 1 is the guided walkthrough and the place to '
+      + 'start; page 2 is the full explorer. Everything after that is independent \u2014 '
+      + 'read in any order.</p>'
+      + '<a class="wgc-row" href="index.html"><span class="wgc-tag" style="color:#c8a84a;border-color:#c8a84a59;">P1</span><span class="wgc-txt"><b style="color:#c8a84a;">How C(n) Works</b><i>Guided walkthrough — start here</i></span></a><a class="wgc-row" href="page2.html"><span class="wgc-tag" style="color:#7ec87a;border-color:#7ec87a59;">P2</span><span class="wgc-txt"><b style="color:#7ec87a;">C(n) Block-Coprime Density</b><i>The full interactive explorer: six lattice views</i></span></a><a class="wgc-row" href="page3.html"><span class="wgc-tag" style="color:#9b7fe8;border-color:#9b7fe859;">P3</span><span class="wgc-txt"><b style="color:#9b7fe8;">Color &amp; Label Modes</b><i>What every pixel encodes</i></span></a><a class="wgc-row" href="page4.html"><span class="wgc-tag" style="color:#4a9eff;border-color:#4a9eff59;">P4</span><span class="wgc-txt"><b style="color:#4a9eff;">The Prime Filter</b><i>Sieve-of-Eratosthenes view of block-coprimality</i></span></a><a class="wgc-row wgc-cur" href="page5.html"><span class="wgc-tag" style="color:#3dc8b8;border-color:#3dc8b859;">P5</span><span class="wgc-txt"><b style="color:#3dc8b8;">Gap Diagonal Identity</b><i>Diagonal strips and the gap structure</i></span></a><a class="wgc-row" href="page6.html"><span class="wgc-tag" style="color:#e05060;border-color:#e0506059;">P6</span><span class="wgc-txt"><b style="color:#e05060;">Strip Correlations</b><i>Where independence breaks down</i></span></a><a class="wgc-row" href="page7.html"><span class="wgc-tag" style="color:#ff8c42;border-color:#ff8c4259;">P7</span><span class="wgc-txt"><b style="color:#ff8c42;">Multi-Block Density C(n₁,n₂)</b><i>Prime gaps: twin, cousin, sexy</i></span></a><a class="wgc-row" href="page8.html"><span class="wgc-tag" style="color:#ff2fd0;border-color:#ff2fd059;">P8</span><span class="wgc-txt"><b style="color:#ff2fd0;">k-Block Density C(n₁,…,nₖ)</b><i>Prime constellations and k-tuples</i></span></a><a class="wgc-row" href="page9.html"><span class="wgc-tag" style="color:#d2691e;border-color:#d2691e59;">P9</span><span class="wgc-txt"><b style="color:#d2691e;">Character-Twisted Density</b><i>Dirichlet characters C_χ(n)</i></span></a><a class="wgc-row" href="page10.html"><span class="wgc-tag" style="color:#a855f7;border-color:#a855f759;">P10</span><span class="wgc-txt"><b style="color:#a855f7;">Farey &amp; Unit Circle</b><i>Modular residue rings</i></span></a><a class="wgc-row" href="page11.html"><span class="wgc-tag" style="color:#f2c14e;border-color:#f2c14e59;">P11</span><span class="wgc-txt"><b style="color:#f2c14e;">Farey Summatory Function</b><i>Counting Farey fractions</i></span></a><a class="wgc-row" href="page12.html"><span class="wgc-tag" style="color:#ff6b9d;border-color:#ff6b9d59;">P12</span><span class="wgc-txt"><b style="color:#ff6b9d;">The Prime Spiral</b><i>Winding r ≡ ±p (mod M) — explains the radial view</i></span></a><a class="wgc-row" href="page13.html"><span class="wgc-tag" style="color:#06b6d4;border-color:#06b6d459;">P13</span><span class="wgc-txt"><b style="color:#06b6d4;">Gauss Circle ↔ Farey Bridge</b><i>Lattice point counting</i></span></a><a class="wgc-row" href="page14.html"><span class="wgc-tag" style="color:#ef4444;border-color:#ef444459;">P14</span><span class="wgc-txt"><b style="color:#ef4444;">ζ(½ + it) Critical-Line Spiral</b><i>The zeta function on the critical line</i></span></a><a class="wgc-row" href="page15.html"><span class="wgc-tag" style="color:#4ade80;border-color:#4ade8059;">P15</span><span class="wgc-txt"><b style="color:#4ade80;">Sector-Graded Discrepancy</b><i>Farey discrepancy by sector</i></span></a>'
+      + '</div>';
+    document.body.appendChild(p);
+
+    function close(){ p.classList.remove('open'); }
+    btn.addEventListener('click', function(){ p.classList.toggle('open'); });
+    p.querySelector('#wgc-close').addEventListener('click', close);
+    p.addEventListener('click', function(e){ if(e.target === p) close(); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && p.classList.contains('open')) close();
+    });
+    return true;
+  }
+
+  // The nav bar is static markup on some pages and script-built on others,
+  // so poll briefly rather than assuming it exists at DOMContentLoaded.
+  function boot(){
+    if(build()) return;
+    var n = 0, t = setInterval(function(){
+      if(build() || ++n > 40) clearInterval(t);
+    }, 50);
+  }
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
 </body>
 </html>
